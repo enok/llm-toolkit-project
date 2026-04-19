@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review and Fix"
+  short_description: "Review, fix, monitor CI, and evolve shared config"
+  default_prompt: "Use $review-and-fix to inspect a change, split review and remediation work in parallel, monitor GitHub CI, and feed reusable failures back into shared rules, workflows, and skills."
+policy:
+  allow_implicit_invocation: true

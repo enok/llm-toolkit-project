@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "March 2026",
+  "abstract": "Comprehensive Bash and shell scripting best practices for writing robust, portable, and secure scripts. Contains 25+ rules across 7 categories covering script structure, safety, error handling, portability, text processing, security, and performance. Each rule includes detailed explanations with incorrect vs. correct code examples.",
+  "references": [
+    "https://www.gnu.org/software/bash/manual/",
+    "https://www.shellcheck.net/",
+    "https://google.github.io/styleguide/shellguide.html",
+    "https://mywiki.wooledge.org/BashPitfalls"
+  ]
+}

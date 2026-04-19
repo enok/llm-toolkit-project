@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "March 2026",
+  "abstract": "Universal testing discipline and best practices that apply to any project regardless of tech stack. Covers AC-to-test traceability, unit/integration/E2E test patterns, coverage requirements, test structure (arrange-act-assert), mocking strategies, and test discipline. Expanded from rules/testing.md with detailed code examples across Java, Python, and TypeScript.",
+  "references": [
+    "https://martinfowler.com/articles/practical-test-pyramid.html",
+    "https://testing-library.com/docs/guiding-principles",
+    "https://jestjs.io/docs/getting-started",
+    "https://docs.pytest.org/"
+  ]
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Cross-Repo Impact"
+  short_description: "Map downstream impact across repos"
+  default_prompt: "Use $cross-repo-impact to analyze how a shared change affects sibling repos and clone families."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ticket Research"
+  short_description: "Gather ticket and code context deeply"
+  default_prompt: "Use $ticket-research to gather Jira, Confluence, GitHub, and local code context before implementation."
+policy:
+  allow_implicit_invocation: true
