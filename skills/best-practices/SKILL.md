@@ -1,0 +1,112 @@
+---
+name: best-practices
+description: Universal software engineering and architecture best practices that apply to every project regardless of tech stack. This skill should be used when writing, reviewing, or refactoring code in any language. Triggers on tasks involving SOLID principles, clean code, layered architecture, API design, resilience patterns, observability, error handling, or general code quality improvement.
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
+---
+
+# Software Engineering & Architecture Best Practices
+
+Universal principles that apply to every project regardless of tech stack. Contains 25+ rules across 6 categories, prioritized by impact to guide code generation, review, and refactoring.
+
+## When to Apply
+
+Reference these guidelines when:
+- Writing new services, modules, or components in any language
+- Reviewing code for architectural correctness
+- Refactoring for maintainability or resilience
+- Designing APIs, data models, or service boundaries
+- Adding error handling, observability, or defensive patterns
+- Identifying and eliminating anti-patterns
+
+## Rule Categories by Priority
+
+| Priority | Category | Impact | Prefix |
+|----------|----------|--------|--------|
+| 1 | SOLID Principles | CRITICAL | `solid-` |
+| 2 | Clean Code | HIGH | `clean-` |
+| 3 | Error Handling & Defensive Programming | HIGH | `error-` |
+| 4 | Architecture & Separation of Concerns | HIGH | `arch-` |
+| 5 | Resilience & Operational Patterns | MEDIUM | `resilience-` |
+| 6 | Anti-Patterns | MEDIUM | `anti-` |
+
+## Quick Reference
+
+### 1. SOLID Principles (CRITICAL)
+
+- `solid-single-responsibility` - Each class/module does one thing. If you can't describe it in one sentence, split it.
+- `solid-open-closed` - Open for extension, closed for modification. Prefer strategies over switch/if chains.
+- `solid-liskov-substitution` - Subtypes must be substitutable without breaking behavior.
+- `solid-interface-segregation` - Many small interfaces over one large one.
+- `solid-dependency-inversion` - Depend on abstractions, not concretions.
+
+### 2. Clean Code (HIGH)
+
+- `clean-naming` - Names reveal intent. calculateMonthlyRevenue() not calc().
+- `clean-small-functions` - Under 20 lines, one level of abstraction, one purpose.
+- `clean-no-magic` - Named constants. MAX_RETRY_ATTEMPTS = 3, not bare 3.
+- `clean-early-return` - Guard clauses reduce nesting. Validate and fail early.
+- `clean-dry-rule-of-three` - Abstract on the third occurrence. Wrong abstraction > duplication.
+
+### 3. Error Handling & Defensive Programming (HIGH)
+
+- `error-fail-fast` - Validate at boundaries. Don't let bad data propagate.
+- `error-specific-exceptions` - Catch narrowest type. Never catch Exception/Throwable unless re-throwing.
+- `error-no-swallowed` - Every catch must log, re-throw, or handle meaningfully.
+- `error-input-validation` - Validate all inputs at system boundaries.
+- `error-immutability` - Prefer immutable data. Mutable shared state = concurrency bugs.
+
+### 4. Architecture & Separation of Concerns (HIGH)
+
+- `arch-layered` - Controller → Service → Repository. Never skip layers.
+- `arch-thin-controllers` - Controllers parse input and delegate. No business logic.
+- `arch-api-design` - Idempotency, consistent errors, versioning, input validation.
+- `arch-data-design` - Single source of truth, schema evolution, TTL.
+- `arch-coupling-cohesion` - Low coupling, high cohesion, contract-first, event-driven.
+
+### 5. Resilience & Operational Patterns (MEDIUM)
+
+- `resilience-timeouts` - Every external call needs a timeout. No unbounded waits.
+- `resilience-retry-backoff` - Exponential backoff + jitter. Cap max retries.
+- `resilience-circuit-breaker` - Fail fast on frequently-failing dependencies.
+- `resilience-observability` - Structured logging, correlation IDs, metrics, alerting.
+
+### 6. Anti-Patterns (MEDIUM)
+
+- `anti-god-class` - Split by responsibility.
+- `anti-premature-optimization` - Measure first, optimize proven bottlenecks.
+- `anti-premature-abstraction` - Don't abstract until 3+ concrete cases.
+- `anti-distributed-monolith` - If services share DB or need synchronized deploy, they're a monolith.
+
+## How to Use
+
+Read individual rule files for detailed explanations and code examples:
+
+```
+rules/solid-single-responsibility.md
+rules/arch-layered.md
+rules/resilience-timeouts.md
+```
+
+Each rule file contains:
+- Brief explanation of why it matters
+- Incorrect code example with explanation
+- Correct code example with explanation
+- Additional context and key rules
+
+## Related Skills
+
+This skill provides **language-agnostic foundations**. Pair it with language-specific implementations:
+
+- **java-best-practices** — Java implementation of SOLID, DI, concurrency, error handling
+- **python-best-practices** — Python implementation of SOLID, DI, concurrency, error handling
+- **js-ts-best-practices** — TypeScript/JavaScript implementation of DI, async patterns, error handling
+- **nodejs** — Node.js runtime patterns for resilience (timeouts, graceful shutdown, streams)
+- **security** — Security-specific rules (injection, auth, secrets) that complement the defensive programming section
+- **testing** — Testing discipline (AC traceability, test pyramid) that validates architecture and code quality
+
+## Full Compiled Document
+
+For the complete guide with all rules expanded: `AGENTS.md`

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Run Tests"
+  short_description: "Plan and run the right validations"
+  default_prompt: "Use $run-tests to map a change set to the right validation commands and execute the safest checks first."
+policy:
+  allow_implicit_invocation: true

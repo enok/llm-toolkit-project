@@ -1,0 +1,6 @@
+interface:
+  display_name: "Environment Diagnose"
+  short_description: "Diagnose local setup and build issues"
+  default_prompt: "Use $environment-diagnose to troubleshoot local setup, auth, Docker, and build failures."
+policy:
+  allow_implicit_invocation: true

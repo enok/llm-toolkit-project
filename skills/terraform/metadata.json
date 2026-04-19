@@ -1,0 +1,12 @@
+{
+  "version": "1.6.0",
+  "organization": "Anton Babenko",
+  "date": "2025",
+  "license": "Apache-2.0",
+  "abstract": "Comprehensive Terraform and OpenTofu guidance covering testing (native test framework, Terratest), modules, CI/CD pipelines, security scanning (trivy, checkov), and production patterns. Based on terraform-best-practices.com and enterprise experience.",
+  "references": [
+    "https://www.terraform-best-practices.com/",
+    "https://developer.hashicorp.com/terraform/language",
+    "https://github.com/antonbabenko/terraform-skill"
+  ]
+}
