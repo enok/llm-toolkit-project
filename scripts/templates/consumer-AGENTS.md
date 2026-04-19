@@ -3,6 +3,25 @@
 
 This repo uses symlinked skills, rules, and workflows for LLM-assisted development.
 
+## Continuous Learning (ALWAYS-ON)
+
+**Read this first, every session, without being asked.**
+
+Before starting any non-trivial task:
+
+1. Open [`learnings/INDEX.md`](./learnings/INDEX.md) and scan the one-line summaries.
+2. If any entry matches the current task (by tag, title, or category), read that file and follow its *Solution*. Do not repeat approaches listed under *Failed Approaches*.
+
+While working, watch for **capture triggers**:
+
+- 2+ failed approaches before success
+- A non-obvious fix, platform/toolchain gotcha, or repeated-mistake pattern
+- An API / config surprise (e.g. undocumented required parameter)
+
+When a trigger fires, invoke `workflows/capture-learning.md` at task end. Always pause for user approval before committing the new learning.
+
+See `skills/error-driven-learning/SKILL.md` for the full discipline. This skill is always on — the user should never have to ask for it.
+
 ## Contents
 
 - **Skills**: `.agents/` -> toolkit `.agents/`

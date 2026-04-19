@@ -2,6 +2,8 @@
 
 Shared knowledge captured from trial-and-error during LLM-assisted development. Each file documents a problem, the approaches that failed, and the correct solution — so any future LLM session skips directly to the happy path.
 
+> **Entry point:** read [`INDEX.md`](./INDEX.md) first for a one-line summary of every learning. Governance is in `skills/error-driven-learning/SKILL.md` (always-on). Capture is via `workflows/capture-learning.md`.
+
 ## How it works
 
 1. An LLM (any tool) hits a problem and recovers after multiple attempts.
