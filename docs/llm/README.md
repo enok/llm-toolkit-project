@@ -1,6 +1,6 @@
 # Repo-Local LLM Configuration
 
-This directory contains repository-specific LLM rules and workflows that complement the shared toolkit linked through:
+This directory contains repository-specific LLM configuration that complements the shared toolkit linked through:
 
 - `.agents/`
 - `.claude/`
@@ -14,10 +14,8 @@ Do not place repo-only customizations inside those linked directories. Doing so 
 ## Local Layout
 
 - `docs/llm/toolkit-selection.txt`: curated shared-toolkit profile for this repo
-- `docs/llm/rules/`: repository-specific rules
 - `docs/llm/scripts/`: helper scripts that build or refresh local analytical references
-- `docs/llm/workflows/`: repository-specific workflows
-- `learnings/`: committed trial-and-error knowledge (see `rules/error-driven-learning.md`)
+- `learnings/`: committed trial-and-error knowledge (see `skills/error-driven-learning/SKILL.md`)
 
 ## Shared Toolkit Selection
 
@@ -43,12 +41,11 @@ Or, in Git Bash:
 
 Keep generic guidance in the shared toolkit. Add repo-only guidance here when it would be incorrect or too specific for other projects, for example:
 
-- domain vocabulary for Brazilian public procurement and compliance data
-- repository-specific data contracts and staging conventions
-- notebook conventions that depend on this repo's folders, datasets, or outputs
-- AWS orchestration guidance that reflects this repo's current shell-script ETL and minimal `infra/` baseline
-- documentation expectations tied to the thesis deliverables
-- mandatory local security-check gates for code, scripts, workflows, rules, and other operational content
+- repository-specific data contracts and staging conventions (via `data-pipeline-boundaries` skill)
+- notebook conventions that depend on this repo's folders, datasets, or outputs (via `notebook-analysis` skill)
+- AWS orchestration guidance that reflects this repo's current shell-script ETL and minimal `infra/` baseline (via `aws-airflow-terraform-project` skill)
+- documentation expectations tied to the thesis deliverables (via `documentation-governance` skill)
+- mandatory local security-check gates (via `security-checkpoint` skill)
 - trial-and-error discoveries captured as committed learnings for cross-session, cross-tool reuse
 
 ## Learnings
@@ -57,7 +54,7 @@ The `learnings/` directory at the repo root captures trial-and-error discoveries
 
 - Before starting a task, check `learnings/` for relevant prior discoveries.
 - When recovering from trial-and-error, use the `capture-learning` workflow to save the knowledge.
-- See `rules/error-driven-learning.md` for the governance rule.
+- See `skills/error-driven-learning/SKILL.md` for the governance rule.
 
 ## Rubrics
 
@@ -85,12 +82,11 @@ For related work in `dev-tools`, use:
 
 See:
 
-- `docs/llm/rules/security-check-required.md`
-- `docs/llm/workflows/security-check-required.md`
+- `security-checkpoint` skill — Repository-specific security requirements
 
 ## Example Templates
 
-Templates remain available under `.setup/examples/`, but they are not the source of truth for this repository. Repo-local rules and workflows live under `docs/llm/rules/` and `docs/llm/workflows/`.
+Templates remain available under `.setup/examples/`, but they are not the source of truth for this repository. All rules, skills, and workflows are now in the shared toolkit and accessible via `.agents/skills/` and `.windsurf/workflows/`.
 
 If the templates become noisy in the IDE, hide `.setup/examples/` locally instead of deleting anything from the linked toolkit.
 
@@ -105,9 +101,35 @@ Jira and Confluence are not used for this project. Their guides may still exist 
 
 ## Workflow Customization
 
-Do not edit shared toolkit workflows under `.windsurf/workflows/` for repo-only behavior. Use `docs/llm/workflows/` for local workflow guidance, and keep anything reusable in the shared toolkit instead.
+All workflows are now in the shared toolkit under `workflows/` and accessible via `.windsurf/workflows/` junction.
 
-## Recommended Local Entry Points
+## Recommended Skills (via Shared Toolkit)
 
-Start with these local files for thesis-specific support:
+Start with these skills for thesis-specific support (activate via your LLM tool):
 
+- `project-overview` — Repository structure and scope
+- `security-checkpoint` — Mandatory security review
+- `data-pipeline-boundaries` — Bronze/Silver/Gold boundaries
+- `aws-airflow-terraform-project` — Infrastructure guidance
+- `documentation-governance` — Documentation and data governance
+
+## Recommended Workflows (via Shared Toolkit)
+
+Access via `.windsurf/workflows/`:
+
+- `project-execution-main.md` — Primary orchestration for technical work
+- `thesis-writing-main.md` — Primary orchestration for thesis writing
+
+## Recommended References (via Shared Toolkit)
+
+Access via `.agents/skills/*/references/`:
+
+
+## Additional Workflows (via Shared Toolkit)
+
+**Complete workflow list:**
+- `data-source-ingestion.md` — Bronze layer data ingestion
+- `pipeline-change-project.md` — Project-specific pipeline changes
+- `bilingual-notebook-sync.md` — EN/pt-BR notebook synchronization
+- `aws-airflow-terraform-project.md` — Project-specific infrastructure guidance
+- `thesis-plagiarism-check.md` — Originality verification

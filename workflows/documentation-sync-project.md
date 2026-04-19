@@ -1,6 +1,6 @@
 # Documentation Sync Workflow
 
-Use this repo-local workflow together with the shared workflow in `.windsurf/workflows/update-docs.md`.
+Use this repo-local workflow together with the shared workflow in `update-docs workflow`.
 
 ## Repository-Specific Steps
 

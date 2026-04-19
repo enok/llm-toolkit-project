@@ -1,10 +1,12 @@
-# Repo-Local References
+# References
 
-These files are supporting references for the repository-specific LLM rules and workflows.
+Repository-specific reference materials for the Public Compliance Data Analysis project.
 
+## Contents
 
-Use the curated map first. Open the generated inventory only when you need to trace a topic back to representative course assets.
+- `aws-airflow-terraform-reference.md` — Infrastructure reference
+- `security-checkpoint-2026-04-05.md` — Security checkpoint documentation
 
+## Usage
 
-```powershell
-```
+These references are accessed via the shared toolkit skills and workflows.

@@ -15,8 +15,8 @@
 
 | Task Type | Entry Point | Key Workflow |
 |-----------|-------------|--------------|
-| **Plagiarism scan** | `docs/llm/workflows/thesis-plagiarism-check.md` | Originality check |
-| **Bilingual sync** | `docs/llm/workflows/bilingual-notebook-sync.md` | EN ↔ pt-BR |
+| **Plagiarism scan** | `thesis-plagiarism-check.md` | Originality check |
+| **Bilingual sync** | `bilingual-notebook-sync.md` | EN ↔ pt-BR |
 | **Advisor submission** | This workflow §Phase 5 | Submission prep |
 
 ### Step 2: Load Thesis Knowledge Base
@@ -230,7 +230,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/thesis-plagiarism-check.md`
+1. Read `thesis-plagiarism-check.md`
 2. Self-review:
    - All direct quotes have quotation marks
    - All paraphrases have citations
@@ -344,11 +344,11 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 ## Related Workflows & Skills
 
 ### Workflows (in execution order)
-7. `docs/llm/workflows/thesis-plagiarism-check.md` — Originality
-8. `docs/llm/workflows/bilingual-notebook-sync.md` — Bilingual sync
+7. `thesis-plagiarism-check.md` — Originality
+8. `bilingual-notebook-sync.md` — Bilingual sync
 9. `.windsurf/workflows/bilingual-doc-sync.md` — Document sync
 
-### Rules (for guidance)
+### Skills (for guidance)
 
 ### Skills (for reusable patterns)
 - `.agents/skills/document-conversion/SKILL.md` — File handling

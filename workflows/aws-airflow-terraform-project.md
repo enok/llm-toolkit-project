@@ -9,8 +9,8 @@ Use this repo-local workflow together with the shared workflow in `.windsurf/wor
    - `scripts/01_bronze_ingestion.sh`
    - `scripts/02_silver_transformation.sh`
    - `scripts/03_gold_transformation.sh`
-   - `docs/llm/rules/data-pipeline-boundaries.md`
-   - `docs/llm/rules/aws-airflow-terraform.md`
+   - `data-pipeline-boundaries` skill
+   - `aws-airflow-terraform-project` skill
 2. Decide whether the first migration step should wrap the existing shell scripts rather than rewrite ETL logic.
 3. Keep Bronze, Silver, and Gold responsibilities traceable in DAG names, task names, and docs.
 4. If the Airflow surface remains small, extending the current `infra/` root may be acceptable. If it becomes non-trivial, split into modules and explicit environment inputs.
