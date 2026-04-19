@@ -1,4 +1,4 @@
-
+<!-- BEGIN LLM TOOLKIT -->
 # LLM Dev Tools
 
 This repo uses symlinked skills, rules, and workflows for LLM-assisted development.
@@ -49,3 +49,4 @@ The linked `.windsurf/workflows/` tree is shared. Keep repo-specific playbooks i
 
 ### Step 6 - Update this AGENTS.md
 Collapse or remove this checklist once repo-local context is written. Replace it with architecture, key services, domain terms, and conventions for this repository.
+<!-- END LLM TOOLKIT -->

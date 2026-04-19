@@ -55,6 +55,22 @@ ensure_text_file() {
   echo "$label: created."
 }
 
+# Detect fresh install vs upgrade
+FRESH_INSTALL=1
+if [[ -d "$CONSUMER/.agents" || -d "$CONSUMER/.windsurf" || -d "$CONSUMER/skills" || -f "$CONSUMER/docs/llm/toolkit-selection.txt" ]]; then
+  FRESH_INSTALL=0
+fi
+
+if [[ $FRESH_INSTALL -eq 1 ]]; then
+  echo ""
+  echo "Fresh install — setting up LLM toolkit for: $CONSUMER"
+else
+  echo ""
+  echo "Existing configuration detected — upgrading LLM toolkit for: $CONSUMER"
+  echo "  Junctions will be repaired if needed; existing files will be preserved."
+  echo "  Use --force to repair broken junctions. AGENTS.md toolkit block will be updated."
+fi
+
 # Interactive tool selection
 USE_WINDSURF=0; USE_CURSOR=0; USE_CLAUDE=0; USE_CODEX=0
 
@@ -147,17 +163,9 @@ ensure_dir_link "$CONSUMER/.agents/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || ex
 echo "Agents: .agents/skills -> toolkit/skills"
 
 # 3. Scaffold repo-local LLM configuration
-mkdir -p "$CONSUMER/docs/llm/rules" "$CONSUMER/docs/llm/workflows"
+mkdir -p "$CONSUMER/docs/llm"
 
 ensure_text_file "$CONSUMER/docs/llm/README.md" "docs/llm/README.md" "$(cat "$SCRIPT_DIR/templates/docs-llm-README.md")"
-
-ensure_text_file "$CONSUMER/docs/llm/rules/README.md" "docs/llm/rules/README.md" "# Repo-Local Rules
-
-Add repository-only rules here. Keep reusable generic rules in the shared toolkit."
-
-ensure_text_file "$CONSUMER/docs/llm/workflows/README.md" "docs/llm/workflows/README.md" "# Repo-Local Workflows
-
-Add repository-only workflows here. Keep reusable generic workflows in the shared toolkit."
 
 ensure_text_file "$CONSUMER/docs/llm/toolkit-selection.txt" "docs/llm/toolkit-selection.txt" "$(cat "$SCRIPT_DIR/templates/toolkit-selection.txt")"
 
@@ -188,24 +196,43 @@ else
   echo "Warning: sync-tool-configs.sh not found; skipping tool surface repair." >&2
 fi
 
-# 5. Generate AGENTS.md
-REFERENCE_AGENTS="$(cat "$SCRIPT_DIR/templates/consumer-AGENTS.md")"
-
+# 5. Update AGENTS.md
+# Strategy:
+#   - Fresh file: write the full template.
+#   - Existing file with sentinel block: replace the block in-place (upgrade).
+#   - Existing file without sentinel: append the template block.
+#   - --force on an existing sentinel block: same replace-in-place (idempotent).
+TOOLKIT_BLOCK="$(cat "$SCRIPT_DIR/templates/consumer-AGENTS.md")"
 CONSUMER_AGENTS="$CONSUMER/AGENTS.md"
-if [[ -f "$CONSUMER_AGENTS" ]]; then
-  if grep -q "LLM Dev Tools\|LLM-assisted development" "$CONSUMER_AGENTS" 2>/dev/null; then
-    echo "AGENTS.md: already configured, unchanged."
-  else
-    {
-      echo ""
-      echo "---"
-      echo "$REFERENCE_AGENTS"
-    } >> "$CONSUMER_AGENTS"
-    echo "AGENTS.md: appended LLM tools reference."
-  fi
-else
-  echo "$REFERENCE_AGENTS" > "$CONSUMER_AGENTS"
+
+if [[ ! -f "$CONSUMER_AGENTS" ]]; then
+  printf "%s\n" "$TOOLKIT_BLOCK" > "$CONSUMER_AGENTS"
   echo "AGENTS.md: created."
+elif grep -q "<!-- BEGIN LLM TOOLKIT -->" "$CONSUMER_AGENTS" 2>/dev/null; then
+  # Replace only the sentinel block, preserving everything outside it.
+  # Pass the replacement block via a temp file; export path for awk via ENVIRON.
+  BLOCK_TMP="$(mktemp)"
+  printf "%s\n" "$TOOLKIT_BLOCK" > "$BLOCK_TMP"
+  export BLOCK_TMP
+  awk '
+    /<!-- BEGIN LLM TOOLKIT -->/ {
+      found=1
+      while ((getline line < ENVIRON["BLOCK_TMP"]) > 0) print line
+      close(ENVIRON["BLOCK_TMP"])
+      next
+    }
+    found && /<!-- END LLM TOOLKIT -->/ { found=0; next }
+    found { next }
+    { print }
+  ' "$CONSUMER_AGENTS" > "${CONSUMER_AGENTS}.tmp" \
+    && mv "${CONSUMER_AGENTS}.tmp" "$CONSUMER_AGENTS"
+  rm -f "$BLOCK_TMP"
+  unset BLOCK_TMP
+  echo "AGENTS.md: toolkit block updated in-place."
+else
+  # Legacy file (no sentinel) — append the block so existing content is preserved.
+  printf "\n---\n%s\n" "$TOOLKIT_BLOCK" >> "$CONSUMER_AGENTS"
+  echo "AGENTS.md: toolkit block appended (no existing sentinel found)."
 fi
 
 # 6. .gitignore - only add entries for selected tools

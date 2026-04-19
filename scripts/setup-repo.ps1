@@ -34,6 +34,23 @@ if (-not (Test-Path -LiteralPath $ConsumerPath -PathType Container)) {
 
 $Consumer = Resolve-ToolkitAbsolutePath $ConsumerPath
 
+# Detect fresh install vs upgrade
+$isFreshInstall = -not (
+    (Test-Path -LiteralPath (Join-Path $Consumer '.agents') -PathType Container) -or
+    (Test-Path -LiteralPath (Join-Path $Consumer '.windsurf') -PathType Container) -or
+    (Test-Path -LiteralPath (Join-Path $Consumer 'skills') -PathType Container) -or
+    (Test-Path -LiteralPath (Join-Path $Consumer 'docs\llm\toolkit-selection.txt') -PathType Leaf)
+)
+
+Write-Host ''
+if ($isFreshInstall) {
+    Write-Host "Fresh install — setting up LLM toolkit for: $Consumer"
+} else {
+    Write-Host "Existing configuration detected — upgrading LLM toolkit for: $Consumer"
+    Write-Host '  Junctions will be repaired if needed; existing files will be preserved.'
+    Write-Host '  Use -Force to repair broken junctions. AGENTS.md toolkit block will be updated.'
+}
+
 # Interactive tool selection
 $USE_WINDSURF = $false; $USE_CURSOR = $false; $USE_CLAUDE = $false; $USE_CODEX = $false
 
@@ -151,15 +168,10 @@ if ($USE_CODEX) {
 
 # 3. Scaffold repo-local LLM configuration
 $llmDir = Join-Path $Consumer 'docs\llm'
-New-Item -ItemType Directory -Path (Join-Path $llmDir 'rules') -Force | Out-Null
-New-Item -ItemType Directory -Path (Join-Path $llmDir 'workflows') -Force | Out-Null
+New-Item -ItemType Directory -Path $llmDir -Force | Out-Null
 
 $llmReadme = (Get-Content -Path "$ScriptDir\templates\docs-llm-README.md" -Raw).TrimEnd()
 Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'README.md') -Content $llmReadme -Label 'docs/llm/README.md'
-
-Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'rules\README.md') -Content "# Repo-Local Rules`n`nAdd repository-only rules here. Keep reusable generic rules in the shared toolkit." -Label 'docs/llm/rules/README.md'
-
-Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'workflows\README.md') -Content "# Repo-Local Workflows`n`nAdd repository-only workflows here. Keep reusable generic workflows in the shared toolkit." -Label 'docs/llm/workflows/README.md'
 
 $selectionTemplate = (Get-Content -Path "$ScriptDir\templates\toolkit-selection.txt" -Raw).TrimEnd()
 Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'toolkit-selection.txt') -Content $selectionTemplate -Label 'docs/llm/toolkit-selection.txt'
@@ -191,22 +203,32 @@ Ensure-ConsumerTextFile -Path (Join-Path $Consumer 'scripts\sync-llm-configs.sh'
 # 4. Sync generated tool surfaces after the local scaffold exists
 Invoke-ToolkitSyncToolConfigs -ConsumerPath $Consumer -ScriptDir $ScriptDir | Out-Null
 
-# 5. Generate AGENTS.md
-$referenceAgents = (Get-Content -Path "$ScriptDir\templates\consumer-AGENTS.md" -Raw).TrimEnd()
-
+# 5. Update AGENTS.md
+# Strategy:
+#   - Missing file: write the full template.
+#   - Existing file with sentinel block: replace the block in-place (upgrade).
+#   - Existing file without sentinel: append the template block (legacy/manual AGENTS.md).
+#   - -Force on existing sentinel: same replace-in-place (idempotent).
+$toolkitBlock = (Get-Content -Path "$ScriptDir\templates\consumer-AGENTS.md" -Raw).TrimEnd()
 $consumerAgents = Join-Path $Consumer 'AGENTS.md'
-if (Test-Path -LiteralPath $consumerAgents -PathType Leaf) {
-    $existing = Get-Content -LiteralPath $consumerAgents -Raw
-    if ($existing -match 'LLM Dev Tools|LLM-assisted development') {
-        Write-Host 'AGENTS.md: already configured, unchanged.'
-    } else {
-        Add-Content -LiteralPath $consumerAgents -Value "`n---`n$referenceAgents"
-        Write-Host 'AGENTS.md: appended LLM tools reference.'
-    }
-} else {
-    $encoding = New-Object System.Text.UTF8Encoding($false)
-    [System.IO.File]::WriteAllText($consumerAgents, $referenceAgents + [Environment]::NewLine, $encoding)
+$encoding = New-Object System.Text.UTF8Encoding($false)
+
+if (-not (Test-Path -LiteralPath $consumerAgents -PathType Leaf)) {
+    [System.IO.File]::WriteAllText($consumerAgents, $toolkitBlock + [Environment]::NewLine, $encoding)
     Write-Host 'AGENTS.md: created.'
+} else {
+    $existing = Get-Content -LiteralPath $consumerAgents -Raw
+    if ($existing -match '(?s)<!-- BEGIN LLM TOOLKIT -->.*<!-- END LLM TOOLKIT -->') {
+        # Replace only the sentinel block, preserving everything outside it.
+        $updated = $existing -replace '(?s)<!-- BEGIN LLM TOOLKIT -->.*?<!-- END LLM TOOLKIT -->', $toolkitBlock
+        [System.IO.File]::WriteAllText($consumerAgents, $updated, $encoding)
+        Write-Host 'AGENTS.md: toolkit block updated in-place.'
+    } else {
+        # Legacy file (no sentinel) — append so existing content is preserved.
+        $nl = [Environment]::NewLine
+        [System.IO.File]::AppendAllText($consumerAgents, "${nl}---${nl}${toolkitBlock}${nl}", $encoding)
+        Write-Host 'AGENTS.md: toolkit block appended (no existing sentinel found).'
+    }
 }
 
 # 6. Update .gitignore
