@@ -1,0 +1,39 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# Anthropic source-available skills (import locally; do NOT redistribute)
+# Import via: scripts/import-anthropic-skills.sh
+skills/pdf/
+skills/docx/
+skills/pptx/
+skills/xlsx/
+
+# Agent-side skill junctions (created by setup scripts, NOT committed content).
+# The CANONICAL skills live in skills/ — agent dirs link to it at setup time.
+# Without these rules, git on Windows would traverse the junction and duplicate content.
+.agents/skills/
+.claude/skills/
+.codex/skills/
+.cursor/skills/
+.windsurf/workflows/
+
+# Temporary helper scripts
+scripts/_create-junctions.cmd
