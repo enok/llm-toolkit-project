@@ -15,15 +15,15 @@ Your main project should remain **clean of any LLM-related files**. This separat
 
 ```
 llm-toolkit-project/
-├── skills/                 # CANONICAL skills (source of truth, 49 skills)
+├── skills/                 # CANONICAL skills (source of truth, 65 skills)
 │   ├── best-practices/
 │   │   ├── SKILL.md        # Summary (loaded on skill activation)
 │   │   ├── rules/          # Fine-grained rules (loaded on-demand)
 │   │   └── references/     # Deep references (loaded on-demand)
 │   ├── python-best-practices/
 │   ├── testing/
-│   └── ... (46 more skills)
-├── workflows/              # CANONICAL workflows (source of truth, 34 workflows)
+│   └── ... (62 more skills)
+├── workflows/              # CANONICAL workflows (source of truth, 49 workflows)
 │   ├── review.md
 │   ├── ticket-research.md
 │   └── ...
@@ -47,10 +47,12 @@ llm-toolkit-project/
 │   ├── ensure-symlinks.{sh,ps1,cmd} # Symlink maintenance
 │   ├── lib.{sh,ps1}        # Shared library functions
 │   └── security-check-toolkit.sh
-├── AGENTS.md               # Main LLM context
-├── CLAUDE.md               # Claude-specific instructions
 └── README.md               # This file
 ```
+
+> **Note:** `AGENTS.md` and `CLAUDE.md` are **not** committed in this toolkit. They are
+> generated or written per-consumer repo and gitignored locally there. Use
+> `scripts/templates/consumer-AGENTS.md` as the starting template for a new consumer.
 
 ## Architecture: Single Source of Truth
 
