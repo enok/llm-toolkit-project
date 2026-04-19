@@ -14,6 +14,11 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 
 - [`llm-toolkit-junction-architecture.md`](./llm-toolkit-junction-architecture.md) — Multi-repo LLM tooling via Windows junctions: zero duplication, zero git traces (`llm-toolkit`, `junctions`, `gitignore`, `multi-repo`, `windows`).
 - [`llm-adaptive-skill-loading.md`](./llm-adaptive-skill-loading.md) — Progressive/two-tier skill loading keeps session context under 1 KB (`skills`, `context-optimization`, `progressive-disclosure`).
+- [`gold-schema-drift-breaks-notebooks.md`](./gold-schema-drift-breaks-notebooks.md) — Gold schema changes break notebooks with hardcoded column names; check dynamic column generation and pt-BR translation maps (`notebook`, `gold`, `schema`, `column-names`, `data-pipeline`, `drift`).
+
+### Security
+
+- [`notebook-hardcoded-aws-credentials.md`](./notebook-hardcoded-aws-credentials.md) — Notebook hardcoded AWS credentials must use `runtime_config.json`; never print secrets in notebook outputs (`notebook`, `aws`, `credentials`, `security`, `runtime-config`, `s3`).
 
 ### API
 
