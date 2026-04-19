@@ -1,0 +1,17 @@
+# Curated shared toolkit profile for this repository
+#
+# List shared toolkit files that should remain prominent in repo-local generated outputs.
+# Supported entries:
+# rules/<name>.md
+# workflows/<name>.md
+#
+# Example entries:
+# rules/code-rules.md
+# rules/python-best-practices.md
+# workflows/project-discovery.md
+# workflows/review.md
+#
+# Notes:
+# - When `.cursor/` is linked to the shared toolkit, this file does not rewrite shared `.cursor/rules/`.
+# - `sync-tool-configs.sh` uses this selection to curate `AGENTS.md`, `CLAUDE.md`,
+#   `.github/copilot-instructions.md`, and local Cursor ignore blocks.
