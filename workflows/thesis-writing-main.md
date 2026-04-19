@@ -16,38 +16,38 @@
 
 | Task Type | Entry Point | Key Workflow |
 |-----------|-------------|--------------|
-| **Writing new chapter** | `docs/llm/workflows/thesis-completion-guide.md` §Chapter Structure | Chapter templates |
-| **Adding citations** | `docs/llm/workflows/thesis-bibliography-integration.md` | Bibliography map |
-| **Method selection** | `docs/llm/workflows/tcc-method-selection.md` | Method framework |
-| **Formatting check** | `docs/llm/workflows/tcc-formatting-abnt-review.md` | ABNT vs TCC Manual |
-| **Plagiarism scan** | `docs/llm/workflows/thesis-plagiarism-check.md` | Originality check |
-| **Bilingual sync** | `docs/llm/workflows/bilingual-notebook-sync.md` | EN ↔ pt-BR |
-| **Analysis→Thesis sync** | `docs/llm/workflows/tcc-analysis-and-writing-sync.md` | Evidence flow |
+| **Writing new chapter** | `thesis-completion-guide.md` §Chapter Structure | Chapter templates |
+| **Adding citations** | `thesis-bibliography-integration.md` | Bibliography map |
+| **Method selection** | `tcc-method-selection.md` | Method framework |
+| **Formatting check** | `tcc-formatting-abnt-review.md` | ABNT vs TCC Manual |
+| **Plagiarism scan** | `thesis-plagiarism-check.md` | Originality check |
+| **Bilingual sync** | `bilingual-notebook-sync.md` | EN ↔ pt-BR |
+| **Analysis→Thesis sync** | `tcc-analysis-and-writing-sync.md` | Evidence flow |
 | **Advisor submission** | This workflow §Phase 5 | Submission prep |
-| **Final formatting** | `docs/llm/workflows/tcc-formatting-abnt-review.md` | ABNT compliance |
+| **Final formatting** | `tcc-formatting-abnt-review.md` | ABNT compliance |
 
 ### Step 2: Load Thesis Knowledge Base
 
 **Read required resources based on task:**
 
 **For chapter writing:**
-- [ ] `docs/llm/workflows/thesis-completion-guide.md` — Structure, templates, deadlines
+- [ ] `thesis-completion-guide.md` — Structure, templates, deadlines
 - [ ] `.agents/skills/research-thesis-support/SKILL.md` — Chapter structure guidance
 - [ ] `docs/thesis_conclusion.md` — Current findings summary
 - [ ] `docs/city_thesis_conclusion_addendum.md` — Municipality analysis
 
 **For methods/methodology:**
-- [ ] `docs/llm/workflows/tcc-method-selection.md` — Method framework
+- [ ] `tcc-method-selection.md` — Method framework
 - [ ] `.agents/skills/thesis-bibliography/SKILL.md` §1-5 — Method references
-- [ ] `docs/llm/references/usp-mba-course-map.md` — Course alignment
+- [ ] `usp-mba-course-map` reference — Course alignment
 
 **For formatting:**
-- [ ] `docs/llm/workflows/tcc-formatting-abnt-review.md` — ABNT vs TCC Manual
-- [ ] `docs/llm/rules/tcc-deliverables-and-argument.md` — Deliverable expectations
+- [ ] `tcc-formatting-abnt-review.md` — ABNT vs TCC Manual
+- [ ] `tcc-deliverables` skill — Deliverable expectations
 
 **For bibliography:**
 - [ ] `.agents/skills/thesis-bibliography/SKILL.md` — Complete reference database
-- [ ] `docs/llm/workflows/thesis-bibliography-integration.md` — Citation map
+- [ ] `thesis-bibliography-integration.md` — Citation map
 
 ### Step 3: Determine Language Scope
 
@@ -88,13 +88,13 @@
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/thesis-completion-guide.md` §Introduction
+1. Read `thesis-completion-guide.md` §Introduction
 2. Use 5-sentence abstract formula for problem statement
    Reference: `.agents/skills/thesis-bibliography/SKILL.md` §10
 3. Cite methodology sources:
    - Gil (2010), Lakatos & Marconi (2010) — Research design
    - Ferreira (2010), Affonso & Araújo (2016) — Public spending context
-   Reference: `docs/llm/workflows/thesis-bibliography-integration.md` §Chapter 1
+   Reference: `thesis-bibliography-integration.md` §Chapter 1
 4. Write in Portuguese (primary)
 5. Sync to English (secondary)
 6. Verify bilingual alignment
@@ -110,7 +110,7 @@
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/tcc-method-selection.md`
+1. Read `tcc-method-selection.md`
 2. Map methods to references:
    - Descriptive stats → Bussab & Morettin (2017)
    - Regression → Wooldridge (2020)
@@ -172,7 +172,7 @@
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/thesis-bibliography-integration.md`
+1. Read `thesis-bibliography-integration.md`
 2. For each section, check required citations:
    - Chapter 1: Gil, Lakatos, Ferreira, etc.
    - Chapter 2: Method-specific references
@@ -214,7 +214,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/tcc-formatting-abnt-review.md`
+1. Read `tcc-formatting-abnt-review.md`
 2. Compare TCC Manual vs ABNT NBR 14724:2011
 3. Check page setup:
    - Margins: Left 3cm, Right 2cm, Top 3cm, Bottom 2cm (verify TCC Manual)
@@ -237,7 +237,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/thesis-completion-guide.md` §Writing Quality
+1. Read `thesis-completion-guide.md` §Writing Quality
 2. Apply Gopen & Swan principles:
    - Subject-verb proximity
    - Stress position
@@ -262,7 +262,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/thesis-plagiarism-check.md`
+1. Read `thesis-plagiarism-check.md`
 2. Self-review:
    - All direct quotes have quotation marks
    - All paraphrases have citations
@@ -287,7 +287,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `docs/llm/workflows/tcc-analysis-and-writing-sync.md`
+1. Read `tcc-analysis-and-writing-sync.md`
 2. Verify evidence traceability:
    - Every claim → notebook/script reference
    - Every statistic → source data
@@ -383,20 +383,20 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 ## Related Workflows & Skills
 
 ### Workflows (in execution order)
-1. `docs/llm/workflows/thesis-completion-guide.md` — Structure and timeline
-2. `docs/llm/workflows/tcc-method-selection.md` — Methodology framework
-3. `docs/llm/workflows/tcc-analysis-and-writing-sync.md` — Evidence flow
-4. `docs/llm/workflows/thesis-bibliography-integration.md` — Citations
+1. `thesis-completion-guide.md` — Structure and timeline
+2. `tcc-method-selection.md` — Methodology framework
+3. `tcc-analysis-and-writing-sync.md` — Evidence flow
+4. `thesis-bibliography-integration.md` — Citations
 5. `.agents/skills/thesis-bibliography/SKILL.md` — Reference database
-6. `docs/llm/workflows/tcc-formatting-abnt-review.md` — Formatting
-7. `docs/llm/workflows/thesis-plagiarism-check.md` — Originality
-8. `docs/llm/workflows/bilingual-notebook-sync.md` — Bilingual sync
+6. `tcc-formatting-abnt-review.md` — Formatting
+7. `thesis-plagiarism-check.md` — Originality
+8. `bilingual-notebook-sync.md` — Bilingual sync
 9. `.windsurf/workflows/bilingual-doc-sync.md` — Document sync
 
-### Rules (for guidance)
-- `docs/llm/rules/tcc-deliverables-and-argument.md` — Deliverable expectations
-- `docs/llm/rules/usp-mba-course-context.md` — USP MBA guidance
-- `docs/llm/rules/course-material-grounding.md` — Course alignment
+### Skills (for guidance)
+- `tcc-deliverables` skill — Deliverable expectations
+- `usp-mba-course-context` skill — USP MBA guidance
+- `course-material-grounding` skill — Course alignment
 
 ### Skills (for reusable patterns)
 - `.agents/skills/research-thesis-support/SKILL.md` — Chapter structure

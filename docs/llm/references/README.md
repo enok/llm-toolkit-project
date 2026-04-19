@@ -1,14 +1,15 @@
-# Repo-Local References
+# References
 
-These files are supporting references for the repository-specific LLM rules and workflows.
+Repository-specific reference materials for the Public Compliance Data Analysis project.
 
-- `usp-mba-course-map.md`: curated mapping from USP MBA course modules to the analytical and documentation tasks in this repository
-- `usp-mba-course-inventory.generated.md`: generated inventory of the `aulas/` corpus used to build the curated map
+## Contents
 
-Use the curated map first. Open the generated inventory only when you need to trace a topic back to representative course assets.
+- `usp-mba-course-map.md` — Curated USP MBA course mapping
+- `usp-mba-course-inventory.generated.md` — Full course inventory (generated)
+- `usp-mba-tcc-examples.md` — TCC examples and templates
+- `aws-airflow-terraform-reference.md` — Infrastructure reference
+- `security-checkpoint-2026-04-05.md` — Security checkpoint documentation
 
-To refresh the generated inventory from the source `aulas/` directory:
+## Usage
 
-```powershell
-python .\docs\llm\scripts\build_usp_mba_course_inventory.py --source C:\google-drive\cursos\usp\mba\data-science\aulas --output .\docs\llm\references
-```
+These references are accessed via the shared toolkit skills and workflows.

@@ -302,11 +302,11 @@ For official ABNT requirements, consult:
 
 ## Related Resources
 
-- `docs/llm/workflows/thesis-completion-guide.md` — Full thesis guide
-- `docs/llm/workflows/thesis-bibliography-integration.md` — Citation formatting
-- `docs/llm/workflows/thesis-plagiarism-check.md` — Originality verification
+- `thesis-completion-guide.md` — Full thesis guide
+- `thesis-bibliography-integration.md` — Citation formatting
+- `thesis-plagiarism-check.md` — Originality verification
 - `.agents/skills/thesis-bibliography/SKILL.md` — ABNT citation formats
-- `docs/llm/rules/tcc-deliverables-and-argument.md` — Deliverable expectations
+- `tcc-deliverables` skill — Deliverable expectations
 
 ---
 

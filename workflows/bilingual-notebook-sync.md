@@ -111,4 +111,4 @@ Use consistent translations for domain terms:
 
 - `.windsurf/workflows/bilingual-doc-sync.md` — For README and documentation files
 - `.windsurf/workflows/notebook-analysis.md` — For notebook quality checks
-- `docs/llm/rules/usp-mba-course-context.md` — For terminology guidance
+- `usp-mba-course-context` skill — For terminology guidance

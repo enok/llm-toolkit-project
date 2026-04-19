@@ -382,8 +382,8 @@ referências bibliográficas).
 ## Related Resources
 
 - `.agents/skills/thesis-bibliography/SKILL.md` — Proper citation formats
-- `docs/llm/workflows/thesis-bibliography-integration.md` — When to cite
-- `docs/llm/workflows/thesis-completion-guide.md` — Final thesis checklist
+- `thesis-bibliography-integration.md` — When to cite
+- `thesis-completion-guide.md` — Final thesis checklist
 - USP/ESALQ Academic Integrity Policy
 - ABNT NBR 6023:2023 (References)
 - ABNT NBR 14724:2020 (Academic Work Presentation)

@@ -17,7 +17,7 @@ Write the current question in one sentence covering:
 
 ### 2. Ground in Course Materials
 
-Read `docs/llm/references/usp-mba-course-map.md` and shortlist the most relevant course anchors:
+Read `usp-mba-course-map` reference and shortlist the most relevant course anchors:
 - Statistical foundations (`01_Fundamentos-de-Estatistica`)
 - Outcome modeling (`29_Supervised_Machine_Learning_Analise_de_Regressao_Simples_e_Multipla`)
 - Segmentation (`26_Unsupervised_Machine_Learning_Clustering`)
@@ -83,4 +83,4 @@ If the analysis could inform policy, compliance, or enforcement:
 
 - `11_tcc/03_Estrutura-do-TCC/02-Material e Métodos.pdf`: Methods section structure
 - `11_tcc/04_Metodologias-de-pesquisa/`: Research methodology selection
-- `docs/llm/rules/tcc-deliverables-and-argument.md`: Deliverable expectations
+- `tcc-deliverables` skill: Deliverable expectations

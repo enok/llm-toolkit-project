@@ -178,7 +178,7 @@ If the change alters:
 
 ## Related Workflows
 
-- `docs/llm/workflows/data-source-ingestion.md` — For adding/modifying data sources
+- `data-source-ingestion.md` — For adding/modifying data sources
 - `.windsurf/workflows/data-pipeline-change.md` — Generic pipeline guidance
 - `.windsurf/workflows/dataset-onboarding.md` — For brand new datasets
 

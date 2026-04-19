@@ -308,5 +308,5 @@ Before finalizing the thesis, verify:
 
 - `.agents/skills/thesis-bibliography/SKILL.md` — Complete bibliography database
 - `.agents/skills/research-thesis-support/SKILL.md` — Evidence artifacts and chapter structure
-- `docs/llm/workflows/thesis-completion-guide.md` — Full thesis guide
-- `docs/llm/workflows/tcc-analysis-and-writing-sync.md` — Writing workflow
+- `thesis-completion-guide.md` — Full thesis guide
+- `tcc-analysis-and-writing-sync.md` — Writing workflow
