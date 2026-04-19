@@ -6,6 +6,8 @@ description: Capture a trial-and-error discovery as a shared learning so any fut
 
 Use this workflow after recovering from trial-and-error, discovering a non-obvious solution, or hitting a platform/toolchain gotcha. The output is a committed markdown file in `learnings/` that any LLM tool can consume.
 
+> This workflow is invoked automatically by the always-on `error-driven-learning` skill (see `skills/error-driven-learning/SKILL.md`). Trigger conditions are listed there — the agent should not wait for the user to ask.
+
 ## When to trigger
 
 - You tried 2+ approaches before finding the correct one.
@@ -29,7 +31,7 @@ If `learnings/` does not exist at the repo root, create it along with the `READM
 mkdir -p learnings
 ```
 
-Copy the README template from the toolkit's `learnings/README.md` or create one following the convention in `rules/error-driven-learning.md`.
+Copy the README template from the toolkit's `learnings/README.md`. The governance is defined in `skills/error-driven-learning/SKILL.md`.
 
 ### 3. Write the learning file
 
@@ -88,12 +90,22 @@ This gives faster retrieval within that tool while keeping the committed file as
 
 **Do NOT commit until the user explicitly approves.** If the user requests changes, revise the learning file and re-run the quality check. Skip this gate only if the user explicitly asked to skip approval.
 
-### 7. Commit
+### 7. Update the INDEX
 
-Stage and commit the learning file. Use commit category 2 (Documentation) per `rules/git-conventions.md`:
+Append one line to `learnings/INDEX.md` under the appropriate category:
+
+```markdown
+- [`<file>.md`](./<file>.md) — <one-line summary> (`tag1`, `tag2`, `tag3`).
+```
+
+This keeps the always-on `error-driven-learning` fast-scan working.
+
+### 8. Commit
+
+Stage and commit **both** the learning file and the INDEX update together. Use commit category 2 (Documentation) per `skills/git-conventions/SKILL.md`:
 
 ```bash
-git add learnings/<topic>.md
+git add learnings/<topic>.md learnings/INDEX.md
 git commit -m "<TICKET-ID>: Add learning — <short description>"
 ```
 

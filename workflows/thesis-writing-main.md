@@ -7,6 +7,14 @@
 
 ---
 
+## Phase 0: Consult Learnings (ALWAYS-ON)
+
+**Before any other step, scan `learnings/INDEX.md`** for entries whose tags, title, or category match the current writing task (formatting rules, citation gotchas, platform quirks, etc.). Follow prior solutions; avoid approaches already documented as failures.
+
+This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
+
+---
+
 ## Phase 1: Discovery & Planning
 
 ### Step 1: Identify Writing Task
@@ -378,6 +386,7 @@ What thesis task?
 - [ ] Writing quality: Meets academic standards
 - [ ] Analysis alignment: Evidence supports claims
 - [ ] Supporting materials: Ready (notebooks, maps, dashboard)
+- [ ] **Capture-learning check (ALWAYS-ON)**: if this task involved 2+ failed approaches, a non-obvious fix, a formatting/tool gotcha, or an undocumented requirement, run `workflows/capture-learning.md` before closing. See `skills/error-driven-learning/SKILL.md`.
 
 ---
 
