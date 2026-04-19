@@ -37,3 +37,10 @@ skills/xlsx/
 
 # Temporary helper scripts
 scripts/_create-junctions.cmd
+
+# Consumer exports must not be committed to the toolkit.
+# These files belong inside each consumer repo (locally, gitignored there).
+# scripts/templates/consumer-AGENTS.md is the canonical template for consumers.
+/AGENTS.md
+/CLAUDE.md
+docs/llm/session_handoff.md
