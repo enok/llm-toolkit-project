@@ -25,6 +25,15 @@ learnings/
   sam-build-docker.md    # Example learning
 ```
 
+**Consuming projects** (repos that junction from `llm-toolkit-project`) have **two** learnings locations:
+
+| Path | Contents |
+|---|---|
+| `learnings/` | Project-specific discoveries — committed in the consuming repo |
+| `docs/llm-toolkit-learnings/` | Shared toolkit discoveries — junction to `llm-toolkit-project/learnings/` |
+
+Always check **both** before starting a task. The toolkit learnings cover cross-project patterns (API auth, junction architecture, skill loading) that apply to any consuming project.
+
 ## File format
 
 ```markdown
