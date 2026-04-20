@@ -24,6 +24,16 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 
 - [`transparency-portal-api.md`](./transparency-portal-api.md) — Portal da Transparência API auth, endpoint catalog, and pagination (`transparency-portal`, `api`, `brazil`, `cgu`, `sanctions`, `ceis`, `cnep`, `cepim`).
 
+### Notebooks / Toolchain
+
+- [`notebook-embedded-plotly-output-size.md`](./notebook-embedded-plotly-output-size.md) — Plotly choropleth outputs embedded in notebooks inflate files to 100MB+, blocking `git push`; run `clear_notebook_outputs.py` before every commit (`notebook`, `plotly`, `outputs`, `file-size`, `git`, `push`, `ipynb`, `clear-outputs`).
+- [`notebook-patch-anchor-mismatch-ptbr.md`](./notebook-patch-anchor-mismatch-ptbr.md) — pt-BR notebook patch anchors silently miss when `except`/`print` strings were never translated; verify exact cell content before writing anchors (`notebook`, `patch`, `anchor`, `ptbr`, `translation`, `scripted-edit`, `silent-failure`).
+- [`notebook-timestamp-noise-in-diff.md`](./notebook-timestamp-noise-in-diff.md) — `ExecuteTime` metadata creates large git diffs with zero source change; detect with source-only comparison and revert before committing (`notebook`, `metadata`, `ExecuteTime`, `git`, `diff`, `noise`, `revert`).
+
+### Data Pipeline
+
+- [`geojson-property-language-drift.md`](./geojson-property-language-drift.md) — GeoJSON property names drift to whichever notebook language ran last; pick one canonical language and generate from a dedicated script, not a notebook side effect (`geojson`, `qgis`, `ptbr`, `english`, `assets`, `schema`, `drift`, `presentation-assets`).
+
 ---
 
 ## Scanning Tips
