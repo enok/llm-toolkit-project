@@ -7,9 +7,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONSUMER="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Find the toolkit by resolving the .agents symlink
+# Find the toolkit by resolving .agents/skills. This works whether .agents is
+# a root link to the toolkit or a real directory with a nested skills link.
 TOOLKIT=""
-if [[ -L "$CONSUMER/.agents" ]]; then
+if [[ -e "$CONSUMER/.agents/skills" ]]; then
+    TOOLKIT="$(cd "$CONSUMER/.agents/skills" && pwd -P)"
+    TOOLKIT="$(dirname "$TOOLKIT")"
+elif [[ -e "$CONSUMER/.agents" ]]; then
     TOOLKIT="$(cd "$CONSUMER/.agents" && pwd -P)"
     TOOLKIT="$(dirname "$TOOLKIT")"
 fi

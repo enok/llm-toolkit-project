@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "May 2026",
+  "abstract": "Safely evaluate, download, adapt, and index skills or workflow patterns from public LLM-tool repositories such as Claude, Codex, Cursor, Windsurf, MCP, or agent frameworks.",
+  "references": [
+    "https://github.com/anthropics/claude-code",
+    "https://github.com/openai/codex",
+    "https://modelcontextprotocol.io/"
+  ]
+}

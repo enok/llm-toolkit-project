@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "May 2026",
+  "abstract": "Design lean, provider-agnostic LLM context surfaces using progressive disclosure. Guidelines for editing AGENTS.md, rules, workflows, skills, and reducing prompt bloat by moving knowledge to on-demand loading.",
+  "references": [
+    "https://platform.openai.com/docs/guides/prompt-engineering",
+    "https://docs.anthropic.com/claude/docs/prompt-engineering"
+  ]
+}

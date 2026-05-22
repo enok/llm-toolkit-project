@@ -1,0 +1,6 @@
+# Enforce LF line endings for all text files in this repo.
+# Prevents CRLF issues on Windows with core.autocrlf=true.
+* text=auto eol=lf
+
+# Shell scripts must always be LF (bash breaks on CRLF)
+*.sh text eol=lf

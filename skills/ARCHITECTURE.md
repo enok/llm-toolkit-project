@@ -16,11 +16,12 @@ llm-toolkit-project/
 │   │   │   └── arch-layered.md
 │   │   └── references/       # Deep reference material (on-demand)
 │   │       └── rules.md
-│   └── ... (49 skills total)
+│   └── ... (78 skills total)
 ├── workflows/                # CANONICAL workflows (source of truth)
 │   ├── review.md
 │   ├── ticket-research.md
-│   └── ... (34 workflows)
+│   └── ... (61 workflows)
+├── rules/                    # CANONICAL broad rules (source of truth)
 ```
 
 ## Agent Directories Are Junctions
@@ -31,7 +32,10 @@ All agent-specific directories are **Windows junctions** (or symlinks on Linux/m
 .agents/skills    -> skills/       (junction)
 .claude/skills    -> skills/       (junction)
 .codex/skills     -> skills/       (junction)
+.windsurf/rules     -> rules/      (junction)
 .windsurf/workflows -> workflows/  (junction)
+.cursor/rules       -> rules/      (junction)
+.cursor/workflows   -> workflows/  (junction)
 ```
 
 **No duplicate content.** Edit a file in `skills/xxx/` and all agents immediately see the change.
@@ -50,11 +54,11 @@ Each skill uses three levels of progressive disclosure:
 
 ## Rules → Skills Migration
 
-The old `.windsurf/rules/` directory (with `trigger: always_on`) has been **dissolved** into skills:
+The old provider-specific `.windsurf/rules/` directory has been replaced by canonical shared `rules/`:
 
-- Rules that matched a skill name → merged into `skills/<name>/references/rules.md`
-- Orphan rules → merged into the most relevant skill's `references/`
-- All content now loads **on-demand**, not always
+- Broad always-relevant constraints live in `rules/`
+- Specialized guidance lives in `skills/<name>/rules/` or `skills/<name>/references/`
+- Provider-specific rule folders should link to canonical `rules/`
 
 ## Creating a New Skill
 
@@ -85,10 +89,11 @@ Check no duplicates exist:
 
 ```bash
 # Canonical only
-find skills/ -name SKILL.md | wc -l   # 49 (or current count)
-find workflows/ -name "*.md" | wc -l  # 34 (or current count)
+find skills/ -name SKILL.md | wc -l   # 78 (or current count)
+find workflows/ -name "*.md" | wc -l  # 61 plus README.md (or current count)
+find rules/ -maxdepth 1 -name "*.md" | wc -l  # 12 (or current count)
 
 # Agent dirs must be junctions
-ls -la .agents/skills .claude/skills .codex/skills .windsurf/workflows
+ls -la .agents/skills .claude/skills .codex/skills .windsurf/rules .windsurf/workflows .cursor/rules .cursor/workflows
 # Should all show "->" indicating link/junction
 ```

@@ -34,7 +34,7 @@ The user will provide a **ticket ID** (e.g., `ABC-1234`). Replace `<TICKET>` bel
 
 ### 5. Read Confluence documentation
 - Search Confluence with key terms from the ticket (feature name, component name, domain concepts).
-- Always check RDTS space: DOPE Architecture page and Insights Webapp page for cross-service context.
+- Always check the relevant architecture and product documentation spaces for cross-service context.
 - Read the top 3-5 most relevant pages.
 - Note: page title, space, URL, and a 1-2 sentence summary of relevance.
 

@@ -1,0 +1,31 @@
+# Curated shared toolkit profile for this repository
+#
+# Keep generic reusable rules and workflows in the shared toolkit.
+# Consumer repos can copy this as a starting point and remove what is not relevant.
+
+rules/api-contract-surface.md
+rules/ci-feedback-loop.md
+rules/code-rules.md
+rules/command-safety.md
+rules/error-driven-learning.md
+rules/git-conventions.md
+rules/multi-agent-orchestration.md
+rules/operational-doc-required.md
+rules/release-safety.md
+rules/repository-context-layers.md
+rules/security-check-required.md
+rules/workflow-authoring.md
+
+workflows/capture-learning.md
+workflows/commit-and-push.md
+workflows/document-creation.md
+workflows/environment-diagnose.md
+workflows/pre-pr-check.md
+workflows/project-discovery.md
+workflows/review.md
+workflows/review-and-fix.md
+workflows/run-tests.md
+workflows/security-report.md
+workflows/self-improvement.md
+workflows/toolkit-maintenance.md
+workflows/update-docs.md

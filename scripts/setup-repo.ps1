@@ -88,6 +88,9 @@ Write-Host ''
 Write-Host "Setting up: $($selectedTools -join ', ')"
 Write-Host ''
 
+Ensure-ToolkitWindsurfLayout -DevToolsRoot $ToolkitRoot -AllowRepair:$Force
+Ensure-ToolkitSetupLayout -DevToolsRoot $ToolkitRoot -AllowRepair:$Force
+
 function Ensure-ConsumerTextFile {
     param(
         [Parameter(Mandatory)][string]$Path,
@@ -113,6 +116,13 @@ $consumerSkills = Join-Path $Consumer 'skills'
 $stSkills = Ensure-ToolkitDirectoryLink -LinkPath $consumerSkills -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
 Write-Host "skills -> toolkit/skills ($stSkills)"
 
+$toolkitRulesRoot = Join-Path $ToolkitRoot 'rules'
+if (Test-Path -LiteralPath $toolkitRulesRoot -PathType Container) {
+    $consumerRules = Join-Path $Consumer 'rules'
+    $stRules = Ensure-ToolkitDirectoryLink -LinkPath $consumerRules -TargetPath $toolkitRulesRoot -AllowRepair:$Force
+    Write-Host "rules -> toolkit/rules ($stRules)"
+}
+
 $toolkitWorkflowsRoot = Join-Path $ToolkitRoot 'workflows'
 $consumerWorkflows = Join-Path $Consumer 'workflows'
 $stWorkflows = Ensure-ToolkitDirectoryLink -LinkPath $consumerWorkflows -TargetPath $toolkitWorkflowsRoot -AllowRepair:$Force
@@ -136,6 +146,10 @@ Write-Host ".agents/skills -> toolkit/skills ($stAgentsSkills)"
 if ($USE_WINDSURF) {
     $consumerWindsurf = Join-Path $Consumer '.windsurf'
     if (-not (Test-Path -LiteralPath $consumerWindsurf)) { New-Item -ItemType Directory -Path $consumerWindsurf -Force | Out-Null }
+    if (Test-Path -LiteralPath $toolkitRulesRoot -PathType Container) {
+        $stWsRules = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurf 'rules') -TargetPath $toolkitRulesRoot -AllowRepair:$Force
+        Write-Host ".windsurf/rules -> toolkit/rules ($stWsRules)"
+    }
     $stWsWf = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurf 'workflows') -TargetPath $toolkitWorkflowsRoot -AllowRepair:$Force
     Write-Host ".windsurf/workflows -> toolkit/workflows ($stWsWf)"
 }
@@ -143,12 +157,18 @@ if ($USE_WINDSURF) {
 if ($USE_CURSOR) {
     $consumerCursor = Join-Path $Consumer '.cursor'
     if (-not (Test-Path -LiteralPath $consumerCursor)) { New-Item -ItemType Directory -Path $consumerCursor -Force | Out-Null }
+    if (Test-Path -LiteralPath $toolkitRulesRoot -PathType Container) {
+        $stCrRules = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'rules') -TargetPath $toolkitRulesRoot -AllowRepair:$Force
+        Write-Host ".cursor/rules -> toolkit/rules ($stCrRules)"
+    }
+    $stCrWorkflows = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'workflows') -TargetPath $toolkitWorkflowsRoot -AllowRepair:$Force
+    Write-Host ".cursor/workflows -> toolkit/workflows ($stCrWorkflows)"
     $stCrSkills = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'skills') -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
     Write-Host ".cursor/skills -> toolkit/skills ($stCrSkills)"
-    $toolkitCursorAgents = Join-Path $ToolkitRoot '.cursor\agents'
+    $toolkitCursorAgents = Join-Path $ToolkitRoot 'tool-subagents'
     if (Test-Path -LiteralPath $toolkitCursorAgents -PathType Container) {
         $stCrAgents = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'agents') -TargetPath $toolkitCursorAgents -AllowRepair:$Force
-        Write-Host ".cursor/agents -> toolkit/.cursor/agents ($stCrAgents)"
+        Write-Host ".cursor/agents -> toolkit/tool-subagents ($stCrAgents)"
     }
 }
 
@@ -169,9 +189,13 @@ if ($USE_CODEX) {
 # 3. Scaffold repo-local LLM configuration
 $llmDir = Join-Path $Consumer 'docs\llm'
 New-Item -ItemType Directory -Path $llmDir -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $llmDir 'rules') -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $llmDir 'workflows') -Force | Out-Null
 
 $llmReadme = (Get-Content -Path "$ScriptDir\templates\docs-llm-README.md" -Raw).TrimEnd()
 Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'README.md') -Content $llmReadme -Label 'docs/llm/README.md'
+Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'rules\README.md') -Content "# Repo-Local Rules`n`nAdd repository-only rules here. Keep reusable generic rules in the shared toolkit." -Label 'docs/llm/rules/README.md'
+Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'workflows\README.md') -Content "# Repo-Local Workflows`n`nAdd repository-only workflows here. Keep reusable generic workflows in the shared toolkit." -Label 'docs/llm/workflows/README.md'
 
 $selectionTemplate = (Get-Content -Path "$ScriptDir\templates\toolkit-selection.txt" -Raw).TrimEnd()
 Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'toolkit-selection.txt') -Content $selectionTemplate -Label 'docs/llm/toolkit-selection.txt'

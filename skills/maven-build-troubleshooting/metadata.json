@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "May 2026",
+  "abstract": "Diagnose Maven build, test, OWASP dependency-check, Jetty/Tomcat, Windows shell, plugin, and Java runtime failures. Covers triage order, common failure classes, validation discipline, and useful commands.",
+  "references": [
+    "https://maven.apache.org/guides/",
+    "https://maven.apache.org/plugins/maven-dependency-check-plugin/",
+    "https://www.eclipse.org/jetty/"
+  ]
+}
