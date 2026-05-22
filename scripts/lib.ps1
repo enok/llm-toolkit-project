@@ -354,6 +354,37 @@ function Get-GitBashExe {
     return $null
 }
 
+function ConvertTo-ToolkitBashQuotedArg {
+    param([Parameter(Mandatory)][string]$Value)
+    return "'" + ($Value -replace "'", "'\''") + "'"
+}
+
+function Invoke-ToolkitBashScript {
+    param(
+        [Parameter(Mandatory)][string]$ScriptPath,
+        [string[]]$Arguments = @()
+    )
+    if (-not (Test-Path -LiteralPath $ScriptPath)) {
+        Write-Warning "Bash script not found: $ScriptPath"
+        return $false
+    }
+    $gitBash = Get-GitBashExe
+    if (-not $gitBash) {
+        Write-Warning "Git Bash not found. Install Git for Windows or run the shell script from a Bash environment."
+        return $false
+    }
+
+    $scriptUnix = Convert-ToGitBashPath $ScriptPath
+    $parts = @((ConvertTo-ToolkitBashQuotedArg $scriptUnix))
+    foreach ($arg in $Arguments) {
+        $parts += ConvertTo-ToolkitBashQuotedArg $arg
+    }
+    $bashCommand = $parts -join ' '
+    Write-ToolkitExecLine "& '$gitBash' -lc '$bashCommand'"
+    & $gitBash -lc $bashCommand | ForEach-Object { Write-Host $_ }
+    return ($LASTEXITCODE -eq 0)
+}
+
 function Invoke-ToolkitSyncToolConfigs {
     param(
         [Parameter(Mandatory)][string]$ConsumerPath,

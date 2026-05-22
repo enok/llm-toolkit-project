@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "March 2026",
+  "abstract": "Comprehensive Java best practices guide for backend applications. Contains 30+ rules across 8 categories covering language fundamentals, dependency injection, error handling, logging, concurrency, testing, external resource access, and operational patterns. Each rule includes detailed explanations with incorrect vs. correct code examples.",
+  "references": [
+    "https://docs.oracle.com/javase/specs/",
+    "https://www.baeldung.com/java-concurrency",
+    "https://site.mockito.org/",
+    "https://github.com/google/guava"
+  ]
+}

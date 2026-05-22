@@ -73,13 +73,13 @@ Security review is mandatory for every new or modified code path, script, workfl
 Run:
 
 ```bash
-./scripts/security_check_this_repo.sh
+./scripts/security-check-toolkit.sh
 ```
 
-For related work in `dev-tools`, use:
+PowerShell:
 
-```bash
-./scripts/security_check_dev_tools.sh /path/to/dev-tools
+```powershell
+.\scripts\security-check-toolkit.ps1
 ```
 
 See:
@@ -103,7 +103,7 @@ Jira and Confluence are not used for this project. Their guides may still exist 
 
 ## Workflow Customization
 
-All workflows are now in the shared toolkit under `workflows/` and accessible via `.windsurf/workflows/` junction.
+All workflows are now in the shared toolkit under `workflows/` and accessible via `.windsurf/workflows/` and `.cursor/workflows/` links.
 
 ## Recommended Skills (via Shared Toolkit)
 

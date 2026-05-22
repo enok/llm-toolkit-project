@@ -1,10 +1,26 @@
-# Codex Skills Mirror
+# Skills
 
-This directory mirrors portable skills from `.agents/skills/` into a Codex-oriented path.
+Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKILL.md` and may include optional `rules/`, `references/`, `scripts/`, or `agents/`.
 
-Guidelines:
+## Conventions
 
-- Treat `.agents/skills/` as the portable source of truth.
-- Refresh managed links with `./.codex/sync-shared-skills.sh`.
-- Keep `AGENTS.md` as the authoritative repo-level instruction surface.
-- Keep Codex-only skills here only when they are truly Codex-specific.
+- Folder name must match the `name:` field in `SKILL.md`.
+- Keep the frontmatter description short and trigger-rich so agents can select the skill from metadata.
+- Put broad always-on behavior in `rules/`; put specialized procedures and examples inside the relevant skill.
+- Keep project-specific details out of shared skills unless they are explicitly scoped to this toolkit's data-science/thesis context.
+
+## Validation
+
+Run from the repository root:
+
+```bash
+./scripts/validate-toolkit-indexes.sh
+```
+
+PowerShell:
+
+```powershell
+.\scripts\validate-toolkit-indexes.ps1
+```
+
+See `skills/ARCHITECTURE.md` for the full structure.

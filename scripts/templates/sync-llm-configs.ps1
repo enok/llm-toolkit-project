@@ -6,18 +6,36 @@ $ErrorActionPreference = 'Stop'
 $ScriptDir = $PSScriptRoot
 $Consumer = Split-Path -Parent $ScriptDir
 
-# Find the toolkit by resolving the .agents symlink
+# Find the toolkit by resolving .agents/skills. This works whether .agents is
+# a root link to the toolkit or a real directory with a nested skills link.
 $Toolkit = $null
-$AgentsLink = Join-Path $Consumer '.agents'
-if (Test-Path -LiteralPath $AgentsLink) {
+$AgentsSkillsLink = Join-Path $Consumer '.agents\skills'
+if (Test-Path -LiteralPath $AgentsSkillsLink) {
     try {
-        $Resolved = (Get-Item -LiteralPath $AgentsLink).Target
+        $item = Get-Item -LiteralPath $AgentsSkillsLink
+        $Resolved = if ($item.Target) { $item.Target } else { $item.FullName }
         if ($Resolved) {
             $Toolkit = Split-Path -Parent $Resolved
         }
     }
     catch {
-        # Not a symlink or can't resolve
+        # Not a link or can't resolve
+    }
+}
+
+if (-not $Toolkit) {
+    $AgentsLink = Join-Path $Consumer '.agents'
+    if (Test-Path -LiteralPath $AgentsLink) {
+        try {
+            $item = Get-Item -LiteralPath $AgentsLink
+            $Resolved = if ($item.Target) { $item.Target } else { $item.FullName }
+            if ($Resolved) {
+                $Toolkit = Split-Path -Parent $Resolved
+            }
+        }
+        catch {
+            # Not a link or can't resolve
+        }
     }
 }
 

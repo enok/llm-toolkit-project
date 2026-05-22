@@ -110,9 +110,18 @@ echo "Setting up: $(
 )"
 echo ""
 
+# Ensure toolkit compatibility layouts before linking consumers.
+ensure_toolkit_windsurf_layout "$TOOLKIT_ROOT" "$FORCE" || exit 1
+ensure_toolkit_setup_layout "$TOOLKIT_ROOT" "$FORCE" || exit 1
+
 # 1. Canonical skills/ and workflows/ - always linked to toolkit's canonical source
 ensure_dir_link "$CONSUMER/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
 echo "Skills: skills -> toolkit/skills (canonical)"
+
+if [[ -d "$TOOLKIT_ROOT/rules" ]]; then
+  ensure_dir_link "$CONSUMER/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
+  echo "Rules: rules -> toolkit/rules (canonical)"
+fi
 
 ensure_dir_link "$CONSUMER/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
 echo "Workflows: workflows -> toolkit/workflows (canonical)"
@@ -128,18 +137,28 @@ fi
 # Windsurf: workflows junction (windsurf has native workflows support)
 if [[ $USE_WINDSURF -eq 1 ]]; then
   mkdir -p "$CONSUMER/.windsurf"
+  if [[ -d "$TOOLKIT_ROOT/rules" ]]; then
+    ensure_dir_link "$CONSUMER/.windsurf/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
+    echo "Windsurf: .windsurf/rules -> toolkit/rules"
+  fi
   ensure_dir_link "$CONSUMER/.windsurf/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
   echo "Windsurf: .windsurf/workflows -> toolkit/workflows"
 fi
 
-# Cursor: skills and agents
+# Cursor: rules, workflows, skills, and agents
 if [[ $USE_CURSOR -eq 1 ]]; then
   mkdir -p "$CONSUMER/.cursor"
+  if [[ -d "$TOOLKIT_ROOT/rules" ]]; then
+    ensure_dir_link "$CONSUMER/.cursor/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
+    echo "Cursor: .cursor/rules -> toolkit/rules"
+  fi
+  ensure_dir_link "$CONSUMER/.cursor/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
+  echo "Cursor: .cursor/workflows -> toolkit/workflows"
   ensure_dir_link "$CONSUMER/.cursor/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
   echo "Cursor: .cursor/skills -> toolkit/skills"
-  if [[ -d "$TOOLKIT_ROOT/.cursor/agents" ]]; then
-    ensure_dir_link "$CONSUMER/.cursor/agents" "$TOOLKIT_ROOT/.cursor/agents" "$FORCE" || exit 1
-    echo "Cursor: .cursor/agents -> toolkit/.cursor/agents"
+  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
+    ensure_dir_link "$CONSUMER/.cursor/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
+    echo "Cursor: .cursor/agents -> toolkit/tool-subagents"
   fi
 fi
 
@@ -164,19 +183,31 @@ echo "Agents: .agents/skills -> toolkit/skills"
 
 # 3. Scaffold repo-local LLM configuration
 mkdir -p "$CONSUMER/docs/llm"
+mkdir -p "$CONSUMER/docs/llm/rules"
+mkdir -p "$CONSUMER/docs/llm/workflows"
 
 ensure_text_file "$CONSUMER/docs/llm/README.md" "docs/llm/README.md" "$(cat "$SCRIPT_DIR/templates/docs-llm-README.md")"
+ensure_text_file "$CONSUMER/docs/llm/rules/README.md" "docs/llm/rules/README.md" "# Repo-Local Rules
+
+Add repository-only rules here. Keep reusable generic rules in the shared toolkit."
+ensure_text_file "$CONSUMER/docs/llm/workflows/README.md" "docs/llm/workflows/README.md" "# Repo-Local Workflows
+
+Add repository-only workflows here. Keep reusable generic workflows in the shared toolkit."
 
 ensure_text_file "$CONSUMER/docs/llm/toolkit-selection.txt" "docs/llm/toolkit-selection.txt" "$(cat "$SCRIPT_DIR/templates/toolkit-selection.txt")"
 
 if [[ $USE_CURSOR -eq 1 ]]; then
   ensure_text_file "$CONSUMER/.cursorignore" ".cursorignore" "# Repo-local Cursor visibility overrides.
-# ".setup/examples/
-# ".setup/integrations/"
+# sync-tool-configs.sh manages a selection block here when docs/llm/toolkit-selection.txt contains entries.
+# Common local hides after initial setup:
+# .setup/examples/
+# .setup/integrations/"
 
-ensure_text_file "$CONSUMER/.cursorindexingignore" ".cursorindexingignore" "# Repo-local Cursor indexing overrides.
-# ".setup/examples/
-# ".setup/integrations/"
+  ensure_text_file "$CONSUMER/.cursorindexingignore" ".cursorindexingignore" "# Repo-local Cursor indexing overrides.
+# sync-tool-configs.sh manages a selection block here when docs/llm/toolkit-selection.txt contains entries.
+# Common local hides after initial setup:
+# .setup/examples/
+# .setup/integrations/"
 fi
 
 ensure_text_file "$CONSUMER/scripts/sync-llm-configs.ps1" "scripts/sync-llm-configs.ps1" "$(cat "$SCRIPT_DIR/templates/sync-llm-configs.ps1")"

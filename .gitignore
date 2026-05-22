@@ -1,7 +1,10 @@
-# IDE
+# IDE / editor
 .idea/
 .vscode/
 *.iml
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
@@ -15,9 +18,23 @@ __pycache__/
 .venv/
 *.egg-info/
 
+# Runtime / build
+node_modules/
+.dev-tools/
+
+# Environment / secrets
+.env
+.env.*
+
 # Logs
 *.log
 logs/
+
+# Google Drive / cloud-sync conflict-resolution duplicates
+* (*).md
+* (*).sh
+* (*).ps1
+* (*).toml
 
 # Anthropic source-available skills (import locally; do NOT redistribute)
 # Import via: scripts/import-anthropic-skills.sh
@@ -27,20 +44,26 @@ skills/pptx/
 skills/xlsx/
 
 # Agent-side skill junctions (created by setup scripts, NOT committed content).
-# The CANONICAL skills live in skills/ — agent dirs link to it at setup time.
+# The CANONICAL skills live in skills/; agent dirs link to it at setup time.
 # Without these rules, git on Windows would traverse the junction and duplicate content.
-.agents/skills/
-.claude/skills/
-.codex/skills/
-.cursor/skills/
-.windsurf/workflows/
+.agents/skills/*
+.claude/agents/*
+.claude/skills/*
+.codex/agents/*
+.codex/skills/*
+.cursor/agents/*
+.cursor/rules/*
+.cursor/skills/*
+.cursor/workflows/*
+.windsurf/rules/*
+.windsurf/skills/*
+.windsurf/workflows/*
 
 # Temporary helper scripts
 scripts/_create-junctions.cmd
 
-# Consumer exports must not be committed to the toolkit.
-# These files belong inside each consumer repo (locally, gitignored there).
-# scripts/templates/consumer-AGENTS.md is the canonical template for consumers.
-/AGENTS.md
-/CLAUDE.md
+# Generated consumer handoff notes must not be committed to the toolkit.
 docs/llm/session_handoff.md
+
+# Generated exports are intentionally tracked only when refreshed for this toolkit.
+# Source of truth: AGENTS.md, rules/, workflows/, skills/, and tool-subagents/.

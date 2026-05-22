@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "May 2026",
+  "abstract": "Design and evaluate LLM application architecture including RAG, knowledge-base retrieval, agent patterns, memory systems, tool use, gateways, evaluation sets, and operational metrics like token usage, cost, and latency.",
+  "references": [
+    "https://platform.openai.com/docs/guides/prompt-engineering",
+    "https://docs.anthropic.com/claude/docs/prompt-engineering",
+    "https://github.com/modelcontextprotocol/specification"
+  ]
+}

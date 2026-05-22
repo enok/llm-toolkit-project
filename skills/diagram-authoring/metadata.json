@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "organization": "dev-tools",
+  "date": "May 2026",
+  "abstract": "Create and validate architecture, flow, sequence, C4-style, and AWS-style PlantUML diagrams from source evidence. Standards for Mermaid and PlantUML diagrams, component/sequence separation, AWS icon usage, compile/export gates, rendered-output visual review, and using real production names.",
+  "references": [
+    "https://mermaid.js.org/",
+    "https://plantuml.com/",
+    "https://c4model.com/",
+    "https://github.com/awslabs/aws-icons-for-plantuml",
+    "https://github.com/plantuml-stdlib/C4-PlantUML",
+    "https://github.com/softaworks/agent-toolkit/tree/main/skills/c4-architecture"
+  ]
+}

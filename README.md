@@ -1,315 +1,119 @@
 # LLM Toolkit for Data Science Projects
 
-This repository contains LLM (Large Language Model) tooling configurations, workflows, and skills for assisting with data science, analytics, and thesis projects. **This toolkit is designed to be used locally only and should never be committed to your main project repository.**
+This repository centralizes local LLM-assisted development assets: rules, workflows, skills, rubrics, setup scripts, and compatibility surfaces for tools such as Codex, Cursor, Claude Code, Windsurf, Copilot, and generic agents.
 
-## Philosophy
+The toolkit is designed to be reused without copying private project context. Keep generic guidance here; keep repository-specific details in the consumer project's own `AGENTS.md`, `docs/llm/`, or project docs.
 
-Your main project should remain **clean of any LLM-related files**. This separation ensures:
+## What Is Included
 
-- **No vendor lock-in** — Your core project doesn't depend on specific LLM tools
-- **Clean repository** — No LLM configuration clutter in your project's history
-- **Privacy** — LLM interactions remain local to your machine
-- **Reproducibility** — Your project can be understood without LLM context
+| Area | Path | Purpose |
+| --- | --- | --- |
+| Rules | `rules/` | Short, broad guidance for code, git, security, release, workflow authoring, and context layering |
+| Workflows | `workflows/` | Step-by-step procedures for review, testing, docs, CI, release, toolkit maintenance, and thesis/data work |
+| Skills | `skills/` | On-demand capabilities with progressive disclosure through `SKILL.md`, `rules/`, `references/`, and optional agents |
+| Tool subagents | `tool-subagents/` | Shared subagent definitions for parallel review, CI triage, docs, security, release, and verification lanes |
+| Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists |
+| Integrations | `integrations/` | Generic guides for Jira, Confluence, GitHub, and AWS CLI usage |
+| Learnings | `learnings/` | Local trial-and-error discoveries that prevent repeated mistakes |
+| Scripts | `scripts/` | Setup, link repair, sync, security checks, index validation, and Markdown-to-PDF helpers |
 
-## Repository Structure
+## Architecture
 
-```
-llm-toolkit-project/
-├── skills/                 # CANONICAL skills (source of truth, 65 skills)
-│   ├── best-practices/
-│   │   ├── SKILL.md        # Summary (loaded on skill activation)
-│   │   ├── rules/          # Fine-grained rules (loaded on-demand)
-│   │   └── references/     # Deep references (loaded on-demand)
-│   ├── python-best-practices/
-│   ├── testing/
-│   └── ... (62 more skills)
-├── workflows/              # CANONICAL workflows (source of truth, 49 workflows)
-│   ├── review.md
-│   ├── ticket-research.md
-│   └── ...
-├── .agents/
-│   └── skills -> ../skills      # Junction to canonical
-├── .claude/
-│   └── skills -> ../skills      # Junction to canonical
-├── .codex/
-│   └── skills -> ../skills      # Junction to canonical
-├── .windsurf/
-│   └── workflows -> ../workflows # Junction to canonical
-├── .cursor/                # Cursor-specific agents
-│   └── agents/
-├── .setup/                 # Setup templates and integration guides
-│   ├── examples/
-│   └── integrations/
-├── rubrics/                # Review rubrics (architecture, security, checklist)
-├── docs/llm/               # Project-specific LLM context
-├── scripts/
-│   ├── setup-repo.{sh,ps1,cmd} # Setup in consumer repos
-│   ├── ensure-symlinks.{sh,ps1,cmd} # Symlink maintenance
-│   ├── lib.{sh,ps1}        # Shared library functions
-│   └── security-check-toolkit.sh
-└── README.md               # This file
+Canonical content lives in one place:
+
+```text
+rules/             broad always-relevant guidance
+workflows/         manually invoked procedures
+skills/            on-demand capabilities
+tool-subagents/    reusable subagent prompts
+rubrics/           review scoring/checklists
 ```
 
-> **Note:** `AGENTS.md` and `CLAUDE.md` are **not** committed in this toolkit. They are
-> generated or written per-consumer repo and gitignored locally there. Use
-> `scripts/templates/consumer-AGENTS.md` as the starting template for a new consumer.
+Provider directories are thin compatibility surfaces:
 
-## Architecture: Single Source of Truth
+```text
+.agents/skills      -> skills/
+.claude/skills      -> skills/
+.codex/skills       -> skills/
+.windsurf/rules     -> rules/
+.windsurf/workflows -> workflows/
+.cursor/rules       -> rules/
+.cursor/workflows   -> workflows/
+```
 
-Skills and workflows live in exactly ONE place each. Agent directories are **junctions** (no duplication):
-
-- **Canonical skills**: `skills/` (dir-per-skill with `SKILL.md`)
-- **Canonical workflows**: `workflows/` (flat `.md` files)
-- **All agent paths resolve to the same content** — edit once, all agents see the change
-
-**Progressive disclosure** reduces context/tokens:
-
-| Level | Content | Loaded When | Tokens |
-|-------|---------|-------------|--------|
-| 1 | Skill metadata (`name`, `description`) | At startup | ~100 each |
-| 2 | `SKILL.md` body | Skill activates | <5000 |
-| 3 | `rules/*.md`, `references/*.md` | Specifically needed | Varies |
-
-Old `.windsurf/rules/` (always-on) have been dissolved into skills as on-demand references.
+Use `scripts/sync-tool-configs.sh . --skip-agents-md` or `scripts/sync-tool-configs.ps1` to repair generated/symlinked surfaces after changing rules, workflows, skills, or subagents.
 
 ## Quick Start
 
-### 1. Clone this repository separately
+Clone this toolkit next to a consumer project, then run the setup script from the consumer repo:
 
 ```bash
-git clone <this-repo-url> ~/llm-toolkit
-cd ~/llm-toolkit
+../llm-toolkit-project/scripts/setup-repo.sh .
 ```
 
-### 2. Run the setup script in your target project
+Windows PowerShell:
 
-#### Option A: Setup Script (Recommended)
-
-**Linux/macOS/Git Bash:**
-```bash
-# Navigate to your main project
-cd /path/to/your/data-science-project
-
-# Run setup (interactive - select which LLM tools to enable)
-~/llm-toolkit/scripts/setup-repo.sh .
-```
-
-**Windows PowerShell:**
 ```powershell
-# Navigate to your main project
-cd C:\path\to\your\data-science-project
-
-# Run setup (may need Developer Mode or Run as Administrator for symlinks)
-..\llm-toolkit\scripts\setup-repo.ps1 .
+..\llm-toolkit-project\scripts\setup-repo.ps1 .
 ```
 
-**Windows CMD (as Administrator):**
-```cmd
-# Navigate to your main project
-cd C:\path\to\your\data-science-project
+The setup scripts create or repair toolkit links, scaffold `docs/llm/`, generate local sync wrappers, update `.gitignore`, and add an `AGENTS.md` toolkit block when needed.
 
-# Run elevated setup
-..\llm-toolkit\scripts\setup-repo.cmd .
+If scripted setup is blocked by local permissions, use `docs/repo-setup-prompt.md` as an LLM-guided repair prompt.
+
+## Selecting Context
+
+Consumer repos should curate shared context in `docs/llm/toolkit-selection.txt`:
+
+```text
+rules/code-rules.md
+rules/security-check-required.md
+workflows/pre-pr-check.md
+workflows/run-tests.md
 ```
 
-The setup script will:
-- Interactively ask which LLM tools to enable (Windsurf, Cursor, Claude Code, Codex)
-- Create symlinks from your project to the toolkit
-- Scaffold `docs/llm/` with project-specific configuration files
-- Generate `AGENTS.md` with LLM context
-- Update `.gitignore` to exclude linked files
-
-#### Option B: Legacy Enable Script
-
-For simpler setups, use the legacy `enable-llm.sh`:
+Then refresh generated exports from the consumer repo with the generated `scripts/sync-llm-configs.sh` wrapper:
 
 ```bash
-# Enable LLM support (creates symlinks)
-~/llm-toolkit/scripts/enable-llm.sh .
-
-# Or copy files instead of symlinking
-~/llm-toolkit/scripts/enable-llm.sh . --copy
-
-# Or only link directories (keep AGENTS.md/CLAUDE.md local)
-~/llm-toolkit/scripts/enable-llm.sh . --dirs-only
-
-# Or use relative paths for portability
-~/llm-toolkit/scripts/enable-llm.sh . --relative
+scripts/sync-llm-configs.sh
 ```
 
-### 3. Verify LLM files are gitignored
+PowerShell wrapper:
 
-The setup scripts automatically update `.gitignore`. Ensure your project includes:
-
-```gitignore
-# LLM integration - symlinked/generated content (do not commit)
-.agents/
-.setup/
-.windsurf/
-.cursor/
-.claude/
-.codex/
-
-# Keep repo-local visibility filters committed
-!.cursorignore
-!.cursorindexingignore
+```powershell
+scripts\sync-llm-configs.ps1
 ```
 
-### 4. Use LLM assistance
+## Useful Entry Points
 
-Now you can use Windsurf, Cursor, Claude Code, or other LLM tools with your project, and they will have access to the relevant context and workflows.
+- `AGENTS.md` - agent guidance for this toolkit repository
+- `INTENTS.md` - phrase-to-skill/workflow map
+- `workflows/README.md` - workflow catalog
+- `skills/ARCHITECTURE.md` - skill structure and progressive loading notes
+- `rules/examples/` - templates for consumer-specific rules
+- `integrations/README.md` - external tool setup guide index
 
-## Disabling LLM Support
+## Validation
 
-To remove LLM files from your project (e.g., before committing or sharing):
+Before committing toolkit changes, run:
 
-**Using the legacy enable script:**
-```bash
-~/llm-toolkit/scripts/enable-llm.sh /path/to/your/project --clean
+```powershell
+.\scripts\validate-toolkit-indexes.ps1
+.\scripts\security-check-toolkit.ps1
 ```
 
-**Manual cleanup:**
-```bash
-rm -rf .agents .setup .windsurf .cursor .claude .codex
-rm -f AGENTS.md CLAUDE.md .cursorignore .cursorindexingignore
-rm -rf docs/llm scripts/sync-llm-configs.*
-```
-
-This removes all LLM-related files and restores your project to a clean state.
-
-## Available Tools
-
-### Workflows
-
-- `project-execution-main.md` — Orchestrate all technical work (infra, code, notebooks, pipelines)
-- `thesis-writing-main.md` — Orchestrate thesis writing and formatting
-- `data-source-ingestion.md` — Data ingestion workflows
-- `pipeline-change.md` — Bronze/Silver/Gold pipeline modifications
-- `review.md` — Code review workflows
-
-### Skills
-
-- `document-conversion/SKILL.md` — Convert between document formats (PDF, DOCX, PPTX, XLSX)
-- `thesis-bibliography/SKILL.md` — Bibliography management
-
-### Rules
-
-- `analytics-discipline.md` — Best practices for analytical work
-- `bilingual-doc-sync.md` — Keep bilingual docs synchronized
-- `data-pipeline-contracts.md` — Data pipeline contract guidelines
-- `notebook-discipline.md` — Jupyter notebook best practices
-- `security.md` — Security guidelines
-- And many more...
-
-## Customizing for Your Project
-
-### Adding Project-Specific Workflows
-
-Create new workflows in your project's `docs/llm/workflows/` directory:
+Git Bash:
 
 ```bash
-# After enabling LLM support
-cd /path/to/your/project
-mkdir -p docs/llm/workflows
-cp ~/llm-toolkit/docs/llm/workflows/template.md docs/llm/workflows/my-custom-workflow.md
+./scripts/validate-toolkit-indexes.sh
+./scripts/security-check-toolkit.sh
 ```
 
-### Modifying Existing Rules
+The validation gate checks skill frontmatter, referenced paths, duplicate cloud-sync files, and optional project-specific leak patterns through `FORBIDDEN_PROJECT_PATTERNS`.
 
-If you need project-specific modifications to rules:
+## Safety
 
-1. Copy the rule file to your project's `docs/llm/rules/`
-2. Modify it there (it will override the toolkit version for that project)
-
-## Security Best Practices
-
-1. **Never commit LLM files** — Always ensure `.gitignore` excludes them
-2. **Keep API keys in `.env`** — Never hardcode credentials in LLM configuration
-3. **Review LLM suggestions** — Always verify code and configurations suggested by LLMs
-4. **Local processing preferred** — Use local tools when possible (e.g., local document conversion)
-
-## Project Separation Checklist
-
-Before committing your main project, ensure:
-
-- [ ] No `.windsurf/` directory in git
-- [ ] No `.cursor/` directory in git
-- [ ] No `.agents/` directory in git
-- [ ] No `AGENTS.md` in git
-- [ ] No `CLAUDE.md` in git
-- [ ] `.gitignore` properly excludes LLM files
-- [ ] `docs/llm/` is gitignored or contains only non-sensitive project documentation
-
-## Troubleshooting
-
-### LLM tools not finding configuration
-
-Ensure you've run the enable script from your project directory:
-
-```bash
-cd /path/to/your/project
-~/llm-toolkit/scripts/enable-llm.sh .
-```
-
-### Changes to toolkit not reflecting
-
-If using `--copy` mode, you'll need to re-run the enable script after toolkit updates:
-
-```bash
-~/llm-toolkit/scripts/enable-llm.sh . --clean
-~/llm-toolkit/scripts/enable-llm.sh . --copy
-```
-
-If using default symlink mode, changes should reflect immediately.
-
-### Permission denied on Windows
-
-On Windows, symlinks require **Developer Mode** or **Administrator privileges**:
-
-**Option 1: Enable Developer Mode (Recommended)**
-1. Settings → System → For developers
-2. Enable "Developer Mode"
-3. Run PowerShell normally: `..\llm-toolkit\scripts\setup-repo.ps1 .`
-
-**Option 2: Run as Administrator**
-1. Open Command Prompt as Administrator
-2. Run: `..\llm-toolkit\scripts\setup-repo.cmd .`
-
-**Option 3: Use copy mode (legacy script)**
-```bash
-~/llm-toolkit/scripts/enable-llm.sh . --copy
-```
-Note: Copy mode requires re-running the script after toolkit updates.
-
-## Contributing
-
-To add new workflows or rules to the toolkit:
-
-1. Add files to the appropriate directory in this repository
-2. Run the security check before committing:
-   ```bash
-   ./scripts/security-check-toolkit.sh
-   ```
-3. Test with the setup script in a test project
-4. Commit and push to the toolkit repository
-5. All projects using the toolkit will get the updates (if using symlink mode)
-
-### Scripts Overview
-
-| Script | Purpose | Platform |
-|--------|---------|----------|
-| `setup-repo.sh` | Full setup with interactive tool selection | Linux/macOS/Git Bash |
-| `setup-repo.ps1` | PowerShell version of setup | Windows |
-| `setup-repo.cmd` | Elevated CMD wrapper | Windows (Admin) |
-| `ensure-symlinks.sh` | Repair/verify symlinks | Linux/macOS/Git Bash |
-| `ensure-symlinks.ps1` | Repair/verify symlinks | Windows |
-| `lib.sh` / `lib.ps1` | Shared script functions | Both |
-| `security-check-toolkit.sh` | Pre-commit security validation | Linux/macOS/Git Bash |
-
-## License
-
-This toolkit is provided as-is for educational and development purposes. The main project retains its own license independently of this toolkit.
-
----
-
-**Remember**: Your main project should never contain LLM-related files. Keep them separate and local-only!
+- Do not commit secrets, credentials, private hostnames, ticket-specific content, or copied consumer payloads.
+- Do not commit cloud-sync duplicates such as `file (1).md`.
+- Keep generated consumer exports local unless they are intentionally part of this toolkit.
+- Prefer links and generated compatibility surfaces over duplicated tool-specific copies.
