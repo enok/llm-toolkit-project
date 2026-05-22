@@ -29,6 +29,7 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`notebook-embedded-plotly-output-size.md`](./notebook-embedded-plotly-output-size.md) — Plotly choropleth outputs embedded in notebooks inflate files to 100MB+, blocking `git push`; run `clear_notebook_outputs.py` before every commit (`notebook`, `plotly`, `outputs`, `file-size`, `git`, `push`, `ipynb`, `clear-outputs`).
 - [`notebook-patch-anchor-mismatch-ptbr.md`](./notebook-patch-anchor-mismatch-ptbr.md) — pt-BR notebook patch anchors silently miss when `except`/`print` strings were never translated; verify exact cell content before writing anchors (`notebook`, `patch`, `anchor`, `ptbr`, `translation`, `scripted-edit`, `silent-failure`).
 - [`notebook-timestamp-noise-in-diff.md`](./notebook-timestamp-noise-in-diff.md) — `ExecuteTime` metadata creates large git diffs with zero source change; detect with source-only comparison and revert before committing (`notebook`, `metadata`, `ExecuteTime`, `git`, `diff`, `noise`, `revert`).
+- [`powerpoint-template-visual-qa.md`](./powerpoint-template-visual-qa.md) — Official-template PPTX decks are not done until PowerPoint/PDF renders are visually inspected for logo fidelity, text overflow, and placeholder drift (`powerpoint`, `pptx`, `template`, `visual-qa`, `pdf-export`).
 
 ### Data Pipeline
 
