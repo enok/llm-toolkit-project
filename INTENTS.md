@@ -13,6 +13,8 @@ Plain-English prompts map to the shared rules, workflows, and skills in this rep
 | update docs for this change | `update-docs` | workflow + skill | `doc-delta`, `document-creation` |
 | create architecture docs or diagrams | `document-creation` | workflow | `diagram-authoring` |
 | export Markdown to PDF | `markdown-pdf-export` | workflow + skill | `security` |
+| create or edit PowerPoint/PPTX slides | `pptx-generator` | skill | `powerpoint-slides`, `document-conversion` |
+| create academic or thesis defense PowerPoint | `powerpoint-slides` | skill | `pptx-generator`, `tcc-defense-prep` |
 | understand this project | `project-discovery` | workflow + skill | `onboarding` |
 | bootstrap or repair local setup | `local-env-bootstrap` | skill | `environment-diagnose` |
 | diagnose my environment | `environment-diagnose` | workflow + skill | `onboarding` |

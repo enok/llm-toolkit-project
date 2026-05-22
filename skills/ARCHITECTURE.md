@@ -16,7 +16,7 @@ llm-toolkit-project/
 │   │   │   └── arch-layered.md
 │   │   └── references/       # Deep reference material (on-demand)
 │   │       └── rules.md
-│   └── ... (78 skills total)
+│   └── ... (80 skills total)
 ├── workflows/                # CANONICAL workflows (source of truth)
 │   ├── review.md
 │   ├── ticket-research.md
@@ -89,7 +89,7 @@ Check no duplicates exist:
 
 ```bash
 # Canonical only
-find skills/ -name SKILL.md | wc -l   # 78 (or current count)
+find skills/ -name SKILL.md | wc -l   # current count
 find workflows/ -name "*.md" | wc -l  # 61 plus README.md (or current count)
 find rules/ -maxdepth 1 -name "*.md" | wc -l  # 12 (or current count)
 
