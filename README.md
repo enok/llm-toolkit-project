@@ -90,6 +90,7 @@ scripts\sync-llm-configs.ps1
 - `INTENTS.md` - phrase-to-skill/workflow map
 - `workflows/README.md` - workflow catalog
 - `skills/ARCHITECTURE.md` - skill structure and progressive loading notes
+- `skills/pptx-generator/` and `skills/powerpoint-slides/` - imported MIT PowerPoint skills for PPTX generation, editing, and academic decks
 - `rules/examples/` - templates for consumer-specific rules
 - `integrations/README.md` - external tool setup guide index
 

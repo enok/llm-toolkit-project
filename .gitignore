@@ -50,6 +50,7 @@ skills/xlsx/
 .claude/agents/*
 .claude/skills/*
 .codex/agents/*
+.codex/config.toml
 .codex/skills/*
 .cursor/agents/*
 .cursor/rules/*
