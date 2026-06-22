@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "description": "Reviewed SkillSpector static findings for existing toolkit skills. Keep this narrow: allow only documented examples or trusted local helper code that has been manually reviewed.",
+  "findings": [
+    {
+      "skill": "git-conventions",
+      "id": "TM1",
+      "file": "SKILL.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Documents the mandatory duplicate-file gate; command is a guarded validation check, not an autonomous destructive action."
+    },
+    {
+      "skill": "git-conventions",
+      "id": "TM1",
+      "file": "references/rules.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Documents duplicate-file and rebase/push workflow commands with explicit human review constraints."
+    },
+    {
+      "skill": "git-conventions",
+      "id": "YR1",
+      "file": "references/rules.md",
+      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
+      "reason": "Documents prohibited/destructive git operations as safety guidance and requires explicit user approval."
+    },
+    {
+      "skill": "maven-release",
+      "id": "P2",
+      "file": "references/maven-release-plugin.md",
+      "pattern": "Hidden Instructions",
+      "reason": "False positive on XML configuration example comments in Maven settings documentation."
+    },
+    {
+      "skill": "maven-release",
+      "id": "TM1",
+      "file": "references/maven-release-plugin.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Documents Maven release rollback commands for an explicitly user-directed operational recovery flow."
+    },
+    {
+      "skill": "maven-release",
+      "id": "YR1",
+      "file": "references/maven-release-plugin.md",
+      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
+      "reason": "Documents rollback cleanup commands with context; not an autonomous instruction."
+    },
+    {
+      "skill": "powerpoint-slides",
+      "id": "OH1",
+      "file": "scripts/inject_omml.py",
+      "pattern": "Unvalidated Output Injection",
+      "reason": "Reviewed trusted local PPTX post-processing helper; inputs are local files and subprocesses use argument arrays."
+    },
+    {
+      "skill": "powerpoint-slides",
+      "id": "OH1",
+      "file": "scripts/render_diagrams.py",
+      "pattern": "Unvalidated Output Injection",
+      "reason": "Reviewed trusted local diagram renderer; Graphviz engines are allowlisted and subprocesses use argument arrays/timeouts."
+    },
+    {
+      "skill": "powerpoint-slides",
+      "id": "OH1",
+      "file": "scripts/render_latex.py",
+      "pattern": "Unvalidated Output Injection",
+      "reason": "Reviewed trusted local LaTeX renderer; skill docs require trusted/reviewed inputs and subprocesses use argument arrays/timeouts."
+    },
+    {
+      "skill": "powerpoint-slides",
+      "id": "OH1",
+      "file": "scripts/soffice.py",
+      "pattern": "Unvalidated Output Injection",
+      "reason": "Reviewed local LibreOffice conversion wrapper; subprocess invocation uses fixed executable and argument arrays."
+    },
+    {
+      "skill": "security",
+      "id": "E2",
+      "file": "AGENTS.md",
+      "pattern": "Env Variable Harvesting",
+      "reason": "Security training material showing what not to do with credentials."
+    },
+    {
+      "skill": "security",
+      "id": "E2",
+      "file": "rules/secrets-no-hardcoded.md",
+      "pattern": "Env Variable Harvesting",
+      "reason": "Security training material describing secret-handling anti-patterns."
+    },
+    {
+      "skill": "security",
+      "id": "OH1",
+      "file": "AGENTS.md",
+      "pattern": "Unvalidated Output Injection",
+      "reason": "Security training material includes unsafe and corrected examples."
+    },
+    {
+      "skill": "security",
+      "id": "TM1",
+      "file": "AGENTS.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Security training material includes unsafe command examples as negative examples."
+    },
+    {
+      "skill": "security",
+      "id": "YR1",
+      "file": "AGENTS.md",
+      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
+      "reason": "Security training material includes destructive payload examples only to teach prevention."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "TM1",
+      "file": "AGENTS.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Shell scripting skill documents unsafe shell patterns as negative examples and safer replacements."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "TM2",
+      "file": "AGENTS.md",
+      "pattern": "Chaining Abuse",
+      "reason": "Shell scripting skill documents command chaining hazards and safe handling."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "TM2",
+      "file": "rules/error-trap-cleanup.md",
+      "pattern": "Chaining Abuse",
+      "reason": "Rule demonstrates cleanup traps and error handling patterns for shell scripts."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "TM1",
+      "file": "rules/safety-strict-mode.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Rule documents strict-mode and dangerous-command caveats as safety guidance."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "YR1",
+      "file": "AGENTS.md",
+      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
+      "reason": "Shell scripting skill includes destructive examples only as hazards to avoid."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "YR1",
+      "file": "rules/safety-strict-mode.md",
+      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
+      "reason": "Rule includes destructive examples only as hazards to avoid."
+    },
+    {
+      "skill": "terraform",
+      "id": "RA1",
+      "file": ".github/workflows/automated-release.yml",
+      "pattern": "Self-Modification",
+      "reason": "Reference workflow documents version-tag release automation; not executed by the skill itself."
+    },
+    {
+      "skill": "terraform",
+      "id": "RA1",
+      "file": "CLAUDE.md",
+      "pattern": "Self-Modification",
+      "reason": "Terraform skill documentation describes generated release outputs in an example workflow."
+    },
+    {
+      "skill": "terraform",
+      "id": "TM1",
+      "file": ".github/workflows/automated-release.yml",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Reference release workflow uses git commands in an explicitly scoped CI example."
+    },
+    {
+      "skill": "terraform",
+      "id": "TM1",
+      "file": "references/security-compliance.md",
+      "pattern": "Tool Parameter Abuse",
+      "reason": "Security compliance reference includes scanning commands as operator-run examples."
+    }
+  ]
+}

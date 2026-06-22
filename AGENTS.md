@@ -46,6 +46,7 @@ Before committing toolkit changes, run:
 ```powershell
 .\scripts\validate-toolkit-indexes.ps1
 .\scripts\security-check-toolkit.ps1
+.\scripts\validate-skills-with-skillspector.ps1
 ```
 
 Git Bash equivalents:
@@ -53,7 +54,10 @@ Git Bash equivalents:
 ```bash
 ./scripts/validate-toolkit-indexes.sh
 ./scripts/security-check-toolkit.sh
+./scripts/validate-skills-with-skillspector.sh
 ```
+
+`security-check-toolkit` runs SkillSpector automatically when the Python package is installed. The dedicated SkillSpector script is useful for focused current/new skill vetting and fails on `HIGH`/`CRITICAL` findings by default.
 
 Also run the duplicate-file gate before push:
 

@@ -7,6 +7,7 @@ Plain-English prompts map to the shared rules, workflows, and skills in this rep
 | review my changes | `ticket-review` or `review` | workflow + skill | `run-tests`, `review-and-fix` |
 | review and fix this branch | `review-and-fix` | workflow + skill | `run-tests`, `pre-pr-check` |
 | pre-PR check this branch | `pre-pr-check` | workflow + skill | `ticket-review`, `doc-delta` |
+| validate installed or new skills | `security` | script | `external-skill-intake`, `run-tests` |
 | commit and push | `commit-and-push` | workflow | `git-conventions`, duplicate-file gate |
 | run the right tests | `run-tests` | workflow + skill | `testing`, stack-specific best-practices skills |
 | give me a test plan | `test-plan` | skill | `testing` |
