@@ -52,6 +52,18 @@ have_psscriptanalyzer() {
     pwsh -NoLogo -NoProfile -Command "if (Get-Command Invoke-ScriptAnalyzer -ErrorAction SilentlyContinue) { exit 0 } exit 1" >/dev/null 2>&1
 }
 
+python_with_skillspector() {
+  local py
+  for py in python python3; do
+    if have_executable_command "$py" &&
+      "$py" -c "import skillspector" >/dev/null 2>&1; then
+      printf '%s\n' "$py"
+      return 0
+    fi
+  done
+  return 1
+}
+
 docker_usable() {
   docker ps >/dev/null 2>&1
 }
@@ -200,6 +212,12 @@ run_cmd_semgrep() {
   PYTHONUTF8=1 SEMGREP_SETTINGS_FILE=/tmp/semgrep-settings.yml semgrep scan --config auto "${files[@]}"
 }
 
+run_skillspector() {
+  local py
+  py="$(python_with_skillspector)"
+  "$py" scripts/validate-skills-with-skillspector.py
+}
+
 run_cfn_lint() {
   mapfile -d '' files < <(find "${REPO_ROOT}" -type f \( -name '*.yaml' -o -name '*.yml' -o -name '*.json' \) -path '*/infra/*' -print0)
 
@@ -303,6 +321,12 @@ if have_executable_command semgrep && { has_files '*.cmd' || has_files '*.bat'; 
   run_check "Batch script scan with semgrep" run_cmd_semgrep
 else
   skip_check "Batch script scan with semgrep" "no .cmd/.bat files found or semgrep is not installed"
+fi
+
+if python_with_skillspector >/dev/null; then
+  run_check "Agent skill scan with SkillSpector" run_skillspector
+else
+  skip_check "Agent skill scan with SkillSpector" "skillspector is not installed in python/python3"
 fi
 
 if have_executable_command actionlint && [ -d "${REPO_ROOT}/.github/workflows" ]; then

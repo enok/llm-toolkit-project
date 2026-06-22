@@ -55,6 +55,7 @@ Run, at minimum:
 ```bash
 ./scripts/validate-toolkit-indexes.sh
 ./scripts/security-check-toolkit.sh
+./scripts/validate-skills-with-skillspector.sh
 ```
 
 On Windows PowerShell, use the Git Bash wrappers:
@@ -62,12 +63,14 @@ On Windows PowerShell, use the Git Bash wrappers:
 ```powershell
 ./scripts/validate-toolkit-indexes.ps1
 ./scripts/security-check-toolkit.ps1
+./scripts/validate-skills-with-skillspector.ps1
 ```
 
 Then verify:
 
 - No missing path references from indexes.
 - No project-specific names in shared rules, workflows, skills, README, or AGENTS surfaces.
+- SkillSpector has scanned current/new skills, or the scanner was explicitly unavailable and the risk was documented.
 - New or modified scripts and skill examples have a portable Windows/Linux/macOS execution path, or the OS-specific limit is explicit and justified.
 - All executable shell scripts have executable mode.
 - All workflow files are below the repository size limit.

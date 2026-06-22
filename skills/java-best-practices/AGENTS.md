@@ -180,7 +180,6 @@ Configure the logging framework to cap stack trace output and prevent log floodi
 
 **Log4j2** — use `%xEx{depth}` in the pattern layout:
 ```xml
-<!-- Limits stack traces to 200 lines — prevents log flooding -->
 <Property name="LOG_PATTERN">%d{ISO8601} [%X{correlationId}] [%t] %-5p [%c] %m%n%xEx{200}</Property>
 ```
 
@@ -209,7 +208,6 @@ try {
 ```
 
 ```xml
-<!-- Reference in log pattern -->
 <PatternLayout pattern="%d [%X{requestId}] [%t] %-5p [%c] %m%n%xEx{200}"/>
 ```
 
@@ -236,19 +234,16 @@ Synchronous logging blocks the application thread until the log event is written
 
 **Log4j2** — use `<Async>` wrapper appenders:
 ```xml
-<!-- Synchronous appender (writes to file) -->
 <RollingFile name="appLog" fileName="app.log" ...>
     <PatternLayout pattern="${LOG_PATTERN}"/>
 </RollingFile>
 
-<!-- Async wrapper — application threads return immediately -->
 <Async name="asyncAppLog" bufferSize="8192" blocking="false" includeLocation="true">
     <AppenderRef ref="appLog"/>
 </Async>
 
-<!-- Use the async wrapper in loggers, not the raw appender -->
 <Logger name="com.myapp" level="INFO">
-    <AppenderRef ref="asyncAppLog"/>  <!-- NOT ref="appLog" -->
+    <AppenderRef ref="asyncAppLog"/>
 </Logger>
 ```
 
@@ -264,7 +259,6 @@ Synchronous logging blocks the application thread until the log event is written
 
 **Alternative — Log4j2 `AsyncLogger`** (LMAX Disruptor-based, higher performance than `<Async>` wrapper):
 ```xml
-<!-- In log4j2.xml: make ALL loggers async (highest throughput) -->
 <Configuration>
     <Loggers>
         <AsyncLogger name="com.myapp" level="INFO">
@@ -865,7 +859,6 @@ When troubleshooting in production, temporarily change log levels from WARN/ERRO
 
 **Log4j2** — use `monitorInterval` for hot-reload without restart:
 ```xml
-<!-- Checks for config changes every 30 seconds — no restart needed -->
 <Configuration monitorInterval="30">
 ```
 
@@ -878,12 +871,9 @@ To troubleshoot: update the log config file on the server (or via S3/SSM), and L
 4. **Revert immediately** — INFO/DEBUG in production generates massive log volume and can impact performance and costs.
 
 ```xml
-<!-- Normal production config -->
 <Logger name="com.myapp.service" level="ERROR"/>
 
-<!-- Temporary troubleshooting config -->
 <Logger name="com.myapp.service" level="INFO"/>
-<!-- Or for deep debugging of a specific class: -->
 <Logger name="com.myapp.service.OrderService" level="DEBUG"/>
 ```
 

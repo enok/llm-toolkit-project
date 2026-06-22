@@ -101,6 +101,7 @@ Before committing toolkit changes, run:
 ```powershell
 .\scripts\validate-toolkit-indexes.ps1
 .\scripts\security-check-toolkit.ps1
+.\scripts\validate-skills-with-skillspector.ps1
 ```
 
 Git Bash:
@@ -108,9 +109,10 @@ Git Bash:
 ```bash
 ./scripts/validate-toolkit-indexes.sh
 ./scripts/security-check-toolkit.sh
+./scripts/validate-skills-with-skillspector.sh
 ```
 
-The validation gate checks skill frontmatter, referenced paths, duplicate cloud-sync files, and optional project-specific leak patterns through `FORBIDDEN_PROJECT_PATTERNS`.
+The validation gate checks skill frontmatter, referenced paths, duplicate cloud-sync files, and optional project-specific leak patterns through `FORBIDDEN_PROJECT_PATTERNS`. When NVIDIA SkillSpector is installed, `security-check-toolkit` also runs a static skill scan across every `skills/*` directory and fails on `HIGH` or `CRITICAL` findings by default. Override that threshold with `SKILLSPECTOR_FAIL_SEVERITIES` only with a documented reason.
 
 ## Safety
 

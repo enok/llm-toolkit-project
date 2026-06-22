@@ -34,6 +34,18 @@ On Windows PowerShell, run the wrapper that invokes the same shell gate through 
 ./scripts/security-check-toolkit.ps1
 ```
 
+For focused agent-skill vetting, run SkillSpector directly across every toolkit skill:
+
+```bash
+./scripts/validate-skills-with-skillspector.sh
+```
+
+PowerShell:
+
+```powershell
+./scripts/validate-skills-with-skillspector.ps1
+```
+
 ## Minimum Expectations
 
 - Review failures before considering the task done.
@@ -71,6 +83,7 @@ winget install Gitleaks.Gitleaks koalaman.shellcheck rhysd.actionlint AquaSecuri
 **Python tools via pip** (no admin required):
 ```bash
 pip install --user yamllint semgrep checkov cfn-lint pip-audit
+pip install --user git+https://github.com/NVIDIA/SkillSpector.git
 ```
 
 **PSScriptAnalyzer module** (for PowerShell linting):
@@ -85,6 +98,7 @@ After installation, restart your shell for PATH updates. Winget tools land in `%
 - **Python 3.14 + Windows**: semgrep requires `PYTHONUTF8=1` to avoid `cp1252` encoding errors. The script sets this automatically.
 - **PSScriptAnalyzer paths**: The script uses relative paths (not POSIX `/c/...` paths) so pwsh can resolve them on Windows.
 - **ShellCheck severity**: The script uses `-S warning` to avoid failing on info-level findings (e.g., SC1091 for unresolvable `source` paths, SC2016 for intentional single-quote usage).
+- **SkillSpector availability**: If `pip install skillspector` is unavailable, install from the NVIDIA GitHub repository URL shown above. The wrapper invokes the installed Python package, so the console script does not need to be on `PATH`.
 - **Disk space**: grype and trivy download vulnerability databases (~90 MB each). Ensure sufficient disk space or these checks will fail.
 
 ## Completion Standard
