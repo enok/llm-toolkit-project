@@ -1,4 +1,4 @@
-# Claude Code instructions (LLM dev-tools)
+# Claude Code instructions (LLM Toolkit for Data Science Projects)
 
 This repository uses [AGENTS.md](./AGENTS.md) as the primary LLM instruction surface.
 

@@ -38,6 +38,24 @@ acli jira workitem comment add <ISSUE_KEY> --body "Implementation complete"
 
 Limiting `--fields` keeps context small. The agent parses the JSON for summary, description, and comments.
 
+### Attachment Replacement
+
+When replacing a generated artifact such as a PDF, list existing attachments
+first, upload the corrected file, delete stale duplicate attachment IDs, and
+list attachments again. Uploading another file with the same name does not prove
+the old copy is hidden.
+
+```bash
+acli jira workitem attachment list --key <ISSUE_KEY> --json
+acli jira workitem attachment delete --id <OLD_ATTACHMENT_ID>
+acli jira workitem attachment list --key <ISSUE_KEY> --json
+```
+
+If the CLI cannot upload attachments, use Jira REST with the active
+authenticated session and `X-Atlassian-Token: no-check`. Never print bearer
+tokens or cookies. Before the final update, verify the work item description
+and attachment text do not expose `file:///`, `C:/Users`, or `C:\Users`.
+
 ### Agent Detection and Setup
 
 When the agent needs Jira and CLI is not available:
