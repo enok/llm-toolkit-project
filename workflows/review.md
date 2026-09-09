@@ -26,7 +26,7 @@ Scope: PR number → use PR tools; branch name → use `git log`; current change
 
 **5. Frontend Standards** — follow project-specific frontend rules. No `any` without justification. Generated API types preferred. Strings externalized. No unsafe HTML insertion.
 
-**6. Security (CRITICAL)** — see `rules/security.md` and `rubrics/security.md`. Authorization on every new endpoint. No PII in logs. No secrets in code. Parameterized queries only.
+**6. Security (CRITICAL)** — see `skills/security/SKILL.md` and `rubrics/security.md`. Authorization on every new endpoint. No PII in logs. No secrets in code. Parameterized queries only.
 
 **7. Performance** — no N+1 queries; long ops offloaded to async workers; no blocking in request threads; appropriate log levels.
 

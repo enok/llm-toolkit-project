@@ -1,6 +1,10 @@
+---
+description: Project-local companion to data-pipeline-change: bronze/silver/gold pipeline changes with contract and downstream checks
+---
+
 # Pipeline Change Workflow
 
-Use this repo-local workflow together with the shared workflow in `.windsurf/workflows/data-pipeline-change.md`.
+Use this repo-local workflow together with the shared workflow in `workflows/data-pipeline-change.md`.
 
 This repository uses a medallion architecture (Bronze → Silver → Gold) on AWS S3. Changes must respect layer boundaries.
 
@@ -179,6 +183,6 @@ If the change alters:
 ## Related Workflows
 
 - `data-source-ingestion.md` — For adding/modifying data sources
-- `.windsurf/workflows/data-pipeline-change.md` — Generic pipeline guidance
-- `.windsurf/workflows/dataset-onboarding.md` — For brand new datasets
+- `workflows/data-pipeline-change.md` — Generic pipeline guidance
+- `workflows/dataset-onboarding.md` — For brand new datasets
 

@@ -34,7 +34,7 @@ The user will provide a **ticket ID** (e.g., `ABC-1234`). Replace `<TICKET>` bel
 
 ### 5. Read Confluence documentation
 - Search Confluence with key terms from the ticket (feature name, component name, domain concepts).
-- Always check the relevant architecture and product documentation spaces for cross-service context.
+- Always check the Confluence spaces and architecture pages listed in the repo's `docs/llm/` context (or the equivalent repo-local documentation index) for cross-service context.
 - Read the top 3-5 most relevant pages.
 - Note: page title, space, URL, and a 1-2 sentence summary of relevance.
 
@@ -167,3 +167,9 @@ The user will provide a **ticket ID** (e.g., `ABC-1234`). Replace `<TICKET>` bel
 - **Do NOT create files until Phase 3** — gather all context first.
 - If the ticket spans multiple repos, use GitHub tools to read remote files.
 - Prefer updating existing docs over creating new files if prior research exists.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

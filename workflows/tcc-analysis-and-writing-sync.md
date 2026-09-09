@@ -1,6 +1,10 @@
+---
+description: Project-local step after research-analysis-cycle: keep thesis narrative, tables, and figures aligned with the latest analysis
+---
+
 # TCC Analysis And Writing Sync Workflow
 
-Use this repo-local workflow after the shared workflow in `.windsurf/workflows/research-analysis-cycle.md`.
+Use this repo-local workflow after the shared workflow in `workflows/research-analysis-cycle.md`.
 
 This workflow ensures analysis changes flow correctly into the thesis document structure, following the MBA TCC course (`11_tcc`) chapter organization.
 

@@ -1,3 +1,7 @@
+---
+description: Orchestrate thesis writing, formatting, bibliography, validation, and submission following the institutional TCC specification
+---
+
 # Thesis Writing Main Workflow
 
 **Purpose**: Orchestrate all thesis writing, formatting, bibliography, and submission tasks following USP/ESALQ TCC specifications.
@@ -81,98 +85,9 @@ This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
 ---
 
 ## Phase 2: Content Development
-
 ### Step 4: Chapter Writing (By Type)
 
-#### Chapter 1: Introduction (Introdução)
-
-**Required elements:**
-- Contexto (Context)
-- Problema (Problem statement)
-- Questão de pesquisa (Research question)
-- Objetivos geral e específicos (Objectives)
-- Justificativa (Justification)
-- Delimitação (Scope/delimitation)
-
-**Execute:**
-```
-1. Read `thesis-completion-guide.md` §Introduction
-2. Use 5-sentence abstract formula for problem statement
-   Reference: `.agents/skills/thesis-bibliography/SKILL.md` §10
-3. Cite methodology sources:
-   - Gil (2010), Lakatos & Marconi (2010) — Research design
-   - Ferreira (2010), Affonso & Araújo (2016) — Public spending context
-   Reference: `thesis-bibliography-integration.md` §Chapter 1
-4. Write in Portuguese (primary)
-5. Sync to English (secondary)
-6. Verify bilingual alignment
-```
-
-#### Chapter 2: Material and Methods (Material e Métodos)
-
-**Required sections:**
-- Data sources (IBGE, Transparency, CGU)
-- Data architecture (Bronze/Silver/Gold)
-- Analytical methods (Statistics, ML, Clustering)
-- Software and tools
-
-**Execute:**
-```
-1. Read `tcc-method-selection.md`
-2. Map methods to references:
-   - Descriptive stats → Bussab & Morettin (2017)
-   - Regression → Wooldridge (2020)
-   - ML → James et al. (2021)
-   - Clustering → Hartigan & Wong (1979), Rousseeuw (1987)
-   Reference: `.agents/skills/thesis-bibliography/SKILL.md` §2-5
-3. Write methodology with proper citations
-4. Include: Data scope, period, variables
-5. Sync English version
-6. Verify method names consistent across languages
-```
-
-#### Chapter 3: Results and Discussion (Resultados e Discussão)
-
-**Required sections:**
-- Descriptive analysis
-- Statistical modeling results
-- Machine learning results
-- Clustering analysis
-- Interpretation and implications
-
-**Execute:**
-```
-1. Read `docs/thesis_conclusion.md` — Extract findings
-2. Read `docs/city_thesis_conclusion_addendum.md` — City-level results
-3. For each finding:
-   - State statistic (r, β, p, R²)
-   - Cite interpretation framework
-   - Reference detection capacity literature (Power, 2007; Liu et al., 2016)
-4. Create/update tables and figures
-5. Write results narrative in Portuguese
-6. Translate to English (maintain identical numbers)
-7. Verify: Same statistics in both versions
-```
-
-#### Chapter 4: Conclusion (Conclusão)
-
-**Required sections:**
-- Summary of findings
-- Limitations
-- Policy implications
-- Future work
-
-**Execute:**
-```
-1. Synthesize key findings from Chapter 3
-2. Cite limitation literature (Wooldridge, 2020 — causality)
-3. Connect to public administration literature
-4. Write limitations honestly
-5. Propose future work with method citations
-6. Sync both languages
-```
-
----
+Run the **thesis-chapter-writing** workflow (`workflows/thesis-chapter-writing.md`) for the chapter identified in Step 1. It carries the per-chapter-type guidance (introduction, literature review, methodology, results, discussion, conclusion), the evidence-linking rules, and the bilingual drafting order.
 
 ## Phase 3: Bibliography & Citations
 
@@ -313,80 +228,9 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 ```
 
 ---
-
 ## Phase 6: Final Preparation & Submission
 
-### Step 11: Pre-Submission Checklist
-
-**Complete for both language versions:**
-
-#### Portuguese Version (Primary)
-- [ ] All 4 chapters complete
-- [ ] Resumo (250 words) + Abstract
-- [ ] ABNT formatting verified against TCC Manual
-- [ ] References: ABNT NBR 6023:2023
-- [ ] Figures: High-res, Portuguese captions
-- [ ] Tables: Numbered, Portuguese titles
-- [ ] Plagiarism scan: <15% similarity
-- [ ] Grammar check: Portuguese
-
-#### English Version (Secondary)
-- [ ] All 4 chapters complete
-- [ ] Abstract complete
-- [ ] References: ABNT or APA
-- [ ] Figures: English captions
-- [ ] Tables: English titles
-- [ ] Plagiarism scan: <15% similarity
-- [ ] Proofreading: English native/competent
-
-#### Bilingual Synchronization
-- [ ] Same statistical results
-- [ ] Same figures/tables (captions differ)
-- [ ] Same bibliography (order may differ)
-- [ ] Equivalent methodology descriptions
-- [ ] Consistent terminology
-
-#### Supporting Materials
-- [ ] Notebooks: Reproducible (both languages)
-- [ ] QGIS maps: Ready
-- [ ] Power BI dashboard: Ready
-- [ ] Presentation: Prepared (defense language)
-- [ ] GitHub repo: Accessible
-
-### Step 12: Final Review
-
-**Execute:**
-```
-1. Print/read both versions (different times of day)
-2. Read aloud (catches awkward phrasing)
-3. Check: First sentence of each paragraph
-4. Check: Last sentence of each chapter
-5. Verify: Cross-references work
-6. Spell check: Both languages
-7. Format check: Consistent headings
-8. Number check: All statistics match
-```
-
-### Step 13: Submission Preparation
-
-**For USP/ESALQ portal upload:**
-```
-1. Final PDF generation:
-   - PT: `TCC_Enok_Antonio_Jesus_PT.pdf`
-   - EN: `TCC_Enok_Antonio_Jesus_EN.pdf`
-2. Verify file sizes (<portal limit)
-3. Test PDF opening on different devices
-4. Prepare metadata:
-   - Title (both languages)
-   - Abstract (both languages)
-   - Keywords (both languages)
-   - Advisor: Prof. Dr. Carlos Nabil Ghobril
-5. Upload to USP/ESALQ portal
-6. Confirm submission receipt
-7. Save confirmation number
-```
-
----
+Run the **thesis-submission-preparation** workflow (`workflows/thesis-submission-preparation.md`) in full: Step 11 pre-submission checklist, Step 12 final review, Step 13 submission packaging. Do not start it until every Phase 5 validation (plagiarism check, analysis-thesis alignment) has passed.
 
 ## Related Workflows & Skills
 
@@ -399,7 +243,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 6. `tcc-formatting-abnt-review.md` — Formatting
 7. `thesis-plagiarism-check.md` — Originality
 8. `bilingual-notebook-sync.md` — Bilingual sync
-9. `.windsurf/workflows/bilingual-doc-sync.md` — Document sync
+9. `workflows/bilingual-doc-sync.md` — Document sync
 
 ### Skills (for guidance)
 - `tcc-deliverables` skill — Deliverable expectations

@@ -44,8 +44,8 @@ Run three independent inspections. Tag every finding with its signal source.
 ### S3: Inspect Against Rules and Skills
 
 **6. Load applicable rules and skills:**
-- Generic rules: `rules/code-rules.md`, `rules/security.md`, `rules/testing.md`, `rules/best-practices.md`
-- Language-specific rules: detect primary language from changed files and load the matching rule (e.g., `rules/java-best-practices.md`, `rules/python-best-practices.md`, `rules/js-ts-best-practices.md`)
+- Generic rules: `rules/code-rules.md`, `skills/security/SKILL.md`, `skills/testing/SKILL.md`, `skills/best-practices/SKILL.md`
+- Language-specific rules: detect primary language from changed files and load the matching rule (e.g., `skills/java-best-practices/SKILL.md`, `skills/python-best-practices/SKILL.md`, `skills/js-ts-best-practices/SKILL.md`)
 - Rubrics: `rubrics/code-review-checklist.md`, `rubrics/security.md`, `rubrics/architecture.md`
 - Project-specific rules: any rules in the project's `.windsurf/rules/`, `.cursor/rules/`, or similar
 
@@ -154,89 +154,19 @@ pytest
 If anything fails, go back to Phase 4.
 
 ---
+## Phase 9 — Commit and Push (MANDATORY)
 
-## Phase 9 — Commit and Push (5-Category Rule — MANDATORY)
+**21. Regroup and push through the shared workflow.** Run the **commit-and-push** workflow (`workflows/commit-and-push.md`) in full. It resets the branch in an isolated regrouping workspace, re-commits every change by the canonical semantic categories in `rules/git-conventions.md` (never mixing categories, ticket-ID prefix on every commit), validates the commit structure, runs the cloud-sync duplicate-file gate, requires the user approval gate, then rebases on the base branch and pushes with `--force-with-lease`.
 
-> **⚠️ MANDATORY GATE — The 5-category commit structure is NOT optional.**
-> Every execution of this workflow MUST produce a branch where ALL commits follow the 5-category rule below. No exceptions. No "just adding on top of existing commits." The ENTIRE branch must be reset and restructured from scratch every time.
+Before starting it, check `git status` for LLM config files (`AGENTS.md`, `CLAUDE.md`, `.gitignore`, provider folders such as `.windsurf/` or `.cursor/`): they belong to the configuration category even when they were not part of the review findings.
 
-**21. Reset the ENTIRE branch** — confirm with the user before running:
-> **⚠️ Destructive operation**: this rewrites branch history. Ask the user for confirmation before proceeding unless they have already opted in (e.g., by invoking this workflow explicitly).
-
-```bash
-git reset --mixed origin/<base-branch>
-```
-This unstages ALL commits on the branch, keeping all changes in the working directory. You will now re-commit everything from scratch in the correct 5-category order.
-
-**21a. Check `git status` for LLM config files** — look for any changes (staged or unstaged) to:
-- `.windsurf/` (project-specific rules/workflows)
-- `AGENTS.md`
-- `.gitignore`
-
-These MUST be committed in Category 1 even if they were not part of the review findings.
-
-**22. Re-commit ALL changes** in exactly this order. Skip categories with no changes. **Maximum 5 commits. Each category gets exactly ONE commit.**
-
-| Order | Category | What belongs here |
-|-------|----------|-------------------|
-| 1 | **LLM configs** | `.windsurf/`, `.cursor/`, `.agents/`, `.claude/`, `.codex/`, `AGENTS.md`, `CLAUDE.md`, `.gitignore` |
-| 2 | **Documentation** | `README.md`, `docs/`, architecture diagrams, API specs, PlantUML |
-| 3 | **Logs improvement** | Logger setup/format/level changes, log context, MDC, logging-only test files |
-| 4 | **Application configs/structure** | Config files, build config, DI config, env config, dependency files |
-| 5 | **Code changes** | Source code, business logic, tests for business logic |
-
-**Commit rules:**
-- Each commit prefixed with ticket ID: `TICKET-ID: <description>`
-- **Never mix categories** in a single commit.
-- **If a source file has BOTH logging and business logic changes**, use the intermediate-file approach:
-  1. Save the final version to a temp location (`cp file /tmp/file_final`)
-  2. Edit the file to contain only original code + new logging changes
-  3. Stage and commit in Category 3
-  4. Restore the final version (`cp /tmp/file_final file`)
-  5. Stage and commit in Category 5
-- Tests follow their subject: logging tests → Cat 3, business logic tests → Cat 5.
-- Use `git add -p` for hunk-level splits when changes are in separate, non-interleaved hunks.
-
-**23. VALIDATE commit structure before pushing** — run:
-```bash
-git log --oneline $(git merge-base origin/<base-branch> HEAD)..HEAD
-```
-Verify ALL of the following — **if ANY check fails, go back to step 21 and redo**:
-- [ ] Each commit belongs to exactly ONE category (1–5)
-- [ ] Categories appear in ascending order — no category appears after a higher-numbered one
-- [ ] No category is repeated — maximum 1 commit per category, maximum 5 commits total
-- [ ] Each commit message starts with the ticket ID
-- [ ] No build output, IDE files, secrets, or `.agents/` directory in any commit
-- [ ] No cloud-sync duplicate files (see below)
-
-**23a. Check for cloud-sync duplicates** (blocking — see `rules/git-conventions.md § Duplicate-File Gate`):
-```bash
-git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED: remove duplicate files before pushing" && exit 1
-```
-If any results appear, `git rm` each duplicate, verify the original is correct, and re-run the check.
-
-**If validation fails, `git reset --mixed origin/<base-branch>` and restructure again.**
-
-**24. Rebase before push** (mandatory):
-```bash
-git fetch origin
-git rebase origin/<base-branch>
-# Resolve any conflicts
-# Re-run full test suite after rebase
-# Re-check for cloud-sync duplicates (rebase can resurrect them)
-git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED" && exit 1
-git push --force-with-lease
-```
-
-**24a. Push to stage branch** (opt-in — enables stage environment testing):
-> **⚠️ Shared branch**: only push to `stage` if the project uses a stage deployment branch and the user confirms. Skip this step if the project does not use a `stage` branch.
+**22. Push to a stage branch** (opt-in): only if the project deploys from a shared environment branch and the user confirms.
 
 ```bash
-git push origin HEAD:stage --force-with-lease
+git push origin HEAD:<env-branch> --force-with-lease
 ```
-This pushes the current branch HEAD to the `stage` branch so the changes are deployed to the stage environment. If `--force-with-lease` fails (e.g., stage branch has diverged), use `--force` since stage is a transient deployment branch.
 
-**25. Reply to PR comments** (S2 fixes) — for each addressed comment, reply with what changed and where.
+**23. Reply to PR comments** (S2 fixes): draft one reply per addressed comment stating what changed and where; post only after the approval gate in `rules/human-comment-reply-gate.md`.
 
 ---
 
@@ -274,4 +204,4 @@ This pushes the current branch HEAD to the `stage` branch so the changes are dep
 ### Multi-agent runs
 
 - After **each phase** (1–10), print a concise **Phase N — result** summary before starting the next phase.
-- See **`rules/review-and-fix-multi-agent.md`** for agent splits (S1/S2/S3), Windows shell pitfalls, exception-handling gotchas, datetime mocking limits, and Phase 9 safety.
+- See **`skills/review-and-fix/references/ticket-review-and-fix-multi-agent.md`** for agent splits (S1/S2/S3), Windows shell pitfalls, exception-handling gotchas, datetime mocking limits, and Phase 9 safety.

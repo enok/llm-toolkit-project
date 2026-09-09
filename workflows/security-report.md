@@ -4,7 +4,7 @@ description: OWASP-aligned security review with parallel audit lanes and a singl
 
 # Security report workflow
 
-Use when the user asks for a security report, OWASP-style audit, AppSec review, or vulnerability assessment. Pair with the **security** skill and `rubrics/security.md`.
+Use when the user asks for a security report, OWASP-style audit, AppSec review, or vulnerability assessment. Pair with the **security** skill and `rubrics/security.md`. For OWASP-framed audits, use `skills/owasp-security-review/SKILL.md` as the specialist engine and `skills/security-best-practices/SKILL.md` for stack-specific secure defaults.
 
 ## Phase 1 — Scope
 
@@ -26,6 +26,12 @@ Use when the user asks for a security report, OWASP-style audit, AppSec review, 
 
 6. Merge lanes into one report with severity, OWASP mapping, evidence, impact, and remediation.
 7. Separate confirmed findings from assumption-backed risks and open questions.
-8. Write the report where the user requests (for example `docs/security-review.md` or ticket notes), using clear severity labels and file references.
+8. Write the report where the user requests; default to the canonical path from `owasp-security-review` (`docs/security/<repo-or-dir-name>-security-report.md`), using clear severity labels and file references.
 
 See `rules/multi-agent-orchestration.md`.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

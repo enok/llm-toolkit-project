@@ -1,3 +1,7 @@
+---
+description: Systematically insert and verify bibliographic references that justify every thesis method, decision, and framework
+---
+
 # Thesis Bibliography Integration Workflow
 
 Use this workflow to systematically insert bibliographical references throughout the thesis document to justify all methods, decisions, and frameworks.

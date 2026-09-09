@@ -127,41 +127,37 @@ Present:
 
 ## Phase 6 — Commit, Push, and PR
 
-### 11. Follow the 5-category commit structure
+### 11. Organize commits by semantic category
 
-Use the commit structure from `rules/git-conventions.md`:
-
-| Order | Category | What belongs here |
-|-------|----------|-------------------|
-| 1 | **LLM configs** | `.windsurf/`, `.cursor/`, `.agents/`, `.claude/`, `.codex/`, `AGENTS.md`, `CLAUDE.md`, `.gitignore` |
-| 2 | **Documentation** | `README.md`, `docs/`, architecture diagrams, API specs |
-| 3 | **Logs improvement** | Logger setup/format/level changes, log context, MDC |
-| 4 | **Application configs/structure** | Build config, DI config, env config, dependency files |
-| 5 | **Code changes** | Source code, business logic, tests for business logic |
-
-Each commit prefixed with `<TICKET>: <description>`. Skip empty categories. Never mix categories.
+Run `workflows/commit-and-push.md`. It applies the canonical
+**Infrastructure**, **Configuration**, **Support + utilities**,
+**Business logic + related unit tests**, **Integration tests**,
+**Documentation**, and **Cleanup** categories from `rules/git-conventions.md`,
+including meaningful subgroup splits and exact-tree safeguards for history-only
+regrouping.
 
 ### 12. Validate, rebase, and push
 
-```bash
-# Validate commit structure
-git log --oneline $(git merge-base origin/<base-branch> HEAD)..HEAD
-
-# Check for cloud-sync duplicates (blocking)
-git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED" && exit 1
-
-# Rebase and push
-git fetch origin
-git rebase origin/<base-branch>
-# Re-run tests after rebase
-git push --force-with-lease
-```
+Complete Steps 3–5 of `workflows/commit-and-push.md`. Do not duplicate or bypass
+its category, exact-tree, duplicate-file, approval, rebase, validation, or safe
+push gates here.
 
 ### 13. Open a draft PR
 
+Before creating the PR, build the mandatory **File changes** table from the
+live base-to-head diff and place one file-specific row in the PR body for every
+added, modified, deleted, or renamed path. Follow
+`rules/git-conventions.md § PR File Change Table`; do not aggregate paths.
+
 ```bash
-gh pr create --draft --title "<TICKET>: <summary>" --body "<link to ticket and brief description>"
+git diff --name-status --find-renames origin/<base-branch>...HEAD
+gh pr create --draft --title "<TICKET>: <summary>" --body-file <pr-body.md>
+gh pr view --json body --jq .body
 ```
+
+Reconcile the body table against the same diff after creation. The PR creation
+step is incomplete if any path is missing, duplicated, or described only with a
+generic placeholder.
 
 ---
 
@@ -193,3 +189,9 @@ If the implementation deviated from the original plan (different files, differen
 - If the research is outdated (files moved, APIs changed), update the research docs and adjust the plan before implementing.
 - If a step turns out to be more complex than the research estimated, pause and inform the user before proceeding.
 - For multi-repo changes, implement and test in dependency order (upstream first).
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

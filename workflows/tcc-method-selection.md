@@ -1,3 +1,7 @@
+---
+description: Choose or refine the thesis analytical method once the research question is clear (candidates, criteria, decision record)
+---
+
 # TCC Method Selection Workflow
 
 Use this workflow when the thesis question is clear enough to choose or refine the analytical method.

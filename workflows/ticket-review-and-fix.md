@@ -10,82 +10,13 @@ Scope: current branch changes only (diff against base branch).
 
 ---
 
-## Phase 1 — Scope and Context
+## Phases 1–3 — Scope, Inspect, Present (delegated)
 
-**1. Determine scope** — identify the current branch and its base (e.g., `main`). Only review changes in `git diff --merge-base <base>`.
-
-**2. Extract ticket ID** — from branch name, PR title, or commits. Fetch from Jira (prefer CLI `acli`, fallback to MCP, then ask user). Label every Acceptance Criterion as `AC-1`, `AC-2`, … Flag vague or untestable ACs immediately.
-
-**3. Fetch PR metadata (if PR exists)** — use `gh pr view` or GitHub MCP to get:
-- PR description and linked ticket
-- All review comments (resolved and unresolved)
-- CI check status
-
----
-
-## Phase 2 — Three-Signal Inspection
-
-Run three independent inspections. Tag every finding with its signal source.
-
-### S1: Inspect Against PR Acceptance Criteria
-
-**4. Map each AC to code and tests.** For every AC:
-- Locate the code that implements it.
-- Locate the test that verifies it.
-- Missing implementation = **Blocker (S1)**. Missing test = **Blocker (S1)**. Vague AC = **Ticket Quality Issue**.
-
-### S2: Inspect Unresolved PR Comments
-
-**5. Read ALL PR review comments** (via `gh pr view <N> --json reviews,comments` or GitHub MCP).
-- Filter to unresolved / not-addressed comments.
-- For each unresolved comment: verify whether the current code addresses it.
-- Unaddressed actionable comment = **Blocker (S2)**.
-
-### S3: Inspect Against Rules and Skills
-
-**6. Load applicable rules and skills:**
-- Generic rules: `rules/code-rules.md`, `rules/security.md`, `rules/testing.md`, `rules/best-practices.md`
-- Language-specific rules: detect primary language from changed files and load the matching rule (e.g., `rules/java-best-practices.md`, `rules/python-best-practices.md`, `rules/js-ts-best-practices.md`)
-- Rubrics: `rubrics/code-review-checklist.md`, `rubrics/security.md`, `rubrics/architecture.md`
-- Project-specific rules: any rules in the project's `.windsurf/rules/`, `.cursor/rules/`, or similar
-
-**7. Evaluate the diff against the full checklist:**
-- **Correctness & Logic** — NPEs, off-by-ones, edge cases (nulls, empty collections, missing records)
-- **Security** — authorization, injection, PII in logs, secrets, parameterized queries
-- **Performance** — N+1 queries, blocking calls, log levels, payload sizes
-- **Error Handling** — swallowed exceptions, meaningful messages, no sensitive data in logs
-- **Backward Compatibility** — API contracts, message formats, shared databases
-- **Operability** — logging quality, metrics impact, migration safety
-- **Code Standards** — framework patterns, DI patterns, naming, duplication, dead code
-
-Each confirmed issue = **Blocker or Suggestion (S3)** per `rubrics/code-review-checklist.md` severity rules.
-
----
-
-## Phase 3 — Present Findings
-
-**8. Categorize and present all findings before fixing:**
-
-```
-## Inspection Summary
-**Branch**: X  **Ticket**: TICKET-ID  **Files reviewed**: N
-
-### S1 — AC Coverage
-| AC | Description | Implemented? | Tested? | Code/Test |
-|----|-------------|-------------|---------|-----------|
-| AC-1 | ... | Yes/No | Yes/No | path:line |
-
-### S2 — Unresolved PR Comments
-| # | Author | Comment | Status | Action |
-|---|--------|---------|--------|--------|
-
-### S3 — Rules/Skills Findings
-| Severity | Signal | File:Line | Issue | Remediation |
-|----------|--------|-----------|-------|-------------|
-| Blocker  | S3     | ...       | ...   | ...         |
-
-### Ticket Quality Issues
-```
+**1–8. Run `workflows/ticket-review.md` Phases 1–3 in full** — scope and ticket
+context, the three-signal inspection (S1 AC coverage, S2 unresolved PR
+comments, S3 rules/skills checklist), and the categorized findings report.
+That workflow owns the canonical S3 checklist and report format; do not
+maintain a diverging copy here.
 
 **9. Confirm with user before proceeding to fix** — if there are Blockers that require design decisions or clarifications, pause and ask.
 
@@ -96,7 +27,7 @@ Each confirmed issue = **Blocker or Suggestion (S3)** per `rubrics/code-review-c
 **10. Fix every Blocker and actionable finding.** Process in order: S1 (AC gaps) -> S2 (PR comments) -> S3 (rules violations). For each fix:
 - Read the actual source file (never fix from memory).
 - Apply minimal, targeted fix — one issue at a time.
-- Verify syntax with `python -m py_compile src/<file>.py`.
+- Verify syntax with the stack's cheapest check (e.g. `python -m py_compile`, `node --check`, `mvn -q compile`); detect the stack per `workflows/run-tests.md`.
 - Never batch unrelated fixes into one change.
 
 **11. For S2 (PR comment) fixes** — note what changed and why, to reply to each comment after push.
@@ -105,7 +36,12 @@ Each confirmed issue = **Blocker or Suggestion (S3)** per `rubrics/code-review-c
 
 ## Phase 5 — Update PR and Documentation
 
-**12. Update PR description** if scope or behavior changed during fixes.
+**12. Update PR description** if scope or behavior changed during fixes. Always
+reconcile the mandatory per-file **File changes** table against the current
+base-to-head diff, even when the prose summary did not otherwise need an update.
+Require one accurate row per added, modified, deleted, or renamed path and read
+the body back after editing; follow
+`rules/git-conventions.md § PR File Change Table`.
 
 **13. Update related documentation:**
 - README, API docs, Swagger/OpenAPI specs if endpoints changed.
@@ -119,10 +55,9 @@ Each confirmed issue = **Blocker or Suggestion (S3)** per `rubrics/code-review-c
 
 **14. Every changed/new method needs full unit test coverage.** Create test file if missing (mirror source path). Cover: happy path, edge cases, error conditions, all branches.
 
-**15. Run unit tests and verify 100% pass:**
-```bash
-pytest
-```
+**15. Run unit tests and verify 100% pass** — detect the stack and use its
+unit-test command per `workflows/run-tests.md` (e.g. `pytest`, `mvn test`,
+`npm test`).
 
 **16. Fix any failures immediately** — do NOT proceed until all unit tests are green.
 
@@ -132,10 +67,9 @@ pytest
 
 **17. For API, cross-service, or DB changes** — ensure integration/system tests exist and cover the changed behavior.
 
-**18. Run integration tests and verify 100% pass:**
-```bash
-pytest
-```
+**18. Run integration tests and verify 100% pass** — use the stack's
+integration-test command per `workflows/run-tests.md` (e.g. `pytest -m integration`,
+`mvn verify`, `npm run test:integration`).
 
 **19. Fix any failures immediately** — do NOT proceed until all integration tests are green.
 
@@ -144,10 +78,9 @@ pytest
 ## Phase 8 — Final Test Gate
 
 // turbo
-**20. Run the full related test suite — zero failures allowed.**
-```bash
-pytest
-```
+**20. Run the full related test suite — zero failures allowed.** Use the
+stack's full-suite command per `workflows/run-tests.md` (e.g. `pytest`,
+`mvn clean verify`, `npm test`).
 
 If anything fails, go back to Phase 4.
 
@@ -176,9 +109,9 @@ Awaiting your approval to commit and push.
 
 ---
 
-## Phase 10 — Commit and Push (5-Category Rule — MANDATORY)
+## Phase 10 — Commit and Push (Semantic Organization — MANDATORY)
 
-Run the **commit-and-push** workflow (`workflows/commit-and-push.md`) in full. This is a mandatory gate — every execution of this workflow MUST produce a branch where ALL commits follow the 5-category rule.
+Run the **commit-and-push** workflow (`workflows/commit-and-push.md`) in full. This is a mandatory gate — every execution MUST produce a branch whose commits follow the canonical semantic categories and regrouping safeguards.
 
 ---
 
@@ -216,4 +149,10 @@ Run the **commit-and-push** workflow (`workflows/commit-and-push.md`) in full. T
 ### Multi-agent runs
 
 - After **each phase** (1–11), print a concise **Phase N — result** summary before starting the next phase.
-- See **`rules/ticket-review-and-fix-multi-agent.md`** for agent splits (S1/S2/S3), Windows shell pitfalls, exception-handling gotchas, datetime mocking limits, and Phase 9 safety.
+- See **`rules/multi-agent-orchestration.md`** for parallel agent splits and safe fanout.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

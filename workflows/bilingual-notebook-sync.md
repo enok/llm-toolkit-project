@@ -1,3 +1,7 @@
+---
+description: Keep English and Portuguese notebook pairs synchronized after edits (cells, outputs, narrative, translations)
+---
+
 # Bilingual Notebook Sync Workflow
 
 Use this workflow when modifying notebooks that exist in both English (`notebooks/`) and Portuguese (`notebooks/pt-BR/`) versions.
@@ -109,6 +113,6 @@ Use consistent translations for domain terms:
 
 ## Related Resources
 
-- `.windsurf/workflows/bilingual-doc-sync.md` — For README and documentation files
-- `.windsurf/workflows/notebook-analysis.md` — For notebook quality checks
+- `workflows/bilingual-doc-sync.md` — For README and documentation files
+- `workflows/notebook-analysis.md` — For notebook quality checks
 - `usp-mba-course-context` skill — For terminology guidance
