@@ -1,6 +1,10 @@
 ---
 name: "owasp-security-review"
 description: "Run an OWASP-style application security review for Java, JavaScript, TypeScript, Node.js, Python, and React projects. Use when the user asks for an OWASP review, OWASP Top 10 assessment, AppSec audit, vulnerability report, or hardening findings document. Inspect access control, authentication, injection, secrets and crypto, dependency risk, SSRF, deserialization, XSS/CSRF, insecure configuration, and logging gaps, then generate a prioritized Markdown report with file and line evidence plus fix guidance. Do not trigger for general code review unless the request is explicitly security-focused."
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # OWASP Security Review
@@ -17,7 +21,7 @@ Use this skill as the specialist engine behind the `security-report` workflow wh
    - Read `references/owasp-top-10-review-map.md` if bundled.
    - Read the relevant sections of `references/stack-review-cues.md` for the active stack: Java, JavaScript, TypeScript, Node.js, Python, React.
    - Read `references/report-template.md` before writing the final report.
-   - When you need cross-checks or fix guidance, merge this skill with `security`, `security-best-practices`, and the relevant language skill such as `java-best-practices`, `js-ts-best-practices`, `nodejs`, `python-best-practices`, or `react-best-practices`.
+   - When you need cross-checks or fix guidance, merge this skill with `security`, `security-best-practices`, and the relevant language skill such as `java-best-practices`, `js-ts-best-practices`, or `python-best-practices`.
 
 3. Audit the codebase through an OWASP lens.
    - Trace user-controlled input to storage, rendering, command execution, deserialization, outbound network calls, and privileged operations.
@@ -70,4 +74,4 @@ Use this skill as the specialist engine behind the `security-report` workflow wh
 - **security** — general application security principles
 - **security-best-practices** — language/framework-specific secure defaults
 - **security-threat-model** — architectural threat modeling
-- **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **nodejs** — language-specific fix guidance
+- **java-best-practices**, **python-best-practices**, **js-ts-best-practices** — language-specific fix guidance

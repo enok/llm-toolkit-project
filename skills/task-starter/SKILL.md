@@ -1,6 +1,10 @@
 ---
 name: task-starter
-description: Turn a ticket or task description into a scoped implementation plan. Use when the user mentions a Jira/ticket ID, "start on TICKET-123," or has a task they want planned before coding. Prefer Atlassian CLI (acli); Jira MCP is an alternative.
+description: "Turn a ticket or task description into a scoped implementation plan. Use when the user mentions a Jira/ticket ID, 'start on TICKET-123,' 'pick up this ticket,' or has a task they want planned before coding. Prefer Atlassian CLI (acli); Jira MCP is an alternative."
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # Task Starter
@@ -41,7 +45,8 @@ If **no ticket ID** is given, use the user's message and any follow-up (requirem
 
 - Identify what "done" looks like (acceptance criteria, tests, docs).
 - Note stack and repo (e.g. Java/Maven, Node/pnpm) so the plan matches the project.
-- If design or API contracts are referenced (Figma, specs, other tickets), note them; use Figma MCP for designs if available and relevant.
+- If design or API contracts are referenced (Figma, specs, other tickets), note them; use Figma MCP for designs if available and relevant. Plan UI steps with `→ verify: ui-verify` and, when a Figma link exists, `→ verify: figma-compare`.
+- For UI/front-end work: run **ui-verify** in the browser before saying the task is complete; if the plan or ticket includes a Figma link, run **figma-compare** after **ui-verify** passes.
 
 ### 3. Understand the target codebase
 
@@ -79,7 +84,7 @@ Open questions (resolve before starting):
 
 After approval, implement following the plan and repo conventions. When done:
 
-- Suggest running **pre-pr-check** (or **review** + tests) before opening a PR.
+- Suggest running **pre-pr-check** (or **ticket-review** / **review** + tests) before opening a PR.
 - If behavior or config changed, suggest **doc-delta** to update docs.
 - If the user wants to address review findings, use the **fix** skill.
 
@@ -93,3 +98,11 @@ If neither Atlassian CLI nor Jira MCP is available (or both fail), ask the user 
 - Do not produce a plan without having inspected the relevant code.
 - Do not guess at requirements — surface ambiguities and ask.
 - Do not add scope beyond what the task describes.
+
+## Related
+
+- `workflows/ticket-research.md` / `workflows/ticket-implementation.md` — the workflow forms of research and execution
+- `skills/pathfinder/SKILL.md` — sequence a large plan into deliverable vertical slices
+- `skills/test-plan/SKILL.md` — turn the plan's acceptance criteria into a test plan
+- `skills/pre-pr-check/SKILL.md` — validations + changed-code quality gate + review before the PR
+- `integrations/jira.md` — acli install/auth and the Jira MCP alternative

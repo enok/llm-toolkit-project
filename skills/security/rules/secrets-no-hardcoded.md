@@ -35,4 +35,5 @@ secret = client.get_secret_value(SecretId="myapp/api-key")["SecretString"]
 | CI/CD | GitHub Actions secrets, GitLab CI variables |
 
 - Also never log secrets, tokens, or auth headers
+- In notebooks, never print credentials or environment-specific values; output cells are committed artifacts
 - Rotate secrets immediately if accidentally committed

@@ -1,6 +1,6 @@
 # Application Security Best Practices
 
-Comprehensive security best practices that apply to any application handling user data. Merged from rules/security.md and rubrics/security.md into a unified guide with detailed code examples.
+Comprehensive security best practices that apply to any application handling user data. Merged from shared security guidance and `rubrics/security.md` into a unified guide with detailed code examples.
 
 ## Injection Prevention
 
@@ -250,6 +250,17 @@ log.info("Processing person: id={}", person.getId());
 - Implement retention policies — delete data when no longer needed.
 - Encrypt sensitive fields at rest.
 
+### Request Context Log Redaction
+
+Centralize request-context formatting and redact high-risk identifiers before
+any log level emits them. Use a marker such as
+`redacted(length=<n>,sha256=<short-hash>)` for user/request correlation IDs,
+session IDs, trace IDs, and similar values, so operators can correlate repeated
+failures without exposing the raw value. Keep lower-risk routing fields
+(flow name, endpoint, request type) readable only when they are needed for
+triage, and add tests that assert raw identifiers are absent from formatted
+log context.
+
 ## Dependency Security
 
 - Check advisories (Snyk, Dependabot, `npm audit`, `pip audit`) when adding/updating dependencies.
@@ -304,9 +315,8 @@ Before approving any PR, verify:
 
 This skill provides **cross-cutting security rules**. Pair it with technology-specific skills:
 
-- **nodejs** — Node.js-specific hardening: helmet(), rate limiting, CORS allowlist, secure cookies, trust proxy
-- **cloudformation** — AWS infrastructure security: least-privilege IAM, no hardcoded secrets in templates, encryption at rest
-- **terraform** — IaC security scanning (trivy, checkov), state encryption, least-privilege
+- **js-ts-best-practices** — Node.js and TypeScript hardening: middleware defaults, async boundaries, input validation, error handling
+- **terraform** / **terraform-change-safety** — Terraform/OpenTofu change-safety patterns; pair with IaC security scanning (trivy, checkov), state encryption, least-privilege IAM, and no hardcoded secrets in templates
 - **shell-scripting** — Script security: no eval, mktemp for temp files, input validation, no secrets in scripts
 - **java-best-practices** / **python-best-practices** / **js-ts-best-practices** — Language-specific error handling and input validation patterns
 - **best-practices** — Defensive programming, fail-fast validation, immutability (foundations that security builds on)

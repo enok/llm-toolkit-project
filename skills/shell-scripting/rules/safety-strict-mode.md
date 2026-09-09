@@ -14,7 +14,7 @@ Every script starts with `set -euo pipefail`. No exceptions.
 ```bash
 #!/bin/bash
 cd /nonexistent/dir   # fails silently
-rm -rf ./*            # deletes files in WRONG directory
+delete_current_directory_contents  # affects the wrong directory
 echo "$UNSET_VAR"     # expands to empty string
 ```
 
@@ -26,7 +26,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 cd /nonexistent/dir   # script exits immediately
-rm -rf ./*            # never reached
+delete_current_directory_contents  # never reached
 echo "$UNSET_VAR"     # never reached — unset var triggers exit
 ```
 

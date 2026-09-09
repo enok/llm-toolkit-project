@@ -4,6 +4,10 @@ description: >
     Cut, verify, and manage releases with structured rollout and rollback planning. Trigger
     when the user asks to cut a release, verify a release candidate, plan a rollout, manage
     hotfix releases, or coordinate multi-service deployments.
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # Release Manager
@@ -65,3 +69,9 @@ Return:
 - **runbook-authoring** — Document the release process as a runbook
 - **incident-ops** — If the release causes an incident
 - **ci-watcher** — Monitor CI for the release branch
+- **maven-release** — Maven-specific release mechanics (release plugin, tags, rollback)
+
+## Related Rules and Workflows
+
+- `rules/release-safety.md` — no production action without verification and rollback defined
+- `workflows/ticket-release.md` — ticket-scoped release flow

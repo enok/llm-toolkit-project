@@ -53,7 +53,9 @@ rm -f "$TEMP_FILE"  # never reached if process fails
 # CORRECT — trap guarantees cleanup regardless of exit reason
 TEMP_FILE=""
 cleanup() {
-  [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+  if [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]]; then
+    rm -- "$TEMP_FILE"
+  fi
 }
 trap cleanup EXIT
 
@@ -85,11 +87,11 @@ trap 'on_error $LINENO' ERR
 ### Check Critical Commands
 
 ```bash
-# WRONG — continues silently if cd fails
+# WRONG - continues silently if cd fails
 cd /some/directory
-rm -rf ./*  # deletes files in WRONG directory if cd failed
+delete_current_directory_contents  # affects the wrong directory if cd failed
 
-# CORRECT — fail explicitly
+# CORRECT - fail explicitly
 cd /some/directory || { echo "Failed to cd to /some/directory" >&2; exit 1; }
 
 # CORRECT — die helper
@@ -105,18 +107,18 @@ command -v docker &>/dev/null || die "Docker is required but not installed"
 ### Never `eval` Untrusted Input
 
 ```bash
-# WRONG — command injection via user input
-user_input="hello; rm -rf /"
-eval "echo $user_input"  # executes rm -rf /
+# WRONG - command injection via user input
+user_input="hello; <destructive shell payload>"
+eval "echo $user_input"  # executes attacker-controlled shell syntax
 
-# CORRECT — direct execution, no eval
+# CORRECT - direct execution, no eval
 echo "$user_input"  # prints the string literally
 
-# WRONG — building commands with string concatenation
+# WRONG - building commands with string concatenation
 cmd="ls $user_provided_path"
 eval "$cmd"
 
-# CORRECT — use arrays for command building
+# CORRECT - use arrays for command building
 cmd=(ls "$user_provided_path")
 "${cmd[@]}"
 ```
@@ -133,7 +135,15 @@ TEMP_FILE=$(mktemp)           # /tmp/tmp.XXXXXXXXXX
 TEMP_DIR=$(mktemp -d)          # /tmp/tmp.XXXXXXXXXX/
 
 # Always clean up
-trap 'rm -rf "$TEMP_FILE" "$TEMP_DIR"' EXIT
+cleanup() {
+  if [[ -n "${TEMP_FILE:-}" && -f "$TEMP_FILE" ]]; then
+    rm -- "$TEMP_FILE"
+  fi
+  if [[ -n "${TEMP_DIR:-}" && -d "$TEMP_DIR" ]]; then
+    rm -r -- "$TEMP_DIR"
+  fi
+}
+trap cleanup EXIT
 ```
 
 ### Validate Input
@@ -165,11 +175,11 @@ port="${3:-8080}"
 ```bash
 # WRONG — credentials in script
 DB_PASSWORD="MyS3cretP@ss!"
-curl -u "admin:$DB_PASSWORD" https://api.example.com
+curl -u "admin:$DB_PASSWORD" "$SERVICE_URL"
 
 # CORRECT — from environment variable
 : "${DB_PASSWORD:?DB_PASSWORD environment variable is required}"
-curl -u "admin:$DB_PASSWORD" https://api.example.com
+curl -u "admin:$DB_PASSWORD" "$SERVICE_URL"
 
 # CORRECT — from secret manager
 DB_PASSWORD=$(aws secretsmanager get-secret-value \
@@ -404,6 +414,22 @@ if true; then
 fi
 ```
 
+### JSON Validation with jq
+
+```bash
+# WRONG — exit 4 on perfectly valid JSON (empty emits no value for -e to inspect)
+jq -e empty payload.json && deploy
+
+# CORRECT — parse validation only
+jq empty payload.json
+
+# CORRECT — parse validation plus top-level shape assertion
+jq -e 'type == "object"' payload.json
+```
+
+- The `empty` filter parses input but emits no result; with `-e`, jq derives its exit status from the last emitted value and returns 4 when there is none.
+- Use `-e` only with filters that emit a value (booleans, objects, counts).
+
 ## Portability & Performance
 
 ### Prefer Builtins Over External Commands
@@ -466,6 +492,62 @@ shellcheck -x scripts/*.sh  # follow sourced files
 - Run it on every PR — treat warnings as errors in CI.
 - Use `# shellcheck disable=SC2034` for intentional suppressions (with comment explaining why).
 
+## PowerShell / Windows Interop
+
+### Scope ErrorActionPreference Per Native Call and Decide by Exit Code
+
+Under Windows PowerShell 5.1, `$ErrorActionPreference = "Stop"` plus `2>&1` on a native command wraps the first stderr line in an `ErrorRecord` and promotes it to a terminating `NativeCommandError` — the script dies even when the command exits 0 (many CLIs write progress/warnings to stderr) and `$LASTEXITCODE` is never inspected. Removing `2>&1` leaks stderr and loses diagnostics; setting `Continue` globally loses fail-fast; `try/catch` loses the remaining output and breaks exit-code flow control.
+
+```powershell
+# CORRECT — scope EAP to the invocation, restore in finally, return the exit code
+function Invoke-NativeCommand {
+    param([Parameter(Mandatory)][string[]]$CommandArguments)
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & aws @CommandArguments 2>&1
+        return [pscustomobject]@{ Output = $output; ExitCode = $LASTEXITCODE }
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+}
+
+# Callers decide success from ExitCode. When parsing JSON from Output,
+# filter stderr records first — they arrive as ErrorRecord objects:
+$json = ($result.Output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }) -join "`n"
+```
+
+PowerShell 7 changed this behavior, so scripts that must run on 5.1 (default on Windows Server and enterprise desktops) need the wrapper even if they appear fine in pwsh.
+
+### Write Tool-Consumed Files as BOM-less UTF-8
+
+In Windows PowerShell 5.1, both `Set-Content -Encoding UTF8` and `Out-File -Encoding utf8` emit a UTF-8 BOM (`EF BB BF`). Strict consumers such as the AWS CLI's `file://` JSON loader do not strip it and fail with parse errors even though the content looks valid in every editor — and `ConvertFrom-Json` parses it fine because PowerShell tolerates the BOM.
+
+```powershell
+# WRONG — BOM breaks the downstream consumer
+$payload | Set-Content -Encoding UTF8 batch.json
+
+# CORRECT — explicit BOM-less encoder (WriteAllText needs an absolute path)
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($outputFile, $payload, $utf8NoBom)
+```
+
+Verify by dumping the first bytes: the file must start at `7B` (`{`), not `EF BB BF`. PowerShell 7's `utf8` encoding is BOM-less by default; use the explicit encoder anyway when the script must run on both.
+
+### Use -Command for Array Parameters — -File Binds Literal Strings
+
+`powershell -File` performs no expression parsing on script arguments — every token is bound as a literal string, so a `[string[]]` parameter invoked as `-Only a.png,b.svg` receives one element `"a.png,b.svg"`. Array literals, `@()`, and comma constructors are language syntax and only take effect under `-Command`.
+
+```bash
+# WRONG — one comma-joined literal string reaches the [string[]] parameter
+powershell -File script.ps1 -Only a.png,b.svg
+
+# CORRECT — a real PowerShell parser builds the array
+powershell -NoProfile -Command "& 'script.ps1' -Only @('a.png','b.svg')"
+```
+
+Alternatively, keep `-File` invocation but accept a single delimited string and split inside the script (`$Only -split ','`).
+
 ## Common Patterns
 
 ### Retry with Backoff
@@ -489,7 +571,7 @@ retry() {
 }
 
 # Usage
-retry 3 5 curl -sf https://api.example.com/health
+retry 3 5 curl -sf "$HEALTH_CHECK_URL"
 ```
 
 ### Logging
@@ -540,7 +622,7 @@ failure() { echo -e "${RED}✗ $*${NC}" >&2; }
 | No `set -euo pipefail` | Always use strict mode |
 | Unquoted variables `$var` | Always `"$var"` |
 | Parsing `ls` output | Use globs or `find -print0` |
-| `cd dir && rm -rf *` without checking cd | `cd dir \|\| die "..."` |
+| Destructive cleanup after unchecked `cd` | `cd dir \|\| die "..."` before cleanup |
 | `eval "$user_input"` | Use arrays: `cmd=(...); "${cmd[@]}"` |
 | Temp files in `/tmp/myscript.tmp` | `mktemp` + `trap cleanup EXIT` |
 | Global variables in functions | `local` for all function variables |
@@ -551,6 +633,6 @@ failure() { echo -e "${RED}✗ $*${NC}" >&2; }
 ## Related Skills
 
 - **security** — Input validation, injection prevention, secrets management (applies to all scripts handling user input or credentials)
-- **nodejs** — CI/CD shell steps and Docker deployment scripts often accompany Node.js builds
-- **cloudformation** / **terraform** — Infrastructure deployment scripts that wrap IaC tooling
+- **js-ts-best-practices** — CI/CD shell steps and Docker deployment scripts often accompany Node.js builds
+- **terraform-change-safety** — Change-safety patterns for the Terraform/OpenTofu stacks that deployment scripts wrap
 - **best-practices** — Defensive programming and fail-fast patterns that apply to script design

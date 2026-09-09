@@ -1,10 +1,10 @@
 ---
 name: js-ts-best-practices
-description: JavaScript and TypeScript backend best practices for writing robust, testable, and maintainable code. This skill should be used when writing, reviewing, or refactoring JS/TS code. Triggers on tasks involving Node.js services, Express/Fastify/NestJS, async patterns, TypeScript types, error handling, or testing. Complements the react-best-practices skill (frontend/React focus) with general language patterns.
+description: JavaScript and TypeScript backend best practices for writing robust, testable, and maintainable code. This skill should be used when writing, reviewing, or refactoring JS/TS code. Triggers on tasks involving Node.js services, Express/Fastify/NestJS, async patterns, TypeScript types, error handling, or testing. Pair with project-local frontend/React guidance when the destination repo provides it.
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # JavaScript / TypeScript Best Practices
@@ -35,6 +35,8 @@ Reference these guidelines when:
 | 8 | External Resources & Operations | LOW-MEDIUM | `resource-` |
 
 ## Quick Reference
+
+The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `AGENTS.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
 
 ### 1. Type Safety (CRITICAL)
 
@@ -93,11 +95,21 @@ Reference these guidelines when:
 
 ## How to Use
 
-Read individual rule files for detailed explanations and code examples:
+Read the standalone rule files for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `AGENTS.md`:
+
+Use [references/source-backed-node-typescript.md](references/source-backed-node-typescript.md)
+for Node runtime and TypeScript-toolchain choices.
 
 ```
-rules/type-strict-config.md
 rules/async-promise-all.md
+rules/async-race-conditions.md
+rules/di-constructor-injection.md
+rules/error-custom-classes.md
+rules/logging-structured.md
+rules/resource-env-validation.md
+rules/testing-mock-interface.md
+rules/type-narrowing.md
+rules/type-no-any.md
 ```
 
 Each rule file contains:
@@ -108,8 +120,7 @@ Each rule file contains:
 
 ## Related Skills
 
-- **nodejs** — Node.js runtime: process lifecycle, Express/Fastify middleware, streams, Docker deployment (complements this skill's language-level patterns)
-- **react-best-practices** — React/Next.js performance optimization (frontend complement to this skill's backend focus)
+- Project-local frontend guidance — React/Next.js performance optimization when the destination repo provides it
 - **best-practices** — SOLID principles, architecture patterns, resilience (language-agnostic foundations)
 - **security** — Injection prevention, auth, secrets, XSS/CSRF (applies to all JS/TS endpoints)
 - **testing** — AC traceability, test pyramid, coverage checklist (universal testing discipline)

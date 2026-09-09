@@ -31,8 +31,8 @@ Help engineers make data changes that are technically correct and operationally 
 
 ## Related Rules And Workflows
 
-- `rules/data-governance.md`
-- `rules/data-pipeline-contracts.md`
+- `skills/data-governance/references/rules.md`
+- `skills/data-pipeline/references/data-pipeline-contracts.md`
 - `workflows/dataset-onboarding.md`
 - `workflows/bilingual-doc-sync.md`
 

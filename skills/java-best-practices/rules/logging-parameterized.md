@@ -24,3 +24,7 @@ log.debug("Processing user: {} with {} items", user.getId(), items.size());
 - Use appropriate levels: ERROR (action needed), WARNING (concerning), INFO (milestones), DEBUG (diagnostics).
 - Log at function boundaries: entry (DEBUG), result (INFO/DEBUG), exceptions (ERROR/WARNING).
 - Never log PII, credentials, or full request/response bodies in production.
+- For startup beans or configuration loaders that establish critical runtime
+  state, log the final sanitized or parsed value at `INFO` after successful
+  construction. Prefer the value the application will use over raw config
+  payloads, and keep equivalent logs for mock/test replacement paths.

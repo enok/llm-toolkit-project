@@ -38,7 +38,7 @@ terraform-compliance -f compliance/ -p tfplan.json
 # macOS
 brew install trivy
 
-# Linux (package manager — preferred over curl|bash)
+# Linux (package manager — preferred over piping a remote script into a shell)
 sudo apt-get install -y trivy  # Debian/Ubuntu (add aquasecurity repo first)
 # Or: download a pinned release binary with checksum verification
 

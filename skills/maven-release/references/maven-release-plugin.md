@@ -49,7 +49,7 @@ The Maven Release Plugin automates the release lifecycle in two main phases:
 
 ### Maven Settings (credentials)
 
-The `<server><id>` in `~/.m2/settings.xml` must match the `<repository><id>` in the POM:
+The `<server><id>` in the Maven settings file (`~/.m2/settings.xml`; `%USERPROFILE%\.m2\settings.xml` on Windows) must match the `<repository><id>` in the POM:
 
 ```xml
 <!-- ~/.m2/settings.xml -->
@@ -186,16 +186,16 @@ This reverts the POM changes and removes the tag. The `release.properties` file 
 If automatic rollback fails:
 
 ```bash
-# Delete the Git tag locally and remotely
+# Delete the Git tag locally and remotely only after confirming the release
+# tag is invalid and no consumer depends on it.
 git tag -d <tag-name>
-git push origin :refs/tags/<tag-name>
+git push --delete origin <tag-name>
 
 # Revert the 2 commits created by release:prepare
 git revert HEAD~2..HEAD
 
-# Or hard reset if the commits are the latest
-git reset --hard HEAD~2
-git push --force-with-lease
+# If history rewrite looks necessary, stop and ask the repository owner.
+# Do not run hard reset or force-push cleanup from an autonomous agent.
 
 # Clean release artifacts
 mvn release:clean

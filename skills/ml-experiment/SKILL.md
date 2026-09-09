@@ -11,7 +11,7 @@ license: MIT
 
 Run or update ML experiments with proper baselines, leakage prevention, and reproducible evaluation.
 
-> **Reference**: For complete guidance, see `workflows/ml-experiment.md` and `rules/ml-experiment.md`
+> **Reference**: For complete guidance, see `workflows/ml-experiment.md` and `skills/ml-experiment/references/rules.md`
 
 ## Quick Reference
 
@@ -56,5 +56,5 @@ Run or update ML experiments with proper baselines, leakage prevention, and repr
 ## Related
 
 - `workflows/ml-experiment.md` — Complete workflow
-- `rules/ml-experiment.md` — ML experiment rules
+- `skills/ml-experiment/references/rules.md` — ML experiment rules
 - `skills/notebook-analysis` — EDA before ML

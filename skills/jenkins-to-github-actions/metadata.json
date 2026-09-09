@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "organization": "llm-toolkit-project",
+  "date": "May 2026",
+  "abstract": "Plan, translate, secure, and validate migrations from Jenkins CI/CD pipelines to GitHub Actions workflows.",
+  "references": [
+    "https://docs.github.com/en/actions/tutorials/migrate-to-github-actions/manual-migrations/migrate-from-jenkins",
+    "https://docs.github.com/en/actions/tutorials/migrate-to-github-actions/automated-migrations/jenkins-migration",
+    "https://docs.github.com/en/actions/reference/security/secure-use",
+    "https://docs.github.com/en/actions/concepts/security/secrets",
+    "https://github.com/anthropics/skills"
+  ]
+}

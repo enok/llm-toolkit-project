@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "organization": "dev-tools",
   "date": "March 2026",
-  "abstract": "Comprehensive application security best practices that apply to any project handling user data. Covers injection prevention, authentication/authorization, secrets management, XSS/CSRF/SSRF, dependency security, PII protection, and threat modeling. Merges rules/security.md and rubrics/security.md into a unified security skill with detailed code examples.",
+  "abstract": "Comprehensive application security best practices that apply to any project handling user data. Covers injection prevention, authentication/authorization, secrets management, XSS/CSRF/SSRF, dependency security, PII protection, and threat modeling. Merges shared security guidance and rubrics/security.md into a unified security skill with detailed code examples.",
   "references": [
     "https://owasp.org/www-project-top-ten/",
     "https://cheatsheetseries.owasp.org/",

@@ -31,8 +31,8 @@ Help engineers work in notebooks without turning them into opaque, one-off artif
 
 ## Related Rules And Workflows
 
-- `rules/jupyter-notebook-hygiene.md`
-- `rules/analytics-reproducibility.md`
+- `skills/notebook-analysis/references/notebook-discipline.md`
+- `skills/notebook-analysis/references/analytics-discipline.md`
 - `workflows/notebook-analysis-update.md`
 - `workflows/notebook-to-script.md`
 

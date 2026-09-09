@@ -145,7 +145,7 @@ Add a `Makefile` target such as `make install-local` that installs the command o
 
 ## Companion Skill
 
-After the CLI works, create or update a small skill for it. Use `$skill-creator` when it is available. Prefer the user's personal Codex skill home for private companion skills unless the user explicitly names a repository skill path or another skill repo.
+After the CLI works, create or update a small skill for it. Use `$skill-creator` when it is available. Prefer the user's personal skill home for private companion skills (for example `$CODEX_HOME/skills/<tool-name>/SKILL.md` for Codex) unless the user explicitly names a repository skill path (such as a repo-local `.codex/skills/...` directory) or another skill repo.
 
 Write the companion skill in the order a future Codex thread should use the CLI, not as a tour of every feature. Explain:
 

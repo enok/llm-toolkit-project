@@ -1,6 +1,10 @@
 ---
 name: "security-best-practices"
-description: "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (Python, JavaScript/TypeScript, Go, Java). Do not trigger for general code review, debugging, or non-security tasks."
+description: "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (Python, JavaScript/TypeScript, Java); for other languages, fall back to the generic guidance path. Do not trigger for general code review, debugging, or non-security tasks."
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # Security Best Practices
@@ -15,11 +19,9 @@ If the user explicitly asks for an OWASP review, OWASP Top 10 assessment, or a f
 
 The initial step is to identify ALL languages and ALL frameworks in scope. Focus on the primary core frameworks. Often you will want to identify both frontend and backend languages and frameworks.
 
-Then check this skill's references directory (if available) for relevant documentation. The format of the filenames is `<language>-<framework>-<stack>-security.md`. Also check for `<language>-general-<stack>-security.md` which is agnostic to the specific framework.
+Then check this skill's `references/` directory, but only when that directory is present — this skill currently ships without bundled reference files, so it usually is not. When references exist, filenames follow `<language>-<framework>-<stack>-security.md`, plus `<language>-general-<stack>-security.md` for framework-agnostic guidance; for a web application, check reference documents for BOTH frontend and backend.
 
-If working on a web application with both frontend and backend, check reference documents for BOTH sides.
-
-If no relevant reference material is available, apply well-known security best practices for the language and framework.
+When no matching reference exists (the default), take the generic path: apply the built-in guidance below together with the **security** skill and the relevant language best-practices skills, plus well-known security best practices for the language and framework.
 
 ## Operating Modes
 
@@ -78,4 +80,4 @@ While TLS is important for production, most development work will be with TLS di
 - **security** — general application security principles
 - **owasp-security-review** — OWASP-specific audit and findings report
 - **security-threat-model** — architectural threat modeling
-- **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **nodejs** — language-specific patterns
+- **java-best-practices**, **python-best-practices**, **js-ts-best-practices** — language-specific patterns

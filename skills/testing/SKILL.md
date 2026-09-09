@@ -4,7 +4,7 @@ description: Universal testing discipline and best practices for any project reg
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Testing Best Practices
@@ -20,6 +20,8 @@ Reference these guidelines when:
 - Mapping acceptance criteria to test cases
 - Choosing between unit, integration, and E2E tests
 - Designing mocks, fixtures, and test data
+- Testing Terraform-managed resources, dashboards, metrics, alarms, or
+  non-Production post-apply convergence
 
 ## Rule Categories by Priority
 
@@ -32,6 +34,8 @@ Reference these guidelines when:
 | 5 | Coverage & Test Pyramid | MEDIUM | `coverage-` |
 
 ## Quick Reference
+
+The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `AGENTS.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
 
 ### 1. Test Discipline (CRITICAL)
 
@@ -66,14 +70,23 @@ Reference these guidelines when:
 - `coverage-exception-paths` - Verify exception type and message
 - `coverage-pyramid` - Many unit tests, fewer integration, fewest E2E
 
+## Infrastructure and observability contracts
+
+For Terraform structural parity, non-Production post-apply validation,
+dashboard and widget semantics, visual evidence, alarm transitions, and
+notification delivery, use
+[`references/terraform-observability-contract-testing.md`](references/terraform-observability-contract-testing.md).
+
 ## How to Use
 
-Read individual rule files for detailed explanations and code examples:
+Read the standalone rule files for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `AGENTS.md`:
 
 ```
 rules/ac-mapping.md
 rules/pattern-arrange-act-assert.md
 ```
+
+[references/rules.md](references/rules.md) is a compact always-on summary of this baseline for consumer repos that want the whole thing in one short file.
 
 Each rule file contains:
 - Brief explanation of why it matters
@@ -90,6 +103,8 @@ This skill provides **universal testing discipline**. Pair it with language-spec
 - **js-ts-best-practices** — Vitest/Jest, `vi.fn()`, async test patterns, mock-at-interface for TypeScript
 - **best-practices** — Architecture patterns (layered, SOLID) that make code testable in the first place
 - **security** — Security-specific test cases: injection attempts, auth bypass, PII exposure
+- **terraform-change-safety** / **terraform-specialist** — the change-safety side of the Terraform contracts referenced above
+- **test-plan** / **run-tests** — derive a plan from a diff, then execute the repo's suite
 
 ## Full Compiled Document
 

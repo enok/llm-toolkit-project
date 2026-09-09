@@ -101,7 +101,7 @@ mvn release:rollback
 
 # If rollback fails, manual cleanup:
 git tag -d <tag-name>
-git push origin :refs/tags/<tag-name>
+git push --delete origin <tag-name>
 git revert HEAD~2    # revert the 2 commits from prepare
 ```
 
