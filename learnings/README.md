@@ -19,7 +19,7 @@ Each learning is a standalone markdown file with YAML frontmatter:
 ```markdown
 ---
 title: Short descriptive title
-category: environment | build | api | architecture | testing | toolchain | deployment
+category: environment | build | api | architecture | testing | toolchain | deployment | security | data-pipeline | monitoring
 created: YYYY-MM-DD
 tags: [searchable, terms, for, this, learning]
 ---
@@ -52,3 +52,13 @@ Use lowercase kebab-case that summarizes the topic:
 - **Explain the root cause.** Solutions without context break when conditions change.
 - **Keep it concise.** Target 20–60 lines per file.
 - **Commit to version control.** These are shared team knowledge, not personal notes.
+
+## Promotion
+
+This directory is an inbox, not a permanent archive. The `toolkit-maintenance`
+workflow (`workflows/toolkit-maintenance.md`) periodically reviews it and
+promotes learnings that keep recurring into durable rules, workflows, skills,
+or scripts elsewhere in the toolkit. When a learning is promoted, its line in
+`INDEX.md` is marked as promoted with `~~strikethrough~~` plus a pointer to
+where the pattern now lives, instead of being silently deleted - so a reader
+who remembers the old lesson can still find where it went.
