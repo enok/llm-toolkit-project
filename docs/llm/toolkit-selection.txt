@@ -1,31 +1,139 @@
-# Curated shared toolkit profile for this repository
+# Curated shared toolkit profile for this repository (the toolkit itself).
 #
 # Keep generic reusable rules and workflows in the shared toolkit.
-# Consumer repos can copy this as a starting point and remove what is not relevant.
+# Consumer repos copy this as a starting point and remove what is not relevant.
+# Paths not listed here are hidden from Cursor locally by the generated
+# .cursorignore / .cursorindexingignore blocks (they stay available on disk).
 
+# Always-on rules
 rules/api-contract-surface.md
+rules/changed-code-quality-gate-required.md
 rules/ci-feedback-loop.md
+rules/cli-over-mcp.md
 rules/code-rules.md
 rules/command-safety.md
+rules/cross-platform-scripts.md
+rules/documentation-review-required.md
 rules/error-driven-learning.md
+rules/external-write-authorization.md
 rules/git-conventions.md
+rules/human-comment-reply-gate.md
+rules/log-analysis-safety.md
 rules/multi-agent-orchestration.md
 rules/operational-doc-required.md
 rules/release-safety.md
 rules/repository-context-layers.md
+rules/request-orchestration.md
 rules/security-check-required.md
 rules/workflow-authoring.md
 
+# Orchestration and toolkit evolution
+workflows/task-quality-loop.md
+workflows/agent-orchestrator-validation.md
+workflows/agent-orchestrator-evolution.md
+workflows/model-selector-validation.md
+workflows/model-selector-evolution.md
+workflows/specialist-agent-factory.md
+workflows/specialist-agent-evolution.md
+workflows/context-compaction.md
+workflows/chat-knowledge-curation.md
+workflows/automation-maintenance.md
 workflows/capture-learning.md
-workflows/commit-and-push.md
-workflows/document-creation.md
-workflows/environment-diagnose.md
-workflows/pre-pr-check.md
+workflows/self-improvement.md
+workflows/toolkit-maintenance.md
+
+# Core engineering
 workflows/project-discovery.md
 workflows/review.md
 workflows/review-and-fix.md
+workflows/ticket-review.md
+workflows/ticket-review-and-fix.md
+workflows/pre-pr-check.md
+workflows/changed-code-quality-gate.md
 workflows/run-tests.md
-workflows/security-report.md
-workflows/self-improvement.md
-workflows/toolkit-maintenance.md
 workflows/update-docs.md
+workflows/commit-and-push.md
+workflows/cross-repo-impact.md
+workflows/new-backend-feature.md
+workflows/environment-diagnose.md
+workflows/dependency-upgrade.md
+
+# Tickets, PRs, CI, releases
+workflows/ticket-research.md
+workflows/ticket-implementation.md
+workflows/ticket-research-and-implementation.md
+workflows/ticket-research-and-implementation-and-validation.md
+workflows/ticket-pr-validation-loop.md
+workflows/pr-validator-validation.md
+workflows/pr-validator-evolution.md
+workflows/java-change-validation.md
+workflows/java-validator-evolution.md
+workflows/gh-address-comments.md
+workflows/gh-fix-ci.md
+workflows/pr-automation-review.md
+workflows/ticket-release.md
+workflows/security-check-required.md
+workflows/security-report.md
+
+# Infrastructure, operations, logs
+workflows/terraform-specialist-validation.md
+workflows/terraform-specialist-evolution.md
+workflows/terraform-manual-infrastructure-handoff.md
+workflows/dag-glue-specialist-validation.md
+workflows/dag-glue-specialist-evolution.md
+workflows/aws-alarm-investigator-validation.md
+workflows/aws-alarm-investigator-evolution.md
+workflows/log-investigation.md
+workflows/aws-airflow-terraform-change.md
+workflows/aws-data-pipeline-ops.md
+workflows/aws-data-platform-ops.md
+
+# Documentation, diagrams, wiki
+workflows/document-creation.md
+workflows/documentation-reviewer-validation.md
+workflows/documentation-reviewer-evolution.md
+workflows/diagram-creation-specialist-validation.md
+workflows/diagram-creation-specialist-evolution.md
+workflows/system-architecture-specialist-validation.md
+workflows/system-architecture-specialist-evolution.md
+workflows/confluence-documentation.md
+workflows/confluence-documentation-specialist-validation.md
+workflows/confluence-documentation-specialist-evolution.md
+workflows/prod-doc-promoter-validation.md
+workflows/prod-doc-promoter-evolution.md
+workflows/markdown-pdf-export.md
+workflows/bilingual-doc-sync.md
+workflows/paired-doc-sync.md
+workflows/translation-sync.md
+
+# Data science, thesis, notebooks, pipelines (toolkit-local context)
+workflows/project-execution-main.md
+workflows/notebook-analysis.md
+workflows/notebook-analysis-update.md
+workflows/notebook-to-script.md
+workflows/notebook-latex-polish.md
+workflows/ml-experiment.md
+workflows/ml-experiment-update.md
+workflows/experiment-result-update.md
+workflows/research-analysis-cycle.md
+workflows/analysis-validation.md
+workflows/thesis-writing-main.md
+workflows/thesis-chapter-writing.md
+workflows/thesis-submission-preparation.md
+workflows/thesis-completion-guide.md
+workflows/thesis-bibliography-integration.md
+workflows/thesis-plagiarism-check.md
+workflows/thesis-plagiarism-prevention.md
+workflows/tcc-method-selection.md
+workflows/tcc-analysis-and-writing-sync.md
+workflows/tcc-formatting-abnt-review.md
+workflows/refresh-usp-mba-course-context.md
+workflows/course-material-grounding.md
+workflows/data-source-ingestion.md
+workflows/data-source-storage-backend.md
+workflows/dataset-onboarding.md
+workflows/data-pipeline-change.md
+workflows/pipeline-change-project.md
+workflows/bilingual-notebook-sync.md
+workflows/documentation-sync-project.md
+workflows/aws-airflow-terraform-project.md

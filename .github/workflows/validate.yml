@@ -1,0 +1,59 @@
+---
+name: validate
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install linters and scanners
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          pip install --upgrade pip
+          pip install yamllint semgrep
+          curl -fsSL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -fsSL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          tag="$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r .tag_name)"
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/${tag}/gitleaks_${tag#v}_linux_x64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin gitleaks
+          tag="$(curl -fsSL https://api.github.com/repos/rhysd/actionlint/releases/latest | jq -r .tag_name)"
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/${tag}/actionlint_${tag#v}_linux_amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin actionlint
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+      - name: Install SkillSpector (best effort)
+        continue-on-error: true
+        run: pip install skillspector
+      - name: Make shell scripts executable
+        run: chmod +x scripts/*.sh scripts/templates/*.sh .codex/*.sh INFRA.sh
+      - name: Regenerate provider compatibility surfaces
+        run: ./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github
+      - name: Toolkit index and genericity validation
+        run: ./scripts/validate-toolkit-indexes.sh
+      - name: Toolkit security check
+        run: ./scripts/security-check-toolkit.sh
+      - name: SkillSpector full skill scan
+        run: ./scripts/validate-skills-with-skillspector.sh --all || test "$?" -eq 127
+      - name: Toolkit validation (node validators + unit tests)
+        run: SKIP_SECURITY_CHECK_TOOLKIT=1 npm run validate
+      - name: Python unit tests
+        run: python3 -m unittest discover -s tests -v

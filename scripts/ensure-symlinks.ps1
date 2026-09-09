@@ -1,23 +1,21 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Ensure directory symlinks to toolkit are correct (repair if needed).
+  Refresh directory links (mklink /J, then mklink /d fallback) for skills, provider compatibility paths, rules, and workflows in a consumer repo.
 .DESCRIPTION
-  Mirrors scripts/ensure-symlinks.sh. Verifies .agents, .windsurf, .cursor, etc. point at toolkit.
-.PARAMETER ConsumerPath
-  Path to the consumer repo (default: current directory).
-.PARAMETER Force
-  Replace blocking paths (wrong symlinks or copied folders).
-.PARAMETER Pull
-  Run git pull in toolkit before checking.
+  Mirrors scripts/ensure-symlinks.sh. Use -Pull / --pull and a consumer path (default .). Use -Force to replace blocking paths with the expected toolkit links.
 .EXAMPLE
-  .\scripts\ensure-symlinks.ps1 . -Force
+  .\scripts\ensure-symlinks.ps1 .
+  .\scripts\ensure-symlinks.ps1 . -Pull
+  .\scripts\ensure-symlinks.ps1 --pull .
+  .\scripts\ensure-symlinks.ps1 C:\work\my-app -Pull -Force
 #>
+[CmdletBinding()]
 param(
-    [Parameter(Position = 0)]
-    [string]$ConsumerPath = '.',
+    [switch]$Pull,
     [switch]$Force,
-    [switch]$Pull
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$RemainingArguments
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,72 +25,182 @@ $ToolkitRoot = Split-Path -Parent $ScriptDir
 
 . "$ScriptDir\lib.ps1"
 
+function Ensure-ConsumerDirectory {
+    param([Parameter(Mandatory)][string]$Path)
+
+    if (Test-Path -LiteralPath $Path) {
+        $item = Get-Item -LiteralPath $Path -Force
+        if ($item.PSIsContainer -and -not $item.LinkType) {
+            return
+        }
+        if (-not $Force) {
+            throw "Blocking link/file exists at $Path. Remove it manually, or rerun with -Force to replace it with a directory for per-path toolkit links."
+        }
+        Remove-ToolkitPathSafely -Path $Path
+    }
+    New-Item -ItemType Directory -Path $Path -Force | Out-Null
+}
+
+function Ensure-SharedSkillCatalogLinks {
+    param(
+        [Parameter(Mandatory)][string]$SkillsRoot,
+        [Parameter(Mandatory)][string]$Label
+    )
+
+    $skillsSourceRoot = Join-Path $ToolkitRoot 'skills'
+    Ensure-ConsumerDirectory -Path $SkillsRoot
+    Get-ChildItem -LiteralPath $skillsSourceRoot -Directory |
+        Sort-Object Name |
+        ForEach-Object {
+            $target = Join-Path $SkillsRoot $_.Name
+            $null = Ensure-ToolkitDirectoryLink -LinkPath $target -TargetPath $_.FullName -AllowRepair:$Force
+        }
+    Write-Host $Label
+}
+
+$ConsumerPath = '.'
+foreach ($a in @($RemainingArguments | ForEach-Object { $_ })) {
+    if (-not $a) { continue }
+    switch -Exact ($a) {
+        '--pull' { $Pull = $true }
+        '--force' { $Force = $true }
+        '-Pull' { $Pull = $true }
+        '-Force' { $Force = $true }
+        default {
+            if ($a -notmatch '^-') { $ConsumerPath = $a }
+        }
+    }
+}
+
+if (-not (Test-Path -LiteralPath "$ToolkitRoot\skills" -PathType Container) -and -not (Test-Path -LiteralPath "$ToolkitRoot\.agents\skills" -PathType Container)) {
+    Write-Error "toolkit root not found (expected skills/ at $ToolkitRoot)"
+}
+
+if (-not (Test-Path -LiteralPath $ConsumerPath -PathType Container)) {
+    Write-Error "consumer path is not a directory: $ConsumerPath"
+}
+
 $Consumer = Resolve-ToolkitAbsolutePath $ConsumerPath
+$ToolkitRootResolved = Resolve-ToolkitAbsolutePath $ToolkitRoot
+$IsToolkitRepo = ($Consumer -eq $ToolkitRootResolved)
 
-# Optional: pull latest toolkit first
-if ($Pull -and (Test-Path (Join-Path $ToolkitRoot '.git') -PathType Container)) {
-    Write-Host "Pulling latest toolkit changes..."
+if ($Pull) {
+    Push-Location $ToolkitRoot
     try {
-        Push-Location $ToolkitRoot
-        git pull
+        Write-ToolkitExecLine "Push-Location '$ToolkitRoot'; git pull --ff-only; Pop-Location"
+        & git pull --ff-only
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "git pull --ff-only exited with code $LASTEXITCODE (continuing)."
+        }
+    }
+    finally {
         Pop-Location
     }
-    catch {
-        Write-Warning "git pull failed, continuing..."
-        Pop-Location
-    }
 }
 
-Write-Host "Ensuring symlinks for: $Consumer"
-Write-Host "Toolkit root: $ToolkitRoot"
-Write-Host ''
+Ensure-ToolkitWindsurfLayout -ToolkitRoot $ToolkitRoot -AllowRepair:$Force
 
-# Ensure toolkit layouts first
-Ensure-ToolkitWindsurfLayout -DevToolsRoot $ToolkitRoot -AllowRepair:$Force
-Ensure-ToolkitSetupLayout -DevToolsRoot $ToolkitRoot -AllowRepair:$Force
-
-# Define links to verify/create
-$links = @(
-    @{ Name = '.agents'; Target = Join-Path $ToolkitRoot '.agents' }
-    @{ Name = '.windsurf'; Target = Join-Path $ToolkitRoot '.windsurf' }
-    @{ Name = '.setup'; Target = Join-Path $ToolkitRoot '.setup' }
-)
-
-if (Test-Path (Join-Path $ToolkitRoot '.cursor') -PathType Container) {
-    $links += @{ Name = '.cursor'; Target = Join-Path $ToolkitRoot '.cursor' }
-}
-if (Test-Path (Join-Path $ToolkitRoot '.claude') -PathType Container) {
-    $links += @{ Name = '.claude'; Target = Join-Path $ToolkitRoot '.claude' }
-}
-if (Test-Path (Join-Path $ToolkitRoot '.codex') -PathType Container) {
-    $links += @{ Name = '.codex'; Target = Join-Path $ToolkitRoot '.codex' }
-}
-
-$errors = 0
-foreach ($entry in $links) {
-    $linkPath = Join-Path $Consumer $entry.Name
-    $target = $entry.Target
-
-    if (-not (Test-Path $target)) {
-        Write-Host "Skipping $($entry.Name): target not found ($target)"
-        continue
-    }
-
-    try {
-        $result = Ensure-ToolkitDirectoryLink -LinkPath $linkPath -TargetPath $target -AllowRepair:$Force
-        Write-Host "  OK: $($entry.Name) ($result)"
-    }
-    catch {
-        Write-Host "  FAIL: $($entry.Name) - $_"
-        $errors++
-    }
-}
-
-Write-Host ''
-if ($errors -eq 0) {
-    Write-Host "Done. All symlinks are correct."
+if ($IsToolkitRepo) {
+    Write-Host 'Toolkit repo: skipping per-skill provider links; sync-tool-configs.sh repairs catalog junctions.'
 }
 else {
-    Write-Warning "$errors symlink(s) could not be verified/created. Run with -Force to replace blocking paths."
-    exit 1
+    # ── 1. Shared skills and provider roots, linked by subpath ───────────────────
+    $consumerAgentsRoot = Join-Path $Consumer '.agents'
+    Ensure-ConsumerDirectory -Path $consumerAgentsRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerAgentsRoot 'skills') -Label 'Skills: .agents/skills/<name> -> toolkit/skills/<name>'
+
+    $consumerAntigravityRoot = Join-Path $Consumer '.agent'
+    Ensure-ConsumerDirectory -Path $consumerAntigravityRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerAntigravityRoot 'skills') -Label 'Antigravity: .agent/skills/<name> -> toolkit/skills/<name>'
+
+    $consumerClaudeRoot = Join-Path $Consumer '.claude'
+    Ensure-ConsumerDirectory -Path $consumerClaudeRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerClaudeRoot 'skills') -Label 'Claude Code: .claude/skills/<name> -> toolkit/skills/<name>'
+    $toolkitAgents = Join-Path $ToolkitRoot 'tool-subagents'
+    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerClaudeRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    }
+
+    $consumerCodexRoot = Join-Path $Consumer '.codex'
+    Ensure-ConsumerDirectory -Path $consumerCodexRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCodexRoot 'skills') -Label 'Codex: .codex/skills/<name> -> toolkit/skills/<name>'
+    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    }
+
+    $consumerWindsurfRoot = Join-Path $Consumer '.windsurf'
+    Ensure-ConsumerDirectory -Path $consumerWindsurfRoot
+    $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'rules') -TargetPath (Join-Path $ToolkitRoot 'rules') -AllowRepair:$Force
+    $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'workflows') -TargetPath (Join-Path $ToolkitRoot 'workflows') -AllowRepair:$Force
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerWindsurfRoot 'skills') -Label 'Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>'
+
+    $consumerCursorRoot = Join-Path $Consumer '.cursor'
+    Ensure-ConsumerDirectory -Path $consumerCursorRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCursorRoot 'skills') -Label 'Cursor: .cursor/skills/<name> -> toolkit/skills/<name>'
+    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursorRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    }
+    Write-Host '.cursor root ready; shared rules/workflows refresh during sync'
+
+    $consumerGeminiRoot = Join-Path $Consumer '.gemini'
+    Ensure-ConsumerDirectory -Path $consumerGeminiRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerGeminiRoot 'skills') -Label 'Gemini CLI: .gemini/skills/<name> -> toolkit/skills/<name>'
+
+    $consumerOpenCodeRoot = Join-Path $Consumer '.opencode'
+    Ensure-ConsumerDirectory -Path $consumerOpenCodeRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerOpenCodeRoot 'skills') -Label 'OpenCode: .opencode/skills/<name> -> toolkit/skills/<name>'
+
+    $toolkitLearningsRoot = Join-Path $ToolkitRoot 'learnings'
+    $consumerLearningsRoot = Join-Path $Consumer 'learnings'
+    if (Test-Path -LiteralPath $toolkitLearningsRoot -PathType Container) {
+        $stLearnings = Ensure-ToolkitDirectoryLink -LinkPath $consumerLearningsRoot -TargetPath $toolkitLearningsRoot -AllowRepair:$Force
+        Write-Host "learnings -> toolkit/learnings ($stLearnings)"
+    }
+    else {
+        Write-Warning 'Toolkit learnings/ not found; skipped consumer learnings link.'
+    }
 }
+
+$syncOk = Invoke-ToolkitSyncToolConfigs -ConsumerPath $Consumer -ScriptDir $ScriptDir -Force:$Force -SkipAgentsMd:$IsToolkitRepo
+if (-not $syncOk) {
+    throw 'sync-tool-configs.sh failed. Shared tool symlinks or local exports may be stale. Fix the issue and re-run, or run sync-tool-configs.sh from Git Bash.'
+}
+
+# Mark link-surface directories skip-worktree to prevent git checkout conflicts
+if (-not $IsToolkitRepo) {
+    Push-Location $Consumer
+    try {
+        $linkPaths = @(
+            '.agents/skills',
+            '.claude/agents',
+            '.claude/skills',
+            '.codex/skills',
+            '.cursor/agents',
+            '.cursor/rules',
+            '.cursor/workflows',
+            '.windsurf/rules',
+            '.windsurf/skills',
+            '.windsurf/workflows'
+        )
+        # Only mark paths that exist in the index
+        $existingPaths = @()
+        foreach ($p in $linkPaths) {
+            $gitLsOutput = & git ls-files $p 2>$null
+            if ($LASTEXITCODE -eq 0 -and $gitLsOutput) {
+                $existingPaths += $p
+            }
+        }
+        if ($existingPaths.Count -gt 0) {
+            Write-Host "Marking link surfaces skip-worktree: $($existingPaths -join ', ')"
+            & git update-index --skip-worktree @existingPaths 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warning "git update-index --skip-worktree failed (exit $LASTEXITCODE); continuing."
+            }
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
+Write-Host 'Integration refresh complete.'

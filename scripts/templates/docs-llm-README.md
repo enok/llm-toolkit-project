@@ -1,21 +1,31 @@
-# LLM Toolkit Configuration
+# Repo-Local LLM Configuration
 
-This directory contains repository-specific LLM toolkit configuration.
+Use this directory for repository-specific LLM guidance that should not live in the shared toolkit links.
 
-## Contents
+## Shared vs local
 
-- `toolkit-selection.txt` - Curated selection of shared toolkit rules/workflows
-- `rules/` - Repository-specific rules (extends shared toolkit rules)
-- `workflows/` - Repository-specific workflows (extends shared toolkit workflows)
-- `references/` - Reference materials for this project
+- Shared toolkit content stays in `.agents/`, `.claude/`, `.codex/`, `.cursor/`, and `.windsurf/`
+- Repo-local context stays in `docs/llm/`
+- Keep reusable generic guidance in the shared toolkit
+- Keep project-specific architecture, domain terms, conventions, and workflow notes here
 
-## Getting Started
+## Local layout
 
-1. Review `toolkit-selection.txt` and select relevant shared toolkit rules/workflows
-2. Create repository-specific rules in `rules/` for your tech stack and domain
-3. Create repository-specific workflows in `workflows/` for your project processes
-4. Run `scripts/sync-llm-configs.sh` (or `.ps1` on Windows) after updating selections
+- `docs/llm/toolkit-selection.txt`: repo-local allowlist for shared toolkit rules and workflows
+- `docs/llm/rules/`: project-only rules and conventions
+- `docs/llm/workflows/`: project-only workflows and playbooks
 
-## Project-Specific Context
+## Cursor note
 
-Add project architecture, key services, domain terms, and conventions here.
+When `.cursor/` is linked to the shared toolkit, do not treat `.cursor/rules/` or `.cursor/workflows/` as repo-local.
+Use `docs/llm/toolkit-selection.txt`, `.cursorignore`, and `.cursorindexingignore`
+to narrow the local surface without editing shared toolkit files.
+
+## Examples
+
+- Toolkit `rules/examples/` contains shared starting points you can adapt into repo-local files.
+
+## Integrations
+
+- Toolkit `integrations/` contains shared setup guides for optional tools and services.
+- Configure only the integrations your repository actually uses.

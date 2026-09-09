@@ -1,0 +1,20 @@
+{
+  "name": "llm-toolkit-project",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared IDE-agnostic LLM development toolkit",
+  "scripts": {
+    "tool-configs:sync": "node scripts/create-specialist-agent.js --sync-tool-configs .",
+    "subagents:apply": "node scripts/create-specialist-agent.js --apply-subagents",
+    "skills:index:check": "node scripts/validate-specialist-agent.js --skills-index-check",
+    "skills:security:check": "node scripts/validate-specialist-agent.js --skillspector-check",
+    "skills:security:check:all": "node scripts/validate-specialist-agent.js --skillspector-check-all",
+    "rules:redirects:check": "node scripts/validate-specialist-agent.js --rules-redirects-check",
+    "workflows:size:check": "node scripts/validate-specialist-agent.js --workflows-size-check",
+    "subagents:check": "node scripts/validate-specialist-agent.js --subagents-check",
+    "llm-content:security-check": "node scripts/validate-specialist-agent.js --llm-security-scan",
+    "code:quality:changed": "node scripts/validate-specialist-agent.js --changed-code-quality-gate",
+    "test": "python3 -m unittest discover -s tests",
+    "validate": "node scripts/validate-specialist-agent.js --all && python3 -m unittest discover -s tests"
+  }
+}

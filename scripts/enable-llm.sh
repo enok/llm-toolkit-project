@@ -125,8 +125,10 @@ use_relative_paths() {
         return 1  # User didn't request relative paths
     fi
     
-    local llm_parent="$(cd "$LLM_TOOLKIT_DIR/.." && pwd)"
-    local target_parent="$(cd "$TARGET_PATH/.." && pwd)"
+    local llm_parent
+    llm_parent="$(cd "$LLM_TOOLKIT_DIR/.." && pwd)"
+    local target_parent
+    target_parent="$(cd "$TARGET_PATH/.." && pwd)"
     
     if [ "$llm_parent" = "$target_parent" ]; then
         return 0  # Same parent, can use relative
@@ -197,7 +199,8 @@ enable_item() {
     
     # Use relative path for symlinks if requested and possible
     if [ "$MODE" = "symlink" ] && use_relative_paths; then
-        local llm_dirname="$(basename "$LLM_TOOLKIT_DIR")"
+        local llm_dirname
+        llm_dirname="$(basename "$LLM_TOOLKIT_DIR")"
         link_source="../$llm_dirname/$item"
     fi
     

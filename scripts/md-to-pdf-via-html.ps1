@@ -125,7 +125,7 @@ try {
     $job = Start-Job -ScriptBlock {
         param($workDir, $listenPort)
         Set-Location -LiteralPath $workDir
-        python -m http.server $listenPort
+        python -m http.server $listenPort --bind 127.0.0.1
     } -ArgumentList $tmp, $port
 
     Start-Sleep -Seconds 2

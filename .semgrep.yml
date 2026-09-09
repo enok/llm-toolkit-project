@@ -1,0 +1,90 @@
+---
+rules:
+  - id: changed-code-python-eval
+    languages: [python]
+    message: Avoid evaluating dynamically constructed Python expressions.
+    severity: ERROR
+    pattern: eval(...)
+  - id: changed-code-python-exec
+    languages: [python]
+    message: Avoid executing dynamically constructed Python code.
+    severity: ERROR
+    pattern: exec(...)
+  - id: changed-code-python-subprocess-shell
+    languages: [python]
+    message: Avoid shell=True; pass an argument array to subprocess APIs.
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+          - pattern: subprocess.call(..., shell=True, ...)
+  - id: changed-code-javascript-eval
+    languages: [javascript, typescript]
+    message: Avoid evaluating dynamically constructed JavaScript.
+    severity: ERROR
+    pattern: eval(...)
+  - id: changed-code-javascript-child-process-exec
+    languages: [javascript, typescript]
+    message: Avoid shell command strings; use an argument-array process API.
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: child_process.exec(...)
+          - pattern: $CP.exec(...)
+  - id: changed-code-java-runtime-exec
+    languages: [java]
+    message: Avoid Runtime.exec; use a fixed argument-list process API with validated input.
+    severity: ERROR
+    pattern: Runtime.getRuntime().exec(...)
+  - id: changed-code-java-processbuilder-shell
+    languages: [java]
+    message: Avoid invoking a command shell through ProcessBuilder.
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: new ProcessBuilder("sh", "-c", ...)
+          - pattern: new ProcessBuilder("bash", "-c", ...)
+          - pattern: new ProcessBuilder("cmd", "/c", ...)
+          - pattern: new ProcessBuilder("powershell", "-Command", ...)
+          - pattern: new ProcessBuilder("pwsh", "-Command", ...)
+          - pattern: new ProcessBuilder(java.util.List.of("sh", "-c", ...))
+          - pattern: new ProcessBuilder(java.util.List.of("bash", "-c", ...))
+          - pattern: new ProcessBuilder(java.util.List.of("cmd", "/c", ...))
+          - pattern: new ProcessBuilder(java.util.List.of("powershell", "-Command", ...))
+          - pattern: new ProcessBuilder(java.util.List.of("pwsh", "-Command", ...))
+          - pattern: new ProcessBuilder(List.of("sh", "-c", ...))
+          - pattern: new ProcessBuilder(List.of("bash", "-c", ...))
+          - pattern: new ProcessBuilder(List.of("cmd", "/c", ...))
+          - pattern: new ProcessBuilder(List.of("powershell", "-Command", ...))
+          - pattern: new ProcessBuilder(List.of("pwsh", "-Command", ...))
+  - id: changed-code-java-print-stack-trace
+    languages: [java]
+    message: Do not print stack traces directly; use the project logger with relevant context.
+    severity: ERROR
+    pattern: $EXCEPTION.printStackTrace(...)
+  - id: changed-code-java-processbuilder-variable-command
+    languages: [java]
+    message: Avoid opaque variable command lists in ProcessBuilder; construct a fixed argument list at the call site after validating input.
+    severity: ERROR
+    patterns:
+      - pattern: new ProcessBuilder($COMMAND)
+      - metavariable-regex:
+          metavariable: $COMMAND
+          regex: '^[A-Za-z_$][A-Za-z0-9_$]*$'
+  - id: changed-code-java-system-output
+    languages: [java]
+    message: Do not write application diagnostics to System.out or System.err; use the project logger.
+    severity: ERROR
+    pattern-either:
+      - pattern: System.out.print(...)
+      - pattern: System.out.println(...)
+      - pattern: System.out.printf(...)
+      - pattern: System.err.print(...)
+      - pattern: System.err.println(...)
+      - pattern: System.err.printf(...)
+  - id: changed-code-java-direct-object-deserialization
+    languages: [java]
+    message: Avoid direct Java object deserialization from ObjectInputStream; use a validated, constrained format instead.
+    severity: ERROR
+    pattern: (new ObjectInputStream(...)).readObject()

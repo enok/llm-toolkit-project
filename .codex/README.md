@@ -2,34 +2,42 @@
 
 `AGENTS.md` remains the primary repository instruction surface for Codex sessions.
 
-This `.codex/` directory is an optional companion layout for teams that want a Codex-oriented mirror next to `.agents/`, `.claude/`, `.cursor/`, and `.windsurf/`.
+This `.codex/` directory is a thin Codex compatibility surface next to `.agents/`, `.claude/`, `.cursor/`, and `.windsurf/`.
 
 ## What belongs here
 
 - `README.md` for Codex-specific notes.
-- `skills/` as an optional mirror of portable skills from `.agents/skills/`.
-- `agents/` as an optional mirror for Codex-oriented agent prompts.
-- true Codex-only additions only when they cannot live in the tool-agnostic source tree.
+- `skills/` as a compatibility symlink to the shared skill catalog.
+- `agents/` as generated per-file compatibility copies of the shared `tool-subagents/` catalog. Not committed (gitignored except this README); regenerate locally, do not hand-edit.
+- Codex-only additions only when they cannot live in the tool-agnostic source tree.
 
 ## Quick start
 
-Run:
+Materialize or repair the `skills/` symlink and other provider links with:
 
 ```bash
-./.codex/sync-shared-skills.sh
+./scripts/sync-tool-configs.sh . --skip-agents-md
 ```
 
-Optional:
+On Windows PowerShell:
 
-```bash
-./.codex/sync-shared-skills.sh --no-global
+```powershell
+./scripts/sync-tool-configs.ps1 . -SkipAgentsMd
 ```
 
-`--no-global` keeps the mirror local to this repository and skips `~/.codex/skills`.
+`--skip-agents-md` preserves the curated root `AGENTS.md` while repairing provider links.
 
-If the filesystem does not support symlinks, the script automatically falls back to copy mode.
-You can also force copy mode explicitly:
+Materialize or refresh the `agents/` mirror separately with:
 
 ```bash
-./.codex/sync-shared-skills.sh --copy --no-global
+npm run subagents:apply -- codex .
+```
+
+(or `all .` to refresh `.codex/agents/`, `.cursor/agents/`, and `.claude/agents/` together.)
+
+`sync-shared-skills.sh` remains available for the additional workflow of mirroring the shared skill catalog into a global `~/.codex/skills/` for system-wide Codex sessions. It refuses to replace non-symlink provider directories:
+
+```bash
+./.codex/sync-shared-skills.sh             # local repair + global mirror
+./.codex/sync-shared-skills.sh --no-global # local repair only
 ```

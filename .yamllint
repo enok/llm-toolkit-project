@@ -1,0 +1,11 @@
+---
+# yamllint configuration for the toolkit (used by scripts/security-check-toolkit.sh and CI).
+extends: default
+rules:
+  line-length:
+    max: 160
+    allow-non-breakable-inline-mappings: true
+  document-start:
+    present: true
+  truthy:
+    check-keys: false
