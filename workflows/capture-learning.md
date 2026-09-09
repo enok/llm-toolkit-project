@@ -1,12 +1,12 @@
 ---
-description: Capture a trial-and-error discovery as a shared learning so any future LLM session goes directly to the happy path
+description: Capture a trial-and-error discovery into the learnings inbox so any future LLM session goes directly to the happy path
 ---
 
 # Capture Learning
 
-Use this workflow after recovering from trial-and-error, discovering a non-obvious solution, or hitting a platform/toolchain gotcha. The output is a committed markdown file in `learnings/` that any LLM tool can consume.
+Use this workflow after recovering from trial-and-error, discovering a non-obvious solution, or hitting a platform/toolchain gotcha. The output is a committed markdown file in `learnings/` that any LLM tool can consume — a temporary evidence record that preserves the failure until it is migrated into durable rules, workflows, skills, agents, docs, scripts, tests, templates, generated surfaces, or validation gates.
 
-> This workflow is invoked automatically by the always-on `error-driven-learning` skill (see `skills/error-driven-learning/SKILL.md`). Trigger conditions are listed there — the agent should not wait for the user to ask.
+> This workflow is invoked automatically by the always-on `error-driven-learning` skill (see `skills/error-driven-learning/SKILL.md` and `rules/error-driven-learning.md`). Trigger conditions are listed there — the agent should not wait for the user to ask.
 
 ## When to trigger
 
@@ -31,7 +31,7 @@ If `learnings/` does not exist at the repo root, create it along with the `READM
 mkdir -p learnings
 ```
 
-Copy the README template from the toolkit's `learnings/README.md`. The governance is defined in `skills/error-driven-learning/SKILL.md`.
+Copy the README template from the toolkit's `learnings/README.md`, or create one following the convention in `rules/error-driven-learning.md`.
 
 ### 3. Write the learning file
 
@@ -46,7 +46,7 @@ Use this structure:
 ```markdown
 ---
 title: Short descriptive title
-category: environment | build | api | architecture | testing | toolchain | deployment
+category: environment | build | api | architecture | testing | toolchain | deployment | security | data-pipeline
 created: YYYY-MM-DD
 tags: [relevant, searchable, terms]
 ---
@@ -78,7 +78,7 @@ Before saving, verify:
 
 ### 5. Supplement tool-specific memory (optional)
 
-If your LLM tool has built-in memory (Windsurf memories, Cursor context, etc.), also store a brief reference there pointing to the learning file:
+If your LLM tool has built-in memory or tool-native context, also store a brief reference there pointing to the learning file:
 
 > See `learnings/<topic>.md` for the full solution.
 
@@ -100,9 +100,11 @@ Append one line to `learnings/INDEX.md` under the appropriate category:
 
 This keeps the always-on `error-driven-learning` fast-scan working.
 
-### 8. Commit
+### 8. Commit or migrate
 
-Stage and commit **both** the learning file and the INDEX update together. Use commit category 2 (Documentation) per `skills/git-conventions/SKILL.md`:
+If the durable destination is obvious in the same change — a rule, workflow, skill reference, script, test, or validation gate — update that asset instead of leaving a long-lived learning file, and skip the inbox entry.
+
+Otherwise stage and commit **both** the learning file and the INDEX update together. Use the Documentation commit category from `rules/git-conventions.md`:
 
 ```bash
 git add learnings/<topic>.md learnings/INDEX.md
@@ -114,3 +116,11 @@ If no ticket context exists, use a descriptive prefix:
 ```bash
 git commit -m "docs: Add learning — <short description>"
 ```
+
+`learnings/` is an inbox, not an archive. The **toolkit-maintenance** workflow consumes at most 5 learning files per run; after each selected file is migrated and validated, remove it from `learnings/` and update `learnings/INDEX.md`.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

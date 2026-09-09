@@ -1,3 +1,7 @@
+---
+description: Project-local companion to update-docs: keep the data-science repo docs, notebooks, and README aligned after changes
+---
+
 # Documentation Sync Workflow
 
 Use this repo-local workflow together with the shared workflow in `update-docs workflow`.

@@ -21,6 +21,19 @@ Use when the user is ready for a PR, wants a full branch check, or wants a revie
    - security or release-impact checks when relevant
 4. Do not pause before internal fanout unless there is a user-visible tradeoff, risky external side effect, or overlapping write ownership.
 5. Run the smallest safe validation set, then broaden only when needed.
-6. Produce one summary with blockers, warnings, follow-up fixes, and readiness status.
+6. If source code was created or updated, run the blocking
+   **changed-code-quality-gate** workflow with the trusted PR base. A
+   worktree-only scope run cannot validate committed branch changes.
+7. Build or validate the mandatory per-file **File changes** table from
+   `git diff --name-status --find-renames origin/<base>...HEAD`. Require exact
+   path coverage and file-specific purposes as defined by
+   `rules/git-conventions.md § PR File Change Table`.
+8. Produce one summary with blockers, warnings, follow-up fixes, and readiness status.
 
 See `rules/multi-agent-orchestration.md`.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

@@ -34,7 +34,7 @@ Run the **ticket-implementation** workflow (`workflows/ticket-implementation.md`
 3. Implement the plan step by step (code, config, docs).
 4. Write tests per the testing plan, verify 100% pass.
 5. **User Approval Gate** — present changes and wait for explicit approval before committing.
-6. Commit using the 5-category structure, rebase, push.
+6. Commit using semantic categories, rebase the ticket branch, and push safely.
 7. Open a draft PR.
 8. Run pre-PR check or ticket-review-and-fix.
 9. Update research docs with any deviations.
@@ -59,3 +59,9 @@ Run the **ticket-implementation** workflow (`workflows/ticket-implementation.md`
 - If Part 1 reveals the ticket is too large, suggest splitting it before implementing.
 - If the implementation in Part 2 uncovers issues the research missed, pause, update the research docs, and inform the user before continuing.
 - For multi-repo tickets, complete research across all repos first, then implement in dependency order.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

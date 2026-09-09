@@ -200,14 +200,22 @@ git push origin update-parent-<RELEASE_VERSION>
 
 ### 15. Open PRs for each client
 
+For each client repository, generate the mandatory per-file **File changes**
+table from `origin/<base>...HEAD` as required by
+`rules/git-conventions.md § PR File Change Table`. Even a one-file parent-POM
+update needs its own row and file-specific purpose. Create the PR with a body
+file, then read the body back and verify exact diff coverage.
+
 ```bash
 gh pr create --draft \
   --title "Update parent POM to <RELEASE_VERSION>" \
-  --body "Parent POM released as <RELEASE_VERSION>. Updating parent version from SNAPSHOT."
+  --body-file <pr-body.md>
+gh pr view --json body --jq .body
 ```
 
 - [ ] Each client project builds successfully against the released parent
 - [ ] PRs opened for all downstream repos
+- [ ] Every PR body contains an exact per-file change table
 
 ---
 

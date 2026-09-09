@@ -1,6 +1,10 @@
+---
+description: Project-local companion to aws-airflow-terraform-change for the data-platform repo (Airflow DAGs plus Terraform roots)
+---
+
 # AWS Airflow Terraform Change Workflow
 
-Use this repo-local workflow together with the shared workflow in `.windsurf/workflows/aws-airflow-terraform-change.md`.
+Use this repo-local workflow together with the shared workflow in `workflows/aws-airflow-terraform-change.md`.
 
 ## Repository-Specific Steps
 

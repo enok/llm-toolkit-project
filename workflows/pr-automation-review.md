@@ -17,7 +17,32 @@ Trigger: user says "fix PR bot review", "PR validation", "fix automation review"
 gh pr view --json number,title,url --jq '{number, title, url}'
 ```
 
-**2. Fetch the automation review comment** — the bot usually posts a single review comment with all findings. Example filters (adjust `author.login` / patterns for your org’s bot):
+**2. Fetch the automation review findings** — bots can post inline review
+threads, top-level review submissions, PR comments, or a mixture. Inspect both
+thread state and top-level reviews for the current head before concluding there
+is nothing left to fix.
+
+```bash
+gh pr view <PR_NUMBER> --json reviews,latestReviews,comments,statusCheckRollup
+```
+
+For inline review threads, use GraphQL:
+
+```bash
+gh api graphql -f owner='<org>' -f repo='<repo>' -F number=<PR_NUMBER> -f query='
+query($owner:String!, $repo:String!, $number:Int!) {
+  repository(owner:$owner, name:$repo) {
+    pullRequest(number:$number) {
+      reviewThreads(first:100) {
+        nodes { isResolved isOutdated path comments(first:10) { nodes { author { login } body url } } }
+      }
+    }
+  }
+}'
+```
+
+The bot often posts a single review comment with all findings. Example filters
+(adjust `author.login` / patterns for your org's bot):
 ```bash
 gh pr view <PR_NUMBER> --json comments --jq '.comments[] | select(.author.login == "cursor[bot]" or .author.login == "cursor-bot" or (.body | test("Review Outcome"))) | .body' | tail -1
 ```
@@ -26,6 +51,8 @@ If the CLI doesn't capture it, check PR reviews:
 gh api repos/{owner}/{repo}/pulls/<PR_NUMBER>/reviews --jq '.[] | select(.user.login | test("cursor")) | .body'
 ```
 If neither works, ask the user to paste the review comment or provide a screenshot.
+Treat fresh top-level Yellow or warning findings as actionable unless a human
+reviewer explicitly accepted the risk.
 
 **3. Parse the review into a structured findings table.** The bot uses this format:
 
@@ -104,9 +131,9 @@ If neither works, ask the user to paste the review comment or provide a screensh
 ## Resolution Summary
 | # | Severity | Title | Resolution | Commit |
 |---|----------|-------|------------|--------|
-| 1 | Red | ... | Fixed | Cat 5 |
+| 1 | Red | ... | Fixed | `<SHA>` — Business logic + related unit tests |
 | 2 | Red | ... | False positive — [reason] | N/A |
-| 3 | Yellow | ... | Fixed | Cat 3 |
+| 3 | Yellow | ... | Fixed | `<SHA>` — Configuration |
 | 4 | Yellow | ... | Deferred — [reason] | N/A |
 | 5 | Green | ... | Skipped — low priority | N/A |
 ```
@@ -141,12 +168,12 @@ npm test
 
 ## Phase 6 — Commit, Push, and Verify
 
-**15. Stage and commit fixes** following the 5-category commit rule (see `workflows/commit-and-push.md`). If this workflow is run as part of a ticket-review-and-fix loop, fold fixes into the existing commit structure. Otherwise, create a fixup commit:
-```bash
-git add -A
-git commit -m "TICKET-ID: Fix PR automation review findings — [summary]"
-git push --force-with-lease
-```
+**15. Stage and commit fixes** by running `workflows/commit-and-push.md` with
+selective staging. Fold each fix into its existing category/subgroup; if it
+belongs to an existing grouped commit, use the workflow's isolated
+fixup/autosquash path. Never use a repository-wide `git add -A` shortcut unless
+the complete worktree diff was proven to contain exactly one in-scope category
+and subgroup with no pre-existing user work.
 
 **16. Poll CI until the automation review check re-runs:**
 ```bash
@@ -162,7 +189,11 @@ Wait for the relevant check (name depends on your org; often includes the vendor
 
 ## Phase 7 — Reply to Review
 
-**19. Post a summary comment on the PR** addressing the bot's findings:
+**19. Draft a summary comment on the PR** addressing the bot's findings. Because
+the comment is human-facing, apply `rules/human-comment-reply-gate.md`: show the
+exact target and body first, mark it `Posting status: NOT POSTED`, and do not
+post until the user explicitly approves.
+
 ```bash
 gh pr comment <PR_NUMBER> --body "## Automation review — resolution
 
@@ -183,9 +214,9 @@ gh pr comment <PR_NUMBER> --body "## Automation review — resolution
 **20. If any Red finding revealed a gap in existing rules or workflows**, update the corresponding rule file to prevent recurrence (see `rules/ci-feedback-loop.md`).
 
 Common rule updates after automation review:
-- Vulnerable dependency → update `rules/security.md` with version pinning guidance
+- Vulnerable dependency → update `skills/security/SKILL.md` or `skills/security-best-practices/SKILL.md` with version pinning guidance
 - Payload logging → update language-specific best practices with log-safety rules
-- Request body size → update `rules/best-practices.md` with input validation patterns
+- Request body size → update `skills/best-practices/SKILL.md` with input validation patterns
 - IMDS/startup fragility → update project-specific infra rules (see `rules/examples/infra-deployment.md` as a template)
 
 ---

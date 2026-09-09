@@ -18,3 +18,9 @@ Use when the user asks to understand a repo, get onboarded, map architecture, or
 5. When asked, propose or apply committed docs (for example `README.md`, `docs/architecture.md`).
 
 See `rules/multi-agent-orchestration.md`.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

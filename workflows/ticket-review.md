@@ -44,8 +44,8 @@ Run three independent inspections. Tag every finding with its signal source.
 ### S3: Inspect Against Rules and Skills
 
 **6. Load applicable rules and skills:**
-- Generic rules: `rules/code-rules.md`, `rules/security.md`, `rules/testing.md`, `rules/best-practices.md`
-- Language-specific rules: detect primary language from changed files and load the matching rule (e.g., `rules/java-best-practices.md`, `rules/python-best-practices.md`, `rules/js-ts-best-practices.md`)
+- Generic rules and skills: `rules/code-rules.md`, `skills/security/SKILL.md`, `skills/testing/SKILL.md`, `skills/best-practices/SKILL.md`
+- Language-specific skills: detect primary language from changed files and load the matching skill (e.g., `skills/java-best-practices/SKILL.md`, `skills/python-best-practices/SKILL.md`, `skills/js-ts-best-practices/SKILL.md`)
 - Rubrics: `rubrics/code-review-checklist.md`, `rubrics/security.md`, `rubrics/architecture.md`
 - Project-specific rules: any rules in the project's `.windsurf/rules/`, `.cursor/rules/`, or similar
 
@@ -107,3 +107,9 @@ Each confirmed issue = **Blocker or Suggestion (S3)** per `rubrics/code-review-c
 - API changes → note whether types need regeneration.
 - Check test files too — tests can have bugs.
 - To act on findings, run `workflows/ticket-review-and-fix.md`.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

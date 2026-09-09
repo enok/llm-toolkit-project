@@ -34,7 +34,7 @@ Run the **ticket-implementation** workflow (`workflows/ticket-implementation.md`
 3. Implement the plan step by step (code, config, docs).
 4. Write tests per the testing plan, verify 100% pass.
 5. **User Approval Gate** — present changes and wait for explicit approval before committing.
-6. Commit using the 5-category structure, rebase, push.
+6. Commit using semantic categories, rebase the ticket branch, and push safely.
 7. Open a draft PR.
 8. Update research docs with any deviations.
 9. Present implementation summary.
@@ -56,7 +56,7 @@ Run the **ticket-review-and-fix** workflow (`workflows/ticket-review-and-fix.md`
 7. **Integration Tests** — run and verify 100% pass.
 8. **Final Test Gate** — full test suite, zero failures.
 9. **User Approval Gate** — present changes and wait for explicit approval before committing.
-10. **Commit and Push** — 5-category commit structure, rebase, push.
+10. **Commit and Push** — semantic commit organization, ticket-branch rebase, safe push.
 11. **Monitor CI Until Green** — poll CI, diagnose and fix failures, loop until green.
 
 **Only stop when CI is fully green.**
@@ -84,3 +84,9 @@ Run the **ticket-review-and-fix** workflow (`workflows/ticket-review-and-fix.md`
 - If the implementation in Part 2 uncovers issues the research missed, pause, update the research docs, and inform the user before continuing.
 - If Part 3 review finds architectural issues that require redesign, pause and discuss with the user rather than patching around them.
 - For multi-repo tickets, complete research across all repos first, then implement in dependency order, then validate each repo.
+
+---
+
+## Final Step — Self-improvement
+
+Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
