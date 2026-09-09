@@ -69,12 +69,30 @@ function parseFrontmatter(text) {
   return data;
 }
 
-function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// Locate `key = ` at the start of a line and return the text that follows it.
+// String scanning (no dynamic RegExp) keeps the TOML key handling literal.
+function tomlValueAfterKey(toml, key) {
+  const prefix = `${key} = `;
+  let searchFrom = 0;
+  while (searchFrom <= toml.length) {
+    const index = toml.indexOf(prefix, searchFrom);
+    if (index === -1) {
+      return null;
+    }
+    if (index === 0 || toml[index - 1] === "\n") {
+      return toml.slice(index + prefix.length);
+    }
+    searchFrom = index + prefix.length;
+  }
+  return null;
 }
 
 function parseTomlBasicString(toml, key) {
-  const match = toml.match(new RegExp(`^${escapeRegExp(key)} = "((?:[^"\\\\]|\\\\.)*)"`, "m"));
+  const rest = tomlValueAfterKey(toml, key);
+  if (rest === null || !rest.startsWith('"') || rest.startsWith('"""')) {
+    return null;
+  }
+  const match = rest.match(/^"((?:[^"\\]|\\.)*)"/);
   if (!match) {
     return null;
   }
@@ -82,16 +100,29 @@ function parseTomlBasicString(toml, key) {
 }
 
 function parseTomlMultilineString(toml, key) {
-  const match = toml.match(new RegExp(`^${escapeRegExp(key)} = """\\n?([\\s\\S]*?)"""`, "m"));
-  return match ? match[1] : null;
+  const rest = tomlValueAfterKey(toml, key);
+  if (rest === null || !rest.startsWith('"""')) {
+    return null;
+  }
+  let body = rest.slice(3);
+  if (body.startsWith("\n")) {
+    body = body.slice(1);
+  }
+  const close = body.indexOf('"""');
+  return close === -1 ? null : body.slice(0, close);
 }
 
 function parseTomlStringArray(toml, key) {
-  const match = toml.match(new RegExp(`^${escapeRegExp(key)} = \\[([\\s\\S]*?)\\]`, "m"));
-  if (!match) {
+  const rest = tomlValueAfterKey(toml, key);
+  if (rest === null || !rest.startsWith("[")) {
     return [];
   }
-  return (match[1].match(/"(?:[^"\\]|\\.)*"/g) || []).map((entry) =>
+  const close = rest.indexOf("]");
+  if (close === -1) {
+    return [];
+  }
+  const inner = rest.slice(1, close);
+  return (inner.match(/"(?:[^"\\]|\\.)*"/g) || []).map((entry) =>
     entry.slice(1, -1).replace(/\\(["\\])/g, "$1"),
   );
 }
