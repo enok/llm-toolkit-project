@@ -69,8 +69,12 @@ function parseFrontmatter(text) {
   return data;
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function parseTomlBasicString(toml, key) {
-  const match = toml.match(new RegExp(`^${key} = "((?:[^"\\\\]|\\\\.)*)"`, "m"));
+  const match = toml.match(new RegExp(`^${escapeRegExp(key)} = "((?:[^"\\\\]|\\\\.)*)"`, "m"));
   if (!match) {
     return null;
   }
@@ -78,12 +82,12 @@ function parseTomlBasicString(toml, key) {
 }
 
 function parseTomlMultilineString(toml, key) {
-  const match = toml.match(new RegExp(`^${key} = """\\n?([\\s\\S]*?)"""`, "m"));
+  const match = toml.match(new RegExp(`^${escapeRegExp(key)} = """\\n?([\\s\\S]*?)"""`, "m"));
   return match ? match[1] : null;
 }
 
 function parseTomlStringArray(toml, key) {
-  const match = toml.match(new RegExp(`^${key} = \\[([\\s\\S]*?)\\]`, "m"));
+  const match = toml.match(new RegExp(`^${escapeRegExp(key)} = \\[([\\s\\S]*?)\\]`, "m"));
   if (!match) {
     return [];
   }
@@ -293,8 +297,9 @@ function resolvePython() {
     return cachedPython;
   }
   cachedPython = null;
-  const locator = process.platform === "win32" ? "where" : "command";
-  const locatorArgs = process.platform === "win32" ? [] : ["-v"];
+  // `which` is an executable on POSIX systems (unlike the `command` shell builtin), so no shell is needed.
+  const locator = process.platform === "win32" ? "where" : "which";
+  const locatorArgs = [];
   for (const candidate of [
     { command: "python3", args: [] },
     { command: "python", args: [] },
@@ -303,7 +308,7 @@ function resolvePython() {
     // nosemgrep: javascript.lang.security.detect-child-process.detect-child-process
     const located = spawnSync(locator, [...locatorArgs, candidate.command], {
       encoding: "utf8",
-      shell: process.platform !== "win32",
+      shell: false,
     });
     if (located.error || located.status !== 0) {
       continue;

@@ -1,0 +1,7 @@
+# Semgrep ignore list for the toolkit's own scans (security-check-toolkit.sh and CI).
+# Sample CI templates shipped inside skills are documentation for consumers, not this
+# repository's pipelines; they keep readable version tags on purpose.
+skills/terraform/.github/
+# Generated or temporary content
+.cowork-tmp/
+node_modules/

@@ -88,11 +88,19 @@ def parse_property(raw: str) -> tuple[str, str]:
 def load_jmx(source: Path) -> ET.ElementTree:
     # Preserve comments/PIs on the round trip so the patched copy stays close
     # to the source plan instead of silently dropping author notes.
+    # The .jmx is a local, user-supplied file; Python's ElementTree does not
+    # resolve external entities, and defusedxml is used when installed for
+    # defence in depth (entity expansion / DTD retrieval hardening).
     parser = ET.XMLParser(
         target=ET.TreeBuilder(insert_comments=True, insert_pis=True)
     )
     try:
-        return ET.parse(source, parser=parser)
+        try:
+            from defusedxml.ElementTree import parse as defused_parse  # type: ignore
+
+            return defused_parse(str(source), parser=parser)
+        except ImportError:
+            return ET.parse(source, parser=parser)  # nosemgrep: python.lang.security.use-defused-xml
     except ET.ParseError as exc:
         fail(f"Could not parse {source} as XML: {exc}")
 
