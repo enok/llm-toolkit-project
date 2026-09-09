@@ -1,6 +1,6 @@
 # Security Rubric
 
-Evaluate security posture during code review. Use together with `rules/security.md`. Every item marked Blocker must be fixed before merge.
+Evaluate security posture during code review. For the full review checklist (including correctness, architecture, testing), see `rubrics/code-review-checklist.md`; use together with `rules/security-check-required.md` and `skills/security/SKILL.md`. Every item marked Blocker must be fixed before merge.
 
 ---
 
@@ -10,9 +10,10 @@ Evaluate security posture during code review. Use together with `rules/security.
 |--------|----------|
 | User-controlled input concatenated into SQL / NoSQL query | Blocker |
 | User-controlled input concatenated into shell command | Blocker |
-| User-controlled input used in file path without sanitization | Blocker |
+| User-controlled input used in file path without sanitization (path traversal) | Blocker |
 | User-controlled input rendered as HTML without escaping (XSS) | Blocker |
-| Parameterized queries / SDK builders used correctly | — (pass) |
+| User-controlled input rendered into a template with an engine that can execute code (server-side template injection) | Blocker |
+| Parameterized queries / SDK builders used correctly | - (pass) |
 
 ## Authentication & Authorization
 
@@ -33,7 +34,12 @@ Evaluate security posture during code review. Use together with `rules/security.
 | Secret committed to `.env`, config file tracked by git | Blocker |
 | Secret logged (even at DEBUG level) | Blocker |
 | Secret passed as CLI argument (visible in `ps` output) | Blocker |
-| Secrets loaded from env vars or secret store | — (pass) |
+| Secrets loaded from env vars or secret store | - (pass) |
+
+For request-context logs, prefer centralized formatting that replaces
+high-risk identifiers (session tokens, request IDs tied to a user) with a
+length plus a short hash marker rather than the raw value, and add a test
+asserting the raw identifier is absent from log output.
 
 ## Cryptography
 
@@ -72,6 +78,10 @@ Evaluate security posture during code review. Use together with `rules/security.
 | Dependency version unpinned in production lock file | Suggestion |
 | Transitive dependency pulled from untrusted registry | Blocker |
 
+Note when the diff adds or changes a dependency and recommend checking
+advisories with the ecosystem's usual tooling (for example Snyk, Dependabot,
+`npm audit`, `pip-audit`, or OWASP Dependency-Check).
+
 ## Error Handling & Observability
 
 | Signal | Severity |
@@ -84,12 +94,14 @@ Evaluate security posture during code review. Use together with `rules/security.
 
 ## Threat Model Shortcuts
 
-When reviewing a new endpoint or service boundary, quickly check:
+Extra scrutiny applies wherever data crosses a trust boundary (user -> app,
+app -> service, service -> data store). When reviewing a new endpoint or
+service boundary, quickly check:
 
-1. **Who can call it?** — authenticated + authorized?
-2. **What inputs flow in?** — validated, typed, bounded?
-3. **What secrets does it touch?** — injected, not hardcoded?
-4. **What does it return?** — no PII, no stack traces?
-5. **What does it write?** — idempotent, audit-logged?
+1. **Who can call it?** - authenticated + authorized?
+2. **What inputs flow in?** - validated, typed, bounded?
+3. **What secrets does it touch?** - injected, not hardcoded?
+4. **What does it return?** - no PII, no stack traces?
+5. **What does it write?** - idempotent, audit-logged?
 
 Any "no" without justification = Blocker.

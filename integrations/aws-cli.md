@@ -100,6 +100,36 @@ aws logs tail /ecs/my-service --follow --since 1h
 aws logs get-log-events --log-group-name /ecs/my-service --log-stream-name <stream>
 ```
 
+For production log analysis, prefer bounded, read-only Logs Insights queries
+over raw event dumps:
+
+```bash
+aws logs start-query \
+  --log-group-name /aws/lambda/my-function \
+  --start-time 1717200000 \
+  --end-time 1717203600 \
+  --query-string 'fields @timestamp, @message | sort @timestamp desc | limit 50'
+
+aws logs get-query-results --query-id <query-id>
+```
+
+Use `workflows/log-investigation.md`, `rules/log-analysis-safety.md`, and the
+`log-analysis` skill for CloudWatch, API Gateway access logs, Apache, nginx,
+Log4j/SLF4J, Lambda `REPORT`, Glue, Firehose, and server-log investigations.
+Keep prod commands read-only unless an operator approves a specific
+remediation.
+
+**Dashboard/widget visual changes need rendered semantic validation.** Widget
+JSON proves structure, not human interpretation: rendering depends on the
+statistic, period, time range, missing-data behavior, and renderer defaults
+(for example, `view: "bar"` does not mean one isolated bar per sparse event).
+Write the visual acceptance criterion before editing, then render the real
+widget (`aws cloudwatch get-metric-widget-image` or the console) over a bounded
+window containing known datapoints and compare visible timestamps/values with
+the source data. Terraform validation, JSON diffs, or a successful deploy are
+not evidence of visualization semantics; validate one representative widget's
+image before promoting the pattern to other widgets.
+
 ### Secrets Manager
 
 ```bash
