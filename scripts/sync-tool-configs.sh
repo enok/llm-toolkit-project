@@ -13,20 +13,24 @@
 #
 # Generates repo-local exports:
 #   CLAUDE.md                        - Claude Code pointer to AGENTS.md
-#   .github/copilot-instructions.md  - GitHub Copilot (shared selection + repo-local docs/llm content)
+#   .github/copilot-instructions.md  - GitHub Copilot (shared selection + LLM config content)
 #   AGENTS.md                        - primary LLM surface (preserves existing content + refreshes sync block)
 #   .cursorignore / .cursorindexingignore managed blocks (repo-local, optional)
 #
-# If docs/llm/toolkit-selection.txt exists and contains entries, repo-local generated outputs
-# are curated to that shared selection. Repo-local docs/llm/rules and docs/llm/workflows
-# are appended to AGENTS.md and Copilot exports without duplicating shared canonical files.
+# LLM config is read from the project's own docs/llm/ directory. If
+# docs/llm/toolkit-selection.txt exists and contains entries, generated outputs are
+# curated to that shared selection. Local rules and workflows from docs/llm/rules/ and
+# docs/llm/workflows/ are appended to AGENTS.md and Copilot exports without duplicating
+# shared canonical files.
 #
 # Usage:
-#   ./scripts/sync-tool-configs.sh [path-to-project] [--skip-agents-md]
+#   ./scripts/sync-tool-configs.sh [path-to-project] [--skip-agents-md] [--skip-github] [--force]
 #
 # Use --skip-agents-md when syncing this toolkit repo itself so handcrafted AGENTS.md
 # is not modified.
 # Use --skip-cursor-rules to skip repairing `.cursor/rules` and `.cursor/workflows`.
+# Use --skip-github to avoid generating `.github/copilot-instructions.md`.
+# Use --force to replace blocking paths that do not point at the expected sources.
 
 set -euo pipefail
 
@@ -40,11 +44,15 @@ fi
 
 SKIP_AGENTS_MD=0
 SKIP_CURSOR_RULES=0
+SKIP_GITHUB=0
+ALLOW_REPAIR=0
 POSITIONAL=()
 for arg in "$@"; do
   case "$arg" in
     --skip-agents-md)    SKIP_AGENTS_MD=1 ;;
     --skip-cursor-rules) SKIP_CURSOR_RULES=1 ;;
+    --skip-github|--skip-github-copilot) SKIP_GITHUB=1 ;;
+    --force|--force-repair) ALLOW_REPAIR=1 ;;
     *)                   POSITIONAL+=("$arg") ;;
   esac
 done
@@ -101,8 +109,15 @@ create_symlink() {
   local destination="$2"
 
   # Resolve source against destination parent so `-d` works for relative paths.
-  local source_resolved
+  local source_resolved source_resolved_canon
   source_resolved="$(resolve_symlink_source "$source" "$destination")"
+  if [[ -d "$source_resolved" ]]; then
+    source_resolved_canon="$(cd "$source_resolved" && pwd -P)"
+  elif [[ -e "$source_resolved" ]]; then
+    source_resolved_canon="$(cd "$(dirname "$source_resolved")" && pwd -P)/$(basename "$source_resolved")"
+  else
+    source_resolved_canon="$source_resolved"
+  fi
 
   if is_windows_shell; then
     local destination_native
@@ -116,14 +131,13 @@ create_symlink() {
     fi
     source_for_mklink="${source_for_mklink//\//\\}"
 
-    if [[ -d "$source_resolved" ]]; then
-      # Pass args separately to cmd.exe (MSYS mangles embedded-quote strings on
-      # paths with spaces). Try /D first (needs admin or Developer Mode); fall
-      # back to /J (junction, no admin; stores absolute path, same-volume only).
-      if ! cmd.exe //D //C mklink //D "$destination_native" "$source_for_mklink" >/dev/null 2>&1; then
-        local source_native
-        source_native="$(to_native_path "$source_resolved")"
-        if ! cmd.exe //D //C mklink //J "$destination_native" "$source_native" >/dev/null 2>&1; then
+    if [[ -d "$source_resolved_canon" ]]; then
+      local source_native
+      source_native="$(to_native_path "$source_resolved_canon")"
+      # Prefer junctions with absolute targets on Windows. Relative directory symlinks
+      # often become invalid reparse points when created from Git Bash/MSYS.
+      if ! cmd.exe //D //C mklink //J "$destination_native" "$source_native" >/dev/null 2>&1; then
+        if ! cmd.exe //D //C mklink //D "$destination_native" "$source_for_mklink" >/dev/null 2>&1; then
           echo "Error: failed to create directory symlink '$destination' -> '$source'." >&2
           echo "  Enable Windows Developer Mode (Settings > Privacy & security > For developers)," >&2
           echo "  or run this script from an elevated shell." >&2
@@ -144,6 +158,13 @@ create_symlink() {
 
 reset_path() {
   local path="$1"
+
+  if is_windows_shell && [[ -e "$path" || -L "$path" ]]; then
+    local path_native
+    path_native="$(to_native_path "$path")"
+    cmd.exe //D //C rmdir "$path_native" >/dev/null 2>&1 || true
+    cmd.exe //D //C del //F //Q "$path_native" >/dev/null 2>&1 || true
+  fi
 
   if [[ -L "$path" ]]; then
     rm -f "$path"
@@ -173,8 +194,32 @@ ensure_symlink() {
     return 1
   fi
 
+  if [[ -e "$target" || -L "$target" ]]; then
+    local target_resolved expected_source
+    target_resolved="$(cd "$target" 2>/dev/null && pwd -P)" || target_resolved=""
+    expected_source="$(cd "$source_resolved" 2>/dev/null && pwd -P)" || expected_source=""
+    if [[ -n "$target_resolved" && "$target_resolved" == "$expected_source" ]]; then
+      return 0
+    fi
+    if [[ "$ALLOW_REPAIR" -ne 1 ]]; then
+      echo "Error: blocking path exists at $target and does not point at the expected source." >&2
+      echo "  Expected source: $source_resolved" >&2
+      echo "  Re-run with --force to replace it after a replacement link is created." >&2
+      return 1
+    fi
+  fi
+
+  local tmp_target
+  tmp_target="${target}.tmp-link-$$"
+  reset_path "$tmp_target"
+  if ! create_symlink "$source" "$tmp_target"; then
+    reset_path "$tmp_target" 2>/dev/null || true
+    return 1
+  fi
+
   reset_path "$target"
-  if ! create_symlink "$source" "$target"; then
+  if ! mv "$tmp_target" "$target"; then
+    reset_path "$tmp_target" 2>/dev/null || true
     return 1
   fi
 }
@@ -190,7 +235,7 @@ elif [[ -d "$PROJECT/rules" ]]; then
   WINDSURF_WORKFLOWS="$PROJECT/workflows"
 elif [[ -L "$PROJECT/.agents" || -d "$PROJECT/.agents" ]]; then
   # Fallback for consumer repos where .windsurf/rules is a broken nested symlink
-  # (common on Windows/Google Drive). Resolve the toolkit root via .agents.
+  # (common on Windows synced folders). Resolve the toolkit root via .agents.
   _AGENTS_RESOLVED="$(cd "$PROJECT/.agents" 2>/dev/null && pwd -P)" || _AGENTS_RESOLVED=""
   if [[ -n "$_AGENTS_RESOLVED" ]]; then
     _TOOLKIT_ROOT="$(cd "$_AGENTS_RESOLVED/.." && pwd -P)"
@@ -228,6 +273,11 @@ if [[ -n "${TOOLKIT_DOC_TITLE:-}" ]]; then
 elif [[ -f "$PROJECT/TOOLKIT_DOC_TITLE" ]]; then
   DOC_TITLE="$(head -n1 "$PROJECT/TOOLKIT_DOC_TITLE" | tr -d '\r')"
 fi
+
+LLM_CONFIG_ROOT="$PROJECT/docs/llm"
+LLM_CONFIG_ROOT_LABEL="docs/llm"
+SELECTION_FILE="$LLM_CONFIG_ROOT/toolkit-selection.txt"
+SELECTION_FILE_LABEL="$LLM_CONFIG_ROOT_LABEL/toolkit-selection.txt"
 
 append_unique() {
   local -n ref="$1"
@@ -445,11 +495,11 @@ generate_concatenated_export() {
   {
     echo "# $title ($DOC_TITLE)"
     echo ""
-    echo "> Auto-generated from \`${DISPLAY_RULES_PREFIX}\` by \`sync-tool-configs.sh\`."
+    echo "> Auto-generated from \`${DISPLAY_RULES_PREFIX}\` and \`${DISPLAY_WORKFLOWS_PREFIX}\` by \`sync-tool-configs.sh\`."
     if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
-      echo "> Curated by \`docs/llm/toolkit-selection.txt\` for this repository."
+      echo "> Curated by \`$SELECTION_FILE_LABEL\` for this repository."
     else
-      echo "> Edit the source rule files and re-run the script."
+      echo "> Edit the source rule/workflow files and re-run the script."
     fi
     echo ""
     while IFS= read -r f; do
@@ -642,14 +692,13 @@ fi
 
 LOCAL_RULE_FILES=()
 LOCAL_WORKFLOW_FILES=()
-if [[ -d "$PROJECT/docs/llm/rules" ]]; then
-  mapfile -t LOCAL_RULE_FILES < <(find -L "$PROJECT/docs/llm/rules" -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | LC_ALL=C sort)
+if [[ -d "$LLM_CONFIG_ROOT/rules" ]]; then
+  mapfile -t LOCAL_RULE_FILES < <(find -L "$LLM_CONFIG_ROOT/rules" -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | LC_ALL=C sort)
 fi
-if [[ -d "$PROJECT/docs/llm/workflows" ]]; then
-  mapfile -t LOCAL_WORKFLOW_FILES < <(find -L "$PROJECT/docs/llm/workflows" -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | LC_ALL=C sort)
+if [[ -d "$LLM_CONFIG_ROOT/workflows" ]]; then
+  mapfile -t LOCAL_WORKFLOW_FILES < <(find -L "$LLM_CONFIG_ROOT/workflows" -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | LC_ALL=C sort)
 fi
 
-SELECTION_FILE="$PROJECT/docs/llm/toolkit-selection.txt"
 SELECTED_RULE_FILES=()
 SELECTED_WORKFLOW_FILES=()
 SELECTED_RULE_NAMES=()
@@ -704,10 +753,10 @@ fi
 echo "Syncing tool configs for: $DOC_TITLE (dir: $PROJECT_NAME)"
 echo "Source: ${DISPLAY_RULES_PREFIX} and ${DISPLAY_WORKFLOWS_PREFIX}"
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
-  echo "Selection: docs/llm/toolkit-selection.txt"
+  echo "Selection: $SELECTION_FILE_LABEL"
 fi
 if [[ "${#LOCAL_RULE_FILES[@]}" -gt 0 || "${#LOCAL_WORKFLOW_FILES[@]}" -gt 0 ]]; then
-  echo "Repo-local docs: docs/llm/rules/ and docs/llm/workflows/"
+  echo "LLM config docs: $LLM_CONFIG_ROOT_LABEL/rules/ and $LLM_CONFIG_ROOT_LABEL/workflows/"
 fi
 
 CURSOR_RULES=""
@@ -740,8 +789,14 @@ fi
 if [[ -d "$PROJECT/tool-subagents" ]]; then
   ensure_symlink "$PROJECT/.cursor/agents" "../tool-subagents"
   ensure_symlink "$PROJECT/.claude/agents" "../tool-subagents"
-  ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents"
-  echo "  OK shared subagent symlinks repaired"
+  if ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents"; then
+    CODEX_AGENTS_SYNCED=1
+    echo "  OK shared subagent symlinks repaired"
+  else
+    CODEX_AGENTS_SYNCED=0
+    echo "Warning: optional .codex/agents link could not be repaired; continuing." >&2
+    echo "  OK shared Cursor/Claude subagent symlinks repaired"
+  fi
 fi
 
 if [[ -d "$PROJECT/rules" ]]; then
@@ -752,18 +807,36 @@ if [[ -d "$PROJECT/workflows" ]]; then
 fi
 
 if [[ -d "$PROJECT/skills" ]]; then
-  ensure_symlink "$PROJECT/.agents/skills" "../skills"
-  ensure_symlink "$PROJECT/.claude/skills" "../.agents/skills"
-  ensure_symlink "$PROJECT/.codex/skills" "../.agents/skills"
-  ensure_symlink "$PROJECT/.windsurf/skills" "../.agents/skills"
-  echo "  OK shared skills symlinks repaired"
+  SKILLS_SYNCED=1
+  for link_spec in \
+    "$PROJECT/.agents/skills|../skills" \
+    "$PROJECT/.agent/skills|../.agents/skills" \
+    "$PROJECT/.claude/skills|../.agents/skills" \
+    "$PROJECT/.codex/skills|../.agents/skills" \
+    "$PROJECT/.cursor/skills|../.agents/skills" \
+    "$PROJECT/.gemini/skills|../.agents/skills" \
+    "$PROJECT/.opencode/skills|../.agents/skills" \
+    "$PROJECT/.windsurf/skills|../.agents/skills"; do
+    link_target="${link_spec%%|*}"
+    link_source="${link_spec#*|}"
+    if ! ensure_symlink "$link_target" "$link_source"; then
+      SKILLS_SYNCED=0
+      echo "Warning: shared skills compatibility link could not be repaired: $link_target" >&2
+    fi
+  done
+  if [[ "$SKILLS_SYNCED" -eq 1 ]]; then
+    echo "  OK shared skills symlinks repaired"
+  else
+    echo "Warning: shared skills compatibility links could not be fully repaired; continuing with generated exports." >&2
+    echo "  Re-run with --force if a blocking local path should be replaced." >&2
+  fi
 fi
 
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   build_ignore_block() {
     {
       echo "# BEGIN TOOLKIT SELECTION FILTERS"
-      echo "# Auto-generated from docs/llm/toolkit-selection.txt by sync-tool-configs.sh."
+      echo "# Auto-generated from $SELECTION_FILE_LABEL by sync-tool-configs.sh."
       echo "# When .cursor/ is linked to the shared toolkit, hide non-selected shared files locally."
 
       ignored_any=0
@@ -796,7 +869,7 @@ if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   SELECTION_BLOCK="$(build_ignore_block)"
   managed_block_update "$PROJECT/.cursorignore" "$SELECTION_BLOCK"
   managed_block_update "$PROJECT/.cursorindexingignore" "$SELECTION_BLOCK"
-  echo "  OK Cursor local ignore blocks refreshed from docs/llm/toolkit-selection.txt"
+  echo "  OK Cursor local ignore blocks refreshed from $SELECTION_FILE_LABEL"
 else
   managed_block_remove "$PROJECT/.cursorignore"
   managed_block_remove "$PROJECT/.cursorindexingignore"
@@ -807,20 +880,24 @@ generate_claude_pointer "$CLAUDE_FILE"
 echo "  OK CLAUDE.md linked to AGENTS.md"
 
 GITHUB_DIR="$PROJECT/.github"
-mkdir -p "$GITHUB_DIR"
-COPILOT_FILE="$GITHUB_DIR/copilot-instructions.md"
-generate_concatenated_export "Copilot Instructions" "$COPILOT_FILE"
-echo "  OK .github/copilot-instructions.md generated"
+if [[ "$SKIP_GITHUB" -eq 1 ]]; then
+  echo "  SKIP .github/copilot-instructions.md (--skip-github)"
+else
+  mkdir -p "$GITHUB_DIR"
+  COPILOT_FILE="$GITHUB_DIR/copilot-instructions.md"
+  generate_concatenated_export "Copilot Instructions" "$COPILOT_FILE"
+  echo "  OK .github/copilot-instructions.md generated"
+fi
 
 RULE_LIST_MD="$(markdown_list "$DISPLAY_RULES_PREFIX" "${EXPORT_RULE_FILES[@]}")"
 WORKFLOW_LIST_MD="$(markdown_list "$DISPLAY_WORKFLOWS_PREFIX" "${EXPORT_WORKFLOW_FILES[@]}")"
-LOCAL_RULE_LIST_MD="$(markdown_list "docs/llm/rules/" "${LOCAL_RULE_FILES[@]}")"
-LOCAL_WORKFLOW_LIST_MD="$(markdown_list "docs/llm/workflows/" "${LOCAL_WORKFLOW_FILES[@]}")"
+LOCAL_RULE_LIST_MD="$(markdown_list "$LLM_CONFIG_ROOT_LABEL/rules/" "${LOCAL_RULE_FILES[@]}")"
+LOCAL_WORKFLOW_LIST_MD="$(markdown_list "$LLM_CONFIG_ROOT_LABEL/workflows/" "${LOCAL_WORKFLOW_FILES[@]}")"
 
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   RULES_LABEL="### Selected Rules Files"
   WORKFLOWS_LABEL="### Selected Workflow Files"
-  SELECTION_NOTE="> Curated by \`docs/llm/toolkit-selection.txt\` for this repository.
+  SELECTION_NOTE="> Curated by \`$SELECTION_FILE_LABEL\` for this repository.
 >
 > When \`.cursor/\` is linked to the shared toolkit, keep shared \`.cursor/rules/\` and
 > \`.cursor/workflows/\` generic and use \`.cursorignore\` plus \`.cursorindexingignore\`
@@ -845,6 +922,23 @@ $LOCAL_WORKFLOW_LIST_MD
 "
 fi
 
+IS_TOOLKIT_PROJECT=0
+if [[ -f "$PROJECT/scripts/sync-tool-configs.sh" && -d "$PROJECT/skills" && -d "$PROJECT/rules" && -d "$PROJECT/workflows" ]]; then
+  IS_TOOLKIT_PROJECT=1
+fi
+
+if [[ "$IS_TOOLKIT_PROJECT" -eq 1 ]]; then
+  SYNC_COMMAND_INTRO="To refresh generated provider exports from the toolkit root while preserving the curated root \`AGENTS.md\`, run:"
+  SYNC_COMMAND_BASH="./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github"
+  SYNC_COMMAND_POWERSHELL="./scripts/sync-tool-configs.ps1 . -SkipAgentsMd -SkipGithub"
+  SYNC_COMMAND_NOTE="Omit \`--skip-agents-md\` / \`-SkipAgentsMd\` only when intentionally regenerating the managed block inside root \`AGENTS.md\`. Omit \`--skip-github\` / \`-SkipGithub\` only when \`.github/copilot-instructions.md\` is intentionally in scope."
+else
+  SYNC_COMMAND_INTRO="To regenerate local exports after editing shared rules, \`$SELECTION_FILE_LABEL\`, or resolved LLM config docs:"
+  SYNC_COMMAND_BASH="../llm-toolkit-project/scripts/sync-tool-configs.sh ."
+  SYNC_COMMAND_POWERSHELL="..\\llm-toolkit-project\\scripts\\sync-tool-configs.ps1 ."
+  SYNC_COMMAND_NOTE=""
+fi
+
 if [[ "$SKIP_AGENTS_MD" -eq 1 ]]; then
   echo "  SKIP AGENTS.md (--skip-agents-md)"
 else
@@ -855,7 +949,7 @@ else
   RULES_BLOCK="$MARKER_START
 ## Shared Toolkit Rules
 
-> Auto-generated from \`${DISPLAY_RULES_PREFIX}\` by \`sync-tool-configs.sh\`.
+> Auto-generated from \`${DISPLAY_RULES_PREFIX}\` and \`${DISPLAY_WORKFLOWS_PREFIX}\` by \`sync-tool-configs.sh\`.
 $SELECTION_NOTE
 
 $RULES_LABEL
@@ -870,22 +964,44 @@ $LOCAL_WORKFLOWS_SECTION
 
 ### Tool Config Locations
 
+Canonical shared content lives in toolkit \`skills/\`, \`rules/\`, \`workflows/\`, and \`tool-subagents/\`. Provider folders below are compatibility links or generated exports, not duplicate sources. The central path map is \`docs/tool-compatibility-paths.md\` in the toolkit.
+
 | Tool | Location | Format |
 |------|----------|--------|
-| Windsurf / canonical | \`.windsurf/rules/\` or \`rules/\` | Individual files (source of truth) |
-| Cursor | \`.cursor/rules/\`, \`.cursor/workflows/\`, \`.cursor/agents/\` | Symlinked compatibility surfaces that point to the canonical shared files; project filtering happens via local ignore files |
-| Claude Code | \`CLAUDE.md\`, \`.claude/agents/\` | \`CLAUDE.md\` is a thin pointer to \`AGENTS.md\`; shared agents live in \`.claude/agents/\` |
-| GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus \`docs/llm/\` |
-| Codex / Generic | \`AGENTS.md\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; \`.codex/skills\` should stay a thin symlink to the shared skill catalog when present |
+| Antigravity | \`.agent/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
+| Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; provider skill paths stay thin links to the shared skill catalog |
+| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/workflows/\`, \`.cursor/agents/\` | Symlinked compatibility surfaces that point to canonical shared files; project filtering happens via local ignore files |
+| Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` is a thin pointer to \`AGENTS.md\`; shared skills and agents are links |
+| Gemini CLI | \`.gemini/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
+| GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus resolved LLM config docs |
+| OpenCode | \`.opencode/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
+| Windsurf | \`.windsurf/skills/\`, \`.windsurf/rules/\`, \`.windsurf/workflows/\` | Thin skill links plus shared rule/workflow links |
 
-To regenerate local exports after editing shared rules, \`docs/llm/toolkit-selection.txt\`, or repo-local \`docs/llm/\` files:
+### Clone Bootstrap
+
+After cloning this repo on a new machine, make sure \`llm-toolkit-project\` is available locally, then recreate shared-tool folders from this repo root. If the toolkit is a sibling directory, run:
+
+- macOS/Linux/Git Bash: \`../llm-toolkit-project/scripts/ensure-symlinks.sh . --pull\`
+- Windows PowerShell: \`..\llm-toolkit-project\scripts\ensure-symlinks.ps1 . -Pull\`
+- Windows Command Prompt: \`..\llm-toolkit-project\scripts\ensure-symlinks.cmd . --pull\`
+
+Adjust the toolkit path if it lives elsewhere. The ensure script repairs \`.agents/\`, \`.agent/\`, \`.claude/\`, \`.codex/\`, \`.cursor/\`, \`.gemini/\`, \`.opencode/\`, \`.windsurf/\`, and \`learnings\` links, then refreshes local generated LLM exports. It does not create or modify \`.github/skills/\` by default. If a path is blocked by an old link or file, rerun with \`--force\` / \`-Force\` only after confirming the path is toolkit-managed. On Windows, directory symlinks may require Developer Mode or an elevated shell; the \`.cmd\` wrapper requires Administrator Command Prompt.
+
+### Default Orchestration
+
+For every non-trivial request, the root agent should route through shared \`rules/request-orchestration.md\` and \`tool-subagents/agent-orchestrator.md\` by default. The orchestrator maps the request, splits independent read-only or disjoint-write lanes across specialist agents, scores each delegated task's complexity tier (\`light\`/\`standard\`/\`deep\`, provider-agnostic — and MUST apply it by setting the delegation tool's model/effort parameter from the client model map in \`tool-subagents/agent-orchestrator.md\` on every dispatch where the platform exposes one; on Claude Code \`light\` -> \`haiku\`, \`standard\` -> \`sonnet\`, \`deep\` -> \`opus\`; letting a child silently inherit the session default is a routing defect, and only a platform with no per-task mechanism runs at the stated platform default), presents the plan as a wave-ordered task table (agent, task, tier, validator, loop, rough ETA, status), allows only shallow agent-to-agent delegation for independently verifiable subparts, and reduces specialist findings before editing or reporting. Every delegated task runs as a bounded produce->validate->refine quality loop per \`workflows/task-quality-loop.md\`: verifiable acceptance criteria before dispatch, a read-only validator matched to the task's evidence type, targeted refinement from the defect list on \`fail\`, max 5 iterations per task (1 for deterministic \`light\` tasks), and escalation to the root agent instead of silent acceptance when the budget is exhausted. The root agent stays on the strongest model available in the session and remains responsible for user communication, final edits, validation, commits, pushes, and PR actions. Per-task progress notifications to a user-designated channel are opt-in and gated by \`rules/human-comment-reply-gate.md\`.
+
+If any referenced shared rule, workflow, skill, or agent path is missing, run the clone bootstrap commands above before continuing.
+
+$SYNC_COMMAND_INTRO
 \`\`\`bash
-./scripts/sync-llm-configs.sh
+$SYNC_COMMAND_BASH
 \`\`\`
 On Windows PowerShell:
 \`\`\`powershell
-./scripts/sync-llm-configs.ps1
+$SYNC_COMMAND_POWERSHELL
 \`\`\`
+$SYNC_COMMAND_NOTE
 $MARKER_END"
 
   if [[ -f "$AGENTS_FILE" ]]; then
@@ -922,7 +1038,7 @@ if [[ -f "$GITIGNORE" ]]; then
 
 # AI tool configs (auto-generated by sync-tool-configs.sh)
 # Source of truth: .windsurf/rules/ and .windsurf/workflows/ OR rules/ and workflows/
-# Shared `.cursor/` and `.claude/agents` surfaces are symlinked to the canonical files.
+# Shared provider skill roots and agent surfaces are symlinked to the canonical files.
 # Repair them with: ./scripts/sync-tool-configs.sh .
 # CLAUDE.md
 # .github/copilot-instructions.md
@@ -933,14 +1049,14 @@ fi
 
 echo ""
 echo "Done. All tool configs synced for $DOC_TITLE."
-# Guard: remove Google Drive conflict-resolution duplicates (e.g., "file (1).md")
+# Guard: remove cloud-sync conflict-resolution duplicates (e.g., "file (1).md")
 if [[ "$SKIP_CURSOR_RULES" -eq 0 ]] && [[ -d "${CURSOR_RULES:-}" ]]; then
   dupes=()
   while IFS= read -r -d '' f; do
     dupes+=("$f")
   done < <(find "$CURSOR_RULES" -name "* (*).md" -print0 2>/dev/null)
   if [ "${#dupes[@]}" -gt 0 ]; then
-    echo "Warning: removing ${#dupes[@]} Google Drive conflict-duplicate(s) in $CURSOR_RULES:" >&2
+    echo "Warning: removing ${#dupes[@]} cloud-sync conflict duplicate(s) in $CURSOR_RULES:" >&2
     for f in "${dupes[@]}"; do
       echo "  rm $(basename "$f")" >&2
       rm -f "$f"
@@ -954,9 +1070,10 @@ if [[ -d "$PROJECT/tool-subagents" ]]; then
   echo "Shared agents:    tool-subagents/"
 fi
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
-  echo "Selection file:   docs/llm/toolkit-selection.txt"
+  echo "Selection file:   $SELECTION_FILE_LABEL"
 fi
-GENERATED_LIST="CLAUDE.md pointer, .github/copilot-instructions.md"
+GENERATED_LIST="CLAUDE.md pointer"
+[[ "$SKIP_GITHUB" -eq 0 ]] && GENERATED_LIST="$GENERATED_LIST, .github/copilot-instructions.md"
 [[ "$SKIP_AGENTS_MD" -eq 0 ]] && GENERATED_LIST="$GENERATED_LIST, AGENTS.md (sync section)"
 echo "Generated:        $GENERATED_LIST"
 LINKED_LIST=""
@@ -972,7 +1089,11 @@ append_linked() {
   fi
 }
 if [[ -d "$PROJECT/tool-subagents" ]]; then
-  append_linked ".cursor/agents/, .claude/agents/, .codex/agents/"
+  if [[ "${CODEX_AGENTS_SYNCED:-0}" -eq 1 ]]; then
+    append_linked ".cursor/agents/, .claude/agents/, .codex/agents/"
+  else
+    append_linked ".cursor/agents/, .claude/agents/"
+  fi
 fi
 if [[ -d "$PROJECT/rules" ]]; then
   append_linked ".windsurf/rules/"
@@ -981,7 +1102,9 @@ if [[ -d "$PROJECT/workflows" ]]; then
   append_linked ".windsurf/workflows/"
 fi
 if [[ -d "$PROJECT/skills" ]]; then
-  append_linked ".agents/skills/, .claude/skills/, .codex/skills/, .windsurf/skills/"
+  if [[ "${SKILLS_SYNCED:-0}" -eq 1 ]]; then
+    append_linked ".agents/skills/, .agent/skills/, .claude/skills/, .codex/skills/, .cursor/skills/, .gemini/skills/, .opencode/skills/, .windsurf/skills/"
+  fi
 fi
 if [[ -n "$LINKED_LIST" ]]; then
   echo "Linked:           $LINKED_LIST"

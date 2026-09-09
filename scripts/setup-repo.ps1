@@ -1,15 +1,15 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Symlink skills, rules, workflows, and repo-local LLM scaffolding into a consumer repo (Windows PowerShell).
+  Symlink skills, rules, workflows, provider compatibility paths, and repo-local LLM scaffolding into a consumer repo (Windows PowerShell).
 .DESCRIPTION
-  Mirrors scripts/setup-repo.sh. Root links: .agents, .claude, .codex, .windsurf, .cursor, .setup -> toolkit.
-  Toolkit .windsurf/.setup layouts are ensured first. Sync runs after the local scaffold exists.
+  Mirrors scripts/setup-repo.sh. Shared content is linked by subpath so repo-specific skills and local tool files can coexist with toolkit-managed links.
+  Toolkit .windsurf layout is ensured first. Sync runs after the local scaffold exists.
 .PARAMETER ConsumerPath
   Path to the consumer repo (default: current directory).
 .EXAMPLE
   .\scripts\setup-repo.ps1 .
-  ..\llm-toolkit\scripts\setup-repo.ps1 C:\work\my-app
+  ..\path-to-llm-toolkit\scripts\setup-repo.ps1 C:\work\my-app
 #>
 param(
     [Parameter(Position = 0)]
@@ -24,49 +24,35 @@ $ToolkitRoot = Split-Path -Parent $ScriptDir
 
 . "$ScriptDir\lib.ps1"
 
-if (-not (Test-Path -LiteralPath "$ToolkitRoot\.agents" -PathType Container)) {
-    Write-Error "Toolkit root not found (expected .agents/ at $ToolkitRoot)"
+if (-not (Test-Path -LiteralPath "$ToolkitRoot\skills" -PathType Container) -and -not (Test-Path -LiteralPath "$ToolkitRoot\.agents\skills" -PathType Container)) {
+    Write-Error "toolkit root not found (expected skills/ at $ToolkitRoot)"
 }
 
 if (-not (Test-Path -LiteralPath $ConsumerPath -PathType Container)) {
-    Write-Error "Consumer path is not a directory: $ConsumerPath"
+    Write-Error "consumer path is not a directory: $ConsumerPath"
 }
 
 $Consumer = Resolve-ToolkitAbsolutePath $ConsumerPath
 
-# Detect fresh install vs upgrade
-$isFreshInstall = -not (
-    (Test-Path -LiteralPath (Join-Path $Consumer '.agents') -PathType Container) -or
-    (Test-Path -LiteralPath (Join-Path $Consumer '.windsurf') -PathType Container) -or
-    (Test-Path -LiteralPath (Join-Path $Consumer 'skills') -PathType Container) -or
-    (Test-Path -LiteralPath (Join-Path $Consumer 'docs\llm\toolkit-selection.txt') -PathType Leaf)
-)
-
-Write-Host ''
-if ($isFreshInstall) {
-    Write-Host "Fresh install — setting up LLM toolkit for: $Consumer"
-} else {
-    Write-Host "Existing configuration detected — upgrading LLM toolkit for: $Consumer"
-    Write-Host '  Junctions will be repaired if needed; existing files will be preserved.'
-    Write-Host '  Use -Force to repair broken junctions. AGENTS.md toolkit block will be updated.'
-}
-
-# Interactive tool selection
-$USE_WINDSURF = $false; $USE_CURSOR = $false; $USE_CLAUDE = $false; $USE_CODEX = $false
+# ── Interactive tool selection ────────────────────────────────────────────────
+$USE_WINDSURF = $false; $USE_CURSOR = $false; $USE_CLAUDE = $false; $USE_CODEX = $false; $USE_ANTIGRAVITY = $false; $USE_GEMINI = $false; $USE_OPENCODE = $false
 
 Write-Host ''
 Write-Host 'Which LLM tools does this project use? (enter numbers separated by spaces)'
 Write-Host '  1) Windsurf'
 Write-Host '  2) Cursor'
 Write-Host '  3) Claude Code'
-Write-Host '  4) Codex'
+Write-Host '  4) Codex compatibility surface'
+Write-Host '  5) Antigravity'
+Write-Host '  6) Gemini CLI'
+Write-Host '  7) OpenCode'
 Write-Host '  a) All of the above'
 Write-Host ''
 $toolSelection = Read-Host 'Selection [default: a]'
 if ([string]::IsNullOrWhiteSpace($toolSelection)) { $toolSelection = 'a' }
 
 if ($toolSelection -ieq 'a') {
-    $USE_WINDSURF = $true; $USE_CURSOR = $true; $USE_CLAUDE = $true; $USE_CODEX = $true
+    $USE_WINDSURF = $true; $USE_CURSOR = $true; $USE_CLAUDE = $true; $USE_CODEX = $true; $USE_ANTIGRAVITY = $true; $USE_GEMINI = $true; $USE_OPENCODE = $true
 } else {
     foreach ($choice in ($toolSelection -split '\s+')) {
         switch ($choice) {
@@ -74,6 +60,9 @@ if ($toolSelection -ieq 'a') {
             '2' { $USE_CURSOR = $true }
             '3' { $USE_CLAUDE = $true }
             '4' { $USE_CODEX = $true }
+            '5' { $USE_ANTIGRAVITY = $true }
+            '6' { $USE_GEMINI = $true }
+            '7' { $USE_OPENCODE = $true }
             default { Write-Warning "Unknown selection '$choice', ignored." }
         }
     }
@@ -83,13 +72,13 @@ $selectedTools = @()
 if ($USE_WINDSURF) { $selectedTools += 'Windsurf' }
 if ($USE_CURSOR) { $selectedTools += 'Cursor' }
 if ($USE_CLAUDE) { $selectedTools += 'Claude Code' }
-if ($USE_CODEX) { $selectedTools += 'Codex' }
+if ($USE_CODEX) { $selectedTools += 'Codex compatibility surface' }
+if ($USE_ANTIGRAVITY) { $selectedTools += 'Antigravity' }
+if ($USE_GEMINI) { $selectedTools += 'Gemini CLI' }
+if ($USE_OPENCODE) { $selectedTools += 'OpenCode' }
 Write-Host ''
 Write-Host "Setting up: $($selectedTools -join ', ')"
 Write-Host ''
-
-Ensure-ToolkitWindsurfLayout -DevToolsRoot $ToolkitRoot -AllowRepair:$Force
-Ensure-ToolkitSetupLayout -DevToolsRoot $ToolkitRoot -AllowRepair:$Force
 
 function Ensure-ConsumerTextFile {
     param(
@@ -97,98 +86,135 @@ function Ensure-ConsumerTextFile {
         [Parameter(Mandatory)][string]$Content,
         [Parameter(Mandatory)][string]$Label
     )
+
     $parent = Split-Path -Parent $Path
     if ($parent -and -not (Test-Path -LiteralPath $parent)) {
         New-Item -ItemType Directory -Path $parent -Force | Out-Null
     }
+
     if (Test-Path -LiteralPath $Path -PathType Leaf) {
         Write-Host "${Label}: already exists, unchanged."
         return
     }
+
     $encoding = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText($Path, $Content + [Environment]::NewLine, $encoding)
     Write-Host "${Label}: created."
 }
 
-# 1. Canonical skills/ and workflows/ - always linked to toolkit's canonical source
-$toolkitSkillsRoot = Join-Path $ToolkitRoot 'skills'
-$consumerSkills = Join-Path $Consumer 'skills'
-$stSkills = Ensure-ToolkitDirectoryLink -LinkPath $consumerSkills -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
-Write-Host "skills -> toolkit/skills ($stSkills)"
+function Get-SharedSkillIgnoreLines {
+    param([Parameter(Mandatory)][string]$Prefix)
 
-$toolkitRulesRoot = Join-Path $ToolkitRoot 'rules'
-if (Test-Path -LiteralPath $toolkitRulesRoot -PathType Container) {
-    $consumerRules = Join-Path $Consumer 'rules'
-    $stRules = Ensure-ToolkitDirectoryLink -LinkPath $consumerRules -TargetPath $toolkitRulesRoot -AllowRepair:$Force
-    Write-Host "rules -> toolkit/rules ($stRules)"
-}
-
-$toolkitWorkflowsRoot = Join-Path $ToolkitRoot 'workflows'
-$consumerWorkflows = Join-Path $Consumer 'workflows'
-$stWorkflows = Ensure-ToolkitDirectoryLink -LinkPath $consumerWorkflows -TargetPath $toolkitWorkflowsRoot -AllowRepair:$Force
-Write-Host "workflows -> toolkit/workflows ($stWorkflows)"
-
-# 2. .setup/ (examples, integrations)
-$toolkitSetupRoot = Join-Path $ToolkitRoot '.setup'
-if (Test-Path -LiteralPath $toolkitSetupRoot -PathType Container) {
-    $consumerSetupRoot = Join-Path $Consumer '.setup'
-    $stSetup = Ensure-ToolkitDirectoryLink -LinkPath $consumerSetupRoot -TargetPath $toolkitSetupRoot -AllowRepair:$Force
-    Write-Host ".setup -> toolkit/.setup ($stSetup)"
-}
-
-# 3. Agents (generic) - always linked
-$consumerAgents = Join-Path $Consumer '.agents'
-if (-not (Test-Path -LiteralPath $consumerAgents)) { New-Item -ItemType Directory -Path $consumerAgents -Force | Out-Null }
-$stAgentsSkills = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerAgents 'skills') -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
-Write-Host ".agents/skills -> toolkit/skills ($stAgentsSkills)"
-
-# 4. Tool-specific: each agent dir gets a skills/ junction to canonical
-if ($USE_WINDSURF) {
-    $consumerWindsurf = Join-Path $Consumer '.windsurf'
-    if (-not (Test-Path -LiteralPath $consumerWindsurf)) { New-Item -ItemType Directory -Path $consumerWindsurf -Force | Out-Null }
-    if (Test-Path -LiteralPath $toolkitRulesRoot -PathType Container) {
-        $stWsRules = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurf 'rules') -TargetPath $toolkitRulesRoot -AllowRepair:$Force
-        Write-Host ".windsurf/rules -> toolkit/rules ($stWsRules)"
+    $skillsRoot = Join-Path $ToolkitRoot 'skills'
+    if (-not (Test-Path -LiteralPath $skillsRoot -PathType Container)) {
+        return @()
     }
-    $stWsWf = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurf 'workflows') -TargetPath $toolkitWorkflowsRoot -AllowRepair:$Force
-    Write-Host ".windsurf/workflows -> toolkit/workflows ($stWsWf)"
+
+    Get-ChildItem -LiteralPath $skillsRoot -Directory |
+        Sort-Object Name |
+        ForEach-Object { "$Prefix/skills/$($_.Name)" }
+}
+
+function Ensure-ConsumerDirectory {
+    param([Parameter(Mandatory)][string]$Path)
+
+    if (Test-Path -LiteralPath $Path) {
+        $item = Get-Item -LiteralPath $Path -Force
+        if ($item.PSIsContainer -and -not $item.LinkType) {
+            return
+        }
+        if (-not $Force) {
+            throw "Blocking link/file exists at $Path. Remove it manually, or rerun with -Force to replace it with a directory for per-path toolkit links."
+        }
+        Remove-ToolkitPathSafely -Path $Path
+    }
+    New-Item -ItemType Directory -Path $Path -Force | Out-Null
+}
+
+function Ensure-SharedSkillCatalogLinks {
+    param(
+        [Parameter(Mandatory)][string]$SkillsRoot,
+        [Parameter(Mandatory)][string]$Label
+    )
+
+    $skillsSourceRoot = Join-Path $ToolkitRoot 'skills'
+    Ensure-ConsumerDirectory -Path $SkillsRoot
+    Get-ChildItem -LiteralPath $skillsSourceRoot -Directory |
+        Sort-Object Name |
+        ForEach-Object {
+            $target = Join-Path $SkillsRoot $_.Name
+            $null = Ensure-ToolkitDirectoryLink -LinkPath $target -TargetPath $_.FullName -AllowRepair:$Force
+        }
+    Write-Host $Label
+}
+
+# 1. Shared skills.
+$consumerAgentsRoot = Join-Path $Consumer '.agents'
+Ensure-ConsumerDirectory -Path $consumerAgentsRoot
+Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerAgentsRoot 'skills') -Label 'Skills: .agents/skills/<name> -> toolkit/skills/<name>'
+
+if ($USE_ANTIGRAVITY) {
+    $consumerAntigravityRoot = Join-Path $Consumer '.agent'
+    Ensure-ConsumerDirectory -Path $consumerAntigravityRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerAntigravityRoot 'skills') -Label 'Antigravity: .agent/skills/<name> -> toolkit/skills/<name>'
+}
+
+# 2. Ensure toolkit layouts and link shared directories by subpath.
+Ensure-ToolkitWindsurfLayout -ToolkitRoot $ToolkitRoot -AllowRepair:$Force
+$toolkitAgents = Join-Path $ToolkitRoot 'tool-subagents'
+
+$consumerWindsurfRoot = Join-Path $Consumer '.windsurf'
+Ensure-ConsumerDirectory -Path $consumerWindsurfRoot
+$null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'rules') -TargetPath (Join-Path $ToolkitRoot 'rules') -AllowRepair:$Force
+$null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'workflows') -TargetPath (Join-Path $ToolkitRoot 'workflows') -AllowRepair:$Force
+
+if ($USE_WINDSURF) {
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerWindsurfRoot 'skills') -Label 'Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>'
+    Write-Host '.windsurf/rules and .windsurf/workflows linked to toolkit'
 }
 
 if ($USE_CURSOR) {
-    $consumerCursor = Join-Path $Consumer '.cursor'
-    if (-not (Test-Path -LiteralPath $consumerCursor)) { New-Item -ItemType Directory -Path $consumerCursor -Force | Out-Null }
-    if (Test-Path -LiteralPath $toolkitRulesRoot -PathType Container) {
-        $stCrRules = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'rules') -TargetPath $toolkitRulesRoot -AllowRepair:$Force
-        Write-Host ".cursor/rules -> toolkit/rules ($stCrRules)"
+    $consumerCursorRoot = Join-Path $Consumer '.cursor'
+    Ensure-ConsumerDirectory -Path $consumerCursorRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCursorRoot 'skills') -Label 'Cursor: .cursor/skills/<name> -> toolkit/skills/<name>'
+    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursorRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
     }
-    $stCrWorkflows = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'workflows') -TargetPath $toolkitWorkflowsRoot -AllowRepair:$Force
-    Write-Host ".cursor/workflows -> toolkit/workflows ($stCrWorkflows)"
-    $stCrSkills = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'skills') -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
-    Write-Host ".cursor/skills -> toolkit/skills ($stCrSkills)"
-    $toolkitCursorAgents = Join-Path $ToolkitRoot 'tool-subagents'
-    if (Test-Path -LiteralPath $toolkitCursorAgents -PathType Container) {
-        $stCrAgents = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursor 'agents') -TargetPath $toolkitCursorAgents -AllowRepair:$Force
-        Write-Host ".cursor/agents -> toolkit/tool-subagents ($stCrAgents)"
-    }
+    Write-Host '.cursor root ready; shared rules/workflows refresh during sync'
+}
+
+if ($USE_GEMINI) {
+    $consumerGeminiRoot = Join-Path $Consumer '.gemini'
+    Ensure-ConsumerDirectory -Path $consumerGeminiRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerGeminiRoot 'skills') -Label 'Gemini CLI: .gemini/skills/<name> -> toolkit/skills/<name>'
+}
+
+if ($USE_OPENCODE) {
+    $consumerOpenCodeRoot = Join-Path $Consumer '.opencode'
+    Ensure-ConsumerDirectory -Path $consumerOpenCodeRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerOpenCodeRoot 'skills') -Label 'OpenCode: .opencode/skills/<name> -> toolkit/skills/<name>'
 }
 
 if ($USE_CLAUDE) {
-    $consumerClaude = Join-Path $Consumer '.claude'
-    if (-not (Test-Path -LiteralPath $consumerClaude)) { New-Item -ItemType Directory -Path $consumerClaude -Force | Out-Null }
-    $stClSkills = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerClaude 'skills') -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
-    Write-Host ".claude/skills -> toolkit/skills ($stClSkills)"
+    $consumerClaudeRoot = Join-Path $Consumer '.claude'
+    Ensure-ConsumerDirectory -Path $consumerClaudeRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerClaudeRoot 'skills') -Label 'Claude Code: .claude/skills/<name> -> toolkit/skills/<name>'
+    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerClaudeRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    }
 }
 
 if ($USE_CODEX) {
-    $consumerCodex = Join-Path $Consumer '.codex'
-    if (-not (Test-Path -LiteralPath $consumerCodex)) { New-Item -ItemType Directory -Path $consumerCodex -Force | Out-Null }
-    $stCxSkills = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodex 'skills') -TargetPath $toolkitSkillsRoot -AllowRepair:$Force
-    Write-Host ".codex/skills -> toolkit/skills ($stCxSkills)"
+    $consumerCodexRoot = Join-Path $Consumer '.codex'
+    Ensure-ConsumerDirectory -Path $consumerCodexRoot
+    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCodexRoot 'skills') -Label 'Codex: .codex/skills/<name> -> toolkit/skills/<name>'
+    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    }
 }
 
-# 3. Scaffold repo-local LLM configuration
+# 3. Scaffold repo-local LLM configuration outside linked toolkit directories.
 $llmDir = Join-Path $Consumer 'docs\llm'
-New-Item -ItemType Directory -Path $llmDir -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $llmDir 'rules') -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $llmDir 'workflows') -Force | Out-Null
 
@@ -203,17 +229,21 @@ Ensure-ConsumerTextFile -Path (Join-Path $llmDir 'toolkit-selection.txt') -Conte
 if ($USE_CURSOR) {
     $cursorIgnoreStub = @'
 # Repo-local Cursor visibility overrides.
+# `sync-tool-configs.sh` manages a selection block here when `docs/llm/toolkit-selection.txt` contains entries.
 # Common local hides after initial setup:
-# ".setup/examples/
-# ".setup/integrations/
+# rules/examples/
+# integrations/jira.md
+# integrations/confluence.md
 '@
     Ensure-ConsumerTextFile -Path (Join-Path $Consumer '.cursorignore') -Content $cursorIgnoreStub -Label '.cursorignore'
 
     $cursorIndexingIgnoreStub = @'
 # Repo-local Cursor indexing overrides.
+# `sync-tool-configs.sh` manages a selection block here when `docs/llm/toolkit-selection.txt` contains entries.
 # Common local hides after initial setup:
-# ".setup/examples/
-# ".setup/integrations/
+# rules/examples/
+# integrations/jira.md
+# integrations/confluence.md
 '@
     Ensure-ConsumerTextFile -Path (Join-Path $Consumer '.cursorindexingignore') -Content $cursorIndexingIgnoreStub -Label '.cursorindexingignore'
 }
@@ -224,59 +254,112 @@ Ensure-ConsumerTextFile -Path (Join-Path $Consumer 'scripts\sync-llm-configs.ps1
 $syncWrapperSh = (Get-Content -Path "$ScriptDir\templates\sync-llm-configs.sh" -Raw).TrimEnd()
 Ensure-ConsumerTextFile -Path (Join-Path $Consumer 'scripts\sync-llm-configs.sh') -Content $syncWrapperSh -Label 'scripts/sync-llm-configs.sh'
 
-# 4. Sync generated tool surfaces after the local scaffold exists
-Invoke-ToolkitSyncToolConfigs -ConsumerPath $Consumer -ScriptDir $ScriptDir | Out-Null
-
-# 5. Update AGENTS.md
-# Strategy:
-#   - Missing file: write the full template.
-#   - Existing file with sentinel block: replace the block in-place (upgrade).
-#   - Existing file without sentinel: append the template block (legacy/manual AGENTS.md).
-#   - -Force on existing sentinel: same replace-in-place (idempotent).
-$toolkitBlock = (Get-Content -Path "$ScriptDir\templates\consumer-AGENTS.md" -Raw).TrimEnd()
-$consumerAgents = Join-Path $Consumer 'AGENTS.md'
-$encoding = New-Object System.Text.UTF8Encoding($false)
-
-if (-not (Test-Path -LiteralPath $consumerAgents -PathType Leaf)) {
-    [System.IO.File]::WriteAllText($consumerAgents, $toolkitBlock + [Environment]::NewLine, $encoding)
-    Write-Host 'AGENTS.md: created.'
-} else {
-    $existing = Get-Content -LiteralPath $consumerAgents -Raw
-    if ($existing -match '(?s)<!-- BEGIN LLM TOOLKIT -->.*<!-- END LLM TOOLKIT -->') {
-        # Replace only the sentinel block, preserving everything outside it.
-        $updated = $existing -replace '(?s)<!-- BEGIN LLM TOOLKIT -->.*?<!-- END LLM TOOLKIT -->', $toolkitBlock
-        [System.IO.File]::WriteAllText($consumerAgents, $updated, $encoding)
-        Write-Host 'AGENTS.md: toolkit block updated in-place.'
-    } else {
-        # Legacy file (no sentinel) — append so existing content is preserved.
-        $nl = [Environment]::NewLine
-        [System.IO.File]::AppendAllText($consumerAgents, "${nl}---${nl}${toolkitBlock}${nl}", $encoding)
-        Write-Host 'AGENTS.md: toolkit block appended (no existing sentinel found).'
-    }
+# 4. Sync generated tool surfaces after the local scaffold exists.
+$syncOk = Invoke-ToolkitSyncToolConfigs -ConsumerPath $Consumer -ScriptDir $ScriptDir -SkipCursorRules:(-not $USE_CURSOR) -Force:$Force
+if (-not $syncOk) {
+    throw 'sync-tool-configs.sh failed. Shared tool symlinks or local exports may be stale. Fix the issue and re-run setup, or run sync-tool-configs.sh from Git Bash.'
 }
 
-# 6. Update .gitignore
+# 5. Generate AGENTS.md.
+$referenceAgentsRaw = Get-Content -Path "$ScriptDir\templates\consumer-AGENTS.md" -Raw
+$referenceAgents = $referenceAgentsRaw.TrimEnd()
+
+$orchestrationHeading = '## Mandatory agent orchestration (all LLM assistants)'
+# Single source of truth: the section lives at the end of the template
+# (from the heading line to end-of-template); extract it instead of
+# duplicating the text here.
+$headingIndex = $referenceAgentsRaw.IndexOf($orchestrationHeading)
+if ($headingIndex -lt 0) {
+    throw "Mandatory agent-orchestration heading not found in templates\consumer-AGENTS.md"
+}
+$orchestrationSection = $referenceAgentsRaw.Substring($headingIndex).TrimEnd()
+
+$consumerAgents = Join-Path $Consumer 'AGENTS.md'
+if (Test-Path -LiteralPath $consumerAgents -PathType Leaf) {
+    $existing = Get-Content -LiteralPath $consumerAgents -Raw
+    if ($existing -match 'LLM Dev Tools|LLM-assisted development') {
+        Write-Host 'AGENTS.md: already configured, unchanged.'
+    }
+    else {
+        Add-Content -LiteralPath $consumerAgents -Value "`n---`n$referenceAgents"
+        Write-Host 'AGENTS.md: appended LLM tools reference.'
+    }
+}
+else {
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($consumerAgents, $referenceAgents + [Environment]::NewLine, $encoding)
+    Write-Host 'AGENTS.md: created.'
+}
+
+# 5b. Idempotently ensure the mandatory agent-orchestration section is present.
+# The template-append/create paths above already carry it as part of
+# $referenceAgents; this only fires when an already-configured AGENTS.md
+# (marker present) predates the section being added to the template.
+$existingAgents = Get-Content -LiteralPath $consumerAgents -Raw
+if ($existingAgents -and $existingAgents.Contains($orchestrationHeading)) {
+    Write-Host 'AGENTS.md: agent-orchestration section already present, unchanged.'
+}
+else {
+    Add-Content -LiteralPath $consumerAgents -Value "`n$orchestrationSection"
+    Write-Host 'AGENTS.md: appended mandatory agent-orchestration section.'
+}
+
+# 6. Update .gitignore.
 $gitignoreLines = @(
-    '# LLM integration - symlinked/generated content (do not commit)'
-    '.agents/'
-    '.setup/'
+    '# LLM integration — local output and symlinked/generated toolkit paths'
+    'docs/jira/'
+    'node_modules/'
+    '.DS_Store'
+) + (Get-SharedSkillIgnoreLines -Prefix '.agents') + @(
+    '.agents/skills/AGENTS.md'
+    '.windsurf/rules/'
+    '.windsurf/workflows/'
 )
-if ($USE_WINDSURF) { $gitignoreLines += '.windsurf/' }
-if ($USE_CURSOR)   { $gitignoreLines += '.cursor/' }
-if ($USE_CLAUDE)   { $gitignoreLines += '.claude/' }
-if ($USE_CODEX)    { $gitignoreLines += '.codex/' }
+if ($USE_WINDSURF) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.windsurf'
+}
+if ($USE_ANTIGRAVITY) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.agent'
+    $gitignoreLines += '.agent/skills/AGENTS.md'
+}
+if ($USE_CURSOR) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.cursor'
+    $gitignoreLines += '.cursor/skills/AGENTS.md'
+    $gitignoreLines += '.cursor/rules/'
+    $gitignoreLines += '.cursor/workflows/'
+    $gitignoreLines += '.cursor/agents/'
+}
+if ($USE_CLAUDE) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.claude'
+    $gitignoreLines += '.claude/skills/AGENTS.md'
+}
+if ($USE_CODEX) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.codex'
+    $gitignoreLines += '.codex/skills/AGENTS.md'
+    $gitignoreLines += '.codex/agents/'
+}
+if ($USE_GEMINI) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.gemini'
+    $gitignoreLines += '.gemini/skills/AGENTS.md'
+}
+if ($USE_OPENCODE) {
+    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.opencode'
+    $gitignoreLines += '.opencode/skills/AGENTS.md'
+}
 $gitignoreBlock = $gitignoreLines -join "`n"
 
 $consumerGitignore = Join-Path $Consumer '.gitignore'
 if (Test-Path -LiteralPath $consumerGitignore -PathType Leaf) {
     $gi = Get-Content -LiteralPath $consumerGitignore -Raw
-    if ($gi -match 'LLM integration|LLM toolkit|\.agents/') {
+    if ($gi -match 'LLM integration|LLM toolkit|\docs/jira/') {
         Write-Host '.gitignore: already configured, unchanged.'
-    } else {
+    }
+    else {
         Add-Content -LiteralPath $consumerGitignore -Value "`n$gitignoreBlock"
         Write-Host '.gitignore: appended LLM tool entries.'
     }
-} else {
+}
+else {
     $encoding = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText($consumerGitignore, $gitignoreBlock + [Environment]::NewLine, $encoding)
     Write-Host '.gitignore: created.'
@@ -284,14 +367,13 @@ if (Test-Path -LiteralPath $consumerGitignore -PathType Leaf) {
 
 if ($USE_CURSOR) {
     $keepCursorFiltersBlock = @'
-
 # Keep repo-local Cursor visibility filters committed.
 !.cursorignore
 !.cursorindexingignore
 '@
     $giCurrent = if (Test-Path -LiteralPath $consumerGitignore -PathType Leaf) { Get-Content -LiteralPath $consumerGitignore -Raw } else { '' }
     if ($giCurrent -notmatch '(?m)^!\.cursorignore$') {
-        Add-Content -LiteralPath $consumerGitignore -Value $keepCursorFiltersBlock
+        Add-Content -LiteralPath $consumerGitignore -Value "`n$keepCursorFiltersBlock"
         Write-Host '.gitignore: ensured repo-local Cursor visibility filters stay committed.'
     }
 }
@@ -300,15 +382,19 @@ Write-Host ''
 Write-Host "Done. Consumer repo configured at: $Consumer"
 Write-Host ''
 Write-Host '  Always:'
-Write-Host '    .agents/                   - skills -> toolkit .agents/'
-Write-Host '    .setup/                    - templates -> toolkit .setup/'
+Write-Host '    .agents/skills/<name>      - shared skills -> toolkit skills/<name>'
+Write-Host '    .windsurf/rules/           - shared rules -> toolkit rules/'
+Write-Host '    .windsurf/workflows/       - shared workflows -> toolkit workflows/'
 Write-Host '    docs/llm/                  - repo-local LLM guidance'
 Write-Host '    scripts/sync-llm-configs.* - consumer-local LLM sync wrapper'
 Write-Host '    AGENTS.md                  - repo-level instructions and context'
-if ($USE_WINDSURF) { Write-Host '  Windsurf:'; Write-Host '    .windsurf/                 - -> toolkit .windsurf/ (symlink)' }
-if ($USE_CURSOR)   { Write-Host '  Cursor:'; Write-Host '    .cursor/                   - -> toolkit/.cursor (symlink)' }
-if ($USE_CLAUDE)   { Write-Host '  Claude Code:'; Write-Host '    .claude/                   - -> toolkit .claude/ (symlink)' }
-if ($USE_CODEX)    { Write-Host '  Codex:'; Write-Host '    .codex/                    - -> toolkit .codex/ (symlink)' }
+if ($USE_WINDSURF) { Write-Host '  Windsurf:';  Write-Host '    .windsurf/skills/<name>    - shared skills -> toolkit skills/<name>' }
+if ($USE_ANTIGRAVITY) { Write-Host '  Antigravity:'; Write-Host '    .agent/skills/<name>       - shared skills -> toolkit skills/<name>' }
+if ($USE_CURSOR)   { Write-Host '  Cursor:';    Write-Host '    .cursor/skills/<name>      - shared skills -> toolkit skills/<name>'; Write-Host '    .cursor/                   - provider root with shared subpath links' }
+if ($USE_CLAUDE)   { Write-Host '  Claude Code:'; Write-Host '    .claude/skills/<name>      - shared skills -> toolkit skills/<name>' }
+if ($USE_CODEX)    { Write-Host '  Codex:';     Write-Host '    .codex/skills/<name>       - shared skills -> toolkit skills/<name>' }
+if ($USE_GEMINI)   { Write-Host '  Gemini CLI:'; Write-Host '    .gemini/skills/<name>      - shared skills -> toolkit skills/<name>' }
+if ($USE_OPENCODE) { Write-Host '  OpenCode:'; Write-Host '    .opencode/skills/<name>    - shared skills -> toolkit skills/<name>' }
 Write-Host ''
 Write-Host 'Note: linked/generated toolkit directories are gitignored; repo-local files stay committed.'
 Write-Host 'Next: review docs/llm/toolkit-selection.txt and ask the LLM to add repo-specific context in docs/llm/.'

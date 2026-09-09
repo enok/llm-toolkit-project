@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# Shared functions for LLM toolkit setup scripts.
+# Shared functions for toolkit scripts.
 # Source this file: source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-
-set -euo pipefail
 
 _IS_WINDOWS=""
 case "$(uname -s)" in
@@ -11,10 +9,15 @@ esac
 
 to_windows_path() {
   local path="$1"
-  python3 -c "import os, sys; print(os.path.abspath(sys.argv[1]))" "$path" 2>/dev/null && return 0
-  # Already a Windows-style path
+  # Git Bash/MSYS/Cygwin always ship cygpath; it handles unix, mixed, and
+  # Windows-style inputs and returns backslashed paths cmd.exe accepts.
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$path" 2>/dev/null && return 0
+  fi
+  # Already a Windows-style path; normalize any forward slashes so cmd.exe
+  # does not read path segments as switches (e.g. C:/Users -> C:\Users).
   if [[ "$path" =~ ^[A-Za-z]: ]]; then
-    echo "$path"
+    echo "${path//\//\\}"
     return 0
   fi
   # Pure-bash fallback: /c/Users/... -> C:\Users\...
@@ -34,11 +37,12 @@ create_link() {
     win_link="$(to_windows_path "$link_name")"
 
     if [[ -d "$actual_src" ]]; then
-      # Try junction first (no admin needed) then symlink (requires admin/Dev Mode)
-      cmd //c "mklink /J \"$win_link\" \"$win_target\"" > /dev/null 2>&1 && return 0
-      cmd //c "mklink /D \"$win_link\" \"$win_target\"" > /dev/null 2>&1 && return 0
+      # Junctions first: no symlink privilege required and same ordering as
+      # sync-tool-configs.sh; directory symlink is the fallback.
+      cmd.exe //D //C mklink //J "$win_link" "$win_target" > /dev/null 2>&1 && return 0
+      cmd.exe //D //C mklink //D "$win_link" "$win_target" > /dev/null 2>&1 && return 0
     else
-      cmd //c "mklink \"$win_link\" \"$win_target\"" > /dev/null 2>&1 && return 0
+      cmd.exe //D //C mklink "$win_link" "$win_target" > /dev/null 2>&1 && return 0
     fi
   fi
 
@@ -53,16 +57,21 @@ create_link() {
 
 compute_relative_path() {
   local from_dir="$1" to_dir="$2"
-  python3 -c "
+  # GNU realpath first: native and present in Git Bash; python3 may be a
+  # non-functional Windows Store stub, so try it (then python) only as fallback.
+  realpath --relative-to="$from_dir" "$to_dir" 2>/dev/null && return 0
+
+  local py
+  for py in python3 python; do
+    "$py" -c "
 import os, sys
 c = os.path.abspath(sys.argv[1])
 d = os.path.abspath(sys.argv[2])
 os.chdir(c)
 print(os.path.relpath(d))
 " "$from_dir" "$to_dir" 2>/dev/null && return 0
-
-  realpath --relative-to="$from_dir" "$to_dir" 2>/dev/null && return 0
-  echo "Error: could not compute relative path (need python3 or GNU realpath)" >&2
+  done
+  echo "Error: could not compute relative path (need GNU realpath or Python)" >&2
   return 1
 }
 
@@ -109,7 +118,7 @@ ensure_dir_link() {
 
   resolved="$(cd "$link_path" && pwd -P)" || true
   if [[ -z "$resolved" || "$resolved" != "$expected" ]]; then
-    echo "Error: $link_path did not become a symlink to $actual_src (check link permissions)." >&2
+    echo "Error: $link_path did not become a link to $actual_src (check link permissions)." >&2
     safe_remove_path "$link_path" 2>/dev/null || true
     return 1
   fi
@@ -126,6 +135,8 @@ ensure_toolkit_windsurf_layout() {
   ensure_dir_link "$root/.windsurf/workflows" "$root/workflows" "$allow_repair" || return 1
 }
 
+# Toolkit-only: `.setup/` is a curated entry surface that links the shared
+# integration guides and rule examples so consumers get a single stable path.
 ensure_toolkit_setup_layout() {
   local root="$1"
   local allow_repair="${2:-}"
@@ -155,21 +166,21 @@ is_macos() {
   [ "$(uname -s)" = "Darwin" ]
 }
 
-# Portable sed -i: GNU (Linux/Git Bash) needs sed -i; BSD (macOS) needs sed -i ''
+# Portable sed -i: GNU (Linux/Git Bash) needs `sed -i`; BSD (macOS) needs `sed -i ''`.
 sed_inplace() {
-    if is_macos; then
-        sed -i '' "$@"
-    else
-        sed -i "$@"
-    fi
+  if is_macos; then
+    sed -i '' "$@"
+  else
+    sed -i "$@"
+  fi
 }
 
-# Convert a Windows-style path to Unix style if running under Git Bash
+# Convert a Windows-style path to Unix style when running under Git Bash.
 to_unix_path() {
-    local p="$1"
-    if is_windows && command -v cygpath &>/dev/null; then
-        cygpath -u "$p"
-    else
-        echo "$p"
-    fi
+  local path="$1"
+  if is_windows && command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$path"
+  else
+    printf '%s\n' "$path"
+  fi
 }

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Replaces ```mermaid fenced blocks with PNG images, then optionally builds a PDF with Pandoc (--pdf-engine=typst).
+  Replaces ```mermaid fenced blocks with SVG images by default, then optionally builds a PDF with Pandoc (--pdf-engine=typst).
 
   Diagrams are rendered via Kroki (HTTPS POST to kroki.io). Do not use for highly sensitive diagrams on locked-down networks unless you run a self-hosted Kroki and pass -KrokiUrl.
 
@@ -18,15 +18,20 @@ param(
     [string] $MarkdownPath,
 
     [Parameter(Mandatory = $false)]
-    ### Generated .md referencing mermaid/gen-NN.png. Default: <source-dir>\<stem>-for-pdf.md
+    ### Generated .md referencing mermaid/gen-NN.<format>. Default: <source-dir>\<stem>-for-pdf.md
     [string] $OutputMarkdownPath = "",
 
     [Parameter(Mandatory = $false)]
     [string] $ImageSubdir = "mermaid",
 
     [Parameter(Mandatory = $false)]
-    ### POST endpoint for Mermaid → PNG (default: public Kroki).
-    [string] $KrokiUrl = "https://kroki.io/mermaid/png",
+    ### Generated diagram format. Prefer svg for crisp PDF/wiki output; use png only when required.
+    [ValidateSet("svg", "png")]
+    [string] $ImageFormat = "svg",
+
+    [Parameter(Mandatory = $false)]
+    ### POST endpoint for Mermaid → image (default: public Kroki for ImageFormat).
+    [string] $KrokiUrl = "",
 
     [Parameter(Mandatory = $false)]
     [string] $PandocExe = "",
@@ -48,7 +53,24 @@ function Resolve-FilePath([string] $Path) {
     return [System.IO.Path]::GetFullPath((Join-Path $callerCwd $Path))
 }
 
-function Save-MermaidPngViaKroki {
+function Resolve-ChildDirectory([string] $Parent, [string] $Child, [string] $Label) {
+    if ([string]::IsNullOrWhiteSpace($Child)) {
+        throw "$Label must be a non-empty relative path."
+    }
+    if ([System.IO.Path]::IsPathRooted($Child)) {
+        throw "$Label must be relative: $Child"
+    }
+
+    $parentFull = [System.IO.Path]::GetFullPath($Parent).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $childFull = [System.IO.Path]::GetFullPath((Join-Path $parentFull $Child)).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $prefix = $parentFull + [System.IO.Path]::DirectorySeparatorChar
+    if (-not $childFull.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "$Label must resolve under $parentFull`: $Child"
+    }
+    return $childFull
+}
+
+function Save-MermaidImageViaKroki {
     param(
         [Parameter(Mandatory = $true)][string] $Diagram,
         [Parameter(Mandatory = $true)][string] $OutPath,
@@ -72,17 +94,21 @@ if ([string]::IsNullOrWhiteSpace($OutputMarkdownPath)) {
 }
 
 $outMdParent = Split-Path -Parent $OutputMarkdownPath
-$imageDir = Join-Path $outMdParent $ImageSubdir
+$imageDir = Resolve-ChildDirectory -Parent $outMdParent -Child $ImageSubdir -Label "ImageSubdir"
 if (Test-Path -LiteralPath $imageDir) {
     Remove-Item -LiteralPath $imageDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $imageDir -Force | Out-Null
 
+if ([string]::IsNullOrWhiteSpace($KrokiUrl)) {
+    $KrokiUrl = "https://kroki.io/mermaid/$ImageFormat"
+}
+
 $raw = [System.IO.File]::ReadAllText($MarkdownPath)
 $pattern = '(?s)```mermaid\s*\r?\n(.*?)```'
-$matches = [regex]::Matches($raw, $pattern)
+$mermaidMatches = [regex]::Matches($raw, $pattern)
 
-if ($matches.Count -eq 0) {
+if ($mermaidMatches.Count -eq 0) {
     Write-Host "No mermaid blocks found; copying markdown as-is."
     [System.IO.File]::Copy($MarkdownPath, $OutputMarkdownPath, $true)
     exit 0
@@ -91,19 +117,19 @@ if ($matches.Count -eq 0) {
 $sb = New-Object System.Text.StringBuilder
 $last = 0
 $idx = 1
-foreach ($m in $matches) {
+foreach ($m in $mermaidMatches) {
     $null = $sb.Append($raw.Substring($last, $m.Index - $last))
     $body = $m.Groups[1].Value.TrimEnd()
     $baseName = ("gen-{0:D2}" -f $idx)
-    $pngPath = Join-Path $imageDir "$baseName.png"
+    $imagePath = Join-Path $imageDir "$baseName.$ImageFormat"
 
     Write-Host "Rendering $baseName via Kroki ..."
-    Save-MermaidPngViaKroki -Diagram $body -OutPath $pngPath -KrokiUrl $KrokiUrl
-    if (-not (Test-Path -LiteralPath $pngPath) -or (Get-Item -LiteralPath $pngPath).Length -lt 32) {
-        throw "Kroki did not produce a usable PNG: $pngPath"
+    Save-MermaidImageViaKroki -Diagram $body -OutPath $imagePath -KrokiUrl $KrokiUrl
+    if (-not (Test-Path -LiteralPath $imagePath) -or (Get-Item -LiteralPath $imagePath).Length -lt 32) {
+        throw "Kroki did not produce a usable $ImageFormat file: $imagePath"
     }
 
-    $rel = ($ImageSubdir.TrimEnd('/', '\') + '/' + $baseName + '.png').Replace('\', '/')
+    $rel = ($ImageSubdir.TrimEnd('/', '\') + '/' + $baseName + '.' + $ImageFormat).Replace('\', '/')
     $null = $sb.AppendLine("")
     $null = $sb.AppendLine("![Diagram $idx]($rel)")
     $null = $sb.AppendLine("")

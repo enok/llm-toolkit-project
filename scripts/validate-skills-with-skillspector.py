@@ -62,6 +62,26 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Keep the temporary report directory when --report-dir is not set.",
     )
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument(
+        "--all",
+        action="store_true",
+        help="Scan every skill under --skills-dir (default when no scope flag is given).",
+    )
+    scope.add_argument(
+        "--changed",
+        action="store_true",
+        help=(
+            "Scan only skills whose files are added/modified/untracked in the git "
+            "worktree (staged, unstaged, or new). Exits 0 when nothing changed."
+        ),
+    )
+    parser.add_argument(
+        "--skill",
+        action="append",
+        default=[],
+        help="Scan a specific skill directory (name or path). Repeatable.",
+    )
     return parser.parse_args()
 
 
@@ -93,6 +113,53 @@ def skill_dirs(root: Path) -> list[Path]:
             continue
         skills.append(path)
     return skills
+
+
+def git_lines(command: list[str], cwd: Path) -> list[str]:
+    result = subprocess.run(
+        command, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False
+    )
+    if result.returncode != 0:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def changed_skill_dirs(repo_root: Path, skills_root: Path) -> list[Path]:
+    """Skill directories with added, modified, staged, or untracked files."""
+    rel = skills_root.relative_to(repo_root).as_posix()
+    commands = [
+        ["git", "diff", "--name-only", "--diff-filter=AM", "HEAD", "--", rel],
+        ["git", "diff", "--name-only", "--diff-filter=AM", "--cached", "HEAD", "--", rel],
+        ["git", "ls-files", "--others", "--exclude-standard", "--", rel],
+    ]
+    dirs: set[Path] = set()
+    for command in commands:
+        for line in git_lines(command, repo_root):
+            path = (repo_root / line).resolve()
+            try:
+                skill_name = path.relative_to(skills_root).parts[0]
+            except (ValueError, IndexError):
+                continue
+            skill_dir = skills_root / skill_name
+            if (skill_dir / "SKILL.md").is_file():
+                dirs.add(skill_dir)
+    return sorted(dirs)
+
+
+def explicit_skill_dirs(repo_root: Path, skills_root: Path, names: list[str]) -> list[Path]:
+    dirs: list[Path] = []
+    for name in names:
+        candidate = Path(name)
+        if not candidate.is_absolute():
+            candidate = (repo_root / candidate) if (repo_root / candidate).exists() else (skills_root / name)
+        candidate = candidate.resolve()
+        if candidate.name == "SKILL.md":
+            candidate = candidate.parent
+        if not (candidate / "SKILL.md").is_file():
+            print(f"FAIL: not a skill directory: {name}", file=sys.stderr)
+            return []
+        dirs.append(candidate)
+    return sorted(set(dirs))
 
 
 def scanner_command(skill_dir: Path, report_path: Path, with_llm: bool) -> list[str]:
@@ -233,7 +300,17 @@ def main() -> int:
         temp_dir = Path(tempfile.mkdtemp(prefix="skillspector-"))
         report_dir = temp_dir
 
-    skills = skill_dirs(skills_root)
+    if args.skill:
+        skills = explicit_skill_dirs(repo_root, skills_root, args.skill)
+        if not skills:
+            return 1
+    elif args.changed:
+        skills = changed_skill_dirs(repo_root, skills_root)
+        if not skills:
+            print("OK: no added or modified skills to scan.")
+            return 0
+    else:
+        skills = skill_dirs(skills_root)
     if not skills:
         print(f"FAIL: no skills with SKILL.md found under {skills_root}", file=sys.stderr)
         return 1

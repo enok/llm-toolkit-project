@@ -1,9 +1,14 @@
 # Shared helpers for PowerShell setup scripts (symbolic links on Windows).
 # Dot-source: . "$PSScriptRoot\lib.ps1"
 #
-# Directory links: ONLY cmd.exe mklink /d <DESTINATION> <SOURCE>
-# Requires Administrator (or Developer Mode). Run .cmd from an elevated Command Prompt.
-# Reference: https://www.tenforums.com/tutorials/131182-create-soft-hard-symbolic-links-windows.html
+# Directory links: cmd.exe
+#   mklink /d <DESTINATION> <SOURCE>, then mklink /J as a Windows fallback.
+# DESTINATION = path of the new directory symlink (under the consumer repo).
+# SOURCE      = existing toolkit directory that DESTINATION should point to.
+# Symlink mode requires Administrator (or Developer Mode); junction fallback requires a local same-drive target.
+# Ten Forums reference: https://www.tenforums.com/tutorials/131182-create-soft-hard-symbolic-links-windows.html
+#
+# Files: mklink /H, mklink (file symlink), PowerShell fallbacks.
 
 function Resolve-ToolkitAbsolutePath {
     param([string]$Path)
@@ -69,9 +74,12 @@ function Write-ToolkitExecLine {
 function Invoke-ToolkitCmdMklink {
     <#
     .SYNOPSIS
-      Run mklink via cmd /c. Directory: mklink /d <DESTINATION> <SOURCE>.
+      Run mklink via cmd /c. Directory: mklink /d <DESTINATION> <SOURCE>. Full argument string passed in.
+      Prints the exact command (and cmd output) so you can see what ran.
     #>
-    param([Parameter(Mandatory)][string]$MklinkArguments)
+    param(
+        [Parameter(Mandatory)][string]$MklinkArguments
+    )
     $cmdExe = Join-Path $env:SystemRoot 'System32\cmd.exe'
     $argLine = '/c ' + $MklinkArguments
     Write-ToolkitExecLine "$cmdExe $argLine"
@@ -88,7 +96,7 @@ function Invoke-ToolkitCmdMklink {
 function New-ToolkitLink {
     <#
     .SYNOPSIS
-      Directory: ONLY cmd mklink /d <DESTINATION> <SOURCE>. File: mklink /H then file mklink.
+      Directory: cmd  mklink /J <DESTINATION> <SOURCE>  then mklink /d fallback (quoted paths). File: mklink /H then file mklink.
       Throws if link cannot be created (no copy fallback).
     #>
     param(
@@ -103,28 +111,33 @@ function New-ToolkitLink {
     $linkPathNorm = $LinkPath.TrimEnd('\')
     $linkParent = Split-Path -Parent $linkPathNorm
     if (-not (Test-Path -LiteralPath $linkParent)) {
+        # Parent dirs are ordinary folders; do not log (only mklink lines should show for links).
         New-Item -ItemType Directory -Path $linkParent -Force | Out-Null
     }
 
     $isDir = Test-Path -LiteralPath $TargetPath -PathType Container
 
+    # Escape embedded double-quotes for cmd (unlikely in paths)
     function Escape-CmdArg {
         param([string]$s)
         $s -replace '"', '""'
     }
+    # For cmd.exe mklink: first path = DESTINATION (new link), second = SOURCE (existing target).
     $destEscaped = Escape-CmdArg $linkPathNorm
     $srcEscaped = Escape-CmdArg $targetFull
 
     $ok = $false
 
     if ($isDir) {
-        # Try junction first (no admin needed) then symlink (requires admin/Dev Mode)
+        # Junctions first: they need no symlink privilege and match
+        # sync-tool-configs.sh behavior; mklink /d is the fallback.
         $ok = Invoke-ToolkitCmdMklink "mklink /J `"$destEscaped`" `"$srcEscaped`""
         if (-not $ok) {
             $ok = Invoke-ToolkitCmdMklink "mklink /d `"$destEscaped`" `"$srcEscaped`""
         }
     }
     else {
+        # File: mklink /H DESTINATION SOURCE (hard link)
         $ok = Invoke-ToolkitCmdMklink "mklink /H `"$destEscaped`" `"$srcEscaped`""
         if (-not $ok) {
             try {
@@ -141,7 +154,7 @@ function New-ToolkitLink {
         }
         if (-not $ok) {
             try {
-                Write-ToolkitExecLine "New-Item -ItemType SymbolicLink -Path '$linkPathNorm' -> '$targetFull'"
+                Write-ToolkitExecLine "New-Item -ItemType SymbolicLink -Path '$linkPathNorm' -> '$targetFull' (PS 5.1: -Value; PS 6+: -Target)"
                 $null = New-ToolkitItemLink -Path $linkPathNorm -ItemType SymbolicLink -PointsTo $targetFull
                 $ok = $true
             }
@@ -153,10 +166,10 @@ function New-ToolkitLink {
 
     if ($ok) { return $true }
 
-    $kind = if ($isDir) { 'directory symbolic link (mklink /d)' } else { 'hard link or file symbolic link' }
+    $kind = if ($isDir) { 'directory junction or symbolic link (mklink /J, mklink /d)' } else { 'hard link or file symbolic link' }
     $dirHelp = @(
-        'Directories use ONLY: mklink /d <DESTINATION> <SOURCE>',
-        'Run Command Prompt or PowerShell as Administrator (or enable Developer Mode for symlinks).',
+        'Directories use mklink /J first, then mklink /d as a Windows fallback.',
+        'Run Command Prompt or PowerShell as Administrator, enable Developer Mode, or keep source and destination on the same local drive for junction fallback.',
         'See: https://www.tenforums.com/tutorials/131182-create-soft-hard-symbolic-links-windows.html'
     )
     $fileHelp = @(
@@ -188,31 +201,74 @@ function Normalize-ToolkitFullPath {
 
 function Assert-ToolkitSafeRemovalPath {
     param([Parameter(Mandatory)][string]$Path)
+
     if ([string]::IsNullOrWhiteSpace($Path)) {
         throw "Refusing to remove an empty path."
     }
+
     $trimmed = $Path.Trim()
     if ($trimmed -in @('.', '..', '\', '/')) {
         throw "Refusing to remove unsafe path: '$Path'"
     }
+
     try {
         $full = [System.IO.Path]::GetFullPath($trimmed)
     }
     catch {
         throw "Refusing to remove path with invalid format: '$Path'"
     }
+
     if ($full -match '^[A-Za-z]:\\?$') {
         throw "Refusing to remove drive root path: '$full'"
     }
 }
 
 function Remove-ToolkitPathSafely {
+    <#
+    .SYNOPSIS
+      Safely removes a path. For reparse points (junctions/symlinks), removes only the link, never the target contents.
+    .DESCRIPTION
+      PowerShell 5.1 Remove-Item -Recurse on a directory junction recurses INTO the target and deletes the target's
+      contents instead of just removing the link. This function detects reparse points and removes them as links only.
+    #>
     param([Parameter(Mandatory)][string]$Path)
     Assert-ToolkitSafeRemovalPath -Path $Path
-    Remove-Item -LiteralPath $Path -Recurse -Force
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction Stop
+
+    # Check if this is a reparse point (junction, symlink, etc.)
+    $isReparsePoint = $false
+    if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+        $isReparsePoint = $true
+    }
+
+    if ($isReparsePoint) {
+        # Remove reparse point as a link only (no recursion into target)
+        if ($item.PSIsContainer) {
+            # Directory reparse point (junction or directory symlink)
+            # Use [System.IO.Directory]::Delete with recurse=$false to remove only the link
+            [System.IO.Directory]::Delete($Path, $false)
+        }
+        else {
+            # File reparse point (file symlink or hardlink)
+            Remove-Item -LiteralPath $Path -Force
+        }
+    }
+    else {
+        # Regular file or directory: safe to use -Recurse
+        Remove-Item -LiteralPath $Path -Recurse -Force
+    }
 }
 
 function Get-ToolkitDirectoryLinkTargetCanon {
+    <#
+    .SYNOPSIS
+      If LinkPath is a directory symlink/junction, returns normalized target path; otherwise $null (plain folder/file or missing).
+    #>
     param([Parameter(Mandatory)][string]$LinkPath)
     if (-not (Test-Path -LiteralPath $LinkPath)) {
         return $null
@@ -236,6 +292,10 @@ function Get-ToolkitDirectoryLinkTargetCanon {
 }
 
 function Assert-ToolkitDirectoryReparseMatches {
+    <#
+    .SYNOPSIS
+      Ensures LinkPath is a reparse point (symlink/junction), not a copied folder, and points at TargetCanon.
+    #>
     param(
         [Parameter(Mandatory)][string]$LinkPath,
         [Parameter(Mandatory)][string]$TargetCanon
@@ -265,6 +325,7 @@ function Ensure-ToolkitDirectoryLink {
     <#
     .SYNOPSIS
       Create a directory symlink (mklink /d) or verify an existing reparse point points at TargetPath.
+      Replaces a plain directory or a link pointing elsewhere (e.g. Drive sync copy, old layout) — never keeps a duplicate tree.
     #>
     param(
         [Parameter(Mandatory)][string]$LinkPath,
@@ -292,7 +353,7 @@ function Ensure-ToolkitDirectoryLink {
                 "Remove it manually, or rerun the refresh command with -Force / --force if you want the toolkit to repair it."
             ) -join [Environment]::NewLine
         }
-        Write-Warning "[toolkit] Repairing '$LinkPath': replacing with directory symlink -> '$TargetPath'"
+        Write-Warning "[toolkit] Repairing '$LinkPath': replacing plain folder or wrong link with directory link (junction or symlink) -> '$TargetPath' (canonical rules/workflows stay on disk; only this path is replaced)."
         Remove-ToolkitPathSafely -Path $LinkPath
     }
 
@@ -305,19 +366,24 @@ function Ensure-ToolkitDirectoryLink {
 }
 
 function Ensure-ToolkitWindsurfLayout {
+    <#
+    .SYNOPSIS
+      Ensures toolkit /.windsurf/rules and /.windsurf/workflows point at canonical rules/ and workflows/.
+      Lets consumers use a single symlink: .windsurf -> toolkit/.windsurf (IDE shows root as a link).
+    #>
     param(
-        [Parameter(Mandatory)][string]$DevToolsRoot,
+        [Parameter(Mandatory)][string]$ToolkitRoot,
         [switch]$AllowRepair
     )
-    $rules = Join-Path $DevToolsRoot 'rules'
-    $wf = Join-Path $DevToolsRoot 'workflows'
+    $rules = Join-Path $ToolkitRoot 'rules'
+    $wf = Join-Path $ToolkitRoot 'workflows'
     if (-not (Test-Path -LiteralPath $rules -PathType Container)) {
-        throw "Toolkit rules/ missing at $DevToolsRoot"
+        throw "Toolkit rules/ missing at $ToolkitRoot"
     }
     if (-not (Test-Path -LiteralPath $wf -PathType Container)) {
-        throw "Toolkit workflows/ missing at $DevToolsRoot"
+        throw "Toolkit workflows/ missing at $ToolkitRoot"
     }
-    $ws = Join-Path $DevToolsRoot '.windsurf'
+    $ws = Join-Path $ToolkitRoot '.windsurf'
     if (-not (Test-Path -LiteralPath $ws)) {
         New-Item -ItemType Directory -Path $ws -Force | Out-Null
     }
@@ -326,21 +392,26 @@ function Ensure-ToolkitWindsurfLayout {
 }
 
 function Ensure-ToolkitSetupLayout {
+    <#
+    .SYNOPSIS
+      Toolkit-only: links .setup/integrations and .setup/examples to the canonical
+      integrations/ and rules/examples/ directories so consumers get one stable entry path.
+    #>
     param(
-        [Parameter(Mandatory)][string]$DevToolsRoot,
+        [Parameter(Mandatory)][string]$ToolkitRoot,
         [switch]$AllowRepair
     )
-    $st = Join-Path $DevToolsRoot '.setup'
-    if (-not (Test-Path -LiteralPath $st)) {
-        New-Item -ItemType Directory -Path $st -Force | Out-Null
+    $setup = Join-Path $ToolkitRoot '.setup'
+    if (-not (Test-Path -LiteralPath $setup)) {
+        New-Item -ItemType Directory -Path $setup -Force | Out-Null
     }
-    $intSrc = Join-Path $DevToolsRoot 'integrations'
-    if (Test-Path -LiteralPath $intSrc -PathType Container) {
-        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $st 'integrations') -TargetPath $intSrc -AllowRepair:$AllowRepair
+    $integrations = Join-Path $ToolkitRoot 'integrations'
+    if (Test-Path -LiteralPath $integrations -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $setup 'integrations') -TargetPath $integrations -AllowRepair:$AllowRepair
     }
-    $exSrc = Join-Path $DevToolsRoot 'rules\examples'
-    if (Test-Path -LiteralPath $exSrc -PathType Container) {
-        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $st 'examples') -TargetPath $exSrc -AllowRepair:$AllowRepair
+    $examples = Join-Path $ToolkitRoot 'rules\examples'
+    if (Test-Path -LiteralPath $examples -PathType Container) {
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $setup 'examples') -TargetPath $examples -AllowRepair:$AllowRepair
     }
 }
 
@@ -356,7 +427,7 @@ function Get-GitBashExe {
 
 function ConvertTo-ToolkitBashQuotedArg {
     param([Parameter(Mandatory)][string]$Value)
-    return "'" + ($Value -replace "'", "'\''") + "'"
+    return "'" + ($Value -replace "'", "'\\''") + "'"
 }
 
 function Invoke-ToolkitBashScript {
@@ -375,46 +446,46 @@ function Invoke-ToolkitBashScript {
     }
 
     $scriptUnix = Convert-ToGitBashPath $ScriptPath
-    $parts = @((ConvertTo-ToolkitBashQuotedArg $scriptUnix))
+    $parts = @('bash', (ConvertTo-ToolkitBashQuotedArg $scriptUnix))
     foreach ($arg in $Arguments) {
         $parts += ConvertTo-ToolkitBashQuotedArg $arg
     }
     $bashCommand = $parts -join ' '
     Write-ToolkitExecLine "& '$gitBash' -lc '$bashCommand'"
     & $gitBash -lc $bashCommand | ForEach-Object { Write-Host $_ }
-    return ($LASTEXITCODE -eq 0)
+    $exitCode = $LASTEXITCODE
+    return ($exitCode -eq 0)
 }
 
 function Invoke-ToolkitSyncToolConfigs {
     param(
         [Parameter(Mandatory)][string]$ConsumerPath,
         [Parameter(Mandatory)][string]$ScriptDir,
-        [switch]$SkipAgentsMd
+        [switch]$SkipAgentsMd,
+        [switch]$SkipCursorRules,
+        [switch]$SkipGithub,
+        [switch]$Force
     )
     $sh = Join-Path $ScriptDir 'sync-tool-configs.sh'
     if (-not (Test-Path -LiteralPath $sh)) {
-        Write-Warning "sync-tool-configs.sh not found; skip shared tool surface repair."
-        return $false
-    }
-    $gitBash = Get-GitBashExe
-    if (-not $gitBash) {
-        Write-Warning "Git Bash not found. Install Git for Windows or run: bash scripts/sync-tool-configs.sh [consumer-path]"
+        Write-Warning "sync-tool-configs.sh not found; skip shared tool surface repair and local export refresh."
         return $false
     }
     $cUnix = Convert-ToGitBashPath $ConsumerPath
-    $sUnix = Convert-ToGitBashPath $ScriptDir
-    $shPath = $sUnix + '/sync-tool-configs.sh'
-    $quoteForBash = {
-        param([string]$s)
-        "'" + ($s -replace "'", "'\''") + "'"
-    }
-    $bashCommand = '{0} {1}' -f (& $quoteForBash $shPath), (& $quoteForBash $cUnix)
+    $arguments = @($cUnix)
     if ($SkipAgentsMd) {
-        $bashCommand += ' --skip-agents-md'
+        $arguments += '--skip-agents-md'
     }
-    Write-ToolkitExecLine "& '$gitBash' -lc '$bashCommand'"
-    & $gitBash -lc $bashCommand
-    if ($LASTEXITCODE -ne 0) {
+    if ($SkipCursorRules) {
+        $arguments += '--skip-cursor-rules'
+    }
+    if ($SkipGithub) {
+        $arguments += '--skip-github'
+    }
+    if ($Force) {
+        $arguments += '--force'
+    }
+    if (-not (Invoke-ToolkitBashScript -ScriptPath $sh -Arguments $arguments)) {
         Write-Warning "sync-tool-configs.sh failed (exit $LASTEXITCODE). Run from Git Bash if paths contain special characters."
         return $false
     }

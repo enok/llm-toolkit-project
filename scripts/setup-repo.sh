@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Setup a consumer repo to use LLM toolkit.
-# Symlinks skills, rules, workflows, and optional Codex mirror paths.
+# Symlinks skills, rules, workflows, and provider compatibility paths.
 #
 # Windows (PowerShell): scripts/setup-repo.ps1 - same behavior using directory links.
 #
 # Usage: ./scripts/setup-repo.sh [path-to-consumer-repo] [--force]
 #   Run from toolkit root: ./scripts/setup-repo.sh /path/to/consumer
-#   Or from consumer repo: ../llm-toolkit/scripts/setup-repo.sh .
+#   Or from consumer repo: ../llm-toolkit-project/scripts/setup-repo.sh .
 
 set -euo pipefail
 
@@ -28,8 +28,8 @@ done
 
 CONSUMER="${POSITIONAL[0]:-.}"
 
-if [[ ! -d "$TOOLKIT_ROOT/.agents" ]]; then
-  echo "Error: toolkit root not found (expected .agents/ at $TOOLKIT_ROOT)" >&2
+if [[ ! -d "$TOOLKIT_ROOT/skills" && ! -d "$TOOLKIT_ROOT/.agents/skills" ]]; then
+  echo "Error: toolkit root not found (expected skills/ at $TOOLKIT_ROOT)" >&2
   exit 1
 fi
 
@@ -55,38 +55,75 @@ ensure_text_file() {
   echo "$label: created."
 }
 
-# Detect fresh install vs upgrade
-FRESH_INSTALL=1
-if [[ -d "$CONSUMER/.agents" || -d "$CONSUMER/.windsurf" || -d "$CONSUMER/skills" || -f "$CONSUMER/docs/llm/toolkit-selection.txt" ]]; then
-  FRESH_INSTALL=0
-fi
+append_shared_skill_ignores() {
+  local prefix="$1"
+  local skill_dir
+  if [[ -d "$TOOLKIT_ROOT/skills" ]]; then
+    find "$TOOLKIT_ROOT/skills" -mindepth 1 -maxdepth 1 -type d -print | LC_ALL=C sort | while IFS= read -r skill_dir; do
+      echo "$prefix/skills/$(basename "$skill_dir")"
+    done
+  fi
+}
 
-if [[ $FRESH_INSTALL -eq 1 ]]; then
-  echo ""
-  echo "Fresh install — setting up LLM toolkit for: $CONSUMER"
-else
-  echo ""
-  echo "Existing configuration detected — upgrading LLM toolkit for: $CONSUMER"
-  echo "  Junctions will be repaired if needed; existing files will be preserved."
-  echo "  Use --force to repair broken junctions. AGENTS.md toolkit block will be updated."
-fi
+ensure_plain_dir() {
+  local path="$1"
+  local allow_repair="${2:-}"
 
-# Interactive tool selection
-USE_WINDSURF=0; USE_CURSOR=0; USE_CLAUDE=0; USE_CODEX=0
+  if [[ -e "$path" || -L "$path" ]]; then
+    if [[ -d "$path" && ! -L "$path" ]]; then
+      return 0
+    fi
+    if [[ -z "$allow_repair" ]]; then
+      echo "Error: blocking link/file exists at $path." >&2
+      echo "Remove it manually, or rerun with --force to replace it with a directory for per-path toolkit links." >&2
+      return 1
+    fi
+    safe_remove_path "$path" || return 1
+  fi
+  mkdir -p "$path"
+}
+
+link_shared_skill_catalog() {
+  local skills_root="$1"
+  local label="$2"
+  local skill_dir skill_name
+
+  ensure_plain_dir "$skills_root" "$FORCE" || return 1
+  # Keep the loop in the current shell so ensure_dir_link failures propagate;
+  # a pipeline subshell would swallow the return status.
+  while IFS= read -r skill_dir; do
+    skill_name="${skill_dir##*/}"
+    if [[ -z "$skill_name" ]]; then
+      echo "Error: empty skill name resolved from '$skill_dir'; aborting catalog link pass." >&2
+      return 1
+    fi
+    ensure_dir_link "$skills_root/$skill_name" "$skill_dir" "$FORCE" || return 1
+  done < <(find "$TOOLKIT_ROOT/skills" -mindepth 1 -maxdepth 1 -type d -print | LC_ALL=C sort)
+  echo "$label"
+}
+
+# ── Interactive tool selection ────────────────────────────────────────────────
+# Ask which LLM agents/tools the project uses. Only set up selected ones.
+# Re-running setup is safe — existing links are preserved.
+
+USE_WINDSURF=0; USE_CURSOR=0; USE_CLAUDE=0; USE_CODEX=0; USE_ANTIGRAVITY=0; USE_GEMINI=0; USE_OPENCODE=0
 
 echo ""
 echo "Which LLM tools does this project use? (enter numbers separated by spaces)"
 echo "  1) Windsurf"
 echo "  2) Cursor"
 echo "  3) Claude Code"
-echo "  4) Codex"
+echo "  4) Codex compatibility surface"
+echo "  5) Antigravity"
+echo "  6) Gemini CLI"
+echo "  7) OpenCode"
 echo "  a) All of the above"
 echo ""
 read -rp "Selection [default: a]: " TOOL_SELECTION
 TOOL_SELECTION="${TOOL_SELECTION:-a}"
 
 if [[ "$TOOL_SELECTION" == "a" || "$TOOL_SELECTION" == "A" ]]; then
-  USE_WINDSURF=1; USE_CURSOR=1; USE_CLAUDE=1; USE_CODEX=1
+  USE_WINDSURF=1; USE_CURSOR=1; USE_CLAUDE=1; USE_CODEX=1; USE_ANTIGRAVITY=1; USE_GEMINI=1; USE_OPENCODE=1
 else
   for choice in $TOOL_SELECTION; do
     case "$choice" in
@@ -94,6 +131,9 @@ else
       2) USE_CURSOR=1 ;;
       3) USE_CLAUDE=1 ;;
       4) USE_CODEX=1 ;;
+      5) USE_ANTIGRAVITY=1 ;;
+      6) USE_GEMINI=1 ;;
+      7) USE_OPENCODE=1 ;;
       *) echo "Warning: unknown selection '$choice', ignored." >&2 ;;
     esac
   done
@@ -105,109 +145,124 @@ echo "Setting up: $(
   [[ $USE_WINDSURF -eq 1 ]] && parts+=("Windsurf")
   [[ $USE_CURSOR -eq 1 ]]   && parts+=("Cursor")
   [[ $USE_CLAUDE -eq 1 ]]   && parts+=("Claude Code")
-  [[ $USE_CODEX -eq 1 ]]    && parts+=("Codex")
-  (IFS=,; echo "${parts[*]}") | sed 's/,/, /g'
+  [[ $USE_CODEX -eq 1 ]]    && parts+=("Codex compatibility surface")
+  [[ $USE_ANTIGRAVITY -eq 1 ]] && parts+=("Antigravity")
+  [[ $USE_GEMINI -eq 1 ]] && parts+=("Gemini CLI")
+  [[ $USE_OPENCODE -eq 1 ]] && parts+=("OpenCode")
+  joined=""
+  for part in "${parts[@]}"; do
+    if [ -n "$joined" ]; then
+      joined="${joined}, "
+    fi
+    joined="${joined}${part}"
+  done
+  echo "$joined"
 )"
 echo ""
 
-# Ensure toolkit compatibility layouts before linking consumers.
+# ── 1. Shared skills (.agents/skills/*) — always linked ─────────────────────
+ensure_plain_dir "$CONSUMER/.agents" "$FORCE" || exit 1
+link_shared_skill_catalog "$CONSUMER/.agents/skills" "Skills: .agents/skills/<name> -> toolkit/skills/<name>" || exit 1
+
+if [[ $USE_ANTIGRAVITY -eq 1 ]]; then
+  ensure_plain_dir "$CONSUMER/.agent" "$FORCE" || exit 1
+  link_shared_skill_catalog "$CONSUMER/.agent/skills" "Antigravity: .agent/skills/<name> -> toolkit/skills/<name>" || exit 1
+fi
+
+# ── 2. Ensure toolkit layouts ────────────────────────────────────────────────
 ensure_toolkit_windsurf_layout "$TOOLKIT_ROOT" "$FORCE" || exit 1
-ensure_toolkit_setup_layout "$TOOLKIT_ROOT" "$FORCE" || exit 1
 
-# 1. Canonical skills/ and workflows/ - always linked to toolkit's canonical source
-ensure_dir_link "$CONSUMER/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
-echo "Skills: skills -> toolkit/skills (canonical)"
+# ── 3. Tool-specific setup ───────────────────────────────────────────────────
 
-if [[ -d "$TOOLKIT_ROOT/rules" ]]; then
-  ensure_dir_link "$CONSUMER/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
-  echo "Rules: rules -> toolkit/rules (canonical)"
-fi
-
-ensure_dir_link "$CONSUMER/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
-echo "Workflows: workflows -> toolkit/workflows (canonical)"
-
-# 2. .setup/ (examples, integrations)
-if [[ -d "$TOOLKIT_ROOT/.setup" ]]; then
-  ensure_dir_link "$CONSUMER/.setup" "$TOOLKIT_ROOT/.setup" "$FORCE" || exit 1
-  echo ".setup -> toolkit/.setup"
-fi
-
-# 3. Tool-specific: each agent dir gets a skills/ junction to canonical
-
-# Windsurf: workflows junction (windsurf has native workflows support)
+# Shared rules/workflows are linked by path so provider roots can hold
+# repo-specific files alongside toolkit-managed compatibility links.
+ensure_plain_dir "$CONSUMER/.windsurf" "$FORCE" || exit 1
+ensure_dir_link "$CONSUMER/.windsurf/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
+ensure_dir_link "$CONSUMER/.windsurf/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
 if [[ $USE_WINDSURF -eq 1 ]]; then
-  mkdir -p "$CONSUMER/.windsurf"
-  if [[ -d "$TOOLKIT_ROOT/rules" ]]; then
-    ensure_dir_link "$CONSUMER/.windsurf/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
-    echo "Windsurf: .windsurf/rules -> toolkit/rules"
-  fi
-  ensure_dir_link "$CONSUMER/.windsurf/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
-  echo "Windsurf: .windsurf/workflows -> toolkit/workflows"
+  link_shared_skill_catalog "$CONSUMER/.windsurf/skills" "Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>" || exit 1
+  echo "Windsurf: .windsurf/rules and .windsurf/workflows linked to toolkit"
 fi
 
-# Cursor: rules, workflows, skills, and agents
+# Cursor: create the provider root; sync-tool-configs links shared subpaths.
 if [[ $USE_CURSOR -eq 1 ]]; then
-  mkdir -p "$CONSUMER/.cursor"
-  if [[ -d "$TOOLKIT_ROOT/rules" ]]; then
-    ensure_dir_link "$CONSUMER/.cursor/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
-    echo "Cursor: .cursor/rules -> toolkit/rules"
-  fi
-  ensure_dir_link "$CONSUMER/.cursor/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
-  echo "Cursor: .cursor/workflows -> toolkit/workflows"
-  ensure_dir_link "$CONSUMER/.cursor/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
-  echo "Cursor: .cursor/skills -> toolkit/skills"
+  ensure_plain_dir "$CONSUMER/.cursor" "$FORCE" || exit 1
+  link_shared_skill_catalog "$CONSUMER/.cursor/skills" "Cursor: .cursor/skills/<name> -> toolkit/skills/<name>" || exit 1
   if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
     ensure_dir_link "$CONSUMER/.cursor/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
-    echo "Cursor: .cursor/agents -> toolkit/tool-subagents"
+  fi
+  echo "Cursor: .cursor root ready; shared rules/workflows refresh during sync"
+fi
+
+if [[ $USE_GEMINI -eq 1 ]]; then
+  ensure_plain_dir "$CONSUMER/.gemini" "$FORCE" || exit 1
+  link_shared_skill_catalog "$CONSUMER/.gemini/skills" "Gemini CLI: .gemini/skills/<name> -> toolkit/skills/<name>" || exit 1
+fi
+
+if [[ $USE_OPENCODE -eq 1 ]]; then
+  ensure_plain_dir "$CONSUMER/.opencode" "$FORCE" || exit 1
+  link_shared_skill_catalog "$CONSUMER/.opencode/skills" "OpenCode: .opencode/skills/<name> -> toolkit/skills/<name>" || exit 1
+fi
+
+# Claude Code: link only shared subpaths so repo-specific skills can coexist.
+if [[ $USE_CLAUDE -eq 1 ]]; then
+  ensure_plain_dir "$CONSUMER/.claude" "$FORCE" || exit 1
+  link_shared_skill_catalog "$CONSUMER/.claude/skills" "Claude Code: .claude/skills/<name> -> toolkit/skills/<name>" || exit 1
+  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
+    ensure_dir_link "$CONSUMER/.claude/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
   fi
 fi
 
-# Claude Code: skills junction
-if [[ $USE_CLAUDE -eq 1 ]]; then
-  mkdir -p "$CONSUMER/.claude"
-  ensure_dir_link "$CONSUMER/.claude/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
-  echo "Claude Code: .claude/skills -> toolkit/skills"
-fi
-
-# Codex: skills junction
+# Codex: link only shared subpaths; AGENTS.md remains primary.
 if [[ $USE_CODEX -eq 1 ]]; then
-  mkdir -p "$CONSUMER/.codex"
-  ensure_dir_link "$CONSUMER/.codex/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
-  echo "Codex: .codex/skills -> toolkit/skills"
+  ensure_plain_dir "$CONSUMER/.codex" "$FORCE" || exit 1
+  link_shared_skill_catalog "$CONSUMER/.codex/skills" "Codex: .codex/skills/<name> -> toolkit/skills/<name>" || exit 1
+  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
+    ensure_dir_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
+  fi
 fi
 
-# Agents (generic): skills junction
-mkdir -p "$CONSUMER/.agents"
-ensure_dir_link "$CONSUMER/.agents/skills" "$TOOLKIT_ROOT/skills" "$FORCE" || exit 1
-echo "Agents: .agents/skills -> toolkit/skills"
-
-# 3. Scaffold repo-local LLM configuration
-mkdir -p "$CONSUMER/docs/llm"
-mkdir -p "$CONSUMER/docs/llm/rules"
-mkdir -p "$CONSUMER/docs/llm/workflows"
+# 3. Scaffold repo-local LLM configuration outside linked toolkit directories.
+mkdir -p "$CONSUMER/docs/llm/rules" "$CONSUMER/docs/llm/workflows"
 
 ensure_text_file "$CONSUMER/docs/llm/README.md" "docs/llm/README.md" "$(cat "$SCRIPT_DIR/templates/docs-llm-README.md")"
-ensure_text_file "$CONSUMER/docs/llm/rules/README.md" "docs/llm/rules/README.md" "# Repo-Local Rules
 
-Add repository-only rules here. Keep reusable generic rules in the shared toolkit."
-ensure_text_file "$CONSUMER/docs/llm/workflows/README.md" "docs/llm/workflows/README.md" "# Repo-Local Workflows
+ensure_text_file "$CONSUMER/docs/llm/rules/README.md" "docs/llm/rules/README.md" "$(cat <<'EOF'
+# Repo-Local Rules
 
-Add repository-only workflows here. Keep reusable generic workflows in the shared toolkit."
+Add repository-only rules here. Keep reusable generic rules in the shared toolkit.
+EOF
+)"
+
+ensure_text_file "$CONSUMER/docs/llm/workflows/README.md" "docs/llm/workflows/README.md" "$(cat <<'EOF'
+# Repo-Local Workflows
+
+Add repository-only workflows here. Keep reusable generic workflows in the shared toolkit.
+EOF
+)"
 
 ensure_text_file "$CONSUMER/docs/llm/toolkit-selection.txt" "docs/llm/toolkit-selection.txt" "$(cat "$SCRIPT_DIR/templates/toolkit-selection.txt")"
 
 if [[ $USE_CURSOR -eq 1 ]]; then
-  ensure_text_file "$CONSUMER/.cursorignore" ".cursorignore" "# Repo-local Cursor visibility overrides.
-# sync-tool-configs.sh manages a selection block here when docs/llm/toolkit-selection.txt contains entries.
+  ensure_text_file "$CONSUMER/.cursorignore" ".cursorignore" "$(cat <<'EOF'
+# Repo-local Cursor visibility overrides.
+# `sync-tool-configs.sh` manages a selection block here when `docs/llm/toolkit-selection.txt` contains entries.
 # Common local hides after initial setup:
-# .setup/examples/
-# .setup/integrations/"
+# rules/examples/
+# integrations/jira.md
+# integrations/confluence.md
+EOF
+)"
 
-  ensure_text_file "$CONSUMER/.cursorindexingignore" ".cursorindexingignore" "# Repo-local Cursor indexing overrides.
-# sync-tool-configs.sh manages a selection block here when docs/llm/toolkit-selection.txt contains entries.
+  ensure_text_file "$CONSUMER/.cursorindexingignore" ".cursorindexingignore" "$(cat <<'EOF'
+# Repo-local Cursor indexing overrides.
+# `sync-tool-configs.sh` manages a selection block here when `docs/llm/toolkit-selection.txt` contains entries.
 # Common local hides after initial setup:
-# .setup/examples/
-# .setup/integrations/"
+# rules/examples/
+# integrations/jira.md
+# integrations/confluence.md
+EOF
+)"
 fi
 
 ensure_text_file "$CONSUMER/scripts/sync-llm-configs.ps1" "scripts/sync-llm-configs.ps1" "$(cat "$SCRIPT_DIR/templates/sync-llm-configs.ps1")"
@@ -215,72 +270,93 @@ ensure_text_file "$CONSUMER/scripts/sync-llm-configs.ps1" "scripts/sync-llm-conf
 ensure_text_file "$CONSUMER/scripts/sync-llm-configs.sh" "scripts/sync-llm-configs.sh" "$(cat "$SCRIPT_DIR/templates/sync-llm-configs.sh")"
 chmod +x "$CONSUMER/scripts/sync-llm-configs.sh" 2>/dev/null || true
 
-# 4. Repair shared tool symlinks and refresh repo-local exports
+# 4. Repair shared tool symlinks and refresh repo-local exports after the local scaffold exists.
 if [[ -f "$SCRIPT_DIR/sync-tool-configs.sh" ]]; then
-  if bash "$SCRIPT_DIR/sync-tool-configs.sh" "$CONSUMER"; then
+  SYNC_ARGS=("$CONSUMER")
+  if [[ -n "$FORCE" ]]; then
+    SYNC_ARGS+=("--force")
+  fi
+  if [[ $USE_CURSOR -ne 1 ]]; then
+    SYNC_ARGS+=("--skip-cursor-rules")
+  fi
+  if bash "$SCRIPT_DIR/sync-tool-configs.sh" "${SYNC_ARGS[@]}"; then
     echo "Shared tool surfaces repaired and local exports refreshed via sync-tool-configs.sh"
   else
     echo "Error: sync-tool-configs.sh failed. Shared tool symlinks or local exports may be stale." >&2
+    echo "Fix the issue and re-run, or run manually: bash $SCRIPT_DIR/sync-tool-configs.sh $CONSUMER" >&2
     exit 1
   fi
 else
-  echo "Warning: sync-tool-configs.sh not found; skipping tool surface repair." >&2
+  echo "Error: sync-tool-configs.sh not found at $SCRIPT_DIR; cannot repair tool surfaces or refresh exports." >&2
+  exit 1
 fi
 
-# 5. Update AGENTS.md
-# Strategy:
-#   - Fresh file: write the full template.
-#   - Existing file with sentinel block: replace the block in-place (upgrade).
-#   - Existing file without sentinel: append the template block.
-#   - --force on an existing sentinel block: same replace-in-place (idempotent).
-TOOLKIT_BLOCK="$(cat "$SCRIPT_DIR/templates/consumer-AGENTS.md")"
+# 5. Generate AGENTS.md.
+REFERENCE_AGENTS="$(cat "$SCRIPT_DIR/templates/consumer-AGENTS.md")"
+
+ORCHESTRATION_HEADING="## Mandatory agent orchestration (all LLM assistants)"
+# Single source of truth: the section lives at the end of the template
+# (from the heading line to end-of-template); extract it instead of
+# duplicating the text here.
+ORCHESTRATION_SECTION="$(awk -v h="$ORCHESTRATION_HEADING" '
+  $0 == h { found=1 }
+  found { print }
+' "$SCRIPT_DIR/templates/consumer-AGENTS.md")"
+
 CONSUMER_AGENTS="$CONSUMER/AGENTS.md"
-
-if [[ ! -f "$CONSUMER_AGENTS" ]]; then
-  printf "%s\n" "$TOOLKIT_BLOCK" > "$CONSUMER_AGENTS"
-  echo "AGENTS.md: created."
-elif grep -q "<!-- BEGIN LLM TOOLKIT -->" "$CONSUMER_AGENTS" 2>/dev/null; then
-  # Replace only the sentinel block, preserving everything outside it.
-  # Pass the replacement block via a temp file; export path for awk via ENVIRON.
-  BLOCK_TMP="$(mktemp)"
-  printf "%s\n" "$TOOLKIT_BLOCK" > "$BLOCK_TMP"
-  export BLOCK_TMP
-  awk '
-    /<!-- BEGIN LLM TOOLKIT -->/ {
-      found=1
-      while ((getline line < ENVIRON["BLOCK_TMP"]) > 0) print line
-      close(ENVIRON["BLOCK_TMP"])
-      next
-    }
-    found && /<!-- END LLM TOOLKIT -->/ { found=0; next }
-    found { next }
-    { print }
-  ' "$CONSUMER_AGENTS" > "${CONSUMER_AGENTS}.tmp" \
-    && mv "${CONSUMER_AGENTS}.tmp" "$CONSUMER_AGENTS"
-  rm -f "$BLOCK_TMP"
-  unset BLOCK_TMP
-  echo "AGENTS.md: toolkit block updated in-place."
+if [[ -f "$CONSUMER_AGENTS" ]]; then
+  if grep -q "LLM Dev Tools\|LLM-assisted development" "$CONSUMER_AGENTS" 2>/dev/null; then
+    echo "AGENTS.md: already configured, unchanged."
+  else
+    {
+      echo ""
+      echo "---"
+      echo "$REFERENCE_AGENTS"
+    } >> "$CONSUMER_AGENTS"
+    echo "AGENTS.md: appended LLM tools reference."
+  fi
 else
-  # Legacy file (no sentinel) — append the block so existing content is preserved.
-  printf "\n---\n%s\n" "$TOOLKIT_BLOCK" >> "$CONSUMER_AGENTS"
-  echo "AGENTS.md: toolkit block appended (no existing sentinel found)."
+  echo "$REFERENCE_AGENTS" > "$CONSUMER_AGENTS"
+  echo "AGENTS.md: created."
 fi
 
-# 6. .gitignore - only add entries for selected tools
+# 5b. Idempotently ensure the mandatory agent-orchestration section is present.
+# The template-append/create paths above already carry it as part of
+# REFERENCE_AGENTS; this only fires when an already-configured AGENTS.md
+# (marker present) predates the section being added to the template.
+if grep -qF "$ORCHESTRATION_HEADING" "$CONSUMER_AGENTS" 2>/dev/null; then
+  echo "AGENTS.md: agent-orchestration section already present, unchanged."
+else
+  {
+    echo ""
+    echo "$ORCHESTRATION_SECTION"
+  } >> "$CONSUMER_AGENTS"
+  echo "AGENTS.md: appended mandatory agent-orchestration section."
+fi
+
+# 6. .gitignore — only add entries for selected tools.
 CONSUMER_GITIGNORE="$CONSUMER/.gitignore"
 
-if [[ -f "$CONSUMER_GITIGNORE" ]] && grep -q "LLM integration\|LLM toolkit\|\.agents/" "$CONSUMER_GITIGNORE" 2>/dev/null; then
+if [[ -f "$CONSUMER_GITIGNORE" ]] && grep -q "LLM integration\|LLM toolkit\|\docs/jira/" "$CONSUMER_GITIGNORE" 2>/dev/null; then
   echo ".gitignore: already configured, unchanged."
 else
   {
     echo ""
-    echo "# LLM integration - symlinked/generated content (do not commit)"
-    echo ".agents/"
-    echo ".setup/"
-    [[ $USE_WINDSURF -eq 1 ]] && echo ".windsurf/"
-    [[ $USE_CURSOR -eq 1 ]]   && echo ".cursor/"
-    [[ $USE_CLAUDE -eq 1 ]]   && echo ".claude/"
-    [[ $USE_CODEX -eq 1 ]]    && echo ".codex/"
+    echo "# LLM integration — local output and symlinked/generated toolkit paths"
+    echo "docs/jira/"
+    echo "node_modules/"
+    echo ".DS_Store"
+    append_shared_skill_ignores ".agents"
+    echo ".agents/skills/AGENTS.md"
+    echo ".windsurf/rules/"
+    echo ".windsurf/workflows/"
+    [[ $USE_WINDSURF -eq 1 ]] && append_shared_skill_ignores ".windsurf"
+    [[ $USE_ANTIGRAVITY -eq 1 ]] && append_shared_skill_ignores ".agent" && echo ".agent/skills/AGENTS.md"
+    [[ $USE_CURSOR -eq 1 ]]   && append_shared_skill_ignores ".cursor" && echo ".cursor/skills/AGENTS.md" && echo ".cursor/rules/" && echo ".cursor/workflows/" && echo ".cursor/agents/"
+    [[ $USE_CLAUDE -eq 1 ]]   && append_shared_skill_ignores ".claude" && echo ".claude/skills/AGENTS.md"
+    [[ $USE_CODEX -eq 1 ]]    && append_shared_skill_ignores ".codex" && echo ".codex/skills/AGENTS.md" && echo ".codex/agents/"
+    [[ $USE_GEMINI -eq 1 ]]   && append_shared_skill_ignores ".gemini" && echo ".gemini/skills/AGENTS.md"
+    [[ $USE_OPENCODE -eq 1 ]] && append_shared_skill_ignores ".opencode" && echo ".opencode/skills/AGENTS.md"
   } >> "$CONSUMER_GITIGNORE"
   echo ".gitignore: appended LLM tool entries."
 fi
@@ -299,15 +375,19 @@ echo ""
 echo "Done. Consumer repo configured at: $CONSUMER"
 echo ""
 echo "  Always:"
-echo "    .agents/                   - skills -> toolkit .agents/"
-echo "    .setup/                    - templates -> toolkit .setup/"
+echo "    .agents/skills/<name>      - shared skills -> toolkit skills/<name>"
+echo "    .windsurf/rules/           - shared rules -> toolkit rules/"
+echo "    .windsurf/workflows/       - shared workflows -> toolkit workflows/"
 echo "    docs/llm/                  - repo-local LLM guidance"
 echo "    scripts/sync-llm-configs.* - consumer-local LLM sync wrapper"
 echo "    AGENTS.md                  - repo-level instructions and context"
-[[ $USE_WINDSURF -eq 1 ]] && echo "  Windsurf:"  && echo "    .windsurf/                 - -> toolkit .windsurf/ (symlink)"
-[[ $USE_CURSOR -eq 1 ]]   && echo "  Cursor:"    && echo "    .cursor/                   - -> toolkit/.cursor (symlink)"
-[[ $USE_CLAUDE -eq 1 ]]   && echo "  Claude Code:" && echo "    .claude/                   - -> toolkit .claude/ (symlink)"
-[[ $USE_CODEX -eq 1 ]]    && echo "  Codex:"     && echo "    .codex/                    - -> toolkit .codex/ (symlink)"
+[[ $USE_WINDSURF -eq 1 ]] && echo "  Windsurf:"  && echo "    .windsurf/skills/<name>    - shared skills -> toolkit skills/<name>"
+[[ $USE_ANTIGRAVITY -eq 1 ]] && echo "  Antigravity:" && echo "    .agent/skills/<name>       - shared skills -> toolkit skills/<name>"
+[[ $USE_CURSOR -eq 1 ]]   && echo "  Cursor:"    && echo "    .cursor/skills/<name>      - shared skills -> toolkit skills/<name>" && echo "    .cursor/                   - provider root with shared subpath links"
+[[ $USE_CLAUDE -eq 1 ]]   && echo "  Claude Code:" && echo "    .claude/skills/<name>      - shared skills -> toolkit skills/<name>"
+[[ $USE_CODEX -eq 1 ]]    && echo "  Codex:"     && echo "    .codex/skills/<name>       - shared skills -> toolkit skills/<name>"
+[[ $USE_GEMINI -eq 1 ]]   && echo "  Gemini CLI:" && echo "    .gemini/skills/<name>      - shared skills -> toolkit skills/<name>"
+[[ $USE_OPENCODE -eq 1 ]] && echo "  OpenCode:" && echo "    .opencode/skills/<name>    - shared skills -> toolkit skills/<name>"
 echo ""
 echo "Note: linked/generated toolkit directories are gitignored; repo-local files stay committed."
 echo "Next: review docs/llm/toolkit-selection.txt and ask the LLM to add repo-specific context in docs/llm/."
