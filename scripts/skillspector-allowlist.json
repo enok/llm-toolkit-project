@@ -176,6 +176,83 @@
       "file": "references/security-compliance.md",
       "pattern": "Tool Parameter Abuse",
       "reason": "Security compliance reference includes scanning commands as operator-run examples."
+    },
+    {
+      "skill": "cli-creator",
+      "id": "AS1",
+      "file": "SKILL.md",
+      "pattern": "Agent Config Directory Access",
+      "reason": "Documents where a companion skill file may be written (the user's personal skill home or a repo-local skill path); it never reads agent configuration or credentials."
+    },
+    {
+      "skill": "external-skill-intake",
+      "id": "RA1",
+      "file": "SKILL.md",
+      "pattern": "Self-Modification",
+      "reason": "Reference table about evaluating third-party 'self-evolving agent' material and a rejected-source record; it describes review criteria, not self-modifying behaviour."
+    },
+    {
+      "skill": "external-skill-intake",
+      "id": "RA1",
+      "file": "references/agent-evolution-sources.md",
+      "pattern": "Self-Modification",
+      "reason": "Reference table about evaluating third-party 'self-evolving agent' material and a rejected-source record; it describes review criteria, not self-modifying behaviour."
+    },
+    {
+      "skill": "java-best-practices",
+      "id": "P2",
+      "file": "AGENTS.md",
+      "pattern": "Hidden Instructions",
+      "reason": "False positive on XML comments inside Log4j2 configuration examples."
+    },
+    {
+      "skill": "jenkins-to-github-actions",
+      "id": "PE3",
+      "file": "references/security.md",
+      "pattern": "Credential Access",
+      "reason": "Secure-migration guidance naming credential files (.npmrc, kubeconfig) that must be removed from CI images and replaced by scoped tokens; no credential is read."
+    },
+    {
+      "skill": "jmeter-performance-testing",
+      "id": "E2",
+      "file": "scripts/run_jmeter.py",
+      "pattern": "Env Variable Harvesting",
+      "reason": "The runner reads exactly one user-named environment variable (--auth-token-env) to inject a load-test auth token as a JMeter property; the value is redacted from manifests and logs."
+    },
+    {
+      "skill": "security",
+      "id": "P1",
+      "file": "references/security-check-required.md",
+      "pattern": "Instruction Override",
+      "reason": "Describes the patterns the toolkit's own LLM-surface prompt-injection scanner blocks; it is detection guidance, not an override instruction."
+    },
+    {
+      "skill": "security",
+      "id": "SC2",
+      "file": "references/security-check-required.md",
+      "pattern": "External Script Fetching",
+      "reason": "Lists curl|sh / wget|bash as patterns the LLM-surface scanner flags; no fetch-and-execute is performed."
+    },
+    {
+      "skill": "ui-verify",
+      "id": "AS2",
+      "file": "SKILL.md",
+      "pattern": "MCP Config Access",
+      "reason": "Discovers which configured browser MCP server offers navigate/snapshot/click/screenshot tools; it reads tool capabilities, not MCP configuration files or secrets."
+    },
+    {
+      "skill": "ui-verify",
+      "id": "AS2",
+      "file": "references/browser-workflow.md",
+      "pattern": "MCP Config Access",
+      "reason": "Discovers which configured browser MCP server offers navigate/snapshot/click/screenshot tools; it reads tool capabilities, not MCP configuration files or secrets."
+    },
+    {
+      "skill": "zoom-meeting-sdk",
+      "id": "PE3",
+      "file": "metadata.json",
+      "pattern": "Credential Access",
+      "reason": "Skill abstract mentions keeping SDK credentials in .env files server-side; guidance only, no file access."
     }
   ]
 }
