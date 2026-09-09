@@ -13,7 +13,7 @@ license: MIT
 
 Brazilian statistical office datasets for municipal-level analysis.
 
-> **Reference**: See `references/ibge-apis.md` for full API specs.
+> **Reference**: See `workflows/data-source-ingestion.md` (IBGE Census section) for ingestion steps; the SKILL.md quick reference below lists the API endpoints.
 
 ## Quick Reference
 

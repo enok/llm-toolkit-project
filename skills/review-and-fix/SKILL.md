@@ -15,7 +15,7 @@ Use this skill as a multi-agent orchestrator for high-signal review and remediat
 ## Orchestration pattern
 1. Establish scope first: diff, base branch, ticket, comments, CI state, and changed subsystems.
    - For branch-diff scope, use either `git diff origin/<base>...HEAD` or `git diff --merge-base origin/<base> HEAD`. Do not combine `--merge-base` with a `A...B` range.
-   - Before planning or editing, read the repo-root `AGENTS.md` and the closest applicable `CLAUDE.md` files, and scan any task-matching repo-local `skills/*/SKILL.md` playbooks when they exist.
+   - Before planning or editing, read the repo-root `AGENTS.md` and the closest applicable `CLAUDE.md` files, and scan any task-matching repo-local skill playbooks (`SKILL.md` files) when they exist.
 2. Treat GitHub pipeline state as a first-class signal. If a PR exists or checks are available, inspect them early and keep monitoring them during the loop.
 3. Once scope is clear, spawn the independent lanes immediately by default and report each lane or phase result as soon as it finishes. Do not ask for permission to use multiple agents unless a user-visible tradeoff or unsafe side effect requires a decision.
 4. Keep the immediate blocking path local.
@@ -37,7 +37,7 @@ Use this skill as a multi-agent orchestrator for high-signal review and remediat
    - use `$skill-creator` when designing or restructuring a reusable skill
    - use `$skill-installer` when a mature external skill is a better shared solution than inventing a new one
    - treat CI failures as a common trigger for this loop, not the only one
-9. Whenever a PR exists or will be created, apply `.windsurf/rules/pr-description-review.md` on the initial draft and again after every later revision that changes the diff, affected files, validation, or proof state. Review the live or draft PR title/body, and update it if the summary is stale, noisy, vague, or inconsistent with the current branch state.
+9. Whenever a PR exists or will be created, review the PR description (title, summary, affected files, validation evidence, proof state) against `rules/git-conventions.md` and `skills/documentation-reviewer/SKILL.md` on the initial draft and again after every later revision that changes the diff, affected files, validation, or proof state. Review the live or draft PR title/body, and update it if the summary is stale, noisy, vague, or inconsistent with the current branch state.
 10. Finish with a single local verification pass: targeted tests, sanity check of the diff, CI status, latest PR description refresh status, and a concise summary of what changed, what config artifacts evolved, and what remains risky. If the branch is ready to share and no PR exists yet, create it instead of reporting PR and CI phases as blocked. Missing PR state is temporary, not a completion condition.
    - In JS/TS repos that enforce dead-export or unused-export checks, do not export helper functions solely for testability. Test through public exports or run the repo’s dead-export signal before pushing.
 11. When the active repo family requires proof artifacts, do not stop at green tests. Ensure each UI-visible workflow has appropriate proof, finish with the repo-specific evidence package when one exists, and report whether evidence was attached or not applicable.

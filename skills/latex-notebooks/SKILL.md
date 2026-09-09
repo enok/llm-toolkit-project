@@ -30,8 +30,8 @@ Help engineers express technical math clearly in notebook markdown and adjacent 
 
 ## Related Rules And Workflows
 
-- `rules/latex-in-notebooks.md`
-- `rules/jupyter-notebook-hygiene.md`
+- `skills/notebook-analysis/references/latex-in-notebooks.md`
+- `skills/notebook-analysis/references/notebook-discipline.md`
 - `workflows/notebook-latex-polish.md`
 
 ## Pair With

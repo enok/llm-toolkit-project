@@ -36,6 +36,8 @@ Reference these guidelines when:
 
 ## Quick Reference
 
+The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `AGENTS.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
+
 ### 1. Injection Prevention (CRITICAL)
 
 - `injection-sql` - Parameterized queries only. Never concatenate user input into SQL.
@@ -53,7 +55,7 @@ Reference these guidelines when:
 
 ### 3. Secrets Management (CRITICAL)
 
-- `secrets-no-hardcoded` - Never embed secrets in code or config files.
+- `secrets-no-hardcoded` - Never embed secrets in code, config files, notebooks, or committed outputs.
 - `secrets-no-logging` - Tokens and secrets must never appear in logs or URLs.
 - `secrets-store` - Use a secret store (Vault, AWS Secrets Manager) or environment variables.
 
@@ -67,6 +69,8 @@ Reference these guidelines when:
 ### 5. Data Privacy & PII (HIGH)
 
 - `pii-no-logging` - Never log names, SSNs, addresses, DOBs, or identifiers.
+- `logging-debug-redaction` - Centralize request-context formatting and redact
+  high-risk identifiers before any log level emits them.
 - `pii-minimization` - Collect only what you need. Don't store PII unnecessarily.
 - `pii-audit` - Audit logging required for all data modifications in sensitive domains.
 
@@ -90,12 +94,15 @@ Reference these guidelines when:
 
 ## How to Use
 
-Read individual rule files for detailed explanations and code examples:
+Read the standalone rule files for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `AGENTS.md`:
 
 ```
 rules/injection-sql.md
+rules/logging-debug-redaction.md
 rules/secrets-no-hardcoded.md
 ```
+
+[references/rules.md](references/rules.md) is a compact always-on summary of this baseline for consumer repos that want the whole thing in one short file; [references/security-check-required.md](references/security-check-required.md) mirrors the toolkit's `rules/security-check-required.md` gate.
 
 Each rule file contains:
 - Brief explanation of why it matters
@@ -107,12 +114,12 @@ Each rule file contains:
 
 This skill provides **cross-cutting security rules**. Pair it with technology-specific skills:
 
-- **nodejs** — Node.js-specific hardening: helmet(), rate limiting, CORS allowlist, secure cookies, trust proxy
-- **cloudformation** — AWS infrastructure security: least-privilege IAM, no hardcoded secrets in templates, encryption at rest
-- **terraform** — IaC security scanning (trivy, checkov), state security, least-privilege
+- **js-ts-best-practices** — Node.js and TypeScript hardening: middleware defaults, async boundaries, input validation, error handling
+- **terraform** / **terraform-change-safety** — IaC security scanning (trivy, checkov), state encryption, least-privilege IAM, no hardcoded secrets in templates
 - **shell-scripting** — Script security: no eval, mktemp for temp files, input validation
 - **java-best-practices** / **python-best-practices** / **js-ts-best-practices** — Language-specific error handling and input validation patterns
 - **best-practices** — Defensive programming, fail-fast validation, immutability (foundations that security builds on)
+- **owasp-security-review** / **security-threat-model** / **security-ownership-map** — Audit, threat-model, and ownership passes that consume this baseline
 
 ## Full Compiled Document
 

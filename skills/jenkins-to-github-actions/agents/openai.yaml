@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jenkins to GitHub Actions"
+  short_description: "Migrate Jenkins pipelines to GitHub Actions safely."
+  default_prompt: "Migrate this Jenkins pipeline to GitHub Actions safely."

@@ -1,6 +1,10 @@
 ---
 name: second-opinion
-description: Get a pragmatic second opinion on plans, designs, or code by running it through a secondary AI model alongside the primary model's own review. Use when the user wants a sanity check, peer review, consensus check, or second set of eyes on any artifact before implementation. Trigger on "review this plan", "does this design make sense", "sanity check", "gut check", "what am I missing", "second opinion", or "run this by another model".
+description: "Get a pragmatic second opinion on plans, designs, or code by running it through a secondary AI model alongside the primary model's own review. Use when the user wants a sanity check, peer review, consensus check, or second set of eyes on any artifact before implementation. Trigger on 'review this plan', 'does this design make sense', 'sanity check', 'gut check', 'what am I missing', 'second opinion', or 'run this by another model'."
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # Second Opinion
@@ -122,6 +126,6 @@ The "where we agree" and "where we diverge" sections are the real value. Agreeme
 
 ## Related Skills
 
-- **review** — in-agent AI diff review
+- **ticket-review** (or **review**) — in-agent AI diff review
 - **pre-pr-check** — full pre-PR validation
 - **pathfinder** — decompose plans into slices before review

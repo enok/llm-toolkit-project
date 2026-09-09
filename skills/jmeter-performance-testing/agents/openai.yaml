@@ -1,0 +1,6 @@
+interface:
+  display_name: "JMeter Performance Testing"
+  short_description: "Run and analyze JMeter load tests against any HTTP service"
+  default_prompt: "Use $jmeter-performance-testing to plan, run, and analyze a JMeter load test against this service, then report whether the change improved, regressed, or held steady."
+policy:
+  allow_implicit_invocation: true

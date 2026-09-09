@@ -5,6 +5,10 @@ description: >
     Trigger when a user asks what E2E tests to run, how to verify a release, how to compare
     failures against prior runs, or how to scope regression coverage by environment, tenant,
     or change surface.
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # E2E Release Verification

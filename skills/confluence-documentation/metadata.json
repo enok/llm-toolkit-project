@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "dev-tools",
   "date": "May 2026",
   "abstract": "Create, read, update, delete, move, label, comment on, and manage Confluence documentation safely. Use for Confluence CRUD, wiki docs, page hierarchy, attachments, comments, or syncing repo docs to Confluence.",

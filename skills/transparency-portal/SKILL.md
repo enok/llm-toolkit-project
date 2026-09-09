@@ -12,7 +12,7 @@ license: MIT
 
 Brazilian Federal Government Transparency Portal — federal spending and sanctions data.
 
-> **Reference**: See `references/transparency-api.md` for full endpoint catalog.
+> **Reference**: See `learnings/transparency-portal-api.md` for the endpoint catalog, auth, and pagination notes.
 
 ## Quick Reference
 

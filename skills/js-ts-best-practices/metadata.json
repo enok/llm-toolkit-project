@@ -1,8 +1,8 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "dev-tools",
   "date": "March 2026",
-  "abstract": "Comprehensive JavaScript and TypeScript best practices guide for backend and full-stack applications. Contains 30+ rules across 8 categories covering type safety, async patterns, dependency injection, error handling, concurrency, testing, and operational patterns. Each rule includes detailed explanations with incorrect vs. correct code examples. Complements the Vercel react-best-practices skill (frontend/React focus) with general JS/TS language patterns.",
+  "abstract": "Comprehensive JavaScript and TypeScript best practices guide for backend and full-stack applications. Contains 30+ rules across 8 categories covering type safety, async patterns, dependency injection, error handling, concurrency, testing, and operational patterns. Each rule includes detailed explanations with incorrect vs. correct code examples. Pair with project-local frontend or React guidance when a destination repo provides it.",
   "references": [
     "https://www.typescriptlang.org/docs/",
     "https://developer.mozilla.org/en-US/docs/Web/JavaScript",

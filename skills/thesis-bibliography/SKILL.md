@@ -352,7 +352,7 @@ ORGANIZATION. **Title of the report in bold**. City: Organization, Year.
 
 ## Related Resources
 
-- `.windsurf/rules/research-rigor.md` — Research discipline
+- `skills/research-thesis-support/references/research-discipline.md` — Research discipline
 - `docs/llm/workflows/tcc-analysis-and-writing-sync.md` — Writing guidance
 - `docs/llm/workflows/thesis-completion-guide.md` — Chapter structure
 - `.agents/skills/research-thesis-support/SKILL.md` — Evidence artifacts

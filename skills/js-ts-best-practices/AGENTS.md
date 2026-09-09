@@ -795,12 +795,11 @@ async function getOrFetch(key: string): Promise<Data> {
 - **Sanitize error messages** returned to clients — never expose stack traces or internal details.
 
 > For comprehensive security guidance (injection, auth, XSS/CSRF/SSRF, secrets, PII, threat modeling), see the **security** skill.
-> For Node.js-specific hardening (helmet, rate limiting, CORS, cookies, trust proxy), see the **nodejs** skill.
+> For Node.js-specific hardening (helmet, rate limiting, CORS, cookies, trust proxy), pair this skill with the **security** skill.
 
 ## Related Skills
 
-- **nodejs** — Node.js runtime: process lifecycle, Express/Fastify middleware, streams, Docker deployment (runtime companion to this language-level skill)
-- **react-best-practices** — React/Next.js performance optimization (frontend companion)
+- Project-local frontend guidance — React/Next.js performance optimization when the destination repo provides it
 - **best-practices** — SOLID principles, layered architecture, resilience patterns (language-agnostic foundations)
 - **security** — Comprehensive injection prevention, auth, secrets, XSS/CSRF/SSRF, PII rules
 - **testing** — AC-to-test traceability, test pyramid, coverage checklist (universal testing discipline)

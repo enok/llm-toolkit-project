@@ -5,7 +5,7 @@ description: SOLID, clean code, architecture, resilience, and anti-patterns
 
 # Software Engineering & Architecture Best Practices
 
-Universal principles that apply to every project regardless of tech stack. These supplement `code-rules.md` with higher-level guidance.
+Universal principles that apply to every project regardless of tech stack. These supplement the toolkit-wide `rules/code-rules.md` with higher-level guidance.
 
 ## Software Engineering Principles
 

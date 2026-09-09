@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "dev-tools",
   "date": "March 2026",
   "abstract": "Comprehensive Python best practices guide for backend applications. Contains 30+ rules across 8 categories covering language fundamentals, dependency injection, error handling, logging, concurrency, testing, external resource access, and operational patterns. Each rule includes detailed explanations with incorrect vs. correct code examples.",

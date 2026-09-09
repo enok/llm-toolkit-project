@@ -13,7 +13,7 @@ license: MIT
 
 Brazilian academic formatting standards for thesis work.
 
-> **Reference**: See `references/abnt-standards.md` and USP MBA manual in `../../tcc/Manual de Instruções e Normas TCC_PT.pdf`.
+> **Reference**: See `references/abnt-nbr-14724-core-requirements.md` and the USP MBA manual in `../../tcc/Manual de Instruções e Normas TCC_PT.pdf`.
 
 ## Quick Reference
 

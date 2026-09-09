@@ -7,7 +7,7 @@
 
 | Mechanism | Data sent | Mitigation |
 |-----------|-----------|------------|
-| **Kroki** (`render-mermaid-in-markdown-for-pdf.ps1`, default `https://kroki.io/mermaid/png`) | Full **Mermaid diagram source** (HTTP POST) | For confidential diagrams, use **self-hosted Kroki** and pass `-KrokiUrl`. Do not put **secrets, tokens, PII, or internal-only hostnames** inside Mermaid unless the renderer is org-controlled. |
+| **Kroki** (`render-mermaid-in-markdown-for-pdf.ps1`, default `https://kroki.io/mermaid/svg`) | Full **Mermaid diagram source** (HTTP POST) | For confidential diagrams, use **self-hosted Kroki** and pass `-KrokiUrl`. Do not put **secrets, tokens, PII, or internal-only hostnames** inside Mermaid unless the renderer is org-controlled. |
 | **Public internet** (same) | Only what Kroki needs to render | Treat as **third-party processing** for compliance reviews. |
 
 ## Local-only components
@@ -19,7 +19,10 @@
 ## Artifact handling
 
 - PDFs may be **attached to Jira**, emailed, or stored in Drive — apply the same classification as the **source Markdown** (and anything extracted from diagrams).
-- Generated files include **`architecture-for-pdf.md`** and **`pdf/mermaid/*.png`** — keep out of leaks the same as source docs; prefer **not** committing binary exports unless the team explicitly version-controls them.
+- Generated files include **`architecture-for-pdf.md`** and **`pdf/mermaid/*.svg`** or **`pdf/mermaid/*.png`** — keep out of leaks the same as source docs; prefer **not** committing binary exports unless the team explicitly version-controls them.
+- Cleanup paths for generated HTML, images, PDFs, or temp folders must resolve
+  under the expected output parent before recursive delete or overwrite.
+  Reject traversal inputs such as `..` and absolute paths.
 
 ## Verification tool
 
@@ -32,5 +35,7 @@
 
 - [ ] No credentials or live keys in Markdown, Mermaid, or examples in the exported doc set.
 - [ ] Kroki / diagram policy matches org policy (public vs self-hosted).
+- [ ] Diagram intermediates are SVG by default or high-resolution PNG when raster output is required.
+- [ ] 100% of generated/exported images and final PDF pages containing them passed the mandatory image-quality inspection gate; uninspected output is a blocker.
 - [ ] Extracted PDF text contains no local machine paths or `file:///` source URLs.
 - [ ] Final PDF distribution channel (Jira visibility) matches data class of the content.

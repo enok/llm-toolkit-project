@@ -4,7 +4,7 @@ description: Java backend best practices for writing robust, testable, and maint
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Java Best Practices
@@ -35,6 +35,8 @@ Reference these guidelines when:
 | 8 | External Resources & Operations | LOW-MEDIUM | `resource-` |
 
 ## Quick Reference
+
+The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `AGENTS.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
 
 ### 1. Dependency Injection (CRITICAL)
 
@@ -92,15 +94,37 @@ Reference these guidelines when:
 - `resource-connection-pool` - Always use connection pools (HikariCP, SDK clients)
 - `resource-http-timeouts` - Configure connect + read + idle timeouts
 - `resource-caching` - Use Guava/Caffeine LoadingCache with TTL and max size
+- `resource-metrics-registry-wiring` - Metrics wrappers must share the application registry and fail fast when wiring is missing
+- `resource-log4j2-startup-log-level` - Feed early Log4j2 levels from validated JVM startup properties
 - `resource-dynamic-log-levels` - Use Log4j2 monitorInterval for hot-reload
+- `resource-java-release-cross-compile` - Use Maven compiler `release` when a newer JDK builds for an older runtime
 
 ## How to Use
 
-Read individual rule files for detailed explanations and code examples:
+Read the standalone rule files for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `AGENTS.md`:
+
+Use [references/source-backed-modern-java.md](references/source-backed-modern-java.md)
+for runtime-aware Spring and modern-JDK choices.
 
 ```
-rules/di-constructor-injection.md
+rules/concurrency-collections.md
 rules/concurrency-immutability.md
+rules/concurrency-read-modify-write.md
+rules/concurrency-shared-mutable.md
+rules/di-constructor-injection.md
+rules/di-interface-isolation.md
+rules/error-specific-exceptions.md
+rules/lang-algorithmic.md
+rules/lang-immutability.md
+rules/lang-null-safety.md
+rules/logging-exception-context.md
+rules/logging-mdc.md
+rules/logging-parameterized.md
+rules/logging-slf4j-gotcha.md
+rules/resource-java-release-cross-compile.md
+rules/resource-log4j2-startup-log-level.md
+rules/resource-metrics-registry-wiring.md
+rules/testing-mock-interface.md
 ```
 
 Each rule file contains:

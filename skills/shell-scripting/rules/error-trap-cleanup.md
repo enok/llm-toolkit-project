@@ -23,7 +23,9 @@ rm -f "$TEMP_FILE"  # never reached if process fails
 ```bash
 TEMP_FILE=""
 cleanup() {
-  [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+  if [[ -n "$TEMP_FILE" && -f "$TEMP_FILE" ]]; then
+    rm -- "$TEMP_FILE"
+  fi
 }
 trap cleanup EXIT
 

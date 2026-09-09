@@ -32,8 +32,8 @@ Help engineers improve notebooks without sacrificing reproducibility, readabilit
 
 ## Related Rules And Workflows
 
-- `rules/analytics-reproducibility.md`
-- `rules/bilingual-doc-sync.md`
+- `skills/notebook-analysis/references/analytics-discipline.md`
+- `workflows/bilingual-doc-sync.md`
 - `workflows/notebook-analysis-update.md`
 - `workflows/bilingual-doc-sync.md`
 

@@ -180,6 +180,7 @@ Configure the logging framework to cap stack trace output and prevent log floodi
 
 **Log4j2** — use `%xEx{depth}` in the pattern layout:
 ```xml
+<!-- Limits stack traces to 200 lines — prevents log flooding -->
 <Property name="LOG_PATTERN">%d{ISO8601} [%X{correlationId}] [%t] %-5p [%c] %m%n%xEx{200}</Property>
 ```
 
@@ -208,6 +209,7 @@ try {
 ```
 
 ```xml
+<!-- Reference in log pattern -->
 <PatternLayout pattern="%d [%X{requestId}] [%t] %-5p [%c] %m%n%xEx{200}"/>
 ```
 
@@ -234,16 +236,19 @@ Synchronous logging blocks the application thread until the log event is written
 
 **Log4j2** — use `<Async>` wrapper appenders:
 ```xml
+<!-- Synchronous appender (writes to file) -->
 <RollingFile name="appLog" fileName="app.log" ...>
     <PatternLayout pattern="${LOG_PATTERN}"/>
 </RollingFile>
 
+<!-- Async wrapper — application threads return immediately -->
 <Async name="asyncAppLog" bufferSize="8192" blocking="false" includeLocation="true">
     <AppenderRef ref="appLog"/>
 </Async>
 
+<!-- Use the async wrapper in loggers, not the raw appender -->
 <Logger name="com.myapp" level="INFO">
-    <AppenderRef ref="asyncAppLog"/>
+    <AppenderRef ref="asyncAppLog"/>  <!-- NOT ref="appLog" -->
 </Logger>
 ```
 
@@ -259,6 +264,7 @@ Synchronous logging blocks the application thread until the log event is written
 
 **Alternative — Log4j2 `AsyncLogger`** (LMAX Disruptor-based, higher performance than `<Async>` wrapper):
 ```xml
+<!-- In log4j2.xml: make ALL loggers async (highest throughput) -->
 <Configuration>
     <Loggers>
         <AsyncLogger name="com.myapp" level="INFO">
@@ -853,12 +859,54 @@ public class ExpensiveResourceHolder {
 
 ## Operational Best Practices
 
+### Metrics Registry Wiring
+
+Production monitoring wrappers must use the shared application metrics registry.
+Do not accept an optional registry and create `new MetricRegistry()` as a
+fallback; that records important cache, latency, and failure metrics in a
+private registry that reporters never export.
+
+- Require the registry in constructors or Spring bean methods.
+- Remove fallback constructors that create unreported registries.
+- Add configuration tests that assert the wrapper's registry is the same
+  instance as the application registry.
+- Treat broken metrics wiring as a fail-fast condition, not as a best-effort
+  optional dependency.
+
+### Startup Effective Configuration Logs
+
+For startup beans or configuration loaders that establish critical runtime
+state, log the final sanitized or parsed value at `INFO` after successful
+construction. Prefer the value the application will actually use over raw
+config payloads, and keep equivalent logs for mock or test replacement paths.
+Do not log secrets, raw tokens, or high-risk request identifiers.
+
+### Startup-Owned Log4j2 Levels
+
+Log4j2 initializes early, often before Spring, servlet containers, or application
+frameworks load their property sources. If logger levels must vary by
+deployment, pass a validated JVM system property from the startup script or
+process manager:
+
+```xml
+<Property name="LOG_LEVEL">${sys:LOG_LEVEL:-INFO}</Property>
+<Logger name="com.myapp.service" level="${LOG_LEVEL}"/>
+```
+
+- Validate accepted values before building `JAVA_OPTS` or equivalent startup
+  args.
+- Default to `INFO` when unset or invalid.
+- Prefer system properties for early logging config over classpath resource
+  lookups that can be shadowed by packaged defaults.
+- Keep the scope narrow and never use lower log levels to expose PII or secrets.
+
 ### Dynamic Log Levels for Production Troubleshooting
 
 When troubleshooting in production, temporarily change log levels from WARN/ERROR to INFO or DEBUG to get more diagnostic detail:
 
 **Log4j2** — use `monitorInterval` for hot-reload without restart:
 ```xml
+<!-- Checks for config changes every 30 seconds — no restart needed -->
 <Configuration monitorInterval="30">
 ```
 
@@ -871,9 +919,12 @@ To troubleshoot: update the log config file on the server (or via S3/SSM), and L
 4. **Revert immediately** — INFO/DEBUG in production generates massive log volume and can impact performance and costs.
 
 ```xml
+<!-- Normal production config -->
 <Logger name="com.myapp.service" level="ERROR"/>
 
+<!-- Temporary troubleshooting config -->
 <Logger name="com.myapp.service" level="INFO"/>
+<!-- Or for deep debugging of a specific class: -->
 <Logger name="com.myapp.service.OrderService" level="DEBUG"/>
 ```
 

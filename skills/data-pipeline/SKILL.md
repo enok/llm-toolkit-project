@@ -32,8 +32,8 @@ Help engineers make safe changes to data platforms where contracts, lineage, and
 
 ## Related Rules And Workflows
 
-- `rules/data-pipeline-contracts.md`
-- `rules/data-governance.md`
+- `skills/data-pipeline/references/data-pipeline-contracts.md`
+- `skills/data-governance/references/rules.md`
 - `workflows/dataset-onboarding.md`
 - `workflows/data-pipeline-change.md`
 

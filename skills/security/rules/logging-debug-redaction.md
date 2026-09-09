@@ -28,4 +28,13 @@ logger.debug("Payload: featureCount=%d schemaFields=%d", len(data_array), len(sc
 - Log only structural metadata: IDs, counts, sizes, endpoints, field names — never field values.
 - For payloads containing user-supplied data (`model.fields[*].value`, survey responses, form inputs), always redact or omit the values.
 - Consider a helper like `safe_payload_summary(payload)` to enforce consistent redaction across the codebase.
+- For request-context logs, centralize formatting and redact high-risk
+  identifiers such as user/request correlation IDs, session IDs, and trace IDs.
+  Prefer `redacted(length=<n>,sha256=<short-hash>)` so operators can correlate
+  repeated failures without exposing the raw value.
+- Keep low-risk routing fields readable when needed for triage, such as flow
+  name, model ID, endpoint name, or request type. Represent exact source
+  timestamps as presence markers when the raw value is not needed.
+- Add tests that assert redaction markers are present and raw identifiers are
+  absent from the formatted context.
 - This applies to ALL log levels (ERROR, WARNING, INFO, DEBUG) — DEBUG is not an excuse to log raw data.

@@ -4,6 +4,10 @@ description: >
     Write or update operational runbooks for deploy, triage, rollback, and recurring
     operational procedures. Trigger when the user asks to write a runbook, document an
     operational procedure, create triage instructions, or formalize a recurring ops workflow.
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # Runbook Authoring
@@ -52,3 +56,8 @@ Return:
 - **incident-ops** — Runbooks often come from incident learnings
 - **release-manager** — Release runbooks are a common use case
 - **best-practices** — Operational doc patterns
+
+## Related Rules
+
+- `rules/operational-doc-required.md` — recurring deploy/mitigation/rollback/triage work must become a runbook (mirrored locally in `references/operational-doc-required.md` for consumer repos)
+- `rules/release-safety.md` — release runbooks must carry verification and rollback gates

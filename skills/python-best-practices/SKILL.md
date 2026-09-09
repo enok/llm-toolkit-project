@@ -4,7 +4,7 @@ description: Python backend best practices for writing robust, testable, and mai
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Python Best Practices
@@ -20,6 +20,7 @@ Reference these guidelines when:
 - Adding logging, error handling, or exception management
 - Reviewing Python code for correctness and maintainability
 - Writing or refactoring unit and integration tests
+- Editing, validating, or operationalizing Python notebooks
 
 ## Rule Categories by Priority
 
@@ -35,6 +36,8 @@ Reference these guidelines when:
 | 8 | External Resources & Operations | LOW-MEDIUM | `resource-` |
 
 ## Quick Reference
+
+The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `AGENTS.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
 
 ### 1. Dependency Injection (CRITICAL)
 
@@ -90,14 +93,29 @@ Reference these guidelines when:
 - `resource-http-sessions` - Reuse requests.Session with explicit timeouts
 - `resource-caching` - TTLCache/lru_cache with maxsize and TTL
 - `resource-dynamic-log-levels` - Env var or SSM parameter for runtime toggle
+- `resource-notebook-execution-safety` - Execute notebooks to temp output during repair loops
+- `resource-notebook-runtime-config` - Load environment-specific notebook values from env/config, not committed cells
 
 ## How to Use
 
-Read individual rule files for detailed explanations and code examples:
+- Use [references/source-backed-python-tooling.md](references/source-backed-python-tooling.md) for current tooling, async, typing, and notebook choices.
+- [references/rules.md](references/rules.md) is a compact always-on summary of this baseline for consumer repos that want the whole thing in one short file.
+- Read the standalone rule files below for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `AGENTS.md`:
 
 ```
-rules/di-constructor-injection.md
+rules/concurrency-gil-myth.md
 rules/concurrency-immutability.md
+rules/concurrency-shared-mutable.md
+rules/di-constructor-injection.md
+rules/di-interface-isolation.md
+rules/error-specific-exceptions.md
+rules/imports-remove-unused.md
+rules/lang-algorithmic.md
+rules/logging-exception-context.md
+rules/logging-parameterized.md
+rules/resource-notebook-execution-safety.md
+rules/resource-notebook-runtime-config.md
+rules/testing-mock-interface.md
 ```
 
 Each rule file contains:

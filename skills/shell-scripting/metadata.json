@@ -1,8 +1,8 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "dev-tools",
   "date": "March 2026",
-  "abstract": "Comprehensive Bash and shell scripting best practices for writing robust, portable, and secure scripts. Contains 25+ rules across 7 categories covering script structure, safety, error handling, portability, text processing, security, and performance. Each rule includes detailed explanations with incorrect vs. correct code examples.",
+  "abstract": "Comprehensive Bash and shell scripting best practices for writing robust, portable, and secure scripts. Contains 30+ rules across 8 categories covering script structure, safety, error handling, portability, text processing, security, performance, and PowerShell/Windows interop. Each rule includes detailed explanations with incorrect vs. correct code examples.",
   "references": [
     "https://www.gnu.org/software/bash/manual/",
     "https://www.shellcheck.net/",

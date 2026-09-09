@@ -1,6 +1,10 @@
 ---
 name: pathfinder
-description: Use when you have a design doc or implementation plan and need to decompose it into deliverable vertical slices before execution. Triggers include "slice this plan", "break this into phases", "what should we build first", "pathfinder", "find the path", "how should I sequence this", "de-risk this", "cost of late discovery", concerns about discovering problems too late, wanting to prove risky integrations work early, restructuring plans to retire risk faster, or any multi-layer feature (schema + services + API + UI) that spans multiple PRs and needs sequencing.
+description: "Use when you have a design doc or implementation plan and need to decompose it into deliverable vertical slices before execution. Triggers include 'slice this plan', 'break this into phases', 'what should we build first', 'pathfinder', 'find the path', 'how should I sequence this', 'de-risk this', 'cost of late discovery', concerns about discovering problems too late, wanting to prove risky integrations work early, restructuring plans to retire risk faster, or any multi-layer feature (schema + services + API + UI) that spans multiple PRs and needs sequencing."
+license: MIT
+metadata:
+  author: dev-tools
+  version: "1.0.0"
 ---
 
 # Pathfinder
@@ -234,4 +238,4 @@ Write the slice manifest to the same directory as the design doc, named `SLICES.
 - **task-starter** — turns a ticket into a scoped plan; Pathfinder sequences it
 - **design-driven-dev** — investigation-first design; Pathfinder decomposes the result
 - **project-discovery** — understand the codebase before slicing
-- **review** — review each slice's PR
+- **ticket-review** (or **review**) — review each slice's PR

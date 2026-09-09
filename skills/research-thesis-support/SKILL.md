@@ -31,8 +31,7 @@ Help analysts and engineers keep research work scoped, reproducible, and connect
 
 ## Related Rules And Workflows
 
-- `rules/research-rigor.md`
-- `rules/evidence-based-reporting.md`
+- `skills/research-thesis-support/references/research-discipline.md`
 - `workflows/research-analysis-cycle.md`
 - `workflows/document-creation.md`
 

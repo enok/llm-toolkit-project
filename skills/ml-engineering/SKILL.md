@@ -32,9 +32,9 @@ Help engineers make machine learning changes that are reproducible, comparable, 
 
 ## Related Rules And Workflows
 
-- `rules/analytics-reproducibility.md`
-- `rules/ml-experiment-rigor.md`
-- `rules/data-governance.md`
+- `skills/notebook-analysis/references/analytics-discipline.md`
+- `skills/ml-experiment/references/rules.md`
+- `skills/data-governance/references/rules.md`
 - `workflows/ml-experiment.md`
 - `workflows/notebook-analysis-update.md`
 

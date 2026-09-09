@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "dev-tools",
   "date": "March 2026",
   "abstract": "Universal software engineering and architecture best practices that apply to every project regardless of tech stack. Covers SOLID principles, Clean Code, error handling, defensive programming, layered architecture, API design, resilience patterns, observability, and common anti-patterns. Each rule includes detailed explanations with incorrect vs. correct code examples.",

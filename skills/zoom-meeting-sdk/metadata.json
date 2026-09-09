@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "organization": "llm-toolkit-project",
+  "date": "July 2026",
+  "abstract": "Secure Zoom Meeting SDK guidance encoding auth and configuration defaults: server-side-only SDK JWT signature generation (HS256, 2-hour TTL, 30-second clock-skew backdating, server-decided role), standardized ZOOM_MEETING_SDK_KEY/ZOOM_MEETING_SDK_SECRET credentials stored per environment (.env locally, managed secret store in deployed environments), Java Spring MVC and Node.js signature-endpoint variants, Component View as the default web embed, and mandatory logging redaction and test coverage.",
+  "references": [
+    "https://developers.zoom.us/docs/meeting-sdk/",
+    "https://github.com/zoom/meetingsdk-auth-endpoint-sample",
+    "https://github.com/zoom/meetingsdk-web-sample"
+  ]
+}

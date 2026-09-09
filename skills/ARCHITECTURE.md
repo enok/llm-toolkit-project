@@ -16,11 +16,11 @@ llm-toolkit-project/
 │   │   │   └── arch-layered.md
 │   │   └── references/       # Deep reference material (on-demand)
 │   │       └── rules.md
-│   └── ... (80 skills total)
+│   └── ... (100+ skills; see skills/README.md)
 ├── workflows/                # CANONICAL workflows (source of truth)
 │   ├── review.md
 │   ├── ticket-research.md
-│   └── ... (61 workflows)
+│   └── ... (90+ workflows; see workflows/README.md)
 ├── rules/                    # CANONICAL broad rules (source of truth)
 ```
 
@@ -67,14 +67,20 @@ The old provider-specific `.windsurf/rules/` directory has been replaced by cano
 3. Add optional subdirectories:
    - `rules/` for fine-grained prefixed rules (e.g., `error-classification-code.md`)
    - `references/` for deep reference material
-4. The skill is **automatically visible** to all agents (via junctions)
+4. Run `./scripts/validate-skills-with-skillspector.sh --skill <name>` and `python3 scripts/scan-llm-surface-security.py`
+5. Add the skill row to `skills/README.md`, `README.md`, `AGENTS.md`, and a phrase row to `INTENTS.md`
+6. The skill is **automatically visible** to all agents (via junctions)
 
 ## Regenerating Junctions
 
-If you clone fresh and junctions are missing:
+If you clone fresh and junctions are missing, run from the toolkit root:
 
-```cmd
-scripts\_create-junctions.cmd
+```bash
+./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github
+```
+
+```powershell
+.\scripts\sync-tool-configs.ps1 . -SkipAgentsMd -SkipGithub
 ```
 
 Or for consumers:
@@ -89,9 +95,10 @@ Check no duplicates exist:
 
 ```bash
 # Canonical only
-find skills/ -name SKILL.md | wc -l   # current count
-find workflows/ -name "*.md" | wc -l  # 61 plus README.md (or current count)
-find rules/ -maxdepth 1 -name "*.md" | wc -l  # 12 (or current count)
+find skills/ -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l   # current skill count
+find workflows/ -name "*.md" | wc -l                         # workflows plus README.md
+find rules/ -maxdepth 1 -name "*.md" | wc -l                 # rules plus README.md
+npm run skills:index:check                                   # every skill indexed in AGENTS.md and README.md
 
 # Agent dirs must be junctions
 ls -la .agents/skills .claude/skills .codex/skills .windsurf/rules .windsurf/workflows .cursor/rules .cursor/workflows

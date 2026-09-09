@@ -13,7 +13,7 @@ license: MIT
 
 Treatment ↔ outcome analysis for federal transfers vs compliance in Brazilian municipalities.
 
-> **Reference**: See `references/methodology.md` for full analytical approach and limitations.
+> **Reference**: See `workflows/research-analysis-cycle.md` and `skills/research-thesis-support/references/research-discipline.md` for the analytical approach and its limitations.
 
 ## Quick Reference
 
