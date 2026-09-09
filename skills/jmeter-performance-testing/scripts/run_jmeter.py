@@ -100,7 +100,8 @@ def load_jmx(source: Path) -> ET.ElementTree:
 
             return defused_parse(str(source), parser=parser)
         except ImportError:
-            return ET.parse(source, parser=parser)  # nosemgrep: python.lang.security.use-defused-xml
+            # nosemgrep: python.lang.security.use-defused-xml-parse.use-defused-xml-parse
+            return ET.parse(source, parser=parser)
     except ET.ParseError as exc:
         fail(f"Could not parse {source} as XML: {exc}")
 
