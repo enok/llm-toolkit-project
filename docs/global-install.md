@@ -183,3 +183,17 @@ file from. For those surfaces, the standing "route through the
 orchestrator" directive instead lives in the user's Claude memory
 (a saved preference) and in the relevant Claude Projects' project docs,
 so it travels with the user across chats rather than with a machine.
+
+## Optional: provider-rendered agent copies
+
+The installer links `~/.claude/agents` and `~/.cursor/agents` straight to
+`tool-subagents/`, so updates are live. If you prefer provider-rendered copies
+instead (light-tier agents get `model: haiku` for Claude Code and `model: fast`
+for Cursor, and the `tier:`/`readonly:` keys are stripped), remove the link and
+render explicitly; re-run after every toolkit update:
+
+```bash
+node scripts/create-specialist-agent.js --apply-subagents claude --target ~/.claude/agents
+node scripts/create-specialist-agent.js --apply-subagents cursor --target ~/.cursor/agents
+```
+

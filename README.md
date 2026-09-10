@@ -80,7 +80,7 @@ To make this toolkit the default source of skills, subagents, rules, and workflo
 .\scripts\install-global-surfaces.ps1 -Apply
 ```
 
-It links each tool's home-directory skill and agent paths to `skills/` and `tool-subagents/`, and writes a managed block into each tool's global instruction file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`, Windsurf `global_rules.md`) that routes every non-trivial prompt through `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md`. Re-run after `git pull`; see `docs/global-install.md` for the per-tool table, the Cursor manual step, and uninstall.
+It links each tool's home-directory skill path to `skills/` (and, for Claude Code, Codex, and Cursor, the agent path to `tool-subagents/`), and writes a managed block into each tool's global instruction file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`, Windsurf `global_rules.md`) that routes every non-trivial prompt through `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md`. Re-run after `git pull`; see `docs/global-install.md` for the per-tool table, the Cursor manual step, and uninstall.
 
 ### Use in another repo
 

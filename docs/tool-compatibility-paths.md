@@ -43,16 +43,21 @@ directory in this toolkit, only the generated instructions file above.
 
 ### Global (home-directory) skill paths
 
-A few tools also support installing skills globally, outside any one repo.
-This toolkit only materializes one such path itself - for Codex, via
-`.codex/sync-shared-skills.sh`, which mirrors the shared skill catalog into
-`~/.codex/skills/` for system-wide Codex sessions. The others are the
-tool's own native global path, not something this toolkit's scripts create:
+Most tools also support installing skills globally, outside any one repo.
+`scripts/install-global-surfaces.sh` / `.ps1` (see `docs/global-install.md`)
+materializes every path below as a link back to this toolkit's `skills/`,
+links the agent path for Claude Code (`~/.claude/agents`), Codex
+(`~/.codex/agents`), and Cursor (`~/.cursor/agents`) to `tool-subagents/`, and
+writes a managed instruction block into the global instruction files of
+Claude Code (`~/.claude/CLAUDE.md`), Codex (`~/.codex/AGENTS.md`), Windsurf
+(`~/.codeium/windsurf/memories/global_rules.md`), and Gemini CLI
+(`~/.gemini/GEMINI.md`). `.codex/sync-shared-skills.sh` is the older,
+Codex-only mirror script and remains available.
 
 | Tool | Global skill path |
 |------|-------------------|
 | Antigravity | `~/.gemini/antigravity/skills/` |
-| Codex | `~/.codex/skills/` (via `.codex/sync-shared-skills.sh`) |
+| Codex | `~/.codex/skills/` (per-skill links; also `.codex/sync-shared-skills.sh`) |
 | Cursor | `~/.cursor/skills/` |
 | Claude Code | `~/.claude/skills/` |
 | Gemini CLI | `~/.gemini/skills/` |
