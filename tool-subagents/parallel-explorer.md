@@ -1,7 +1,8 @@
 ---
 name: parallel-explorer
 description: Fast codebase reconnaissance. Use proactively in parallel to map files, symbols, and patterns before larger agents implement. Returns a tight map for the parent agent.
-model: fast
+model: inherit
+tier: light
 is_background: true
 ---
 

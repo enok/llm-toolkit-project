@@ -194,6 +194,9 @@ function checkRulesRedirects() {
   pass("rules redirect/client overlay check completed");
 }
 
+const VALID_SUBAGENT_MODELS = new Set(["inherit", "haiku", "sonnet", "opus"]);
+const VALID_SUBAGENT_TIERS = new Set(["light", "standard", "deep"]);
+
 function checkSubagents() {
   for (const file of listFiles("tool-subagents", (name) => name.endsWith(".md") && name !== "README.md")) {
     const agent = file.replace(/\.md$/, "");
@@ -205,6 +208,12 @@ function checkSubagents() {
     }
     if (!meta.description) {
       fail(`${mdPath} missing description`);
+    }
+    if (!VALID_SUBAGENT_MODELS.has(meta.model)) {
+      fail(`${mdPath} frontmatter model '${meta.model || ""}' must be one of inherit|haiku|sonnet|opus`);
+    }
+    if (meta.tier !== undefined && !VALID_SUBAGENT_TIERS.has(meta.tier)) {
+      fail(`${mdPath} frontmatter tier '${meta.tier}' must be one of light|standard|deep`);
     }
     if (!exists(tomlPath)) {
       fail(`${tomlPath} missing`);
@@ -235,17 +244,37 @@ function checkSubagents() {
     assertContains("tool-subagents/README.md", `\`${agent}\``, `subagent catalog entry ${agent}`);
   }
 
-  for (const providerDir of [".codex/agents", ".cursor/agents", ".claude/agents"]) {
+  const canonicalReal = realpathOrNull(safeRepoPath("tool-subagents"));
+  const providerExpectations = [
+    { dir: ".codex/agents", extension: ".toml" },
+    { dir: ".cursor/agents", extension: ".md" },
+    { dir: ".claude/agents", extension: ".md" },
+  ];
+  for (const { dir: providerDir, extension } of providerExpectations) {
     if (!exists(providerDir)) {
       continue;
     }
-    for (const file of listFiles("tool-subagents", (name) => name.endsWith(".md") || name.endsWith(".toml"))) {
+    const providerReal = realpathOrNull(safeRepoPath(providerDir));
+    if (canonicalReal && providerReal && providerReal === canonicalReal) {
+      // A provider directory that is itself a symlink/junction onto
+      // tool-subagents/ is canonical by construction; nothing to render.
+      continue;
+    }
+    for (const file of listFiles("tool-subagents", (name) => name.endsWith(extension))) {
       if (!exists(`${providerDir}/${file}`)) {
         fail(`${providerDir}/${file} missing; run npm run subagents:apply -- all .`);
       }
     }
   }
   pass("subagent check completed");
+}
+
+function realpathOrNull(target) {
+  try {
+    return fs.realpathSync.native(target);
+  } catch (_err) {
+    return null;
+  }
 }
 
 function checkSpecialist(agent) {

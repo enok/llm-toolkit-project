@@ -53,6 +53,16 @@ Every agent is a pair: `<name>.md` (YAML frontmatter — `name`, `description`, 
 - Human-facing output produced by a subagent (PR comments, review replies, wiki
   comments, chat messages) stays a draft until the user approves it, per
   `rules/human-comment-reply-gate.md`.
+- Canonical `tool-subagents/*.md` frontmatter always carries a portable
+  `model:` value (`inherit`/`haiku`/`sonnet`/`opus` — never a provider-specific
+  word like Cursor's `fast`); an optional `tier:` (`light`/`standard`/`deep`)
+  is a cost hint layered on top, independent of the complexity tier a parent
+  agent assigns at dispatch time. `scripts/create-specialist-agent.js
+  --apply-subagents` renders that hint per provider instead of copying it
+  verbatim: `tier: light` becomes `model: haiku` in `.claude/agents` renders
+  and `model: fast` in `.cursor/agents` renders, and the toolkit-only
+  `readonly`/`tier` keys are dropped from both, since Codex reads `.toml`
+  only and never sees this rewrite.
 
 Regenerate compatibility surfaces with:
 

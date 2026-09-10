@@ -121,6 +121,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
 | set up dev-tools in this repo / get started | `onboarding` | skill | `scripts/setup-repo.sh`, `docs/repo-setup-prompt.md` |
+| use the toolkit in every session / install it globally for my user | `docs/global-install.md` | script | `scripts/install-global-surfaces.sh`, `scripts/install-global-surfaces.ps1`, `tool-subagents/agent-orchestrator.md` |
 
 ## Languages And Engineering Practices
 

@@ -1,7 +1,8 @@
 ---
 name: cross-repo-analyst
 description: Read-only mapping of shared packages and contracts across related repos. Use with cross-repo-impact workflow; parallel with contract-analyzer.
-model: fast
+model: inherit
+tier: light
 is_background: true
 ---
 

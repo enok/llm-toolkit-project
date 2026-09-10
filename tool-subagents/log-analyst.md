@@ -1,7 +1,8 @@
 ---
 name: log-analyst
 description: Read-only operational log specialist. Use for CloudWatch, server, Apache/nginx, API Gateway, Log4j/SLF4J, Lambda, Glue, Firehose, and incident log evidence reduction.
-model: fast
+model: inherit
+tier: light
 is_background: true
 readonly: true
 ---

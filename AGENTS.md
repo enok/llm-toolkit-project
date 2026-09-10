@@ -81,7 +81,7 @@ llm-toolkit-project/
 └── .agents .claude .codex .cursor .windsurf (.agent .gemini .opencode)   # Thin provider links
 ```
 
-`docs/tool-compatibility-paths.md` is the single provider path map. Regenerate compatibility surfaces from the toolkit root with `./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github` (PowerShell: `.\scripts\sync-tool-configs.ps1 . -SkipAgentsMd -SkipGithub`). Omit the skip flags only when intentionally regenerating the managed `AGENTS.md` block or `.github/copilot-instructions.md`.
+`docs/tool-compatibility-paths.md` is the single provider path map; `docs/global-install.md` explains the user-level install (`scripts/install-global-surfaces.sh` / `.ps1`) that makes this toolkit the default for every session on a machine. Regenerate compatibility surfaces from the toolkit root with `./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github` (PowerShell: `.\scripts\sync-tool-configs.ps1 . -SkipAgentsMd -SkipGithub`). Omit the skip flags only when intentionally regenerating the managed `AGENTS.md` block or `.github/copilot-instructions.md`.
 
 ---
 

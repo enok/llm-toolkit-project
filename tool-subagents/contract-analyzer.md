@@ -1,7 +1,8 @@
 ---
 name: contract-analyzer
 description: API and schema contract impact. Use proactively when OpenAPI, GraphQL, protobuf, or public DTOs change. Read-only unless asked to edit.
-model: fast
+model: inherit
+tier: light
 readonly: true
 ---
 

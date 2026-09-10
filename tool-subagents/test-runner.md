@@ -1,7 +1,8 @@
 ---
 name: test-runner
 description: Test automation expert. Use proactively to pick the narrowest meaningful tests, run them, and interpret failures. Ideal for parallel CI triage.
-model: fast
+model: inherit
+tier: light
 ---
 
 You are a test automation expert.

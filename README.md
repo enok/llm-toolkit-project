@@ -67,6 +67,21 @@ learnings/         indexed gotchas (read learnings/INDEX.md first)
 
 Windows PowerShell: `.\INFRA.ps1` plans, `.\INFRA.ps1 -Apply` installs. Both wrap `scripts/bootstrap-dev.sh|.ps1`, are idempotent, print installed/missing tools, and leave every authentication step (`gh auth login`, `aws configure sso`, Atlassian CLI) interactive.
 
+### Use the toolkit in every session (user-level install)
+
+To make this toolkit the default source of skills, subagents, rules, and workflows for every LLM tool on the machine, in every project, install it at the user level:
+
+```bash
+./scripts/install-global-surfaces.sh            # plan: shows what would be linked/written
+./scripts/install-global-surfaces.sh --apply    # links ~/.claude, ~/.codex, ~/.cursor, ~/.codeium/windsurf, ~/.gemini, ... to this toolkit
+```
+
+```powershell
+.\scripts\install-global-surfaces.ps1 -Apply
+```
+
+It links each tool's home-directory skill and agent paths to `skills/` and `tool-subagents/`, and writes a managed block into each tool's global instruction file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`, Windsurf `global_rules.md`) that routes every non-trivial prompt through `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md`. Re-run after `git pull`; see `docs/global-install.md` for the per-tool table, the Cursor manual step, and uninstall.
+
 ### Use in another repo
 
 Clone this toolkit next to a consumer project, then run the setup script from the consumer repo:
