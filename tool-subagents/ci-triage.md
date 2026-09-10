@@ -1,7 +1,8 @@
 ---
 name: ci-triage
 description: GitHub Actions and CI failure specialist. Use proactively in parallel with code review when CI is red; maps logs to minimal fixes.
-model: fast
+model: inherit
+tier: light
 is_background: true
 ---
 

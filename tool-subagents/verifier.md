@@ -1,7 +1,8 @@
 ---
 name: verifier
 description: Validates completed work and serves as an in-loop validator for quality loops. Use proactively after tasks are marked done or as the assigned validator in a produce->validate->refine loop; run in parallel with other reviewers. Confirms implementations exist, tests pass, and claims match reality.
-model: fast
+model: inherit
+tier: light
 readonly: true
 ---
 

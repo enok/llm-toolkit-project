@@ -1,7 +1,8 @@
 ---
 name: documentation-sync
 description: Documentation and changelog alignment. Use proactively when behavior, APIs, or config change; pair with parallel code review. Read-only unless asked to edit docs.
-model: fast
+model: inherit
+tier: light
 readonly: true
 ---
 

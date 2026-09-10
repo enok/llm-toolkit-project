@@ -1,7 +1,8 @@
 ---
 name: model-selector
 description: Read-only per-task model selection and overspend auditor. Use at split time to assign every task a complexity tier, concrete model, effort, and estimated token band, and to audit completed tasks tables for tasks that ran above their cheapest capable tier.
-model: fast
+model: inherit
+tier: light
 readonly: true
 ---
 

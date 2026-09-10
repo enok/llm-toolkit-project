@@ -12,6 +12,18 @@ function usage() {
   node scripts/create-specialist-agent.js <agent-name> [--domain "..."] [--description "..."] [--force] [--dry-run]
   node scripts/create-specialist-agent.js --sync-tool-configs [project]
   node scripts/create-specialist-agent.js --apply-subagents <codex|cursor|claude|all> [project]
+  node scripts/create-specialist-agent.js --apply-subagents <codex|cursor|claude> --target <dir>
+
+Renders copy only the files each provider actually reads from tool-subagents/:
+codex reads *.toml only, cursor and claude read *.md only ('all' applies each
+provider's own rule to its own project-relative directory). For claude and
+cursor, the rendered *.md frontmatter drops the toolkit-only 'readonly' and
+'tier' keys and, when 'tier: light' was set, writes the provider's cheap-model
+value ('model: haiku' for claude, 'model: fast' for cursor) so the cost intent
+survives the render; the canonical tool-subagents/*.md source is untouched.
+--target <dir> renders a single provider (not 'all') into an explicit
+directory (e.g. ~/.claude/agents) instead of "<project>/.codex|.cursor|.claude/agents" -
+used by the global installer.
 `);
 }
 
@@ -147,12 +159,17 @@ function sameRealPath(a, b) {
   }
 }
 
-function copyChangedFile(source, destination) {
+// Only rewrite `destination` when its content would actually change, and never
+// touch it when it is the same real file as `source` (a provider directory
+// that is itself a symlink/junction onto tool-subagents/ is canonical by
+// construction; "copying" onto it would self-mutate the canonical source).
+function copyChangedFile(source, destination, transform) {
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   if (sameRealPath(source, destination)) {
     return false;
   }
-  const next = fs.readFileSync(source);
+  const raw = fs.readFileSync(source);
+  const next = transform ? Buffer.from(transform(raw.toString("utf8")), "utf8") : raw;
   if (fs.existsSync(destination)) {
     const current = fs.readFileSync(destination);
     if (Buffer.compare(current, next) === 0) {
@@ -163,44 +180,130 @@ function copyChangedFile(source, destination) {
   return true;
 }
 
-function applySubagents(providerArg, projectArg) {
+// Each provider only reads one of the two canonical file shapes.
+function providerRenderExtension(provider) {
+  if (provider === "codex") {
+    return ".toml";
+  }
+  if (provider === "cursor" || provider === "claude") {
+    return ".md";
+  }
+  fail(`unsupported provider '${provider}', expected codex, cursor, claude, or all`);
+  return null;
+}
+
+// claude/cursor renders keep frontmatter as-is except: drop the 'readonly'
+// and 'tier' keys (unknown to those tools), and when 'tier: light' was set,
+// write the provider's cheap-model value so the cost intent survives the
+// render (model: haiku for claude, model: fast for cursor).
+function rewriteFrontmatterForProvider(provider, content) {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
+  if (!match) {
+    return content;
+  }
+  let tierValue = null;
+  const kept = [];
+  for (const line of match[1].split(/\r?\n/)) {
+    const colon = line.indexOf(":");
+    const key = colon === -1 ? line.trim() : line.slice(0, colon).trim();
+    if (key === "tier") {
+      tierValue = colon === -1 ? "" : line.slice(colon + 1).trim().replace(/^["']|["']$/g, "");
+      continue;
+    }
+    if (key === "readonly") {
+      continue;
+    }
+    kept.push(line);
+  }
+  if (tierValue === "light") {
+    const cheapModel = provider === "claude" ? "haiku" : "fast";
+    for (let i = 0; i < kept.length; i += 1) {
+      const colon = kept[i].indexOf(":");
+      if (colon !== -1 && kept[i].slice(0, colon).trim() === "model") {
+        kept[i] = `model: ${cheapModel}`;
+      }
+    }
+  }
+  return `---\n${kept.join("\n")}\n---\n${content.slice(match[0].length)}`;
+}
+
+function expandHome(target) {
+  const home = process.env.HOME || process.env.USERPROFILE;
+  if (!home) {
+    return target;
+  }
+  if (target === "~") {
+    return home;
+  }
+  if (target.startsWith("~/") || target.startsWith("~\\")) {
+    return path.join(home, target.slice(2));
+  }
+  return target;
+}
+
+function renderProviderInto(provider, sourceRoot, targetRoot, label) {
+  const extension = providerRenderExtension(provider);
+  fs.mkdirSync(targetRoot, { recursive: true });
+  const transform = provider === "codex" ? null : (text) => rewriteFrontmatterForProvider(provider, text);
+  let changed = 0;
+  for (const entry of fs.readdirSync(sourceRoot)) {
+    if (!entry.endsWith(extension)) {
+      continue;
+    }
+    if (!/^[a-z0-9-]+(?:\.md|\.toml)$/.test(entry) && entry !== "README.md") {
+      fail(`unexpected subagent filename: ${entry}`);
+      continue;
+    }
+    const source = path.join(sourceRoot, entry);
+    // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+    const destination = path.join(targetRoot, entry);
+    if (copyChangedFile(source, destination, transform)) {
+      changed += 1;
+      console.log(`APPLY ${label}/${entry}`);
+    }
+  }
+  return changed;
+}
+
+function applySubagents(providerArg, projectArg, targetArg) {
   const provider = providerArg || "codex";
-  const project = resolveProjectPath(projectArg || ".");
-  const targets = {
-    codex: [".codex/agents"],
-    cursor: [".cursor/agents"],
-    claude: [".claude/agents"],
-    all: [".codex/agents", ".cursor/agents", ".claude/agents"],
+  const projectTargets = {
+    codex: ".codex/agents",
+    cursor: ".cursor/agents",
+    claude: ".claude/agents",
   };
-  if (!targets[provider]) {
+  const providers = provider === "all" ? ["codex", "cursor", "claude"] : [provider];
+  if (provider !== "all" && !projectTargets[provider]) {
     fail(`unsupported provider '${provider}', expected codex, cursor, claude, or all`);
   }
 
   const sourceRoot = path.join(ROOT, "tool-subagents");
   let changed = 0;
-  for (const targetRel of targets[provider]) {
+
+  if (targetArg) {
+    if (provider === "all") {
+      fail("--target requires a single provider (codex, cursor, or claude), not 'all'");
+    }
+    const expanded = expandHome(targetArg);
+    if (!path.isAbsolute(expanded)) {
+      fail(`--target must be an absolute path: ${targetArg}`);
+    }
+    changed = renderProviderInto(provider, sourceRoot, expanded, expanded);
+    console.log(`Subagent apply complete for ${provider} -> ${expanded} (${changed} file update(s)).`);
+    return;
+  }
+
+  const project = resolveProjectPath(projectArg || ".");
+  for (const p of providers) {
+    const targetRel = projectTargets[p];
     // targetRel comes from the provider allowlist above.
     // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
     const targetRoot = path.resolve(project, targetRel);
     if (targetRoot !== project && !targetRoot.startsWith(`${project}${path.sep}`)) {
       fail(`refusing provider target outside project: ${targetRel}`);
+      continue;
     }
-    fs.mkdirSync(targetRoot, { recursive: true });
-    for (const entry of fs.readdirSync(sourceRoot)) {
-      if (!entry.endsWith(".md") && !entry.endsWith(".toml")) {
-        continue;
-      }
-      if (!/^[a-z0-9-]+(?:\.md|\.toml)$/.test(entry) && entry !== "README.md") {
-        fail(`unexpected subagent filename: ${entry}`);
-      }
-      const source = path.join(sourceRoot, entry);
-      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-      const destination = path.join(targetRoot, entry);
-      if (copyChangedFile(source, destination)) {
-        changed += 1;
-        console.log(`APPLY ${targetRel}/${entry}`);
-      }
-    }
+    changed += renderProviderInto(p, sourceRoot, targetRoot, targetRel);
   }
   console.log(`Subagent apply complete for ${provider} (${changed} file update(s)).`);
 }
@@ -379,7 +482,17 @@ if (argv[0] === "--sync-tool-configs") {
 }
 
 if (argv[0] === "--apply-subagents") {
-  applySubagents(argv[1], argv[2]);
+  const rest = argv.slice(1);
+  const targetIndex = rest.indexOf("--target");
+  let targetValue;
+  if (targetIndex !== -1) {
+    targetValue = rest[targetIndex + 1];
+    if (!targetValue || targetValue.startsWith("--")) {
+      fail("--target requires a value");
+    }
+    rest.splice(targetIndex, 2);
+  }
+  applySubagents(rest[0], rest[1], targetValue);
   process.exit(0);
 }
 
