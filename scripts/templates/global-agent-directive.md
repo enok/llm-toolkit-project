@@ -47,5 +47,5 @@ overridden by this global directive.
 
 ## Trivial exceptions
 
-One-line answers, single-file lookups, and other genuinely trivial
+One-line answers, single-file edits or lookups, and other genuinely trivial
 requests stay inline -- no task table, no delegation.

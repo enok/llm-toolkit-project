@@ -22,8 +22,8 @@ cursor, the rendered *.md frontmatter drops the toolkit-only 'readonly' and
 value ('model: haiku' for claude, 'model: fast' for cursor) so the cost intent
 survives the render; the canonical tool-subagents/*.md source is untouched.
 --target <dir> renders a single provider (not 'all') into an explicit
-directory (e.g. ~/.claude/agents) instead of "<project>/.codex|.cursor|.claude/agents" -
-used by the global installer.
+directory (e.g. ~/.claude/agents) instead of "<project>/.codex|.cursor|.claude/agents";
+see docs/global-install.md for the optional provider-rendered agent copies.
 `);
 }
 
