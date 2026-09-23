@@ -133,7 +133,7 @@ pip install bandit pip-audit
 
 5. **For dev-tools work**, run:
    ```bash
-   ./scripts/security_check_dev_tools.sh /mnt/hgfs/shared/dev-tools
+   ./scripts/security_check_dev_tools.sh <path-to-toolkit-checkout>
    ```
 
 ## Reporting Requirements

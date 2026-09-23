@@ -4,12 +4,12 @@ description: Refresh the repo LLM guidance when new USP MBA class material lands
 
 # Refresh USP MBA Course Context Workflow
 
-Use this workflow when new class material is added under `/mnt/hgfs/shared/data-science/aulas` and the thesis repo's LLM guidance should stay current.
+Use this workflow when new class material is added under `<path-to-course-materials>` and the thesis repo's LLM guidance should stay current.
 
 ## Steps
 
 1. Regenerate the source inventory:
-   - Linux or WSL: `python ./docs/llm/scripts/build_usp_mba_course_inventory.py --source /mnt/hgfs/shared/data-science/aulas --output ./docs/llm/references`
+   - Linux or WSL: `python ./docs/llm/scripts/build_usp_mba_course_inventory.py --source <path-to-course-materials> --output ./docs/llm/references`
    - Windows PowerShell: `python .\docs\llm\scripts\build_usp_mba_course_inventory.py --source C:\google-drive\cursos\usp\mba\data-science\aulas --output .\docs\llm\references`
 2. Review the diff in `usp-mba-course-inventory` reference:
    - identify new course folders

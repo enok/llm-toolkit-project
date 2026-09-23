@@ -4,7 +4,7 @@ description: Ground a task in the local USP MBA course corpus (class material, s
 
 # Course Material Grounding Workflow
 
-Use this workflow when a task should be grounded in the USP MBA class corpus under `/mnt/hgfs/shared/data-science/aulas`, not just in generic best practices.
+Use this workflow when a task should be grounded in the USP MBA class corpus under `<path-to-course-materials>`, not just in generic best practices.
 
 ## Steps
 

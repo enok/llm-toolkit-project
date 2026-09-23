@@ -108,7 +108,7 @@ Does the method match the MBA curriculum?
 
 Cross-reference with:
 - `usp-mba-course-map` reference
-- Course materials in `/mnt/hgfs/shared/data-science/aulas`
+- Course materials in `<path-to-course-materials>`
 
 Check:
 - [ ] Method is covered in relevant course (or justified why external)
