@@ -133,6 +133,13 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `pipeline-change-project.md` | Project-local companion to data-pipeline-change: bronze/silver/gold pipeline changes with contract and downstream checks |
 | `bilingual-notebook-sync.md` | Keep English and Portuguese notebook pairs synchronized after edits (cells, outputs, narrative, translations) |
 
+### Career And Job Search
+
+| Workflow | Use when |
+| --- | --- |
+| `job-search-pipeline.md` | Run one job scan for a candidate profile: inbox and board reconciliation, owner-approved applications, new-posting discovery and screening, guarded tracker update, skill gaps, digest |
+| `job-search-setup.md` | Onboard a candidate: build the profile from CV and criteria, create or adopt the tracker, wire connectors, dry run, schedule the recurring scan |
+
 Many workflows fan out independent read-only lanes; follow `rules/multi-agent-orchestration.md` and the per-task quality loop in `workflows/task-quality-loop.md` when doing so. Project-local companions (`*-project.md`, `documentation-sync-project.md`, thesis workflows) carry this toolkit's data-science/thesis context and are safe to ignore in other consumers.
 
 ## How To Invoke
