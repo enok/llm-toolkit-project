@@ -123,6 +123,7 @@ from fpdf import FPDF
 class ThesisPDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Thesis - Data Science', 0, 0, 'C')
         self.ln(20)
     
     def footer(self):
@@ -261,10 +262,11 @@ create_thesis_docx(
     "thesis_chapter1.docx",
     "Chapter 1: Introduction",
     [
-        ("Context", "This research investigates the relationship between..."),
+        ("Context", "This research investigates a specific problem domain..."),
         ("Problem Statement", ["The main challenge is...", "Additionally, we observe..."]),
         ("Objectives", "The objectives of this study are to...")
     ],
+    author="<Author Name>"
 )
 
 # Advanced: Add tables
@@ -322,6 +324,7 @@ def create_thesis_presentation(output_path, title, slides_data):
     title_slide_layout = prs.slide_layouts[0]  # Title slide layout
     slide = prs.slides.add_slide(title_slide_layout)
     slide.shapes.title.text = title
+    slide.placeholders[1].text = "<Author Name>\n<Program>\n<Institution>"
     
     # Content slides
     for slide_title, slide_content in slides_data:
@@ -349,12 +352,12 @@ def create_thesis_presentation(output_path, title, slides_data):
 # Example usage
 create_thesis_presentation(
     "thesis_defense.pptx",
-    "Public Compliance Data Analysis",
+    "Research Data Analysis",
     [
-        ("Introduction", ["Context: Public spending efficiency", "Problem: Compliance risk assessment", "Scope: 5,570 municipalities"]),
-        ("Methodology", ["Bronze/Silver/Gold architecture", "Statistical analysis", "Machine Learning models"]),
-        ("Results", ["Income predicts sanctions (r=0.74)", "Detection capacity > misconduct", "Regional disparities evident"]),
-        ("Conclusions", ["Policy implications", "Limitations", "Future work"])
+        ("Introduction", ["Context: Research background and motivation", "Problem: The research question being addressed", "Scope: Domain-specific scope"]),
+        ("Methodology", ["Data architecture overview", "Statistical analysis approach", "Analysis methods"]),
+        ("Results", ["Key finding 1 with supporting metric", "Key finding 2 with supporting metric", "Key finding 3 with supporting metric"]),
+        ("Conclusions", ["Implications of findings", "Limitations", "Future work"])
     ]
 )
 
@@ -568,18 +571,20 @@ create_markdown_document(
     "Chapter 1: Introduction",
     [
         ("Context", [
-            "Public spending efficiency is a critical concern...",
-            ("Federal Transfers", "The Brazilian government transfers..."),
+            "Context: The research domain addresses an important area...",
+            ("Background", "The domain of interest has evolved over time..."),
+            ("Research Gap", "Current literature lacks understanding of...")
         ]),
         ("Research Problem", "This study addresses the gap in understanding..."),
         ("Objectives", [
-            "Characterize municipality clusters based on socioeconomic indicators",
-            "Model the relationship between federal transfers and sanctions",
-            "Assess regional disparities in compliance patterns"
+            "Characterize key dimensions based on domain indicators",
+            "Model the relationship between relevant variables",
+            "Assess patterns and variations across the domain"
         ])
     ],
     metadata={
-        "title": "Public Compliance Data Analysis",
+        "title": "Research Title",
+        "author": "<Author Name>",
         "date": "2026-02-01",
         "language": "en"
     }

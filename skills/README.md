@@ -145,11 +145,11 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **data-pipeline-boundaries** | Repository-specific data pipeline boundaries for the data-science project (toolkit-local context) |
 | **data-governance** | Dataset provenance, privacy, licensing, and evidence integrity in analytics projects |
 
-### Thesis And Course Context (toolkit-local)
+### Thesis And Academic Formatting
 
 | Skill | Purpose |
 | --- | --- |
-| **project-overview** | Project overview and context for the data-science thesis repository (toolkit-local context) |
+| **abnt-formatting** | ABNT academic formatting for thesis documents |
 
 ## Validation
 

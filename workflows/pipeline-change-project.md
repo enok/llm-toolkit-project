@@ -12,6 +12,7 @@ This repository uses a medallion architecture (Bronze → Silver → Gold) on AW
 
 | Layer | Purpose | Storage | Change Frequency | Contract Files |
 |-------|---------|---------|------------------|----------------|
+| **Bronze** | Raw source fidelity | `s3://<bucket>/bronze/` | Rare (source changes) | `config/<source>_metadata.json` |
 | **Silver** | Normalized, typed, joined | `s3://<bucket>/silver/` | Medium (schema evolution) | `config/silver_schemas.json` |
 | **Gold** | Analysis-ready features | `s3://<bucket>/gold/` | High (new features) | Implicit via `src/processing/gold_transformer.py` |
 
@@ -40,7 +41,7 @@ This repository uses a medallion architecture (Bronze → Silver → Gold) on AW
 
 ```bash
 # For Bronze changes
-config/ipca_metadata.json          # Inflation series
+config/<source>_metadata.json      # One contract per source
 
 # For Silver changes
 config/silver_schemas.json         # Expected Silver columns and types
@@ -174,7 +175,8 @@ If the change alters:
 | Add income percentile feature | Gold | No | `tests/processing/`, notebooks |
 | Handle new API field | Bronze | Yes | `tests/ingestion/` |
 | Change clustering algorithm | Gold | No | Validation notebooks |
-| Adjust for inflation | Gold | No | Compare to official IPCA |
+| Adjust for inflation | Gold | No | Compare to the official price index |
+| Add sanctions flag | Silver/Gold | Maybe | Cross-check with the sanctions registry |
 
 ## Related Workflows
 

@@ -13,8 +13,9 @@ Phase 6 of `workflows/thesis-writing-main.md`, extracted so the parent stays wit
 **Complete for both language versions:**
 
 #### Portuguese Version (Primary)
-- [ ] All 4 chapters complete
+- [ ] All chapters complete
 - [ ] Resumo (250 words) + Abstract
+- [ ] ABNT formatting verified against the institution's thesis manual
 - [ ] References: ABNT NBR 6023:2023
 - [ ] Figures: High-res, Portuguese captions
 - [ ] Tables: Numbered, Portuguese titles
@@ -22,7 +23,7 @@ Phase 6 of `workflows/thesis-writing-main.md`, extracted so the parent stays wit
 - [ ] Grammar check: Portuguese
 
 #### English Version (Secondary)
-- [ ] All 4 chapters complete
+- [ ] All chapters complete
 - [ ] Abstract complete
 - [ ] References: ABNT or APA
 - [ ] Figures: English captions
@@ -60,14 +61,19 @@ Phase 6 of `workflows/thesis-writing-main.md`, extracted so the parent stays wit
 
 ### Step 13: Submission Preparation
 
+**For the institution's submission portal upload:**
 ```
 1. Final PDF generation:
+   - PT: `<thesis>_PT.pdf`
+   - EN: `<thesis>_EN.pdf`
 2. Verify file sizes (<portal limit)
 3. Test PDF opening on different devices
 4. Prepare metadata:
    - Title (both languages)
    - Abstract (both languages)
    - Keywords (both languages)
+   - Advisor: <advisor name>
+5. Upload to the institution's submission portal
 6. Confirm submission receipt
 7. Save confirmation number
 ```

@@ -2,6 +2,7 @@
 title: PowerPoint template decks need rendered visual QA
 category: toolchain
 created: 2026-05-22
+tags: [powerpoint, pptx, template, visual-qa, pdf-export, presentation]
 ---
 
 # Problem

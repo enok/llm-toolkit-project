@@ -15,6 +15,7 @@ Use this skill after the shared `data-pipeline` skill for understanding contract
 
 ## Source Contracts
 
+- `config/<source>_metadata.json` is the authoritative source for source dataset definitions.
 - `config/silver_schemas.json` is the authoritative schema contract for Silver outputs.
 - `scripts/01_bronze_ingestion.sh`, `scripts/02_silver_transformation.sh`, and `scripts/03_gold_transformation.sh` are the implemented orchestration entry points in this repo.
 

@@ -121,6 +121,7 @@ Segundo Autor (Ano, p. xx), "texto citado diretamente".
 
 #### 2.2 Recommended Scanning Approach
 
+**For a thesis (university context):**
 
 1. **Primary Tool**: **Turnitin** (if available through university)
    - Most comprehensive academic database
@@ -268,5 +269,8 @@ For day-to-day prevention habits (note-taking, writing, citing, paraphrasing), r
 
 ## Related Resources
 
+- `skills/abnt-formatting/SKILL.md` — Proper citation formats
+- `workflows/thesis-submission-preparation.md` — Final thesis checklist
+- The institution's academic integrity policy
 - ABNT NBR 6023:2023 (References)
 - ABNT NBR 14724:2020 (Academic Work Presentation)

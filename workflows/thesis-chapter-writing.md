@@ -20,10 +20,11 @@ Step 4 of `workflows/thesis-writing-main.md` (Phase 2: Content Development), ext
 
 **Execute:**
 ```
+1. Read the institution's thesis manual for the required introduction structure
 2. Use 5-sentence abstract formula for problem statement
 3. Cite methodology sources:
    - Gil (2010), Lakatos & Marconi (2010) — Research design
-   - Ferreira (2010), Affonso & Araújo (2016) — Public spending context
+   - Domain literature that frames the problem context
 4. Write in Portuguese (primary)
 5. Sync to English (secondary)
 6. Verify bilingual alignment
@@ -32,12 +33,14 @@ Step 4 of `workflows/thesis-writing-main.md` (Phase 2: Content Development), ext
 #### Chapter 2: Material and Methods (Material e Métodos)
 
 **Required sections:**
+- Data sources (e.g., public or institutional sources)
 - Data architecture (Bronze/Silver/Gold)
 - Analytical methods (Statistics, ML, Clustering)
 - Software and tools
 
 **Execute:**
 ```
+1. Read `workflows/research-analysis-cycle.md` (method choice and baselines)
 2. Map methods to references:
    - Descriptive stats → Bussab & Morettin (2017)
    - Regression → Wooldridge (2020)
@@ -60,16 +63,15 @@ Step 4 of `workflows/thesis-writing-main.md` (Phase 2: Content Development), ext
 
 **Execute:**
 ```
-1. Read `docs/thesis_conclusion.md` — Extract findings
-2. Read `docs/city_thesis_conclusion_addendum.md` — City-level results
-3. For each finding:
+1. Read the project's findings summary (e.g., `docs/<findings-summary>.md`) — Extract findings
+2. For each finding:
    - State statistic (r, β, p, R²)
    - Cite interpretation framework
-   - Reference detection capacity literature (Power, 2007; Liu et al., 2016)
-4. Create/update tables and figures
-5. Write results narrative in Portuguese
-6. Translate to English (maintain identical numbers)
-7. Verify: Same statistics in both versions
+   - Cite the literature that supports the interpretation
+3. Create/update tables and figures
+4. Write results narrative in Portuguese
+5. Translate to English (maintain identical numbers)
+6. Verify: Same statistics in both versions
 ```
 
 #### Chapter 4: Conclusion (Conclusão)
@@ -84,7 +86,7 @@ Step 4 of `workflows/thesis-writing-main.md` (Phase 2: Content Development), ext
 ```
 1. Synthesize key findings from Chapter 3
 2. Cite limitation literature (Wooldridge, 2020 — causality)
-3. Connect to public administration literature
+3. Connect to the domain literature
 4. Write limitations honestly
 5. Propose future work with method citations
 6. Sync both languages

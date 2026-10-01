@@ -1,10 +1,10 @@
 ---
-description: Orchestrate infrastructure, code, data pipeline, and notebook work for the public-compliance data-analysis project (entry point for broad technical tasks)
+description: Orchestrate infrastructure, code, data pipeline, and notebook work for the data-analysis project (entry point for broad technical tasks)
 ---
 
 # Project Execution Main Workflow
 
-**Purpose**: Orchestrate all infrastructure, code, data pipeline, and Jupyter notebook work for the Public Compliance Data Analysis project.
+**Purpose**: Orchestrate all infrastructure, code, data pipeline, and Jupyter notebook work for the data-analysis project.
 
 **Scope**: Bronze/Silver/Gold data pipeline, ingestion, processing, analysis notebooks, and infrastructure management.
 
@@ -30,6 +30,7 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 |-----------|-------------|--------------|
 | **New data source** | `data-source-ingestion.md` | Bronze ingestion |
 | **Pipeline change** | `pipeline-change.md` | Bronze/Silver/Gold |
+| **Bronze ingestion bug** | `data-source-ingestion.md` §Troubleshooting | Source clients |
 | **Silver transformation** | `pipeline-change.md` §Silver Layer | Normalization |
 | **Gold features** | `pipeline-change.md` §Gold Layer | Feature engineering |
 | **Infrastructure (AWS)** | `aws-airflow-terraform-change.md` | Terraform/S3 |
@@ -43,7 +44,8 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 **Read required context based on task type:**
 
 **For data/pipeline tasks:**
-- [ ] `project-overview` skill — Technical scope
+- [ ] `data-pipeline` skill — Pipeline conventions
+- [ ] `config/<source>_metadata.json` — Source contracts
 - [ ] `config/silver_schemas.json` — Silver expectations
 
 **For infrastructure tasks:**
@@ -61,6 +63,7 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 - [ ] Does this affect Bronze/Silver/Gold boundaries? → See `data-pipeline-boundaries` skill
 - [ ] Does this require bilingual sync? → See `bilingual-notebook-sync.md`
 - [ ] Does this change data contracts? → See `data-pipeline-contracts` rule
+- [ ] Does this affect thesis evidence? → See `workflows/research-analysis-cycle.md`
 
 ---
 
@@ -182,7 +185,7 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 | Bronze | `docs/01_BRONZE_LAYER.md` + `.pt-BR.md` |
 | Silver | `docs/02_SILVER_LAYER.md` + `.pt-BR.md` |
 | Gold | `docs/03_GOLD_LAYER.md` + `.pt-BR.md` |
-| Analysis | `docs/thesis_conclusion.md` (if findings change) |
+| Analysis | `docs/<findings-summary>.md` (if findings change) |
 | README | `README.md` + `README.pt-BR.md` |
 
 **Reference**: `documentation-sync.md`
@@ -207,16 +210,15 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 
 **If analytical evidence changes:**
 ```
+1. Read `workflows/research-analysis-cycle.md`
 2. Map change to thesis chapter:
    - Data boundary → Introduction (scope)
    - Preprocessing → Material and Methods
    - Method change → Material and Methods
    - Results → Results and Discussion
    - Interpretation → Results/Conclusion
-3. Update `docs/thesis_conclusion.md`
-4. Update `docs/city_thesis_conclusion_addendum.md` (if city-level)
-5. Regenerate presentation assets if needed:
-   python scripts/build_thesis_presentation_assets.py
+3. Update the findings summary (`docs/<findings-summary>.md`)
+4. Regenerate presentation assets if needed
 ```
 
 ---
@@ -240,6 +242,7 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 **Structure commits by category:**
 
 ```
+ABC-123: Category description
 
 1. LLM configs (if modified)
 2. Documentation (EN + pt-BR)
@@ -264,7 +267,7 @@ pytest tests/ -v
 jupyter nbconvert --execute notebooks/01_*.ipynb
 
 # Verify thesis docs consistency
-cat docs/thesis_conclusion.md | head -50
+cat docs/<findings-summary>.md | head -50
 ```
 
 ---
@@ -280,16 +283,16 @@ cat docs/thesis_conclusion.md | head -50
 6. `analysis-validation.md` — Analysis quality
 7. `security-check-required.md` — Security validation
 8. `documentation-sync.md` — Documentation
+9. `workflows/research-analysis-cycle.md` — Thesis alignment
 
 ### Skills (for context)
-- `project-overview` skill — Technical scope
 - `data-pipeline-boundaries` skill — Layer boundaries
 - `aws-airflow-terraform-project` skill — AWS guidance
 - `data-pipeline-contracts` rule — Contract governance
 - `analytics-discipline` rule — Analysis hygiene
 
 ### Skills (for reusable patterns)
-- `.agents/skills/document-conversion/SKILL.md` — File conversion
+- `skills/document-conversion/SKILL.md` — File conversion
 
 ---
 

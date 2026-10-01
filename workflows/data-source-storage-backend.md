@@ -25,6 +25,7 @@ class StorageBackend:
     def __init__(self, mode: str = None):
         self.mode = mode or os.getenv('STORAGE_MODE', 's3-only')
         self.local_dir = os.getenv('LOCAL_DATA_DIR', './data')
+        self.s3_bucket = os.getenv('S3_BUCKET', '<your-bucket>')
         self.s3_prefix = os.getenv('S3_PREFIX', 'bronze/')
         
         if self.mode == 's3-only':
@@ -94,8 +95,10 @@ class StorageBackend:
 ### 2. Update Ingestion Clients
 
 ```python
+# src/ingestion/source_client.py (example)
 from .storage_backend import StorageBackend
 
+class SourceClient:
     def __init__(self, storage_mode: str = None):
         self.storage = StorageBackend(storage_mode)
     
@@ -104,7 +107,9 @@ from .storage_backend import StorageBackend
         data = self._fetch_from_api(indicator, year)
         
         # Store using configured backend
+        path = f"source/{indicator}_{year}.csv"
         self.storage.write(path, data.encode(), metadata={
+            'source': 'source',
             'indicator': indicator,
             'year': str(year),
             'ingested_at': datetime.now().isoformat()
@@ -123,6 +128,7 @@ Update `scripts/01_bronze_ingestion.sh`:
 # Parse storage mode from args or env
 STORAGE_MODE=${STORAGE_MODE:-s3-only}
 LOCAL_DATA_DIR=${LOCAL_DATA_DIR:-./data}
+S3_BUCKET=${S3_BUCKET:-<your-bucket>}
 
 # Command line options
 for arg in "$@"; do
@@ -141,6 +147,7 @@ export LOCAL_DATA_DIR
 export S3_BUCKET
 
 # Run ingestion
+python -m src.ingestion.source_client
 # ... etc
 ```
 
@@ -154,6 +161,7 @@ export S3_BUCKET
 
 # Or via environment
 export STORAGE_MODE=local-only
+export LOCAL_DATA_DIR=/home/user/project-data
 ./scripts/01_bronze_ingestion.sh
 
 # In Python code
@@ -161,6 +169,7 @@ from src.ingestion.storage_backend import StorageBackend
 
 # Explicit mode
 storage = StorageBackend(mode='local-only')  # or 's3-only', 'both'
+storage.write('bronze/source/data.csv', b'...')
 
 # From environment
 storage = StorageBackend()  # reads STORAGE_MODE env var
@@ -176,9 +185,11 @@ storage = StorageBackend()  # reads STORAGE_MODE env var
 | `--s3-only` | Store data only in S3 | **Enabled** |
 | `--both` | Store data in both local and S3 | Disabled |
 | `--local-dir=PATH` | Local storage directory | `$LOCAL_DATA_DIR` or `./data` |
+| `--s3-bucket=NAME` | S3 bucket name | `$S3_BUCKET` or `<your-bucket>` |
+| `--only-<source>` | Ingest only one source | All sources |
 | `--only-inflation` | Ingest only inflation data | All sources |
+| `--skip-<source>` | Skip one source | - |
 | `--skip-inflation` | Skip inflation ingestion | - |
-| `--skip-transparency` | Skip Transparency ingestion | - |
 
 ### Environment Variables
 

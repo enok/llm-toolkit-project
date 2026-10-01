@@ -48,6 +48,7 @@ What type of change are you making?
    - Code identical
    - Variable names unchanged
    - Dataset paths unchanged
+   - Technical terms consistent with the course materials
 
 ### 4. Validate Synchronization
 
@@ -68,6 +69,7 @@ Check that both notebooks:
 
 Commit both notebooks together:
 ```
+ABC-123: Update <analysis> notebooks (EN + pt-BR)
 
 - Changes: <brief description>
 - English: notebooks/<name>.ipynb
@@ -94,13 +96,10 @@ Commit both notebooks together:
 Use consistent translations for domain terms:
 | English | Portuguese |
 |---------|------------|
-| Federal transfers | Transferências federais |
-| Sanctions | Sanções |
 | Municipalities | Municípios |
 | Clustering | Clusterização |
 | Outliers | Outliers (keep) or Valores atípicos |
 | Income per capita | Renda per capita |
-| Compliance risk | Risco de compliance |
 
 ## Common Pitfalls
 

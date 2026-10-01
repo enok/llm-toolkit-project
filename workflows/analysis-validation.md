@@ -8,6 +8,7 @@ Use this workflow before finalizing any analytical output that will support the 
 
 ## Purpose
 
+Ensure all analytical outputs meet thesis standards for:
 - Reproducibility
 - Validity
 - Interpretability
@@ -74,13 +75,13 @@ What could make this result wrong or misleading?
 - [ ] Outliers handled transparently
 
 **External Validity (Does it generalize?)**
-- [ ] Time period specified (2010-2022)
-- [ ] Geographic scope stated (Brazilian municipalities)
+- [ ] Time period specified (e.g., 2010-2022)
+- [ ] Geographic or population scope stated
 - [ ] Selection biases acknowledged
-- [ ] Missing municipality patterns documented
+- [ ] Patterns of missing units (e.g., regions, groups) documented
 
 **Construct Validity (Are we measuring what we claim?)**
-- [ ] Variable definitions match literature/course materials
+- [ ] Variable definitions match the literature and course materials
 - [ ] Proxy variables justified
 - [ ] Measurement error acknowledged
 
@@ -99,13 +100,13 @@ Prohibited claims:
 - ❌ "X causes Y" (without causal design)
 - ❌ "Proves" (association never proves)
 - ❌ "Significant" without effect size
-- ❌ Generalizing beyond 2010-2022 Brazil municipalities
+- ❌ Generalizing beyond the stated time period and population
 
 ### 5. Course Material Alignment
 
+Does the method match the program curriculum?
 
-Cross-reference with:
-- Course materials in `<path-to-course-materials>`
+Cross-reference with the course materials in `<path-to-course-materials>`.
 
 Check:
 - [ ] Method is covered in relevant course (or justified why external)
@@ -179,5 +180,6 @@ All checkboxes above must be checked, or explicitly documented why not:
 
 ## Related Workflows
 
+- `workflows/research-analysis-cycle.md` — For choosing methods and integrating results into the thesis
 - `bilingual-notebook-sync.md` — For EN/pt-BR pairs
 - `workflows/notebook-analysis.md` — For general notebook quality

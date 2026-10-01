@@ -82,6 +82,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | promote deployed ticket docs / clean up the intake folder | `prod-doc-promoter-validation` | workflow + skill | `prod-doc-promoter`, `confluence-documentation-specialist`, `rules/human-comment-reply-gate.md` |
 | export Markdown to PDF / ticket-ready PDF | `markdown-pdf-export` | workflow + skill | `image-quality-inspection`, `security` |
 | create or edit PowerPoint / PPTX slides | `pptx-generator` | skill | `powerpoint-slides`, `document-conversion` |
+| academic or thesis defense deck | `powerpoint-slides` | skill | `pptx-generator` |
 | convert PDF / DOCX / XLSX / Markdown | `document-conversion` | skill | `markdown-pdf-export` |
 | keep bilingual or paired docs in sync / translation drift | `bilingual-doc-sync` / `paired-doc-sync` / `translation-sync` | workflow | `documentation-reviewer` |
 
@@ -148,8 +149,11 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | data pipeline change / Bronze, Silver, Gold | `data-pipeline-change` | workflow + skill | `data-pipeline`, `data-pipeline-boundaries`, `data-governance` |
 | project-local pipeline change (toolkit-local) | `pipeline-change-project` | workflow | `data-pipeline-change`, `data-pipeline-boundaries` |
 | project-local docs sync after a change (toolkit-local) | `documentation-sync-project` | workflow | `update-docs`, `documentation-governance` |
-| orchestrate broad project work (toolkit-local) | `project-execution-main` | workflow | `project-overview`, `agent-orchestrator` |
+| orchestrate broad project work (toolkit-local) | `project-execution-main` | workflow | `agent-orchestrator` |
 | ingest a new data source / dataset onboarding | `data-source-ingestion` / `dataset-onboarding` | workflow | `data-source-storage-backend`, `data-governance` |
+| research or thesis analysis cycle | `research-analysis-cycle` | workflow | `analysis-validation` |
+| write the thesis / thesis chapter / submission | `thesis-writing-main` | workflow | `thesis-chapter-writing`, `thesis-submission-preparation` |
+| ABNT formatting / citations and references / thesis manual review | `abnt-formatting` | skill | `document-conversion` |
 | plagiarism check before submission | `thesis-plagiarism-check` | workflow | `thesis-plagiarism-prevention` |
 
 ## Provider Surfaces

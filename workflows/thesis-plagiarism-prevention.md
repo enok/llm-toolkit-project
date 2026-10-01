@@ -74,6 +74,8 @@ def my_function():
     pass
 
 # Or for data:
+# Source: <dataset name> <year>
+# URL: <dataset URL>
 # Accessed: 2024-01-15
 ```
 

@@ -116,6 +116,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `experiment-result-update.md` | Propagate an analytical or model result change into the docs, notebooks, and supporting context that depend on it |
 | `research-analysis-cycle.md` | Run an evidence-heavy research or thesis analysis cycle from question framing through method choice, result generation, and report updates |
 | `analysis-validation.md` | Validate analytical outputs (numbers, figures, tables, claims) before they support thesis conclusions |
+| `thesis-writing-main.md` | Orchestrate thesis writing, formatting, bibliography, validation, and submission following the institutional thesis specification |
 | `thesis-chapter-writing.md` | Writing a thesis chapter by type (introduction, literature review, methodology, results, discussion, conclusion) |
 | `thesis-submission-preparation.md` | Final pre-submission checklist, final review, and submission packaging |
 | `thesis-plagiarism-check.md` | Pre-submission plagiarism check for the bilingual thesis: self-review, automated similarity scan, report interpretation, documentation |

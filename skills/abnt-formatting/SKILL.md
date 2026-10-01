@@ -2,14 +2,18 @@
 name: abnt-formatting
 description: |
   Apply ABNT (Associação Brasileira de Normas Técnicas) academic formatting standards
-  (NBR 6023), page layout (NBR 14724), and figure/table captions. Use when writing
-  or reviewing thesis content, formatting references, generating LaTeX, or checking
+  to thesis, dissertation, and capstone documents, including citations (NBR 10520),
+  references (NBR 6023), page layout (NBR 14724), and figure/table captions. Use when
+  writing or reviewing thesis content, formatting references, generating LaTeX, or
+  checking compliance with the institution's thesis manual.
 license: MIT
 ---
 
+# ABNT Formatting for Theses
 
 Brazilian academic formatting standards for thesis work.
 
+> **Reference**: See `references/abnt-nbr-14724-core-requirements.md` and the institution's thesis manual.
 
 ## Quick Reference
 
@@ -30,6 +34,7 @@ SURNAME, F. et al. Article title. Journal Name, v. X, n. Y, p. 10-20, Month Year
 - Alphabetical order by surname
 - Single space within entry, double space between entries
 - Left-aligned (NOT justified)
+- Year in **bold** (optional; follow the institution's manual)
 
 ### Page Layout (NBR 14724)
 - **Paper**: A4
@@ -45,6 +50,7 @@ SURNAME, F. et al. Article title. Journal Name, v. X, n. Y, p. 10-20, Month Year
   - Source **below**: `Fonte: Author (Year)` or `Fonte: Elaborada pelo autor (Year)`
 - **Tables** (numeric data):
   - Caption **above**: `Tabela 1 - Descrição`
+  - Source **below**: `Fonte: elaborado pelo autor (2023)`
   - Tables use **open borders** (no side vertical lines)
 
 ### Section Numbering
@@ -59,15 +65,20 @@ SURNAME, F. et al. Article title. Journal Name, v. X, n. Y, p. 10-20, Month Year
 - Checking citation consistency across document
 - Creating figures/tables with ABNT-compliant captions
 - Converting informal notes to academic prose
+- Reviewing a LaTeX template for institutional compliance
 
+## Institution-Specific Rules
 
+Institutions often add rules beyond ABNT; the institution's thesis manual takes precedence. Typical additions:
 - **Pre-textual pages order**: cover → title page → approval sheet → dedication → acknowledgments → epigraph → resumo (pt-BR) → abstract (EN) → lists (figures/tables/abbreviations) → summary
-- **Approved document must include**: resumo AND abstract (Portuguese + English)
+- **Final document typically includes**: resumo AND abstract (Portuguese + English)
 - **Keywords**: 3-5 per language, after each abstract
+- **Length**: typically 30-80 pages (check the institution's limit)
 
 ## Related
 
 - `skills/latex-notebooks/` — LaTeX math in notebooks
+- `workflows/thesis-writing-main.md` — Thesis writing and formatting orchestration
 
 ## References
 

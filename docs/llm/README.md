@@ -14,7 +14,6 @@ Do not place repo-only customizations inside those linked directories. Doing so 
 ## Local Layout
 
 - `docs/llm/toolkit-selection.txt`: curated shared-toolkit profile for this repo
-- `docs/llm/scripts/`: helper scripts that build or refresh local analytical references
 - `learnings/`: committed trial-and-error knowledge (see `skills/error-driven-learning/SKILL.md`)
 
 ## Shared Toolkit Selection
@@ -105,9 +104,8 @@ All workflows are now in the shared toolkit under `workflows/` and accessible vi
 
 ## Recommended Skills (via Shared Toolkit)
 
-Start with these skills for thesis-specific support (activate via your LLM tool):
+Start with these skills for repository-specific support (activate via your LLM tool):
 
-- `project-overview` — Repository structure and scope
 - `security-checkpoint` — Mandatory security review
 - `data-pipeline-boundaries` — Bronze/Silver/Gold boundaries
 - `aws-airflow-terraform-project` — Infrastructure guidance
@@ -120,10 +118,9 @@ Access via `.windsurf/workflows/`:
 - `project-execution-main.md` — Primary orchestration for technical work
 - `thesis-writing-main.md` — Primary orchestration for thesis writing
 
-## Recommended References (via Shared Toolkit)
+## Recommended References
 
-Access via `.agents/skills/*/references/`:
-
+Skill-specific references live under `.agents/skills/*/references/`. Repository-specific reference material lives in `docs/llm/references/` (see its `README.md`).
 
 ## Additional Workflows (via Shared Toolkit)
 

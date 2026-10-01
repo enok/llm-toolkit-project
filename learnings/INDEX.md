@@ -20,9 +20,6 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 
 - [`notebook-hardcoded-aws-credentials.md`](./notebook-hardcoded-aws-credentials.md) — Notebook hardcoded AWS credentials must use `runtime_config.json`; never print secrets in notebook outputs (`notebook`, `aws`, `credentials`, `security`, `runtime-config`, `s3`).
 
-### API
-
-
 ### Notebooks / Toolchain
 
 - [`notebook-embedded-plotly-output-size.md`](./notebook-embedded-plotly-output-size.md) — Plotly choropleth outputs embedded in notebooks inflate files to 100MB+, blocking `git push`; run `clear_notebook_outputs.py` before every commit (`notebook`, `plotly`, `outputs`, `file-size`, `git`, `push`, `ipynb`, `clear-outputs`).

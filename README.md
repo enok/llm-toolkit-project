@@ -9,8 +9,8 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 | Area | Path | Purpose |
 | --- | --- | --- |
 | Rules | `rules/` | 20 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring |
-| Workflows | `workflows/` | 99 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, infrastructure and log investigation, data-science and thesis work |
-| Skills | `skills/` | 102 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
+| Workflows | `workflows/` | 92 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, infrastructure and log investigation, data-science and thesis work |
+| Skills | `skills/` | 92 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
 | Tool subagents | `tool-subagents/` | 25 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
@@ -143,7 +143,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 99 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 92 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -164,6 +164,7 @@ All workflows by area:
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`
 - **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`
+- **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
 
 ## Skills at a Glance
 
@@ -300,11 +301,11 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **data-pipeline-boundaries** | Repository-specific data pipeline boundaries for the data-science project (toolkit-local context) |
 | **data-governance** | Dataset provenance, privacy, licensing, and evidence integrity in analytics projects |
 
-#### Thesis And Course Context (toolkit-local)
+#### Thesis And Academic Formatting
 
 | Skill | Purpose |
 | --- | --- |
-| **project-overview** | Project overview and context for the data-science thesis repository (toolkit-local context) |
+| **abnt-formatting** | ABNT academic formatting for thesis documents |
 
 ---
 

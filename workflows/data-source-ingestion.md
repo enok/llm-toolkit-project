@@ -1,8 +1,10 @@
 ---
+description: Add, modify, or troubleshoot bronze-layer ingestion from public data sources (statistical agencies, public-data APIs, registries, price indexes) with storage-mode selection
 ---
 
 # Data Source Ingestion Workflow
 
+Use this workflow when adding, modifying, or troubleshooting data ingestion from the project's core sources (for example a statistical agency, a public-data API, a registry, or a price-index series).
 
 ## Storage Backend Configuration
 
@@ -22,13 +24,17 @@ Set storage mode via environment variable or config file:
 ```bash
 # S3 only (default production)
 export STORAGE_MODE=s3-only
+export S3_BUCKET=<your-bucket>
 export S3_PREFIX=bronze/
 
 # Local only (development/offline)
 export STORAGE_MODE=local-only
+export LOCAL_DATA_DIR=/home/user/project-data
 
 # Both (backup/redundancy)
 export STORAGE_MODE=both
+export S3_BUCKET=<your-bucket>
+export LOCAL_DATA_DIR=/home/user/project-data-backup
 ```
 
 **Option 2: Config File**
@@ -37,10 +43,12 @@ export STORAGE_MODE=both
 {
   "storage_mode": "local-only",
   "s3": {
+    "bucket": "<your-bucket>",
     "prefix": "bronze/",
     "region": "us-east-1"
   },
   "local": {
+    "base_dir": "/home/user/project-data",
     "create_dirs": true
   },
   "sync": {
@@ -69,6 +77,7 @@ export LOCAL_DATA_DIR=/path/to/local/data
 # Configure
 export STORAGE_MODE=s3-only
 export AWS_PROFILE=your-profile
+export S3_BUCKET=<your-bucket>
 
 # Run ingestion
 ./scripts/01_bronze_ingestion.sh
@@ -80,6 +89,8 @@ export AWS_PROFILE=your-profile
 ```bash
 # Configure
 export STORAGE_MODE=both
+export LOCAL_DATA_DIR=/home/user/project-data
+export S3_BUCKET=<your-bucket>
 
 # Run ingestion (writes to both)
 ./scripts/01_bronze_ingestion.sh
@@ -91,7 +102,10 @@ export STORAGE_MODE=both
 
 | Source | Type | Update Frequency | Contract File | Client Code |
 |--------|------|------------------|---------------|-------------|
-| BCB IPCA | Monthly | Monthly | `config/ipca_metadata.json` | `src/ingestion/bcb_client.py` |
+| Census / survey | Static snapshots | Per release | `config/<census>_metadata.json` | `src/ingestion/<census>_client.py` |
+| Public Data API | Monthly | Historical complete | `config/<api>_metadata.json` | `src/ingestion/<api>_client.py` |
+| Registry | As updated | Periodic | `config/<registry>_metadata.json` | `src/ingestion/<registry>_client.py` |
+| Price index | Monthly | Monthly | `config/<index>_metadata.json` | `src/ingestion/<index>_client.py` |
 
 ## When to Use
 
@@ -129,7 +143,7 @@ Before modifying ingestion:
 
 ```bash
 # Read the relevant metadata
-config/ipca_metadata.json          # Inflation series
+config/<source>_metadata.json      # One contract per source
 config/silver_schemas.json         # Silver layer expectations
 ```
 
@@ -141,14 +155,18 @@ Verify:
 
 ### 3. Trace the Ingestion Path
 
+**For a census / survey source:**
+1. `src/ingestion/<census>_client.py` — HTTP client
 2. `scripts/01_bronze_ingestion.sh` — Orchestration
 3. `src/processing/silver_transformer.py` — Normalization
 
+**For a public-data API:**
+1. `src/ingestion/<api>_client.py` — API client with pagination
 2. `scripts/01_bronze_ingestion.sh` — Orchestration
 3. `src/processing/silver_transformer.py` — Normalization
 
-**For BCB IPCA:**
-1. `src/ingestion/bcb_client.py` — BCB API client
+**For a price-index series:**
+1. `src/ingestion/<index>_client.py` — Series API client
 2. `scripts/01_bronze_ingestion.sh` — Orchestration
 3. `src/processing/gold_transformer.py` — CPI adjustment
 
@@ -246,28 +264,31 @@ Update:
 
 ## Source-Specific Guidance
 
+### Census / survey sources
 
-- Municipality codes (`codigo_municipio`) are the join key
-- 2010 and 2022 have different variable availability
-- Handle missing values explicitly (not all municipalities have all indicators)
-- Real income requires IPCA adjustment (handled in Gold layer)
+- Use the official geographic code as the join key
+- Different census years can have different variable availability
+- Handle missing values explicitly (not every unit has every indicator)
+- Real (inflation-adjusted) values are computed in the Gold layer
 
+### Public-data APIs
 
-- API has rate limits; client implements backoff
-- Historical data (2010-2022) is complete; no new fetches needed for thesis
-- Municipality codes may need left-padding to 7 digits
-- Action codes indicate transfer type (documented in metadata)
+- APIs have rate limits; the client implements backoff
+- When historical data is complete, still keep data freshness checks in place
+- Geographic codes may need left-padding to their fixed width
+- Document coded fields (categories, action codes) in the metadata contract
 
+### Registries
 
-- Dates matter: sanctions have start and end dates
+- Dates matter: registry entries have start and end dates
 - Boolean flags should be time-aware (active at reference date)
 
-### BCB IPCA
+### Price-index series
 
 - Monthly series for inflation adjustment
-- Base date matters (thesis uses 2022 BRL as reference)
-- Used for real income calculations in Gold layer
-- Validate against official BCB published values
+- Base date matters (state the reference currency and year)
+- Used for real-value calculations in the Gold layer
+- Validate against the official published values
 
 ## Error Handling Checklist
 

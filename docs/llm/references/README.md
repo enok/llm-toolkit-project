@@ -1,11 +1,6 @@
 # References
 
-Repository-specific reference materials for the Public Compliance Data Analysis project.
-
-## Contents
-
-- `aws-airflow-terraform-reference.md` — Infrastructure reference
-- `security-checkpoint-2026-04-05.md` — Security checkpoint documentation
+Repository-specific reference materials for this project live here (domain notes, infrastructure references, and similar documents that are too specific for the shared toolkit). List each file in this README.
 
 ## Usage
 
