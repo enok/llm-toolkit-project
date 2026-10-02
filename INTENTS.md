@@ -156,6 +156,14 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | ABNT formatting / citations and references / thesis manual review | `abnt-formatting` | skill | `document-conversion` |
 | plagiarism check before submission | `thesis-plagiarism-check` | workflow | `thesis-plagiarism-prevention` |
 
+## Career And Job Search
+
+| Ask in plain English | Primary capability | Type | Helpers |
+| --- | --- | --- | --- |
+| run my job scan / daily job pipeline / find new jobs and update my tracker | `job-search-pipeline` | workflow + skill | `agent-orchestrator`, `task-quality-loop`, `skills/job-search-pipeline/references/lane-prompts.md` |
+| check my applications / move my tracker rows / recruiter replies | `job-search-pipeline` | workflow + skill | `skills/job-search-pipeline/scripts/tracker_ops.py` |
+| set up a job search for me / adopt my job tracker / schedule my job scan | `job-search-setup` | workflow | `job-search-pipeline`, `automation-maintenance` |
+
 ## Provider Surfaces
 
 | Tool | Primary surface |
