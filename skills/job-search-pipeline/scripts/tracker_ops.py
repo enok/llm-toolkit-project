@@ -255,6 +255,7 @@ def cmd_known(a) -> dict:
     ids, cts = t.known(a.id_pattern or DEFAULT_ID_PATTERNS)
     out = {"mtime": t.mtime, "ids": sorted(ids), "company_title": sorted(cts)}
     if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
         return {"mtime": t.mtime, "ids": len(ids), "company_title": len(cts), "out": a.out}
     return out
