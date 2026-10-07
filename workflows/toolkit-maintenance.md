@@ -16,6 +16,7 @@ Use this when improving the shared toolkit from PR reviews, CI failures, Conflue
 6. Review external skill repositories through `skills/external-skill-intake/SKILL.md`; use them for discovery and generic adaptation only after source, license, SkillSpector, Snyk Agent Scan, and Gen Agent Trust Hub URL review where applicable.
 7. For agent self-improvement, eval, trace, and orchestration patterns, include the curated starting points in `skills/external-skill-intake/references/agent-evolution-sources.md` and add reliable community repos only after source and license review.
 8. Record only transferable patterns; keep project-specific details in the source project or in a learning marked as evidence.
+9. Review the run log (`skills/run-retrospective/SKILL.md`): run `summary` for trends and ineffective prevention, and `candidates` for the promotion backlog. Land in-scope `rule` and `guard` candidates through this workflow, verified per `skills/run-retrospective/references/promotion-ladder.md`, add them to the root run's record `promotions`, and report the backlog left for later runs.
 
 ## Phase 2 — Classification
 

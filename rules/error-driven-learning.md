@@ -7,6 +7,8 @@ description: Capture trial-and-error wins as indexed learnings, consult learning
 
 When an LLM finds the correct solution after trial-and-error, capture the knowledge so future sessions — regardless of tool — go directly to the happy path. Treat `learnings/` as committed intake, not the final knowledge base: durable, reusable guidance belongs in rules, workflows, skills, agents, docs, scripts, tests, templates, generated surfaces, or validation gates, and a learning is the evidence that earns that promotion.
 
+A learning is one rung of the promotion ladder in `rules/workflow-self-improvement.md`. Every mistake is also recorded by signature in the run log (`workflows/run-retrospective.md`), and recurrence is counted by that signature, not by learning file: a second occurrence earns a `## Known pitfalls` checklist bullet, a third (or any high/critical or safety-near-miss one) an executable guard. Cite the learning as `prevented_by` in the run record so the two stay linked.
+
 ## When to capture
 
 Capture a learning when:
