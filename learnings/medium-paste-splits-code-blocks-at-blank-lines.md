@@ -36,10 +36,9 @@ python3 skills/medium-publishing/scripts/medium_paste_html.py check article.past
 ```
 
 After pasting, confirm the editor's `pre` count equals the number of `<pre>` tags in the
-paste HTML. Keep the
-byte-identity hash check: it normalises trailing whitespace on both sides, so the
-single-space lines still compare equal to the source file. Pasted code stays valid;
-Python ignores whitespace-only lines.
+paste HTML. Keep the byte-identity hash check: it normalises trailing whitespace on both
+sides, so the single-space lines still compare equal to the source file. Pasted code
+stays valid; Python ignores whitespace-only lines.
 
 Durable guidance: skills/medium-publishing/references/paste-recipe.md
 

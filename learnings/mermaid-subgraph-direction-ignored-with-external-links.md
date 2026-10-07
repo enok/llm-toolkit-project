@@ -34,10 +34,10 @@ flowchart TB
 ```
 
 A subgraph is still fine as a visual grouping; just do not expect its `direction` to
-apply when its nodes link outside it. Two syntax traps seen in the same session: a node id of `default` or `DEFAULT`
-collides with a Mermaid keyword (use an id such as `DefaultCase`), and any label that
-contains `:`, `(`, `)`, `/`, `,`, `'` or `?` must be quoted, as in `P1{{"Port: Repository"}}`
-above.
+apply when its nodes link outside it. Two syntax traps seen in the same session: a node
+id of `default` or `DEFAULT` collides with a Mermaid keyword (use an id such as
+`DefaultCase`), and any label that contains `:`, `(`, `)`, `/`, `,`, `'` or `?` must be
+quoted, as in `P1{{"Port: Repository"}}` above.
 
 Durable guidance: skills/diagram-authoring/references/publication-diagram-style.md
 
