@@ -293,7 +293,7 @@ class CheckTests(unittest.TestCase):
         self.assertEqual(codes("<pre-wrap>a\n\nb</pre-wrap>"), [])
 
     def test_all_issue_kinds_together(self) -> None:
-        bad = (FIXTURES / "check-bad.html").read_text(encoding="utf-8")
+        bad = (FIXTURES / "check-bad.html.txt").read_text(encoding="utf-8")
         found = {issue.code for issue in paste.check_html(bad, (RAW + "/",))}
         self.assertEqual(
             found,
@@ -310,7 +310,7 @@ class CheckTests(unittest.TestCase):
         )
 
     def test_build_output_passes_check(self) -> None:
-        source = (FIXTURES / "article-input.html").read_text(encoding="utf-8")
+        source = (FIXTURES / "article-input.html.txt").read_text(encoding="utf-8")
         self.assertEqual(paste.check_html(built(source), (RAW + "/",)), [])
 
 
@@ -318,16 +318,16 @@ class CliTests(unittest.TestCase):
     def test_build_matches_golden_fixture(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "article.paste.html"
-            code, stdout, _ = run_main("build", str(FIXTURES / "article-input.html"), "-o", str(out))
+            code, stdout, _ = run_main("build", str(FIXTURES / "article-input.html.txt"), "-o", str(out))
             self.assertEqual(code, 0)
             self.assertIn("6 pre blocks", stdout)
             self.assertIn("java=1", stdout)
-            self.assertEqual(out.read_bytes(), (FIXTURES / "article-expected.html").read_bytes())
+            self.assertEqual(out.read_bytes(), (FIXTURES / "article-expected.html.txt").read_bytes())
 
     def test_build_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             first, second = Path(tmp) / "one.html", Path(tmp) / "two.html"
-            self.assertEqual(run_main("build", str(FIXTURES / "article-input.html"), "-o", str(first))[0], 0)
+            self.assertEqual(run_main("build", str(FIXTURES / "article-input.html.txt"), "-o", str(first))[0], 0)
             self.assertEqual(run_main("build", str(first), "-o", str(second))[0], 0)
             self.assertEqual(first.read_bytes(), second.read_bytes())
 
@@ -351,9 +351,9 @@ class CliTests(unittest.TestCase):
             self.assertEqual(src.read_text(encoding="utf-8"), "<pre>x</pre>")
 
     def test_check_exit_codes(self) -> None:
-        code, stdout, _ = run_main("check", str(FIXTURES / "article-expected.html"))
+        code, stdout, _ = run_main("check", str(FIXTURES / "article-expected.html.txt"))
         self.assertEqual((code, stdout.startswith("OK:")), (0, True))
-        code, stdout, _ = run_main("check", str(FIXTURES / "check-bad.html"))
+        code, stdout, _ = run_main("check", str(FIXTURES / "check-bad.html.txt"))
         self.assertEqual(code, 1)
         for name in ("markdown-leftover", "table", "inline-code", "pre-attrs", "pre-blank-line", "image-unpinned", "non-ascii"):
             self.assertIn(": %s:" % name, stdout)
@@ -361,12 +361,12 @@ class CliTests(unittest.TestCase):
         self.assertIn("issue(s) in", stdout)
 
     def test_check_repo_raw_prefix_flag(self) -> None:
-        code, stdout, _ = run_main("check", str(FIXTURES / "check-bad.html"), "--repo-raw-prefix", RAW + "/")
+        code, stdout, _ = run_main("check", str(FIXTURES / "check-bad.html.txt"), "--repo-raw-prefix", RAW + "/")
         self.assertEqual(code, 1)
         self.assertIn("image-prefix", stdout)
-        code, _, _ = run_main("check", str(FIXTURES / "article-expected.html"), "--repo-raw-prefix", RAW + "/")
+        code, _, _ = run_main("check", str(FIXTURES / "article-expected.html.txt"), "--repo-raw-prefix", RAW + "/")
         self.assertEqual(code, 0)
-        code, stdout, _ = run_main("check", str(FIXTURES / "article-expected.html"), "--repo-raw-prefix", "https://example.com/")
+        code, stdout, _ = run_main("check", str(FIXTURES / "article-expected.html.txt"), "--repo-raw-prefix", "https://example.com/")
         self.assertEqual(code, 1)
         self.assertIn("image-prefix", stdout)
 
@@ -380,9 +380,9 @@ class CliTests(unittest.TestCase):
             code, _, err = run_main("check", str(bad))
             self.assertEqual(code, 2)
             self.assertIn("error:", err)
-            self.assertEqual(run_main("build", str(FIXTURES / "article-input.html"), "-o", str(Path(tmp) / "no-dir" / "o.html"))[0], 2)
+            self.assertEqual(run_main("build", str(FIXTURES / "article-input.html.txt"), "-o", str(Path(tmp) / "no-dir" / "o.html"))[0], 2)
         self.assertEqual(run_main()[0], 2)
-        self.assertEqual(run_main("build", str(FIXTURES / "article-input.html"))[0], 2)
+        self.assertEqual(run_main("build", str(FIXTURES / "article-input.html.txt"))[0], 2)
         self.assertEqual(run_main("bogus")[0], 2)
 
     def test_help_exits_zero(self) -> None:
@@ -430,14 +430,14 @@ class CliTests(unittest.TestCase):
 
     def test_script_runs_as_a_process(self) -> None:
         good = subprocess.run(
-            [sys.executable, str(SCRIPT), "check", str(FIXTURES / "article-expected.html")],
+            [sys.executable, str(SCRIPT), "check", str(FIXTURES / "article-expected.html.txt")],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
         )
         self.assertEqual(good.returncode, 0, good.stderr)
         bad = subprocess.run(
-            [sys.executable, str(SCRIPT), "check", str(FIXTURES / "check-bad.html")],
+            [sys.executable, str(SCRIPT), "check", str(FIXTURES / "check-bad.html.txt")],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

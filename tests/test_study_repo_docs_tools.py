@@ -57,6 +57,10 @@ class RepoCase(unittest.TestCase):
         self.tmp = Path(tmp.name)
         self.repo = self.tmp / "repo"
         shutil.copytree(FIXTURE, self.repo)
+        # the committed fixture keeps the diagram as .mmd.txt (repo policy: no .mmd files); the
+        # tests work on a temp copy where it is the real docs/diagrams/overview.mmd
+        stored = self.repo / "docs" / "diagrams" / "overview.mmd.txt"
+        stored.rename(stored.with_name("overview.mmd"))
 
     def write(self, rel: str, text: str, root: Path = None) -> Path:
         path = (root or self.repo) / rel
@@ -143,6 +147,15 @@ class RepoCase(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------- check_docs
+
+
+class FixtureTreeTests(unittest.TestCase):
+    def test_committed_fixture_tree_uses_only_policy_allowed_suffixes(self) -> None:
+        files = [path for path in FIXTURE.rglob("*") if path.is_file()]
+        self.assertTrue(files)
+        self.assertEqual(sorted({path.suffix for path in files} - {".py", ".js", ".md", ".json", ".txt"}), [])
+        self.assertTrue((FIXTURE / "docs" / "diagrams" / "overview.mmd.txt").is_file())
+        self.assertFalse(list(FIXTURE.rglob("*.mmd")))
 
 
 class CheckDocsHappyPathTests(RepoCase):

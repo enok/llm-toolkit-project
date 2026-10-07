@@ -18,7 +18,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / "skills" / "youtube-video-curation"
 SCRIPT = SKILL_DIR / "scripts" / "youtube_search.py"
-FIXTURE = Path(__file__).resolve().parent / "fixtures" / "youtube-video-curation" / "results.html"
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "youtube-video-curation" / "results.html.txt"
 SPEC = importlib.util.spec_from_file_location("youtube_search", SCRIPT)
 assert SPEC and SPEC.loader
 yt = importlib.util.module_from_spec(SPEC)
@@ -503,7 +503,7 @@ class CliTests(unittest.TestCase):
         payload = json.loads(out)
         self.assertEqual(code, 0)
         self.assertEqual([r["id"] for r in payload["results"]], [ID_A, ID_B, ID_C])
-        self.assertEqual(payload["source"], "results.html")
+        self.assertEqual(payload["source"], "results.html.txt")
 
     def test_parse_errors_exit_2(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

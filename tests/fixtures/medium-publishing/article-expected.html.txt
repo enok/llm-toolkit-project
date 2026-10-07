@@ -1,0 +1,28 @@
+<h1>Strategy Pattern in Practice</h1>
+<p>It&#8217;s &#8220;quoted&#8221; text with a dash &#8212; and a caf&#233;.</p>
+<figure><img src="https://raw.githubusercontent.com/example-owner/example-repo/0123456789abcdef0123456789abcdef01234567/docs/diagrams/class-diagram.png" alt="Class diagram"></figure>
+<h2>Code by language</h2>
+<p><strong>src/Duck.java</strong></p>
+<pre data-code-block-mode="2" data-code-block-lang="java">public class Duck {
+ 
+    void quack() {
+        System.out.println("Quack");
+    }
+}
+</pre>
+<p><strong>duck.py</strong></p>
+<pre data-code-block-mode="2" data-code-block-lang="python">def quack():
+ 
+    print("Quack &#10003;")
+</pre>
+<p><strong>duck.js:</strong></p>
+<pre data-code-block-mode="2" data-code-block-lang="javascript">export const quack = () =&gt; "Quack";
+ 
+ 
+export default quack;</pre>
+<pre data-code-block-mode="2" data-code-block-lang="typescript">export const quack = (): string =&gt; "Quack";</pre>
+<p><strong>notes.txt</strong></p>
+<pre data-code-block-mode="0">plain text, no language
+</pre>
+<pre data-code-block-mode="0">unlabelled block</pre>
+<p>Closing paragraph with <em>emphasis</em> and a <a href="https://example.com/post">link</a>.</p>
