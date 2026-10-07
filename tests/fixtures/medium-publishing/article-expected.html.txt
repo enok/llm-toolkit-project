@@ -4,7 +4,7 @@
 <h2>Code by language</h2>
 <p><strong>src/Duck.java</strong></p>
 <pre data-code-block-mode="2" data-code-block-lang="java">public class Duck {
- 
+{{SPACE}}
     void quack() {
         System.out.println("Quack");
     }
@@ -12,13 +12,13 @@
 </pre>
 <p><strong>duck.py</strong></p>
 <pre data-code-block-mode="2" data-code-block-lang="python">def quack():
- 
+{{SPACE}}
     print("Quack &#10003;")
 </pre>
 <p><strong>duck.js:</strong></p>
 <pre data-code-block-mode="2" data-code-block-lang="javascript">export const quack = () =&gt; "Quack";
- 
- 
+{{SPACE}}
+{{SPACE}}
 export default quack;</pre>
 <pre data-code-block-mode="2" data-code-block-lang="typescript">export const quack = (): string =&gt; "Quack";</pre>
 <p><strong>notes.txt</strong></p>

@@ -4,6 +4,7 @@ import contextlib
 import importlib.util
 import io
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -19,6 +20,29 @@ assert SPEC and SPEC.loader
 paste = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = paste
 SPEC.loader.exec_module(paste)
+
+# The golden file keeps each single-space line as the visible marker line below, so no
+# committed fixture carries trailing whitespace; expected_bytes() restores the spaces.
+SPACE_MARKER = b"{{SPACE}}"
+EXPECTED_PATH: Path  # materialised golden file with real spaces, created in setUpModule
+_EXPECTED_TMP: "tempfile.TemporaryDirectory[str]"
+
+
+def expected_bytes() -> bytes:
+    raw = (FIXTURES / "article-expected.html.txt").read_bytes()
+    return re.sub(rb"(?m)^" + re.escape(SPACE_MARKER) + rb"$", b" ", raw)
+
+
+def setUpModule() -> None:
+    global EXPECTED_PATH, _EXPECTED_TMP
+    _EXPECTED_TMP = tempfile.TemporaryDirectory()
+    EXPECTED_PATH = Path(_EXPECTED_TMP.name) / "article-expected.html"
+    EXPECTED_PATH.write_bytes(expected_bytes())
+
+
+def tearDownModule() -> None:
+    _EXPECTED_TMP.cleanup()
+
 
 SHA40 = "0123456789abcdef0123456789abcdef01234567"
 RAW = "https://raw.githubusercontent.com/example-owner/example-repo"
@@ -314,6 +338,25 @@ class CheckTests(unittest.TestCase):
         self.assertEqual(paste.check_html(built(source), (RAW + "/",)), [])
 
 
+class FixtureHygieneTests(unittest.TestCase):
+    def test_no_fixture_has_trailing_whitespace(self) -> None:
+        fixtures = sorted(path for path in FIXTURES.rglob("*") if path.is_file())
+        self.assertGreaterEqual(len(fixtures), 3)
+        for path in fixtures:
+            data = path.read_bytes()
+            with self.subTest(fixture=path.name):
+                offenders = [number for number, line in enumerate(data.split(b"\n"), 1) if re.search(rb"[ \t\r]+$", line)]
+                self.assertEqual(offenders, [], "trailing whitespace on lines %s" % offenders)
+                self.assertFalse(data.endswith(b"\n\n"), "blank line at end of file")
+
+    def test_marker_restores_exactly_the_single_space_lines(self) -> None:
+        raw = (FIXTURES / "article-expected.html.txt").read_bytes()
+        restored = expected_bytes()
+        self.assertEqual(raw.count(SPACE_MARKER), 4)
+        self.assertNotIn(SPACE_MARKER, restored)
+        self.assertEqual([n for n, line in enumerate(restored.split(b"\n"), 1) if line == b" "], [7, 15, 20, 21])
+
+
 class CliTests(unittest.TestCase):
     def test_build_matches_golden_fixture(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -322,7 +365,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertIn("6 pre blocks", stdout)
             self.assertIn("java=1", stdout)
-            self.assertEqual(out.read_bytes(), (FIXTURES / "article-expected.html.txt").read_bytes())
+            self.assertEqual(out.read_bytes(), expected_bytes())
 
     def test_build_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -351,7 +394,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(src.read_text(encoding="utf-8"), "<pre>x</pre>")
 
     def test_check_exit_codes(self) -> None:
-        code, stdout, _ = run_main("check", str(FIXTURES / "article-expected.html.txt"))
+        code, stdout, _ = run_main("check", str(EXPECTED_PATH))
         self.assertEqual((code, stdout.startswith("OK:")), (0, True))
         code, stdout, _ = run_main("check", str(FIXTURES / "check-bad.html.txt"))
         self.assertEqual(code, 1)
@@ -364,9 +407,9 @@ class CliTests(unittest.TestCase):
         code, stdout, _ = run_main("check", str(FIXTURES / "check-bad.html.txt"), "--repo-raw-prefix", RAW + "/")
         self.assertEqual(code, 1)
         self.assertIn("image-prefix", stdout)
-        code, _, _ = run_main("check", str(FIXTURES / "article-expected.html.txt"), "--repo-raw-prefix", RAW + "/")
+        code, _, _ = run_main("check", str(EXPECTED_PATH), "--repo-raw-prefix", RAW + "/")
         self.assertEqual(code, 0)
-        code, stdout, _ = run_main("check", str(FIXTURES / "article-expected.html.txt"), "--repo-raw-prefix", "https://example.com/")
+        code, stdout, _ = run_main("check", str(EXPECTED_PATH), "--repo-raw-prefix", "https://example.com/")
         self.assertEqual(code, 1)
         self.assertIn("image-prefix", stdout)
 
@@ -430,7 +473,7 @@ class CliTests(unittest.TestCase):
 
     def test_script_runs_as_a_process(self) -> None:
         good = subprocess.run(
-            [sys.executable, str(SCRIPT), "check", str(FIXTURES / "article-expected.html.txt")],
+            [sys.executable, str(SCRIPT), "check", str(EXPECTED_PATH)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
