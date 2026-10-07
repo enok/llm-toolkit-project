@@ -28,9 +28,9 @@ If an image is blurry, cropped, distorted, unreadable, low-resolution, stale, in
 ## Process
 
 1. Inventory every generated or exported image artifact, including intermediates and final embedded renders.
-2. Inspect each artifact with a real render path: an image viewer, a browser screenshot, a PDF page render, a document or page render, a slide render, or the target wiki or page preview.
+2. Inspect each artifact with a real render path: an image viewer, a browser screenshot, a PDF page render, a document or page render, a slide render, or the target wiki or page preview. For a batch of images headed for publication, have a validator other than the producer do this pass.
 3. Verify source fidelity: current source, request match, no stale output, no accidental prompt drift.
-4. Verify visual quality: dimensions, sharpness, crop, text readability, contrast, layout, aspect ratio, alpha and transparent edges, compression, and rendering in the target viewer.
+4. Verify visual quality: dimensions, sharpness, crop, text readability, contrast, layout, aspect ratio, alpha and transparent edges, compression, and rendering in the target viewer. For an image shown at a known width (article column, README, slide), judge text size at that width, not at the file's pixel size.
 5. Fix failed artifacts by editing the source, prompt, layout, export flags, DPI or scale, or output format. Prefer vector output or a higher DPI or scale when possible.
 6. Re-export or re-render every fixed artifact and inspect it again.
 7. Report inspection evidence: artifacts checked, fixes made, remaining blockers, and whether any image could not be visually inspected.
@@ -38,6 +38,7 @@ If an image is blurry, cropped, distorted, unreadable, low-resolution, stale, in
 ## Required references
 
 - Use `references/image-quality-gate.md` for the detailed pass/fail gate.
+- Use `references/destination-legibility.md` for images published at a known width (effective text size, aspect ratio, margins, defect checklist, independent validator). For the diagram style that passes it, see `skills/diagram-authoring/references/publication-diagram-style.md`.
 - For diagram-specific export rules, use `skills/diagram-authoring/references/diagram-export-quality.md`.
 - For Markdown-to-PDF image intermediates and final PDF checks, use `workflows/markdown-pdf-export.md`.
 
