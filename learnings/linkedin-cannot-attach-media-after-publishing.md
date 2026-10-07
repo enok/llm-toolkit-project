@@ -2,7 +2,7 @@
 title: LinkedIn cannot add media to a post after it is published
 category: toolchain
 created: 2026-10-07
-tags: [linkedin, media, publishing, repost, delete, approval-gate, back-links]
+tags: [linkedin, media, publishing, repost, delete, approval-gate, back-links, more-pointer]
 ---
 
 # Problem
@@ -26,9 +26,11 @@ Prevent it first, repost only if it already happened.
 2. If the post is already live without the image, write a new post with text and image.
    Show the full text and the image, get explicit approval, then post and read the new
    post URL from the "View post" link. Decline the paid boost prompt ("No thanks").
-3. Ask for a separate approval to delete the old post (each external write was approved
-   separately in this flow). Then use the post's "..." menu, Delete post, confirm.
-   Verify the old URL now shows "Post not found".
+3. Default since 2026-10-07: keep the old post and edit its text so it opens with a
+   "More... <new-post-url>" line (text edits are allowed after publishing). Delete the old
+   post only if the user asks, with its own approval: "..." menu, Delete post, confirm, and
+   verify the old URL shows "Post not found". See
+   learnings/linkedin-image-change-needs-new-post-with-more-pointer.md.
 4. Repoint every back-link from the old URL to the new one, each as its own approved write:
    edit the published Medium story (use "Save and publish") and open a README link PR.
 
@@ -38,7 +40,7 @@ Durable guidance: skills/linkedin-publishing/references/repost-and-delete.md
 
 The session recorded the limitation, not the product reason behind it, so treat it as a
 fixed property of LinkedIn and plan around it. The bidirectional links between the story
-and the post are why step 4 exists: the old URL is gone after the delete. General
+and the post are why step 4 exists: readers should land on the post that carries the image. General
 guidance, not observed in this session: deleting the old post also discards whatever
 reactions and comments it had, so tell the user before asking for the delete approval.
 Cheapest fix is step 1, because the image is easy to attach before publishing and

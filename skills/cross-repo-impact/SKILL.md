@@ -22,3 +22,7 @@ Use this skill when changes cross repository boundaries.
 - Affected repos and why they are affected.
 - Likely file or module hotspots per repo.
 - Suggested execution order and validation strategy.
+
+## Known pitfalls
+
+- Before trusting a zero-match search over a local clone, run `git fetch origin` and compare `git rev-list --count main..origin/main`; when the clone is behind, search the remote ref with `git grep -in "<pattern>" origin/main` and read files with `git show origin/main:<path>`. A zero-match grep over a stale clone looks the same as "removed". See `learnings/stale-local-clone-false-negative-search.md`.

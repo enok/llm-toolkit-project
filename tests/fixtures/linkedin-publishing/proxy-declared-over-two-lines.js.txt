@@ -1,0 +1,8 @@
+(() => {
+  const proxy =
+    document.getElementById('tmp-upload-proxy');
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  proxy.files = dt.files;
+  return proxy.files.length;
+})()

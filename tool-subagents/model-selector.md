@@ -61,7 +61,7 @@ escalation trigger is the only thing that moves a task up from it.
 | Running a validation script or test command and reporting pass/fail with the failing lines | `light` | `haiku` / low |
 | Path/name synchronization, formatting, lint fixes, mechanical find-and-replace | `light` | `haiku` / low |
 | Retrieval, file/symbol mapping, log or output scanning for a known pattern, single deterministic check | `light` | `haiku` / medium |
-| Doc drafting and doc updates, release notes, PR bodies, runbook sections | `standard` | `sonnet` / medium |
+| Doc drafting and doc updates, release notes, PR bodies, runbook sections; authoring learnings or skill references from a recorded facts ledger | `standard` | `sonnet` / medium |
 | Config/overlay sync review, generated-surface drift check, dependency bump review | `standard` | `sonnet` / medium |
 | Standard code edits and ordinary bug fixes inside a known surface; ordinary code review | `standard` | `sonnet` / medium |
 | Summarization and evidence reduction of child output; test selection and failure triage | `standard` | `sonnet` / medium |
@@ -139,6 +139,10 @@ overspend patterns, and the reusable routing lesson for
 - Keep your own output compact. You are a routing aid, not an analysis.
 - If a task cannot be classified without investigation that costs more than the
   tier difference, assign `standard` and say so.
+
+## Known pitfalls
+
+- Assign authoring of learnings, skill references, or other prose that must stay faithful to a recorded facts ledger to the `standard` tier, never `light`: `light` lanes invented failed approaches and wrong code, and the files were rewritten at `standard`. Correct the lookup row instead of looping at the wrong tier. (sig: tier-misassignment/light-tier-fact-bound-authoring)
 
 ## References
 

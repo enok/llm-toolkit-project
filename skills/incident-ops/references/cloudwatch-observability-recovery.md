@@ -51,6 +51,28 @@ metrics, include a compact catalog with:
 Record dimension quirks when environment labels differ between services or
 dashboards.
 
+## Console deep links for wiki tables
+
+When a runbook or wiki index links every dashboard, alarm, and metric to the AWS
+console, author the page in HTML content format, not Markdown: CloudWatch metrics
+URLs contain balanced parentheses and `~'` sequences that Markdown link syntax
+mangles or truncates at the first `)`. Escape `&` as `&amp;` inside hrefs.
+Working link shapes (example region `us-west-2`):
+
+- Dashboard:
+  `https://<region>.console.aws.amazon.com/cloudwatch/home?region=<region>#dashboards/dashboard/<Name>`
+- Alarm prefix search:
+  `https://<region>.console.aws.amazon.com/cloudwatch/home?region=<region>#alarmsV2:?search=<name-prefix>`
+- Metrics search:
+  `https://<region>.console.aws.amazon.com/cloudwatch/home?region=<region>#metricsV2?graph=~()&query=~'<term>`,
+  with `/` encoded as `*2f` (for example `~'MyApp*2fUpstream`).
+
+The console URL does not encode the AWS account, so a STAGE link and a PROD link
+to same-named resources are byte-identical. State on the page that a link opens
+in whichever account the reader is signed into, so the reader signs into the
+matching account (`<stage-account-id>` or `<prod-account-id>`) before clicking.
+See `learnings/cloudwatch-console-deep-links-in-wiki-tables.md`.
+
 ## Read-only evidence commands
 
 Bash / Git Bash:

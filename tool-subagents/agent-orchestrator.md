@@ -582,7 +582,7 @@ When invoked:
    - on `escalate` or an exhausted budget, stop the loop and hand the task to the normal-mode root agent or explicit-LOA coordinator marked `escalated` with its verdict history — never silently accept a failed result and never loop past the budget;
    - loops run independently, so tasks in the same wave keep iterating in parallel without a barrier.
 7. After loop results return, judge them before using them:
-   - evidence sufficiency: exact files, commands, sources, traces, or artifacts are cited;
+   - evidence sufficiency: exact files, commands, sources, traces, or artifacts are cited, and any count that gates a decision is re-derived with a deterministic command instead of accepted from the child's summary (`learnings/agent-self-reported-counts-are-not-evidence.md`);
    - scope fit: the child stayed inside the delegated task and user constraints;
    - conflict handling: incompatible findings are reconciled or sent back for a narrow redo;
    - validation value: suggested checks are executable, relevant, and not just ceremonial;
@@ -707,6 +707,10 @@ Progress notification (opt-in, gated):
   user-authorized async worker only after the human-facing gate is satisfied.
 - The root agent may send a status line without a fresh per-message approval only when the user explicitly pre-authorized progress posting for this run/session, naming both the destination (e.g. a specific chat channel or thread) and the status-line format; that standing approval covers only that exact format and destination, per `rules/human-comment-reply-gate.md`. Anything beyond it — different destination, added detail, findings, evidence — goes back to draft-and-approve.
 - Never include evidence, file contents, or findings that the user has not already agreed can leave the local session.
+
+## Known pitfalls
+
+- Anchor every ledger edit (`TASKS_TABLE.md`, `CONTEXT_STATE.md`) to the current run's own section or unique row text, never to a bare row number, and assert the neighbouring rows before writing: a row-number match once edited an older session's table instead of the current one. (sig: coordination/ledger-row-edit-not-scoped-to-session)
 
 ## Related Specialists
 

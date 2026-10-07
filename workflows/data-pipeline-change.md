@@ -17,3 +17,7 @@ Use when modifying ingestion, normalization, aggregation, storage layout, featur
 7. Run the narrowest meaningful validation first, then broader tests if the change crosses layers.
 8. Update docs, runbooks, and localized counterparts when behavior, commands, or outputs change.
 9. Summarize operational impact clearly: what changed, what must be rerun, and what downstream readers should expect.
+
+## Known pitfalls
+
+- When a Gold (or other consumed) dataset changes schema (for example a column rename), update every notebook that reads it, English and pt-BR pairs alike. Also search for dynamically built names (for example `f'{col}_norm'` over a `raw_features` list), which a grep for explicit names misses, and check the pt-BR translation map for renamed columns and update it. See learnings/gold-schema-drift-breaks-notebooks.md.

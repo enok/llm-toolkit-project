@@ -32,6 +32,7 @@ languages; a repo keeps only the folders and CI jobs of its chosen languages
 │   ├── 03-application-example.md
 │   ├── 04-example-diagram.md
 │   ├── 05-code-by-component.md  # GENERATED (see code-by-component.md)
+│   ├── 06-design-principles.md  # principles the pattern applies, tension (see design-principles-doc.md)
 │   ├── 09-architecture-perspective.md   # only if applicable
 │   ├── 10-videos.md
 │   └── diagrams/                # *.mmd sources + rendered *.png (+ *.svg for hand-authored views)
@@ -41,10 +42,11 @@ languages; a repo keeps only the folders and CI jobs of its chosen languages
 └── typescript/  # package.json, package-lock.json, tsconfig.json, src/**, test/**, README.md
 ```
 
-Numbering `NN` follows the content checklist; items 5 to 8 (code per
-language) are one component-first page, `05`, whatever the number of
-languages. Skip `09` when no architecture
-view applies and say so in the README. Each language README holds install,
+Numbering `NN` follows the content checklist; the code of every language
+is one component-first page, `05`, whatever the number of languages, so `06`
+is free for the design-principles page (`07` and `08` stay unused). `06` is
+always present: skip a principle on it only with a one-line reason. Skip `09`
+when no architecture view applies and say so in the README. Each language README holds install,
 test and demo commands. `CODEOWNERS` documents ownership and requests reviews;
 it does not gate merges (`require_code_owner_reviews` stays false).
 

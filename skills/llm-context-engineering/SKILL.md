@@ -45,3 +45,7 @@ Use progressive disclosure:
 ## When not to use shared toolkit files
 
 If guidance contains real internal hostnames, Jira ticket IDs, customer data, repo-specific commands, or product-specific business rules, place it in the consumer repository or in a learning with enough context to remain evidence rather than policy.
+
+## Known pitfalls
+
+- Keep the always-loaded skill surface to each skill's name and one-line description and load the full `SKILL.md` only when the skill is invoked; let each consumer list only the skills it needs in `docs/llm/toolkit-selection.txt` so unlisted skills are never surfaced. Do not embed skill content in rules files or inline all skills in `AGENTS.md`. See `learnings/llm-adaptive-skill-loading.md`.

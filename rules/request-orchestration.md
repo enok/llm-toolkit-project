@@ -158,7 +158,7 @@ before the affected task can be marked done.
    | Running a validation script or test and reporting pass/fail | `light` | `haiku` / low |
    | Path/name sync, formatting, mechanical find-and-replace | `light` | `haiku` / low |
    | Retrieval, file/symbol mapping, scanning output for a known pattern | `light` | `haiku` / medium |
-   | Doc drafting and updates, release notes, PR bodies | `standard` | `sonnet` / medium |
+   | Doc drafting and updates, release notes, PR bodies; authoring learnings or skill references from a recorded facts ledger | `standard` | `sonnet` / medium |
    | Config/overlay sync review, generated-surface drift check | `standard` | `sonnet` / medium |
    | Standard code edits, ordinary bug fixes, ordinary code review | `standard` | `sonnet` / medium |
    | Summarization and evidence reduction, test selection and triage | `standard` | `sonnet` / medium |

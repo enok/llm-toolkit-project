@@ -1,0 +1,4 @@
+(() => {
+  const dialog = document.querySelector('[role="dialog"]');
+  return dialog.querySelectorAll('input[type=file]').length;
+})()

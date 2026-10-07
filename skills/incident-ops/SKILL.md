@@ -58,6 +58,10 @@ Return:
 - Do not skip mitigation to pursue root cause while users are impacted.
 - Do not make destructive changes without explicit approval and a rollback plan.
 
+## Known pitfalls
+
+- When a wiki or runbook table links CloudWatch dashboards, alarms, or metrics, author the page in HTML content format (escape `&` as `&amp;` in hrefs), not Markdown, use the link shapes in `references/cloudwatch-observability-recovery.md`, and state on the page that each link opens in whichever AWS account the reader is signed into. See learnings/cloudwatch-console-deep-links-in-wiki-tables.md.
+
 ## Related Skills
 
 - **runbook-authoring** — Convert incident learnings into operational runbooks
@@ -69,4 +73,5 @@ Return:
 ## References
 
 - `references/cloudwatch-observability-recovery.md` — CloudWatch dashboard,
-  metric, alarm, and log-signal recovery checklist
+  metric, alarm, and log-signal recovery checklist, plus console deep-link shapes
+  for wiki tables

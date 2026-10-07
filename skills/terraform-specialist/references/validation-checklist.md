@@ -39,7 +39,7 @@ consumer's stack inventory (`stack-inventory.md`).
 - Variable/output `description` strings are ordinary HCL strings: a literal
   `${...}` is template syntax and gets interpolated (or errors) - write
   `<org>`-style angle-bracket placeholders (or escape as `$${...}`) in
-  descriptions.
+  descriptions. See `learnings/hcl-variable-descriptions-interpolate-dollar-brace.md`.
 - `terraform fmt -check` and `terraform validate` clean per touched root.
 
 ## Versioning and pinning
@@ -167,23 +167,27 @@ consumer's stack inventory (`stack-inventory.md`).
   (AWS/Lambda has no `Timeouts` metric; back it with a dimensionless
   CloudWatch Logs metric filter, `default_value = 0`, per-function log group
   scoping - filters cannot derive `FunctionName` from plain-text lines).
+  See `learnings/aws-lambda-timeouts-metric-does-not-exist.md`.
 - Name-collision check before first apply of alarms/dashboards:
   `PutMetricAlarm`/`PutDashboard` are upserts, so a Terraform "create" of a
   same-name resource silently overwrites a live hand-made one with no plan
   warning - verify composed names are unused (`describe-alarms`,
-  `list-dashboards`) or make the collision an explicit import.
+  `list-dashboards`) or make the collision an explicit import. See
+  `learnings/putmetricalarm-putdashboard-silently-overwrite-same-name.md`.
 
 ## Serverless wiring (Lambda / API Gateway)
 
 - `aws_lambda_permission` on an alias: `function_name` = bare function name,
   `qualifier` = alias. Baking `name:alias` into `function_name` applies
-  cleanly but plans as a perpetual replacement forever after.
+  cleanly but plans as a perpetual replacement forever after. See
+  `learnings/lambda-permission-alias-belongs-in-qualifier.md`.
 - Never add an unqualified "console visibility" twin permission for an
   alias-fronted API Gateway integration: the function-level Triggers tab
   cross-checks the statement against the integration URI (which targets the
   alias) and permanently flags it as a path/method mismatch. Alias-scoped
   trigger visibility lives only under Aliases > <alias> > Configuration >
-  Permissions; document that instead.
+  Permissions; document that instead. See
+  `learnings/apigw-trigger-tab-cannot-represent-alias-scoped-permissions.md`.
 - AWS_IAM-authorized APIs: SigV4 signing alone is not enough - callers also
   need an `execute-api:Invoke` identity policy; verify the caller role, not
   just the resource policy.
@@ -260,3 +264,10 @@ consumer's stack inventory (`stack-inventory.md`).
   fossilize superseded design decisions.
 - When a workflow bounds coverage (subset of roots, skipped environments),
   say what was skipped; silent truncation reads as full coverage.
+
+## Known pitfalls
+
+- Validate every dashboard and alarm metric-math expression beyond JSON syntax before each apply, not only at authoring: balanced parentheses, `IF()` with exactly three arguments, no dangling or consecutive operators. Run it over every widget expression in the contract test suite; CloudWatch accepts invalid metric math and the widget fails silently at render time. See learnings/json-validity-does-not-prove-metric-math-validity.md.
+- Match gap-filling and `treat_missing_data` to what the metric means: counts and rates fill with zero in widgets (`FILL(m1, 0)`, no `TIME_SERIES(0)` scaffold on top) and use `notBreaching` on failure-count alarms; latencies stay unfilled in widgets and use `breaching` on alarms; an event-driven silence-detection alarm (`LessThanOrEqualToThreshold`, threshold 0) uses `breaching`. Never set `missing` on a sparse alarm to quiet INSUFFICIENT_DATA noise (it defeats N-of-N evaluation, so one breaching datapoint pages). Sparse success or liveness metrics keep `breaching`; plan the first datapoint (`skills/terraform-change-safety/SKILL.md`). See learnings/no-data-and-zero-are-different-in-monitoring.md.
+- Prove the notification path of every alarm, not only its state transitions: `AlarmActions`/`OKActions` non-empty (`describe-alarms`), the topic exists, subscriptions confirmed (protocol and endpoint checked, none in `PendingConfirmation`), then trip one alarm per action family and check the email or page arrives with the right alarm name, state change, threshold reason, and description. Re-trip any alarm whose latest transition predates the moment actions were attached. See learnings/alarm-e2e-must-validate-the-notification-path.md.
+- Take metric dimensions from the emitting code, the alarm's `dimensions` block, or the dashboard template JSON, never from naming conventions (`list-metrics --namespace <namespace>` enumerates the real dimension sets); if an alarm on the same metric transitions while your query returns empty, your dimensions are wrong, not the traffic. See learnings/verify-metric-dimensions-from-source-before-reconciling.md.

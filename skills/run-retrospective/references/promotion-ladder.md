@@ -9,7 +9,7 @@ toolkit at most a few occurrences, then becomes impossible to repeat silently.
 | Level | Trigger | Lands in | Done when |
 | --- | --- | --- | --- |
 | record | 1st occurrence, `low`/`medium` | the run log only | the record validates |
-| `learning` | 1st win that took trial and error | `learnings/<name>.md` + one `learnings/INDEX.md` line, via `workflows/capture-learning.md` | quality check and approval gate passed |
+| `learning` | 1st win that took trial and error | `learnings/<name>.md` + one `learnings/INDEX.md` line + a link to it from the owning asset, via `workflows/capture-learning.md` | quality check and approval gate passed; `tests/test_learning_promotion_coverage.py` passes |
 | `checklist` | 2nd run with the signature, not yet promoted to `checklist` or above | one bullet in the owning workflow's or skill's `## Known pitfalls` section, or a preflight / acceptance criterion | bullet present with `(sig: ...)` suffix |
 | `guard` | 3rd+ run with the signature, recurrence after a checklist, or any `high` / `critical` / `safety-near-miss`, not yet promoted to `guard` or above | an executable check: script, validator, test, CI gate, lint | the check fails on the original mistake and passes on the fix |
 | `rule` | recurrence after a guard, or one pattern seen in 3+ workflows | a `rules/` change through `workflows/toolkit-maintenance.md`, or human escalation when redesign is needed | maintenance validation passed |
@@ -53,8 +53,9 @@ run's `promotions` at its actual level (for example `learning` for a
 ## The `## Known pitfalls` convention
 
 Checklist promotions live in a section named exactly `## Known pitfalls`,
-placed near the end of the owning workflow or `SKILL.md` (before any
-"Final Step" or "Related" section). One bullet per signature:
+placed near the end of the owning workflow, `SKILL.md`, or agent definition
+(`tool-subagents/<name>.md`, mirrored in its `.toml`), before any "Final Step"
+or "Related" section. One bullet per signature:
 
 ```markdown
 ## Known pitfalls
@@ -67,6 +68,10 @@ placed near the end of the owning workflow or `SKILL.md` (before any
 - Imperative and checkable: say what to do or verify, not what went wrong.
 - The suffix `(sig: <signature>)` is mandatory so recurrence stays traceable
   between the asset and the log.
+- A bullet that carries a learning with no run-log signature ends with
+  `See learnings/<slug>.md.` instead of the suffix;
+  `tests/test_learning_promotion_coverage.py` checks that every learning has such
+  a link.
 - Preflight reads this section; the orchestrator turns relevant bullets into
   acceptance criteria.
 - When a guard lands for the signature, replace the bullet's text with a
@@ -87,7 +92,7 @@ A promotion is recorded only after it is verified in the same run:
   nothing.
 - **checklist:** bullet present, imperative, suffixed, and the owning file
   still passes its size and index checks.
-- **learning:** `workflows/capture-learning.md` quality check and approval.
+- **learning:** `workflows/capture-learning.md` quality check and approval, and the owning asset links the file (`tests/test_learning_promotion_coverage.py`).
 - **rule:** `workflows/toolkit-maintenance.md` validation phase.
 
 An unverified promotion is a deferral: leave it out of `promotions` and name

@@ -54,10 +54,11 @@ Use lowercase kebab-case that summarizes the topic:
 
 ## Promotion
 
-This directory is an inbox, not a permanent archive. The `toolkit-maintenance`
-workflow (`workflows/toolkit-maintenance.md`) periodically reviews it and
-promotes learnings that keep recurring into durable rules, workflows, skills,
-or scripts elsewhere in the toolkit. When a learning is promoted, its line in
-`INDEX.md` is marked as promoted with `~~strikethrough~~` plus a pointer to
-where the pattern now lives, instead of being silently deleted - so a reader
-who remembers the old lesson can still find where it went.
+Every learning ships in the same change as a link from the skill, rule,
+workflow, or agent definition that owns its lesson (`learnings/<slug>.md`;
+`tests/test_learning_promotion_coverage.py` enforces it). The
+`toolkit-maintenance` workflow (`workflows/toolkit-maintenance.md`)
+periodically promotes learnings that keep recurring into stronger checks; the
+file and its `INDEX.md` line stay as the evidence those assets link. Only a
+superseded learning's `INDEX.md` line is marked `~~strikethrough~~`, with the
+replacement named.

@@ -22,3 +22,7 @@ Report:
 - Concrete follow-ups with file references
 
 Do not accept claims at face value. Prefer evidence over narrative.
+
+## Known pitfalls
+
+- Re-derive any count or total that gates a decision with your own deterministic command (for example `rg "<pattern>" --count-matches` or a `jq` extraction), not from the producer's or another agent's summary, and record the command and its output as evidence. See `learnings/agent-self-reported-counts-are-not-evidence.md`.

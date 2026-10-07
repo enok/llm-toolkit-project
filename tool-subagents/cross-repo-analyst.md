@@ -15,3 +15,7 @@ When invoked:
 3. For each candidate, note what would need validation or a bump.
 
 Return bullets only: repo → surface touched → suggested check. Hand off to the parent for write operations.
+
+## Known pitfalls
+
+- Before trusting a zero-match search in a local clone, run `git fetch origin` and compare `git rev-list --count main..origin/main`; when the clone is behind, search the remote ref (`git grep -in "<pattern>" origin/main`, `git show origin/main:<path>`) instead. See `learnings/stale-local-clone-false-negative-search.md`.

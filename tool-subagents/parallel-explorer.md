@@ -15,3 +15,7 @@ When invoked:
 3. Return a structured summary: bullet list of paths, one-line role each, and suggested next files to edit or read.
 
 Avoid implementation; avoid long prose. Optimize for another agent to act immediately on your map.
+
+## Known pitfalls
+
+- Before reporting a directory as missing or empty, confirm the checkout is not a lagging branch: run `git status`, `git log --oneline --graph --all -15`, and `git rev-list --count HEAD..origin/main`; a nonzero behind count next to an empty directory means the content is on another branch. See `learnings/lagging-branch-checkout-looks-like-broken-clone.md`.

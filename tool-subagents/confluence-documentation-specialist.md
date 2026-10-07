@@ -47,6 +47,12 @@ root agent owns every write and every user-facing action.
 8. Separate evidence gaps from findings. Do not infer that Confluence is synced
    when the available tool can only read, or when write verification is missing.
 
+## Known pitfalls
+
+- Fetch several Confluence pages one call at a time, or check that the `id` inside each MCP result equals the requested page ID before using its body; a parallel pair of `getConfluencePage` calls once returned the first page's body for both. See learnings/confluence-mcp-parallel-getpage-can-return-wrong-page.md.
+- When `getConfluencePage` returns only a relative `lastModified` and no numeric version, report the version as unavailable; do not guess one or reuse a cached one. The root agent infers pre-edit = new - 1 from the `updateConfluencePage` response and checks that the increment is exactly 1. See learnings/confluence-mcp-does-not-expose-page-version-number.md.
+- Compare stored and submitted Confluence bodies semantically (heading count and order, inserted fragment exactly once) after normalizing entity encoding and same-site `ac:link` rewrites; do not report those rewrites as corruption or drift. See learnings/confluence-storage-normalization-and-link-rewriting-on-save.md.
+
 ## Related Specialists
 
 - Use `documentation-reviewer` for final documentation quality, audience fit,

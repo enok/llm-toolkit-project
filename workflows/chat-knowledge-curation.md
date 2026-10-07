@@ -87,8 +87,9 @@ Prefer the smallest existing asset that future agents will naturally load.
 3. Update all indexes that make the new knowledge reachable: `INTENTS.md`,
    `AGENTS.md`, `README.md`, `skills/README.md`, `workflows/README.md`, skill
    metadata, subagent indexes, client selections, and generated surfaces.
-4. Delete or move a `learnings/` file only after its selected lesson has been
-   converted and validated. Keep `learnings/INDEX.md` in sync.
+4. Keep a `learnings/` file after its lesson has been converted and validated:
+   the converted asset links it as `learnings/<slug>.md`. Keep
+   `learnings/INDEX.md` in sync.
 5. If a candidate cannot be safely converted, leave it in place and report the
    exact blocker.
 

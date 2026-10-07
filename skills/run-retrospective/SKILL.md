@@ -144,6 +144,10 @@ Full field rules and a complete example: `references/run-record-schema.md`.
 - A promotion counts only after it is verified: a guard must fail on the
   original mistake (`references/promotion-ladder.md`).
 
+## Known pitfalls
+
+- When changing `references/promotion-ladder.md`, `scripts/run_retro.py`, or both, write the CLI contract first (inputs, outputs, exit codes, candidate and ineffective-prevention semantics) and run every documented example and rule against the script, adding each as a case in `tests/test_run_retro.py`, before handoff. (sig: validation-gap/governance-doc-script-drift)
+
 ## References
 
 - `references/run-record-schema.md` - fields, metric counting rules, validation, privacy lint, fallback storage.

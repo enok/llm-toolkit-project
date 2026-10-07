@@ -53,7 +53,7 @@ Run this classification before proposing a migration. An inventory of dozens of 
 
 An extension directory that is a symlink or junction into a git working copy is not workstation state — it is a checkout of a repository that already has history. Record the repository and revision it points to and stop there; copying through the link duplicates tracked content into a second place, and following it during a recursive delete destroys the target.
 
-Check for reparse points before any recursive removal, and resolve links before computing sizes so shared targets are not counted repeatedly.
+Check for reparse points before any recursive removal (on PowerShell 5.1, `Remove-Item -Recurse -Force` on a junction deletes the target directory's contents; see `learnings/powershell-remove-item-recurse-deletes-junction-targets.md`), and resolve links before computing sizes so shared targets are not counted repeatedly.
 
 ## Normalize Aliases Across Config Layers
 

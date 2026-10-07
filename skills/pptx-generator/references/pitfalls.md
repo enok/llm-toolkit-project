@@ -110,3 +110,11 @@ const makeShadow = () => ({ type: "outer", blur: 6, offset: 2, color: "000000", 
 slide.addShape(pres.shapes.RECTANGLE, { shadow: makeShadow(), ... });
 slide.addShape(pres.shapes.RECTANGLE, { shadow: makeShadow(), ... });
 ```
+
+---
+
+## Known pitfalls
+
+- For a deck built from an official template, treat the template as the source of truth: keep its logo, cover typography and visual system instead of rebuilding template slides freely. A successful `python-pptx` save or an extracted-text check does not prove the layout; render the deck before delivery. See learnings/powerpoint-template-visual-qa.md.
+- Save each build as a new versioned file (for example `*_final_v8.pptx`) rather than overwriting a file that may be open in PowerPoint. Export it to PDF and full-slide images (PowerPoint COM automation or an equivalent renderer), make a contact sheet, and inspect the high-risk slides at full size: template logos, cover typography, text overflow in content cards, wrapped or clipped chart labels (including labels embedded as image text), and whether the closing slides match the flow the presentation needs. See learnings/powerpoint-template-visual-qa.md.
+- Search the extracted PPTX and PDF text for removed phrases and template placeholders, then keep only the canonical submitted version in the working folder and archive intermediate renders and decks. See learnings/powerpoint-template-visual-qa.md.

@@ -88,6 +88,11 @@ aws logs get-query-results \
   --query-id "$qid" --output json
 ```
 
+On Windows Git Bash, run these with `MSYS_NO_PATHCONV=1` (or `export` it for
+the session) when `$log_group` starts with `/`; otherwise the name is rewritten
+into a Windows path before the CLI sees it. See
+`learnings/git-bash-path-conversion-breaks-aws-cli-args.md`.
+
 ## Query patterns
 
 Recent errors:

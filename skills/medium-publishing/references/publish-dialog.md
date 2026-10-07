@@ -30,7 +30,7 @@ Two behaviours were observed:
 - Clicking a suggestion with the mouse closed the dropdown without adding
   anything.
 
-What worked: type the topic (no Enter), wait for the suggestions, then
+What worked (`learnings/medium-topic-autocomplete-swaps-typed-topic.md`): type the topic (no Enter), wait for the suggestions, then
 dispatch a DOM click on the exact suggestion button whose text equals the topic,
 and verify the chips afterwards. The selectors below are illustrative; inspect
 the live dialog (accessibility tree or `find`) for the real ones.
@@ -71,36 +71,56 @@ browser lands on, and report it.
 1. Open the live story, choose Edit, change the content in the editor.
 2. Re-run the DOM verification for anything touched.
 3. Get the user's approval of the edit, then use "Save and publish" (an edit
-   to a live story uses this button, not "Publish").
+   to a live story uses this button, not "Publish"). The browser tool's auto-mode classifier
+   can deny this final click even after the content was approved; ask for an explicit go that
+   names the click ("click Save and publish on `<story title>` now"), or hand the click to the
+   user (`learnings/auto-mode-classifier-denies-final-publish-click.md`).
 4. Verify on the post-redirect page: navigate the browser to the story URL,
    let redirects settle, and read that DOM. A quick `fetch` of the public URL
    right after saving may return a cached copy and look unchanged.
 
 ## 6. Replacing one link
 
-Ctrl+K on text that is already linked did not open the link editor. Replace
-the whole anchor instead:
+Ctrl+K on text that is already linked did not open the link editor (earlier note, not
+re-tested). What worked, in the editor of the live story (`learnings/medium-published-story-link-edit-via-toolbar-link-button.md`):
 
-1. Select the anchor text with a DOM Range:
+1. Select the link text.
+2. Click the toolbar link button once. This removes the link.
+3. Click the link button again. The "Paste or type a link" field opens.
+4. Type the new URL and press Enter.
+5. Read the anchor back: its text, its new `href`, and that no anchor with the old URL remains:
 
    ```js
    (async () => {
      const root = document.querySelector('article') || document.body;
-     const a = [...root.querySelectorAll('a')].find(x => x.href.startsWith('https://example.com/old'));
-     if (!a) throw new Error('old link not found');
-     const range = document.createRange();
-     range.selectNodeContents(a);
-     const sel = getSelection();
-     sel.removeAllRanges();
-     sel.addRange(range);
-     return 'selected: ' + sel.toString();
+     return [...root.querySelectorAll('a')].map(a => ({ text: a.textContent.trim(), href: a.href }));
    })()
    ```
-2. Put an HTML `<a href="https://example.com/new">same text</a>` on the OS
-   clipboard as `text/html` ([paste-recipe.md](paste-recipe.md), section 4).
-3. Paste with Ctrl+V (Cmd+V on macOS) while the selection is active.
-4. Verify the anchor: its text, its new `href`, and that no old link remains.
-   Then "Save and publish" with approval, as in section 5.
+6. Get the user's approval of the exact change, then "Save and publish" (section 5; the final
+   click needs the go described there).
 
-To add a link to text that has none, select that text with a Range
-(`setStart` and `setEnd` on its text node) and paste the same way.
+The session did not record how the link text was selected, and it is untested whether a script
+selection makes the toolbar show; the toolbar must be showing for the selection. The DOM Range
+below selects an anchor's text from script:
+
+```js
+(async () => {
+  const root = document.querySelector('article') || document.body;
+  const a = [...root.querySelectorAll('a')].find(x => x.href.startsWith('https://example.com/old'));
+  if (!a) throw new Error('old link not found');
+  const range = document.createRange();
+  range.selectNodeContents(a);
+  const sel = getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  return 'selected: ' + sel.toString();
+})()
+```
+
+Fallback if the toolbar flow fails: put `<a href="https://example.com/new">same text</a>` on the
+OS clipboard as `text/html` ([paste-recipe.md](paste-recipe.md), section 4), select the anchor
+text, and paste with Ctrl+V (Cmd+V on macOS). This was the earlier recipe and was not
+re-checked in the latest session; verify the anchor the same way (step 5).
+
+To add a link to text that has none, select that text with a Range (`setStart` and `setEnd` on
+its text node) and paste the same way (earlier recipe, not re-tested).

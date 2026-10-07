@@ -48,7 +48,8 @@ Explain the topic in your own words; never paste book passages.
 | 2 | Generic diagram of the pattern | `docs/02-generic-diagram.md` + `docs/diagrams/*.mmd` + PNG |
 | 3 | Example application of the pattern | `docs/03-application-example.md` |
 | 4 | Diagram specific to the example | `docs/04-example-diagram.md` + `docs/diagrams/` |
-| 5-8 | Code in every chosen language, component by component (one language: one folder, same page) | `docs/05-code-by-component.md` (generated) + one folder per language |
+| 5 | Code in every chosen language, component by component (one language: one folder, same page) | `docs/05-code-by-component.md` (generated) + one folder per language |
+| 6 | Design and architecture principles the pattern applies (SOLID, object-oriented, general, architecture), how each is realised, the tension and when not to use it ([design-principles-doc.md](references/design-principles-doc.md)) | `docs/06-design-principles.md` |
 | 9 | Architecture-level application, with diagrams (only if applicable; otherwise one line in the README saying why not); widely covered topic: also cited framework appearances in a fact table (`skills/medium-publishing/references/content-angle.md`) | `docs/09-architecture-perspective.md` |
 | 10 | Best video per chosen language, curated and verified (`youtube-video-curation`) | `docs/10-videos.md` |
 
@@ -72,7 +73,7 @@ same whatever the language set.
    code, tests that assert every golden row and the exact demo text, README
    with run commands ([toolchain-notes.md](references/toolchain-notes.md)).
    Design files so each pattern component maps to whole files.
-4. **Docs and diagrams lanes in parallel.** Docs 01-04, 09, 10. Diagrams follow
+4. **Docs and diagrams lanes in parallel.** Docs 01-04, 06, 09, 10. Diagrams follow
    `skills/diagram-authoring/SKILL.md` and
    `skills/diagram-authoring/references/publication-diagram-style.md`: `.mmd` source committed, PNG
    rendered in ONE environment, pilots shown to the user before restyling all,
@@ -158,6 +159,9 @@ config to copy.
 ## Hard rules
 
 - Spec and golden table before code; every language asserts all golden rows.
+- Every pattern is correlated with design and architecture principles on
+  `docs/06-design-principles.md`: skip a principle only with a one-line reason, show the
+  tension, and cite any attribution to a primary source or leave it out.
 - Docs never hand-type code: the code-by-component page is generated and
   guarded; code shown elsewhere (articles, posts) must be byte-identical to
   the repo files (hash-check it).
@@ -183,6 +187,7 @@ config to copy.
 | [repo-layout-and-protection.md](references/repo-layout-and-protection.md) | Layout, repo settings, protection JSON, CI template, owner-only write, merge flow, changing the language set, PowerShell notes |
 | [golden-table-spec.md](references/golden-table-spec.md) | Shared example spec: integer money, golden table, exact demo text, naming map (one column per chosen language) |
 | [code-by-component.md](references/code-by-component.md) | Component-first page (works with one language), GitHub `<details>` and Medium formats, config schema |
+| [design-principles-doc.md](references/design-principles-doc.md) | The principles page: required sections, principle checklist, tension, architecture correlation, citation rule, skeleton |
 | [toolchain-notes.md](references/toolchain-notes.md) | Per-language notes (Java 25, Python 3.12+, Node 24, TypeScript 7; read only the chosen ones), sandbox limits, user-local installs |
 
 ## Related

@@ -1,0 +1,9 @@
+(() => {
+  const inputs = [...document.querySelectorAll('input[type="file"]')];
+  const first = inputs[0];
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  first.files = dt.files;
+  first.dispatchEvent(new Event('change', { bubbles: true }));
+  return inputs.length;
+})()

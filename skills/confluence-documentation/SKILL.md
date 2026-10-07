@@ -183,6 +183,13 @@ curl -u "<email>:<api-token>" -X POST -H "X-Atlassian-Token: no-check" \
 - [ ] Destructive operations had explicit user approval.
 - [ ] Relevant indexes or docs are updated so the page is reachable.
 
+## Known pitfalls
+
+- Fetch Confluence pages one call at a time: parallel `getConfluencePage` calls for different IDs once both returned page A's body. If you batch, check that each result's `id` equals the requested `pageId` and re-fetch any mismatch on its own. See learnings/confluence-mcp-parallel-getpage-can-return-wrong-page.md.
+- When `getConfluencePage` returns only a relative `lastModified` (no numeric version), record it in the backup `meta.json` with a "numeric version unavailable" note. Take the new version from the `updateConfluencePage` response, infer pre-edit = new - 1, and confirm the increment is exactly 1; a larger jump means a concurrent write, so re-take the rollback artifact. This recorded note plus the post-write increment check satisfies the backup gate's version item when the tool does not expose it. See learnings/confluence-mcp-does-not-expose-page-version-number.md.
+- When no available tool offers an archive operation (`updateConfluencePage` cannot set `status`), archive is a human UI step: hash-verify a lightweight rollback snapshot (page id, title, version, parent, restore steps) in the approved backup location (a full body export is unnecessary only when a verified body backup of that page already exists, since archive changes only `status`; otherwise run the normal backup gate first), give the user the click path (page -> `...` -> Archive -> confirm), confirm with `getConfluencePage` returning `status: "archived"`, and record rollback as UI Restore from the space's archived pages. See learnings/confluence-page-archive-is-ui-only-verify-via-status.md.
+- Validate readbacks semantically: Confluence normalizes entities (`'` to `&#039;`, em dash to `&mdash;`), rewrites same-site absolute `<a href>` links to `<ac:link><ri:page ri:content-title="..."/></ac:link>` and turns panel `div`s into `info` macros. Compare heading count and order and exactly-once insertion; byte-compare only after normalizing those rewrites. See learnings/confluence-storage-normalization-and-link-rewriting-on-save.md.
+
 ## Related
 
 - `workflows/confluence-documentation.md`

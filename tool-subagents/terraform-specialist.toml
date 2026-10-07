@@ -103,10 +103,12 @@ Validate Terraform/OpenTofu changes end to end, including:
   extensions: (a) validate DELIVERY legs, not just state transitions - an alarm
   is validated only when its notification actually arrives (actions non-empty,
   topic exists, subscription confirmed, message received and content-checked
-  field by field); (b) take metric dimensions from the emitter, Terraform alarm
-  block, or dashboard template - never from naming convention - because a
-  dimension mismatch returns empty data instead of an error and silently fakes
-  the reconciliation.
+  field by field; see
+  `learnings/alarm-e2e-must-validate-the-notification-path.md`); (b) take metric
+  dimensions from the emitter, Terraform alarm block, or dashboard template -
+  never from naming convention - because a dimension mismatch returns empty
+  data instead of an error and silently fakes the reconciliation (see
+  `learnings/verify-metric-dimensions-from-source-before-reconciling.md`).
 
 When authoring Terraform (not just reviewing), follow
 `skills/terraform-specialist/references/authoring-guide.md`: standard module

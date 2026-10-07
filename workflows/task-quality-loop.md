@@ -83,3 +83,7 @@ When a task arrives `escalated`, the root agent chooses explicitly — never sil
 The orchestrator's task table tracks the loop live: `Loop` column shows `used/budget` (e.g. `2/5`), `Status` gains `validating` and `refining` states, and escalated rows keep their full verdict history available for the root agent's final report. After the run, feed loop statistics (tasks that needed >1 iteration, recurring defect classes, validator misses) into `workflows/self-improvement.md` as evolution signals.
 
 Per task, report to the run record built by `workflows/run-retrospective.md`: iterations used (summed into `iterations`), the first-pass flag (counted in `first_pass` unless the task is later reopened), and a mistake signature for each distinct root cause behind the blocking defects of its `fail` verdicts, classified per `skills/run-retrospective/references/mistake-taxonomy.md`. An in-loop tier escalation adds a `tier-misassignment/...` signature; an `escalated` task is never first-pass.
+
+## Known pitfalls
+
+- When a validator reports the same defect shape in several files, trace it to the shared generator or template and fix it there before refining the instances; a fix to the instances alone lets the generator emit the defect again. See `learnings/find-generator-not-just-instances.md`.

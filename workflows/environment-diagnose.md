@@ -11,6 +11,7 @@ Use for local setup failures, broken builds, missing auth, or service boot issue
 - Setup or repair procedure needed -> `skills/local-env-bootstrap/SKILL.md`.
 - Maven, OWASP dependency-check, Jetty/Tomcat, or Java webapp startup failures -> `skills/maven-build-troubleshooting/SKILL.md`.
 - First-time machine setup (installing CLIs/binaries) -> `scripts/bootstrap-dev.sh` / `scripts/bootstrap-dev.ps1`.
+- Cloud-sandbox limits, Windows `git checkout` failures, and lagging-branch checkouts -> read `## Known pitfalls` in `skills/environment-diagnose/SKILL.md` before diagnosing.
 
 ## Steps
 

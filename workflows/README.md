@@ -20,7 +20,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `context-compaction.md` | Preserve useful chat or workspace context into durable LLM knowledge and produce a compact future handoff |
 | `chat-knowledge-curation.md` | Mine chat, memory, rollout, automation, and learning evidence into durable LLM toolkit assets |
 | `automation-maintenance.md` | Safely inspect, rename, update, or delete scheduled LLM-tool automations while preserving schedule, status, prompt, and thread binding |
-| `capture-learning.md` | Capture a trial-and-error discovery into the learnings inbox so any future LLM session goes directly to the happy path |
+| `capture-learning.md` | Capture a trial-and-error discovery into `learnings/` so any future LLM session goes directly to the happy path |
 | `self-improvement.md` | Capture mistakes as happy-path learnings, identify reusable skills/workflows, and safely harvest external LLM-tool skills |
 | `toolkit-maintenance.md` | Maintain the shared LLM toolkit — mine feedback, de-duplicate guidance, add generic skills/workflows, validate indexes, and sync clients |
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |

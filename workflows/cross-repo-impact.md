@@ -17,6 +17,10 @@ Use when a change may affect multiple repositories, shared packages, or downstre
 
 See `rules/api-contract-surface.md` and `rules/multi-agent-orchestration.md`.
 
+## Known pitfalls
+
+- Before trusting a zero-match search over a local clone, fetch and compare against `origin/main`; when the clone is behind, search the remote ref (`git grep -in "<pattern>" origin/main`). See `learnings/stale-local-clone-false-negative-search.md`.
+
 ---
 
 ## Final Step — Self-improvement
