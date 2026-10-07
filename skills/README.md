@@ -150,6 +150,12 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **data-pipeline-boundaries** | Repository-specific data pipeline boundaries for the data-science project (toolkit-local context) |
 | **data-governance** | Dataset provenance, privacy, licensing, and evidence integrity in analytics projects |
 
+### Career And Job Search
+
+| Skill | Purpose |
+| --- | --- |
+| **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
+
 ### Thesis And Academic Formatting
 
 | Skill | Purpose |
