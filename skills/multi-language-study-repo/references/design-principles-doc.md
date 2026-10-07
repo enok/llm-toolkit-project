@@ -91,3 +91,18 @@ words; never paste passages from it.
 
 <Only if the page attributes or quotes: primary-source citations.>
 ```
+
+## Known pitfalls
+
+- Check each "where it can be violated" example against the example spec: it must not describe
+  something a real participant legitimately does (a participant's own rounding rule is not an SRP
+  violation). Describe a hypothetical misuse instead.
+- Claim the dependency rule (inward-pointing rings) only where a boundary exists, such as
+  behind a port with a core on one side. For code in one package with no inner and outer ring,
+  the claim at class level is DIP.
+- Test every coupling claim against the participants that delegate: a decorator-like participant
+  that holds another one through the interface still depends only on the contract.
+- When the article section is inserted before the example is introduced, say that the
+  participants are introduced further down, and check that every cross-reference still holds at
+  the insertion point.
+- Merge the repo PR that adds this page before publishing an article or post that links it.

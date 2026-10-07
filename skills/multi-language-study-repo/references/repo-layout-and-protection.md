@@ -60,6 +60,11 @@ gh repo create <owner>/<repo> --public --description "<topic> in <languages>" --
 gh repo edit <owner>/<repo> --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --delete-branch-on-merge --enable-wiki=false --enable-projects=false
 ```
 
+Topics are not set here: set them once the docs are final, from the first tag list
+derived from them (re-set if the list grows later), as a settings change that
+needs the user's approval
+([tags-and-topics.md](tags-and-topics.md)).
+
 Squash-only keeps `main` linear and one commit per PR. If the installed `gh`
 lacks `--add-readme`, create the repo empty and push one initial commit.
 Optional hardening in the web UI: Settings, Actions, General, require approval

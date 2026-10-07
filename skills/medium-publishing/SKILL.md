@@ -83,7 +83,9 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
    source file, scan for `](http`. A mismatch means re-paste, not hand editing:
    [editor-verification.md](references/editor-verification.md).
 5. **Open the publish dialog, do not publish.** Set title (<= 100), subtitle
-   (<= 140), up to 5 topics (verify the chips; autocomplete swaps topics), and a
+   (<= 140), up to 5 topics (the five best covering the study's tag list,
+   `skills/multi-language-study-repo/references/tags-and-topics.md`; verify the chips; autocomplete
+   swaps topics), and a
    diagram as preview image: [publish-dialog.md](references/publish-dialog.md).
    Stop with the dialog filled and report what is set.
 6. **Publish only after explicit approval** of that action. If the browser tool

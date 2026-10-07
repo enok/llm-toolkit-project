@@ -50,6 +50,9 @@ Do not use it for replies to other people's comments (follow
    `skills/medium-publishing/references/content-angle.md`. Every post also carries one line
    naming the main design or architecture principles the pattern realises (SOLID and others,
    from the repo's principles page, same file).
+6. **Hashtags come from the study's tag list.** CamelCase, no spaces, at the end of the post, one
+   for every important topic the post names and none for what it does not mention
+   (`skills/multi-language-study-repo/references/tags-and-topics.md`).
 
 ## Preconditions
 

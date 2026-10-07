@@ -99,6 +99,10 @@ same whatever the language set.
    only after the user names that specific PR and its base in the current
    session; otherwise state the PR number and base and ask
    (`rules/git-conventions.md`).
+10. **Topics.** Once the docs are final, derive the first tag list from them
+    and set the repo topics after the user's approval; the list is extended at
+    the article and post drafts, and a grown list re-sets the topics with a new
+    approval ([tags-and-topics.md](references/tags-and-topics.md)).
 
 Then hand the finished repo to the publication stage.
 
@@ -172,7 +176,7 @@ config to copy.
   from the required list BEFORE the PR that removes its job is merged.
 - Say where each build ran (sandbox, user machine, CI). Never report green
   from a partial sandbox run; sandboxes often block package registries.
-- Creating the repo, changing protection and merging are external writes: do
+- Creating the repo, changing protection, setting topics and merging are external writes: do
   them for the owner the user named, and only as the user asked. Merge only
   after the user names that specific PR and base in the current session
   (`rules/git-conventions.md`). Publishing the article or posts has its own
@@ -188,7 +192,17 @@ config to copy.
 | [golden-table-spec.md](references/golden-table-spec.md) | Shared example spec: integer money, golden table, exact demo text, naming map (one column per chosen language) |
 | [code-by-component.md](references/code-by-component.md) | Component-first page (works with one language), GitHub `<details>` and Medium formats, config schema |
 | [design-principles-doc.md](references/design-principles-doc.md) | The principles page: required sections, principle checklist, tension, architecture correlation, citation rule, skeleton |
+| [tags-and-topics.md](references/tags-and-topics.md) | One tag list derived from the finished content; GitHub topics, Medium topics, LinkedIn hashtags (formats, limits, approvals) |
 | [toolchain-notes.md](references/toolchain-notes.md) | Per-language notes (Java 25, Python 3.12+, Node 24, TypeScript 7; read only the chosen ones), sandbox limits, user-local installs |
+
+## Known pitfalls
+
+- Derive the tag list from the finished docs, then extend it from the article and post drafts
+  (main topic, principles and acronyms, architecture concepts covered, language, named
+  frameworks), keep it in one ledger, and check each destination's tags against it: GitHub
+  topics (the at most 20 the repo backs), Medium's five, post hashtags
+  ([tags-and-topics.md](references/tags-and-topics.md)).
+  (sig: spec-gap/tags-miss-important-topics)
 
 ## Related
 

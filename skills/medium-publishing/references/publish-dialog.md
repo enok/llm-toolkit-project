@@ -16,7 +16,7 @@ user's explicit approval of that exact action
 | --- | --- | --- |
 | Title | 100 characters | Plain text; no markdown or brackets. |
 | Subtitle | 140 characters | One sentence on what the reader gets. |
-| Topics | up to 5 | See section 2; verify the chips. |
+| Topics | up to 5 | The five that best represent the content (`skills/multi-language-study-repo/references/tags-and-topics.md`); see section 2; verify the chips. |
 | Preview image | one | Choose a diagram from the story, not a decorative image. |
 
 Count characters before typing and keep the values in the approved draft.

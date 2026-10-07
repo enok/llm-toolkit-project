@@ -38,7 +38,10 @@ them; they just no longer open the article.
   framework appearances.
 - One line names the two or three main principles the pattern realises (from
   the repo's principles page).
-- Then the article link and the repo link; at most 5 hashtags.
+- Then the article link and the repo link; one hashtag per important topic the
+  post names (main topic, principle acronyms, architecture concepts, language, named
+  frameworks), none for topics it does not mention
+  (`skills/multi-language-study-repo/references/tags-and-topics.md`).
 - The image is the architecture-application diagram, checked at feed width.
   The generic diagram is only a fallback when no architecture view exists.
 - The post claims nothing the article's fact table does not hold.
@@ -117,6 +120,13 @@ the legibility check of `skills/image-quality-inspection/references/destination-
   when misused (for example YAGNI or KISS when only two fixed variants exist)
   and the rule of thumb for when not to use it.
 - In Highlight 1, name the principle each architecture application realises.
+- Placed before the worked example, the section must say that the participants
+  are introduced further down, and every cross-reference must hold at that
+  insertion point (read the draft top to bottom once).
+- Merge the repo PR that adds the principles page before publishing an article
+  or post that links it (the link must resolve on the default branch).
+- Examples of misuse and claims such as the dependency rule or coupling follow
+  the checks in `skills/multi-language-study-repo/references/design-principles-doc.md` (Known pitfalls).
 - Principle definitions are generic. Any attribution (who coined a principle) or
   quote needs a primary-source citation or is left out; never attribute from
   memory.

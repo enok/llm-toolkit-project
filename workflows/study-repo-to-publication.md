@@ -23,7 +23,7 @@ Ask only what is missing, in one batch:
 1. Topic, source (book chapter, article), and example scope: one small realistic scenario, 3-6 components, deterministic output.
 2. Repo `<owner>/<repo>` with `<repo>` = `<prefix>-<topic>` (`<prefix>`: the user's series prefix) and the **language set**: one or more languages with target versions, the user's per-project choice (one is fine; never assume all four; versions per `skills/multi-language-study-repo/references/toolchain-notes.md`). Required checks follow: one job per language plus `docs`.
 3. **Content angle.** For a widely covered topic, article and post lead with non-obvious applications (architecture uses, where it hides in widely used frameworks), then principles, explanation, diagrams, code; each framework claim cites an official source checked on the day (`skills/medium-publishing/references/content-angle.md`).
-4. Approval gates, each asked separately when reached, none implied by "do it all": repo creation plus protection; every PR merge (Phase 6 rule); Medium draft creation; Medium publish; the Medium back-link edit; LinkedIn post; editing or deleting an earlier post. Phase 0 only confirms they will be asked.
+4. Approval gates, each asked separately when reached, none implied by "do it all": repo creation plus protection; repo topics; every PR merge (Phase 6 rule); Medium draft creation; Medium publish; the Medium back-link edit; LinkedIn post; editing or deleting an earlier post. Phase 0 only confirms they will be asked.
 5. Environment readiness: device bridge, `gh` auth, browser signed in to Medium and LinkedIn, toolchains installable user-locally (no admin).
 
 Print the wave-ordered task table with tier and model per task (Phase 3 lanes `standard`; transcription and script runs `light`).
@@ -37,19 +37,19 @@ Write the shared example spec and golden table as `EXAMPLE-SPEC.md` in the work 
 1. Create the public repo (owner-only write: no collaborators) with a seed commit (contents: the layout reference); `ci.yml` arrives in the first PR.
 2. Protect `main` with no required checks yet: PR required (0 approvals when solo), enforce for admins, no force-push or deletion, conversation resolution. Repo settings: squash-only, delete branch on merge.
 
-From here on every change is a branch plus PR; work for Phases 3-5 goes on one ticket-named branch, `<TICKET-ID>-initial-content` (no ticket: ask for a GitHub issue or a user-picked name; never a generic name). Recipes: `skills/multi-language-study-repo/references/repo-layout-and-protection.md`.
+From here on every change is a branch plus PR; work for Phases 3-5 goes on one ticket-named branch, `<TICKET-ID>-initial-content` (no ticket: ask for an issue or a user-picked name; never a generic one). Recipes: `skills/multi-language-study-repo/references/repo-layout-and-protection.md`.
 
 ## Phase 3 - Per-Language Lanes
 
 One lane per chosen language, in parallel, write ownership limited to that language's directory. Input: frozen spec and golden table. Output: idiomatic code, tests for every golden row, build file with lockfile, run instructions. Lanes check what they can in the sandbox and report `mistake: <signature> - <line>` lines.
 
-The root syncs lane output as one archive (not many single-file commits) and runs the definitive build and tests on the user's machine (toolchains installed user-locally). A read-only judge compares each language against the golden table; demos must match byte for byte.
+The root syncs lane output as one archive and runs the definitive build and tests on the user's machine. A read-only judge compares each language against the golden table; demos must match byte for byte.
 
 ## Phase 4 - Diagrams
 
 Needed: a generic diagram, an application diagram, and an architecture view when applicable. Use `skills/diagram-authoring` with `skills/diagram-authoring/references/publication-diagram-style.md`.
 
-1. Keep sources in `docs/diagrams/`; hand-author SVG when the notation cannot be drawn by the diagram tool.
+1. Keep sources in `docs/diagrams/`; hand-author SVG when the diagram tool cannot draw the notation.
 2. Pilots first: render 2-3 in the candidate style and show the user before restyling all.
 3. Render all publication PNGs in one environment (the one QA inspects) and commit them.
 4. Independent visual QA by a validator that did not produce the images, per `skills/image-quality-inspection` and its `references/destination-legibility.md` (legible at the Medium column width and LinkedIn feed size). Iterate until pass, max 5 rounds.
@@ -57,7 +57,7 @@ Needed: a generic diagram, an application diagram, and an architecture view when
 
 ## Phase 5 - Docs And Videos
 
-Write the README and the `docs/` pages of the content checklist in `skills/multi-language-study-repo/SKILL.md`: explanation, diagrams, example, principles page `docs/06-design-principles.md` (`skills/multi-language-study-repo/references/design-principles-doc.md`; article section: `skills/medium-publishing/references/content-angle.md`), architecture page with cited framework claims, run steps, videos, generated code-by-component page. Run the drift guards in `skills/multi-language-study-repo/scripts/` (`check_docs.py`, then `gen_code_by_component.py --check`; arguments in the skill's Scripts section). Curate one video per chosen language with `skills/youtube-video-curation` (from the user's machine), verifying every id through oEmbed; never invent ids. Run `documentation-reviewer` per `rules/documentation-review-required.md`.
+Write the README and the `docs/` pages of the content checklist in `skills/multi-language-study-repo/SKILL.md`: explanation, diagrams, example, principles page `docs/06-design-principles.md` (`skills/multi-language-study-repo/references/design-principles-doc.md`; article section: `skills/medium-publishing/references/content-angle.md`), architecture page with cited framework claims, run steps, videos, generated code-by-component page. Run the drift guards (`check_docs.py`, then `gen_code_by_component.py --check`; see the skill's Scripts section). Curate one video per chosen language with `skills/youtube-video-curation` (from the user's machine), verifying every id through oEmbed; never invent ids. Run `documentation-reviewer` per `rules/documentation-review-required.md`. Derive the tag list from the finished docs (repo topics, approval); extend it at the article and post drafts (Medium's five, hashtags): `skills/multi-language-study-repo/references/tags-and-topics.md`.
 
 ## Phase 6 - CI, Required Checks, Merge
 
@@ -80,7 +80,7 @@ Branch plus PR that adds `<story-url>` to the repo README. CI green, then merge 
 
 ## Phase 9 - LinkedIn Post With Diagram
 
-1. Draft the post text (hook, key points, repo link, `<story-url>`, at most 5 hashtags). Well-known topic: hook = the non-obvious application, image = the architecture-application diagram (else the strongest); one line names the main principles; re-check at feed size.
+1. Draft the post text (hook, key points, repo link, `<story-url>`, hashtags per `tags-and-topics.md`). Well-known topic: hook = the non-obvious application, image = the architecture-application diagram (else the strongest); one line names the main principles; re-check at feed size.
 2. Show the full text and image, labelled `NOT POSTED`, in their own message; ask for approval in a separate turn.
 3. After explicit approval follow `skills/linkedin-publishing`: image first, text verified by hash; report the hash match and image preview, get a separate go-ahead to click Post, then post, record `<post-url>`, decline boost prompts.
 4. Earlier post: edit text or alt text in place. New image: post anew, edit a `More... <post-url>` first line into the old post, repoint the article and README links; delete the old post only if asked (`skills/linkedin-publishing/references/repost-and-delete.md`). Each is its own approval.
@@ -92,7 +92,7 @@ Edit the Medium story to add `<post-url>`: show the exact change labelled `NOT P
 ## Known pitfalls
 
 - Put a single space on blank lines inside code blocks before pasting into Medium, then check one code box per listing. (sig: platform-quirk/medium-blank-line-splits-code-block)
-- Treat sandbox checks as best-effort (registries, GitHub web, video sites, Medium may be blocked); build definitively on the user's machine. (sig: env-constraint/sandbox-egress-blocks-registries)
+- Treat sandbox checks as best-effort; build definitively on the user's machine. (sig: env-constraint/sandbox-egress-blocks-registries)
 - Enforced by `skills/linkedin-publishing/scripts/check_upload_target.py` on every upload snippet; never click Send. (sig: safety-near-miss/linkedin-file-input-is-messaging)
 - Write each device commit to a fresh filename and verify it on the machine (a PNG by decoded pixels); an existing path can keep the old bytes. (sig: coordination/device-commit-stale-bytes)
 - Keep Mermaid sources on `Arial, Helvetica, sans-serif`, swap fonts only in the PNG renderer, and check labels on GitHub. (sig: platform-quirk/github-mermaid-font-clipping)
