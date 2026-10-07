@@ -1,4 +1,4 @@
-﻿# Project-Specific Rule Templates
+# Project-Specific Rule Templates
 
 This directory contains **generic templates** for creating project-specific rules. Use these as starting points when adding rules for your own project.
 

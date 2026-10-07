@@ -1,4 +1,4 @@
-﻿# Data Science Project Overview (Template)
+# Data Science Project Overview (Template)
 
 > **This is a template.** Copy it and replace the placeholders with your project details.
 

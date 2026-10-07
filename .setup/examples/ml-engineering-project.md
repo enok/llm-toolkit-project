@@ -1,4 +1,4 @@
-﻿# ML Engineering Project Context (Template)
+# ML Engineering Project Context (Template)
 
 > **This is a template.** Copy it and fill in the project-specific details.
 

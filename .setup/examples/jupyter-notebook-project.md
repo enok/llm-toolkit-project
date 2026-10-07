@@ -1,4 +1,4 @@
-﻿# Jupyter Notebook Project Context (Template)
+# Jupyter Notebook Project Context (Template)
 
 > **This is a template.** Copy it and fill in the notebook-specific details for your project.
 
