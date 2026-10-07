@@ -1,16 +1,19 @@
 ---
 title: Shared example spec and golden table
-tags: [example-spec, golden-table, testing, consistency, multi-language, design-patterns]
+tags: [example-spec, golden-table, testing, consistency, multi-language, single-language, design-patterns]
 ---
 
 # Shared example spec and golden table
 
 One spec file, named `EXAMPLE-SPEC.md` throughout this skill and in lane
-prompts, is the single source of truth for the example in every language. It
-keeps parallel lanes consistent: each language implements the same model,
-passes the same golden table and prints the same demo text. Write it BEFORE
-any code, keep the example a focused slice that explains the topic (not a full
-application), and give every lane the same copy.
+prompts, is the single source of truth for the example in every chosen
+language. The language set is a per-project decision and one language is
+fine. With several languages the spec keeps parallel lanes consistent: each
+implements the same model, passes the same golden table and prints the same
+demo text. With one language it still fixes the model, the tests and the demo
+text, and keeps the docs honest. Write it BEFORE any code, keep the example a
+focused slice that explains the topic (not a full application), and give every
+lane the same copy.
 
 `EXAMPLE-SPEC.md` lives in the work folder and every lane gets the same copy.
 Its human-readable parts (domain, participants, golden table, demo output) are
@@ -33,9 +36,10 @@ a design pattern.
    threshold and one below it, zero, a value that rounds up just past an exact
    multiple, a large value. Rounding uses integer ceil-division (`Math.ceilDiv`
    in Java, `-(-a // b)` in Python, integer-only arithmetic in JS and TS with
-   inputs kept as safe integers).
+   inputs kept as safe integers); keep the rule of each chosen language only.
 5. **Verify the table independently** (hand-check, or a few lines of Python)
-   before any lane starts. A wrong cell is copied into four test suites.
+   before any lane starts. A wrong cell is copied into every test suite (one
+   per chosen language) and into the docs.
 6. **Idiomatic errors, same rule.** Invalid input is rejected in every
    language with that language's argument error (table below).
 7. **Open abstraction.** The pattern's abstraction stays open for extension
@@ -48,7 +52,7 @@ a design pattern.
 ````markdown
 # <topic> - shared example spec (EXAMPLE-SPEC.md, single source of truth)
 
-All implementations (<languages and versions>) and the example docs MUST
+All implementations (<chosen languages and versions; one or more>) and the example docs MUST
 implement exactly this model and pass exactly this golden table. Keep it a
 focused slice that explains the pattern, NOT a full application.
 
@@ -96,11 +100,14 @@ between languages: <for example "(lambda)" vs "(function)" in Python>.)
 (State whether values are totals or component amounts. Also list the
 component-only values if they help debugging.)
 
-Additional required tests (each language): runtime swap (<input> from <a> to
+Additional required tests (each chosen language): runtime swap (<input> from <a> to
 <b>); null abstraction rejected (constructor and setter); each invalid input
 rejected; demo output equals the exact text above.
 
 ## Naming map
+
+Keep one column per chosen language and drop the others (one language: a
+single column). The columns below are the four-language case.
 
 | Concept | Java 25 | Python 3 | JavaScript | TypeScript |
 | --- | --- | --- | --- | --- |
@@ -117,7 +124,7 @@ rejected; demo output equals the exact text above.
 
 ## Lane rules
 
-- Each lane writes only inside its own folder.
+- Each lane writes only inside its own folder (one language: one lane).
 - Tests assert every golden cell, the swap, the rejections, and the demo text.
 - Whole, small files: the docs show files whole, so one pattern component
   maps to one file or a small, fixed group of files per language.

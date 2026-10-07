@@ -1,6 +1,6 @@
 ---
 name: multi-language-study-repo
-description: Use when the user wants a public GitHub repo per study topic (for example one repo per design pattern) that explains the topic, draws generic and example diagrams, implements one shared example identically in several languages with CI, and is owner-only write with a PR-only protected main; or asks to add, check, or fix such a repo.
+description: Use when the user wants a public GitHub repo per study topic (for example one repo per design pattern) that explains the topic, draws generic and example diagrams, implements one shared example in one or more languages (identically when there are several) with CI, and is owner-only write with a PR-only protected main; or asks to add, check, fix, or reduce the language set of such a repo.
 license: MIT
 metadata:
   author: dev-tools
@@ -10,9 +10,11 @@ metadata:
 # Multi-Language Study Repo
 
 Build one public repository per study topic. Each repo teaches the topic
-(explanation, diagrams), shows one small example implemented identically in
-several languages, proves it with CI, and accepts changes from the owner only,
-through pull requests only.
+(explanation, diagrams), shows one small example in one or more languages
+(identical across them when there are several), proves it with CI, and
+accepts changes from the owner only, through pull requests only. The language
+set is a per-project decision and one language is a first-class choice. The
+skill name is historical; keep it so existing indexes keep working.
 
 ## When to use
 
@@ -20,20 +22,23 @@ through pull requests only.
   `<owner>/<repo>` with `<repo>` = `<prefix>-<topic>` (example only:
   `design-pattern-<pattern>`; for a design pattern, `<pattern>` is the
   `<topic>`).
-- The same example must exist in 3+ languages and stay consistent across them.
+- The example exists in the language set chosen for the project (one or more)
+  and, with several, stays consistent across them.
 - The repo is public, but only `<owner>` can change it, and `main` is
   protected.
-- Not for: a single-language sample, a private repo, a monorepo of many
-  topics, or publishing the article/post (that is the next stage, see Related).
+- Not for: a private repo, a monorepo of many topics, or publishing the
+  article/post (that is the next stage, see Related).
 
 ## Inputs to confirm first
 
 `<owner>`, the `<prefix>` of `<repo>` (`<prefix>-<topic>`), `<topic>`,
-languages and versions (default Java 25, Python 3.12+, JavaScript on Node 24,
-TypeScript 7; check the current releases), whether an architecture view
-applies, license holder name for `LICENSE`, and how the user names work items
-(ticket ID, see step 7). Explain the topic in your own words; never paste book
-passages.
+the language set and versions (one or more, the user's decision; do not assume
+all four; known targets: Java 25, Python 3.12+, JavaScript on Node 24,
+TypeScript 7, check the current releases), whether an architecture view
+applies (for a widely covered topic it usually does, see
+`skills/medium-publishing/references/content-angle.md`), license holder name
+for `LICENSE`, and how the user names work items (ticket ID, see step 7).
+Explain the topic in your own words; never paste book passages.
 
 ## Content checklist (one repo)
 
@@ -43,12 +48,13 @@ passages.
 | 2 | Generic diagram of the pattern | `docs/02-generic-diagram.md` + `docs/diagrams/*.mmd` + PNG |
 | 3 | Example application of the pattern | `docs/03-application-example.md` |
 | 4 | Diagram specific to the example | `docs/04-example-diagram.md` + `docs/diagrams/` |
-| 5-8 | Code in every language, component by component | `docs/05-code-by-component.md` (generated) + one folder per language |
-| 9 | Architecture-level application, with diagrams (only if applicable; otherwise one line in the README saying why not) | `docs/09-architecture-perspective.md` |
-| 10 | Best video per language, curated and verified (`youtube-video-curation`) | `docs/10-videos.md` |
+| 5-8 | Code in every chosen language, component by component (one language: one folder, same page) | `docs/05-code-by-component.md` (generated) + one folder per language |
+| 9 | Architecture-level application, with diagrams (only if applicable; otherwise one line in the README saying why not); widely covered topic: also cited framework appearances in a fact table (`skills/medium-publishing/references/content-angle.md`) | `docs/09-architecture-perspective.md` |
+| 10 | Best video per chosen language, curated and verified (`youtube-video-curation`) | `docs/10-videos.md` |
 
 Also: `README.md` (index, run commands, links), `LICENSE`,
-`.github/workflows/ci.yml`, `.github/CODEOWNERS`.
+`.github/workflows/ci.yml`, `.github/CODEOWNERS`. Docs numbering stays the
+same whatever the language set.
 
 ## Procedure
 
@@ -56,16 +62,16 @@ Also: `README.md` (index, run commands, links), `LICENSE`,
    golden table before any code
    ([golden-table-spec.md](references/golden-table-spec.md)). Recompute the
    golden values independently; a wrong value would propagate to every
-   language.
+   language (and a single language still ships it in code, tests and docs).
 2. **Repo + protection.** Create the public repo with a seed commit, set
    squash-only and delete-branch-on-merge, apply branch protection WITHOUT
    required checks, so all content arrives by PR
    ([repo-layout-and-protection.md](references/repo-layout-and-protection.md)).
-3. **Per-language lanes in parallel.** One lane per language, each writing only
-   its own folder to the spec: code, tests that assert every golden row and the
-   exact demo text, README with run commands
-   ([toolchain-notes.md](references/toolchain-notes.md)). Design files so each
-   pattern component maps to whole files.
+3. **Per-language lanes in parallel.** One lane per chosen language (a single
+   language is a single lane), each writing only its own folder to the spec:
+   code, tests that assert every golden row and the exact demo text, README
+   with run commands ([toolchain-notes.md](references/toolchain-notes.md)).
+   Design files so each pattern component maps to whole files.
 4. **Docs and diagrams lanes in parallel.** Docs 01-04, 09, 10. Diagrams follow
    `skills/diagram-authoring/SKILL.md` and
    `skills/diagram-authoring/references/publication-diagram-style.md`: `.mmd` source committed, PNG
@@ -78,14 +84,15 @@ Also: `README.md` (index, run commands, links), `LICENSE`,
    ([code-by-component.md](references/code-by-component.md)), run both script
    checks below. Keep generated artifacts the lanes cannot produce (for
    example `package-lock.json`) across re-merges.
-6. **CI.** One job per language plus `docs`; job names are fixed and never
-   matrix-expanded. Run the definitive builds on the user's machine or in CI,
+6. **CI.** One job per chosen language plus `docs`; job names are fixed and
+   never matrix-expanded. Run the definitive builds on the user's machine or in CI,
    not only in a sandbox.
 7. **Open the PR** as a draft from a ticket-named branch (`<TICKET-ID>-initial-content`;
    no ticket: see the branch rule in the layout reference); wait for the first
    CI run. Follow `rules/git-conventions.md`.
 8. **Required checks after the first green run.** Read the real check-run
-   names, re-apply protection with those names as required contexts.
+   names, re-apply protection with those names as required contexts: one per
+   chosen language plus `docs` (one language: `<language>` and `docs`).
 9. **Merge** with squash, delete the branch, confirm CI on `main` is green, and
    verify protection by API read-back (never with a real push to `main`). Merge
    only after the user names that specific PR and its base in the current
@@ -93,6 +100,25 @@ Also: `README.md` (index, run commands, links), `LICENSE`,
    (`rules/git-conventions.md`).
 
 Then hand the finished repo to the publication stage.
+
+## Reducing the language set later
+
+Dropping a language (for example four down to one) is one PR plus one
+protection change, in this order:
+
+1. In the PR: delete the language folders, delete their CI jobs, remove them
+   from `components.json` and regenerate `docs/05-code-by-component.md`, and
+   update README, `docs/10-videos.md` and the repo description.
+2. BEFORE merging, update branch protection so the required checks are
+   exactly the remaining `<language>` jobs plus `docs`. A required check whose
+   job no longer runs never reports, so the PR waits forever on "Expected -
+   Waiting for status to be reported".
+3. Merge under the merge rule, read the protection back, confirm CI on
+   `main` is green.
+
+Commands: [repo-layout-and-protection.md](references/repo-layout-and-protection.md)
+section 8; the troubleshooting row is in section 9. Adding a language later mirrors this: its job runs once first,
+then its name becomes a required check (step 8).
 
 ## Scripts
 
@@ -138,7 +164,8 @@ config to copy.
 - Protection is applied before content. Never push to `main`, never use
   force-push or admin bypass. `enforce_admins` binds the owner too.
 - Required checks are added only after they have run once; names never
-  change. Sequential versions inside one job, no matrix.
+  change. Sequential versions inside one job, no matrix. A check is removed
+  from the required list BEFORE the PR that removes its job is merged.
 - Say where each build ran (sandbox, user machine, CI). Never report green
   from a partial sandbox run; sandboxes often block package registries.
 - Creating the repo, changing protection and merging are external writes: do
@@ -153,10 +180,10 @@ config to copy.
 
 | File | Covers |
 | --- | --- |
-| [repo-layout-and-protection.md](references/repo-layout-and-protection.md) | Layout, repo settings, protection JSON, CI template, owner-only write, merge flow, PowerShell notes |
-| [golden-table-spec.md](references/golden-table-spec.md) | Shared example spec: integer money, golden table, exact demo text, naming map |
-| [code-by-component.md](references/code-by-component.md) | Component-first page, GitHub `<details>` and Medium formats, config schema |
-| [toolchain-notes.md](references/toolchain-notes.md) | Java 25, Python 3.12+, Node 24, TypeScript 7, sandbox limits, user-local installs |
+| [repo-layout-and-protection.md](references/repo-layout-and-protection.md) | Layout, repo settings, protection JSON, CI template, owner-only write, merge flow, changing the language set, PowerShell notes |
+| [golden-table-spec.md](references/golden-table-spec.md) | Shared example spec: integer money, golden table, exact demo text, naming map (one column per chosen language) |
+| [code-by-component.md](references/code-by-component.md) | Component-first page (works with one language), GitHub `<details>` and Medium formats, config schema |
+| [toolchain-notes.md](references/toolchain-notes.md) | Per-language notes (Java 25, Python 3.12+, Node 24, TypeScript 7; read only the chosen ones), sandbox limits, user-local installs |
 
 ## Related
 

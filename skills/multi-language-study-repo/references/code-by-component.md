@@ -1,15 +1,20 @@
 ---
 title: Code by component page
-tags: [documentation, code-by-component, github-details, medium, generated-docs, drift-guard]
+tags: [documentation, code-by-component, github-details, medium, generated-docs, drift-guard, single-language]
 ---
 
 # Code by component
 
 Readers compare how each language expresses the same role. So the code page is
 organised by pattern component, and every component shows the same code in
-every language, like language tabs. GitHub Markdown has no tabs, so each
+every chosen language, like language tabs. GitHub Markdown has no tabs, so each
 language is a collapsible `<details>` section. Medium has no tabs, so each
 language is a labelled code block in a fixed language order.
+
+The language set is a per-project decision. With ONE language the page works
+unchanged: one `<details open>` section per component, no comparison, and the
+page still guarantees whole-file code that cannot drift from the source tree
+(the generator and `check_docs.py` accept a one-entry `languages` list).
 
 The page is generated from the source tree and guarded in CI. Never hand-type
 or edit it; whole files only, never excerpts.
@@ -30,8 +35,8 @@ abstraction to the caller):
 Other topics rename the roles (for example Observer: subject interface,
 concrete observers, event value object, subject, client), but keep the order.
 Language labels and order are fixed everywhere: `Java 25`, `Python 3`,
-`JavaScript (ES2026)`, `TypeScript 7` (adapt to the repo's languages and
-versions).
+`JavaScript (ES2026)`, `TypeScript 7` (keep only the repo's chosen languages
+and versions, in that order).
 
 Design the source files for this page: map each component to whole files per
 language (for example the Python Protocol and function adapter in their own
@@ -73,11 +78,32 @@ module, concrete classes in another). A component may list several files
   display order. List every language for every component yourself: the
   generator skips a language that has no files for a component, so an
   omission is not reported. After generating, check that each component shows
-  all languages (for example `grep -c "<details" docs/05-code-by-component.md`
-  equals components times languages).
+  all chosen languages (for example `grep -c "<details" docs/05-code-by-component.md`
+  equals components times chosen languages).
 - Paths must stay inside the repo (no absolute paths, no `..`, no symlinks
   leading outside); a missing source file or invalid config exits 2.
-- `scripts/components.example.json` in this skill is a complete generic copy.
+- `scripts/components.example.json` in this skill is a complete generic copy
+  (four languages; delete the entries of the languages you do not use).
+
+Single-language config (same schema, one entry in `languages`, one key in
+every component's `files`):
+
+```json
+{
+  "title": "Code by component — Java 25",
+  "intro": "This page reads the <pattern> example component by component. Files are shown whole and generated from the source tree, so they cannot drift. Run commands are in the [java folder](../java/README.md).",
+  "languages": [
+    { "key": "java", "label": "Java 25", "fence": "java", "dir": "java/src/main/java/<package path>/" }
+  ],
+  "components": [
+    {
+      "title": "<Abstraction>",
+      "role": "<One sentence: the pattern role this component plays.>",
+      "files": { "java": ["<Abstraction>.java"] }
+    }
+  ]
+}
+```
 
 ## 3. GitHub page (`docs/05-code-by-component.md`)
 
@@ -121,12 +147,15 @@ Format rules (the guard depends on them):
 
 Medium is produced from the same components, never retyped:
 
-- One section for all languages' code, with the same five components in the same
-  order. Per component: a short H3 heading, one sentence on its role, then per
-  language a bold label paragraph `Java 25 — <File>` followed by a code block
-  with the whole file, in the fixed language order.
+- One section for all chosen languages' code, with the same five components in
+  the same order. Per component: a short H3 heading, one sentence on its role,
+  then per language a bold label paragraph `Java 25 — <File>` followed by a code
+  block with the whole file, in the fixed language order. With one language the
+  label paragraph can be dropped when the section heading already names the
+  language.
 - Before the components: 2-4 sentences per language on the idioms used (a
-  compact list), plus links to each language folder and the run commands.
+  compact list; one language: one short paragraph), plus links to each
+  language folder and the run commands.
 - Code blocks must be byte-identical to the repo files: hash-check each one.
   Medium-specific block mechanics (explicit language, blank lines) belong to
   `skills/medium-publishing/SKILL.md`.
@@ -162,3 +191,4 @@ Use `python3` where `python` is missing or not Python 3 (on Windows keep
 | Source marker reported as not followed by a fence | A blank line or text sits between the marker and the fence; regenerate |
 | Blocks render as plain text on GitHub | Missing blank line after `<summary>` or before `</details>` |
 | A language folder holds an extra helper file | Add it to its component's list or keep it out of `src/`; unlisted files are simply not shown |
+| A removed language still appears on the page | Remove it from `languages` and from every component's `files`, regenerate, and commit page and config in the same PR as the folder removal (see `repo-layout-and-protection.md`, "Changing the language set later") |
