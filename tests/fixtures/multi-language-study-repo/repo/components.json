@@ -1,0 +1,20 @@
+{
+  "title": "Code by component - Python and JavaScript",
+  "intro": "Each role of the pattern is shown in every language. Files are shown whole.",
+  "languages": [
+    {"key": "python", "label": "Python 3", "fence": "python", "dir": "python/src"},
+    {"key": "javascript", "label": "JavaScript (ES2026)", "fence": "javascript", "dir": "javascript/src"}
+  ],
+  "components": [
+    {
+      "title": "Strategy interface",
+      "role": "The Strategy declares the single operation every interchangeable algorithm offers.",
+      "files": {"python": ["strategy.py"], "javascript": ["strategy.js"]}
+    },
+    {
+      "title": "Client (demo)",
+      "role": "The client wires the pieces together and prints the result.",
+      "files": {"python": ["demo.py", "__main__.py"], "javascript": ["demo.js"]}
+    }
+  ]
+}
