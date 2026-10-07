@@ -157,7 +157,7 @@ See `workflows/README.md` for the categorized catalog of all 94 workflows. Highl
 | `workflows/document-creation.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/confluence-documentation.md`, `workflows/markdown-pdf-export.md` | Docs, diagrams, wiki, and PDF export |
 | `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/toolkit-maintenance.md`, `workflows/chat-knowledge-curation.md`, `workflows/context-compaction.md` | Growing and maintaining the toolkit itself |
 | `workflows/thesis-writing-main.md`, `workflows/notebook-analysis.md`, `workflows/data-pipeline-change.md`, `workflows/ml-experiment.md` | Data-science and thesis work |
-| `workflows/study-repo-to-publication.md` | Study topic to protected multi-language repo, Medium article, and LinkedIn post with bidirectional links and approval gates |
+| `workflows/study-repo-to-publication.md` | Study topic to a protected repo (one or more languages), a Medium article, and a LinkedIn post that lead with non-obvious applications for well-known topics, with bidirectional links and approval gates |
 | `workflows/run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes, append the run record, promote recurring mistakes, report trend metrics |
 
 All workflows by area:
@@ -211,7 +211,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
-| **multi-language-study-repo** | One protected public repo per study topic with identical multi-language examples, golden-table tests, docs drift guards, and a code-by-component page |
+| **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
 
 #### Review, Validation, And Quality Gates
 

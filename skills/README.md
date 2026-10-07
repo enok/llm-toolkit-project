@@ -51,7 +51,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
-| **multi-language-study-repo** | One protected public repo per study topic with identical multi-language examples, golden-table tests, docs drift guards, and a code-by-component page |
+| **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
 
 ### Review, Validation, And Quality Gates
 

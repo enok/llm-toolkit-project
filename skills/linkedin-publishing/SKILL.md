@@ -42,6 +42,11 @@ Do not use it for replies to other people's comments (follow
    `rules/human-comment-reply-gate.md`).
 4. **Plain, verifiable text.** The text that gets posted is byte-for-byte the approved text,
    proven by hash before the Post click.
+5. **Lead with the non-obvious angle on well-known topics.** For a widely covered topic
+   (design patterns, common algorithms) the first lines state an architecture-level use or
+   a cited "hidden in `<framework>`" fact, and the image is the architecture-application
+   diagram. Every framework claim needs an official-source citation checked on the day:
+   `skills/medium-publishing/references/content-angle.md`.
 
 ## Preconditions
 
@@ -54,8 +59,9 @@ Do not use it for replies to other people's comments (follow
 
 ## Procedure
 
-1. Draft the post text and choose the image. Show both to the user as a draft labelled
-   `NOT POSTED`; wait for explicit approval of the exact text.
+1. Draft the post text and choose the image (angle and order for well-known topics:
+   `skills/medium-publishing/references/content-angle.md`). Show both to the user as a draft
+   labelled `NOT POSTED`; wait for explicit approval of the exact text.
 2. Open the feed, start a post, and confirm the "Create post" dialog is the active surface.
    Leave any messaging overlay alone (no typing, uploading, or sending there); if a chat draft is
    open, note it so a stray attachment can be detected later.
@@ -101,5 +107,6 @@ Do not use it for replies to other people's comments (follow
 ## Related
 
 - `skills/medium-publishing/SKILL.md` for the article side of the bidirectional links.
+- `skills/medium-publishing/references/content-angle.md` for what the post leads with.
 - `workflows/study-repo-to-publication.md` for where this step sits in the full
   repo, article, post sequence.

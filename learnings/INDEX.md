@@ -82,6 +82,7 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md`](./cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md) — Cloud sandbox egress blocked npm, Maven Central and GitHub; run definitive builds on the user's machine with user-local toolchains (`sandbox`, `egress`, `registries`, `http-403`, `verification`).
 - [`typescript-7-needs-explicit-node-types-and-quoted-test-globs.md`](./typescript-7-needs-explicit-node-types-and-quoted-test-globs.md) — TypeScript 7 no longer auto-includes `@types`; add `@types/node` + `"types": ["node"]`, avoid removed options, and quote the `node --test` glob (`typescript`, `nodejs`, `tsconfig`, `node-test`, `glob`).
 - [`branch-protection-required-checks-need-stable-job-names.md`](./branch-protection-required-checks-need-stable-job-names.md) — Add required status checks after the first CI run and use job names that never change (no matrix-expanded names) (`github`, `branch-protection`, `ci`, `status-checks`, `job-names`).
+- [`required-checks-must-follow-removed-ci-jobs.md`](./required-checks-must-follow-removed-ci-jobs.md) — Drop a removed CI job from the branch-protection required checks before merging the PR that deletes it, or the PR waits forever for a check that never reports (`github`, `branch-protection`, `ci`, `required-checks`, `language-set`).
 
 ### Git / Windows / Shell
 

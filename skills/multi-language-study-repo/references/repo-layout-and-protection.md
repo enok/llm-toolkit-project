@@ -1,13 +1,18 @@
 ---
-title: Repo layout, protection and CI for a multi-language study repo
-tags: [github, branch-protection, ci, layout, codeowners, gh-cli, powershell]
+title: Repo layout, protection and CI for a study repo (one or more languages)
+tags: [github, branch-protection, ci, layout, codeowners, gh-cli, powershell, language-set]
 ---
 
 # Repo layout, protection and CI
 
 Placeholders: `<owner>` (GitHub user or org), `<repo>` = `<prefix>-<topic>`
 (example only: `design-pattern-<pattern>` when the topic is a design pattern),
-`<topic>`, `<package>` (Java package), `<python_package>`.
+`<topic>`, `<language>` (a folder and CI job name from the chosen set),
+`<package>` (Java package), `<python_package>`.
+
+The language set is a per-project decision. The examples below show all four
+languages; a repo keeps only the folders and CI jobs of its chosen languages
+(one is fine), always plus `docs`.
 
 ## 1. Layout
 
@@ -19,7 +24,7 @@ Placeholders: `<owner>` (GitHub user or org), `<repo>` = `<prefix>-<topic>`
 ├── .gitignore                   # target/ __pycache__/ node_modules/ dist/   (NOT package-lock.json)
 ├── .github/
 │   ├── CODEOWNERS               # * @<owner>
-│   ├── workflows/ci.yml         # jobs: java, python, javascript, typescript, docs
+│   ├── workflows/ci.yml         # jobs: one per chosen language (java, python, javascript, typescript), docs
 │   └── scripts/                 # check_docs.py, gen_code_by_component.py, components.json
 ├── docs/
 │   ├── 01-pattern-explanation.md
@@ -37,7 +42,8 @@ Placeholders: `<owner>` (GitHub user or org), `<repo>` = `<prefix>-<topic>`
 ```
 
 Numbering `NN` follows the content checklist; items 5 to 8 (code per
-language) are one component-first page, `05`. Skip `09` when no architecture
+language) are one component-first page, `05`, whatever the number of
+languages. Skip `09` when no architecture
 view applies and say so in the README. Each language README holds install,
 test and demo commands. `CODEOWNERS` documents ownership and requests reviews;
 it does not gate merges (`require_code_owner_reviews` stays false).
@@ -48,7 +54,7 @@ Seed `main` with an initial commit first. Branch protection requires PRs, so
 nothing else may be pushed to `main` afterwards.
 
 ```bash
-gh repo create <owner>/<repo> --public --description "<topic> in Java, Python, JavaScript and TypeScript" --license mit --add-readme
+gh repo create <owner>/<repo> --public --description "<topic> in <languages>" --license mit --add-readme
 gh repo edit <owner>/<repo> --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --delete-branch-on-merge --enable-wiki=false --enable-projects=false
 ```
 
@@ -106,6 +112,10 @@ contexts with the exact job names read back, see section 4):
 }
 ```
 
+`contexts` lists one job name per chosen language plus `docs`. The list above
+is the four-language case; a single-language repo uses `["<language>", "docs"]`
+(for example `["java", "docs"]`).
+
 ```bash
 gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input protection.initial.json
 ```
@@ -147,6 +157,9 @@ Stable-name rules (learning `branch-protection-required-checks-need-stable-job-n
   Run several versions sequentially inside ONE job, as in the template.
 - Renaming a job later means: change the workflow, wait for one run, update
   the contexts in the same PR window. Treat names as an interface.
+- Removing a job (for example dropping a language) is the opposite hazard: the
+  required context stays and never reports. Remove it from the contexts
+  BEFORE merging the PR that removes the job (section 8).
 
 ## 5. Owner-only write on a public repo
 
@@ -181,7 +194,9 @@ with `--input <file>`, not inline strings.
 ## 6. CI template (`.github/workflows/ci.yml`)
 
 Refresh the action major versions and toolchain versions to current releases.
-Each language job runs tests and the demo; `docs` runs the two scripts.
+Each language job runs tests and the demo; `docs` runs the two scripts. Keep
+the jobs of the chosen languages only and delete the others (a single-language
+repo has one language job plus `docs`).
 
 ```yaml
 name: CI
@@ -305,11 +320,51 @@ gh run list --repo <owner>/<repo> --branch main --limit 1   # CI on main after t
 Later changes (README links after publication, fixes) repeat the same flow
 as new PRs with their own ticket-named branch; never push to `main`.
 
-## 8. Troubleshooting
+## 8. Changing the language set later
+
+Reducing (for example from four languages to one) is a single PR plus a
+protection update, and the order matters.
+
+1. On the ticket-named branch, in ONE PR:
+   - delete the removed languages' folders (their lockfiles go with them);
+   - delete their jobs from `ci.yml`, leaving the remaining language jobs and
+     `docs`;
+   - remove the languages from `components.json` (the `languages` list and
+     every component's `files`) and regenerate the code-by-component page,
+     then run the generator with `--check` and `check_docs.py`
+     ([code-by-component.md](code-by-component.md));
+   - update README, `docs/10-videos.md`, per-language mentions in the other
+     docs, and the repo description.
+2. BEFORE merging, set the required checks to the remaining jobs. The removed
+   jobs do not run on the PR, so a still-required context never reports and
+   the PR waits forever. Edit `protection.json` so `contexts` is
+   `["<language>", "docs"]` and apply it:
+
+```bash
+gh api repos/<owner>/<repo>/branches/main/protection/required_status_checks --jq '.contexts'
+gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input protection.json
+```
+
+```powershell
+(gh api repos/<owner>/<repo>/branches/main/protection/required_status_checks | ConvertFrom-Json).contexts
+gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input protection.json
+```
+
+3. Wait for the remaining checks on the PR, merge under the merge rule
+   (section 7), read the protection back (section 5) and confirm CI on `main`
+   is green.
+
+Adding a language later mirrors this: the PR adds the folder, the `ci.yml`
+job and the component entries; the new job name becomes a required check only
+after it has run once (section 4). Anything published earlier (article, post)
+that shows removed languages is a separate, approval-gated edit.
+
+## 9. Troubleshooting
 
 | Symptom | Cause and fix |
 | --- | --- |
 | PR stuck on "Expected - Waiting for status to be reported" | Required context name does not match a job `name:` or never ran; read names from `check-runs`, fix `protection.json` |
+| Same wait after a language or job was removed | The removed job is still in the required contexts; apply `protection.json` without it (section 8) |
 | `GH006: protected branch update failed` on push | Correct behavior; use a branch and a PR |
 | Cannot merge own PR | A required approval count above 0; keep it 0 for a sole owner |
 | "Branch is out of date" | `strict: true`; run `gh pr update-branch <n>` and wait for CI again |

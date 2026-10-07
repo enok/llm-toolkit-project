@@ -1,14 +1,20 @@
 ---
 title: Toolchain notes for Java 25, Python 3, JavaScript and TypeScript 7
-tags: [java-25, python, nodejs, typescript-7, maven, junit, sandbox, powershell, verification]
+tags: [java-25, python, nodejs, typescript-7, maven, junit, sandbox, powershell, verification, single-language]
 ---
 
 # Toolchain notes
 
-Targets used for a multi-language study repo: Java 25 (Temurin) with Maven 3.9,
-Python 3.12+ (CI runs 3.12 then 3.13), Node.js 24 LTS, TypeScript 7 (native
-`tsc`). Versions move: check the current releases before pinning, and keep
-CI, READMEs and the spec on the same numbers.
+Targets for the languages a study repo can use: Java 25 (Temurin) with Maven
+3.9, Python 3.12+ (CI runs 3.12 then 3.13), Node.js 24 LTS, TypeScript 7
+(native `tsc`). Versions move: check the current releases before pinning, and
+keep CI, READMEs and the spec on the same numbers.
+
+The language set is a per-project decision (one language is fine). The
+sections below are independent: read only those of the chosen languages, plus
+"Sandboxes and the user's machine". A single-language repo needs that one
+language section, its CI job plus `docs`, and a verify script trimmed to its
+own blocks.
 
 ## Java 25
 
@@ -189,6 +195,8 @@ Verification script skeleton (`verify.ps1`; keep it and its log outside the
 repo, since logs contain local paths):
 
 ```powershell
+# $Only defaults to the repo's chosen languages plus docs (for example @('java','docs'));
+# delete the blocks of languages the repo does not use.
 param([string]$Repo = '<repo checkout path>', [string[]]$Only = @('java','python','javascript','typescript','docs'))
 $env:JAVA_HOME = "$env:USERPROFILE\.jdks\<extracted jdk folder>"
 $env:Path = "$env:JAVA_HOME\bin;$env:USERPROFILE\.m2\tools\<maven folder>\bin;$env:Path"
@@ -233,4 +241,5 @@ if ($Only -contains 'docs') {
 ```
 
 Report each `Step` line (name and exit code) as evidence, plus the toolchain
-versions printed (`java -version`, `python --version`, `node -v`, `npx tsc -v`).
+versions printed for the chosen languages (`java -version`, `python --version`,
+`node -v`, `npx tsc -v`).
