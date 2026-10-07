@@ -204,6 +204,13 @@ scoped_existing_paths() {
         if [ "$(basename "${child}")" = "worktrees" ] && [ -d "${child}" ]; then
           continue
         fi
+        # Provider surfaces (.windsurf/skills, .claude/agents, ...) are symlinks
+        # to canonical folders that are already in repo_scope_paths. Scanners
+        # such as semgrep reject a symlink as a scan root, and following it
+        # would only rescan the same files, so skip symlinked children.
+        if [ -L "${child}" ]; then
+          continue
+        fi
         printf '%s\0' "${child#"${REPO_ROOT}"/}"
       done < <(find "${REPO_ROOT}/${path}" -mindepth 1 -maxdepth 1 -print0)
     else

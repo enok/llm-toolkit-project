@@ -8,14 +8,14 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 
 | Area | Path | Purpose |
 | --- | --- | --- |
-| Rules | `rules/` | 20 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring |
-| Workflows | `workflows/` | 92 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, infrastructure and log investigation, data-science and thesis work |
-| Skills | `skills/` | 92 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
+| Rules | `rules/` | 21 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
+| Workflows | `workflows/` | 94 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
+| Skills | `skills/` | 97 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
 | Tool subagents | `tool-subagents/` | 25 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
-| Learnings | `learnings/` | 45 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks) |
+| Learnings | `learnings/` | 59 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
 | Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export |
 | Tests and CI | `tests/`, `.github/workflows/` | Unit tests for the validators and GitHub Actions that run the full gate on `main` |
 | Docs | `docs/` | Provider path map, repo setup prompt, Jira setup |
@@ -138,12 +138,13 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Request Orchestration** | `rules/request-orchestration.md` | Routing into specialists, model-selection contract, quality loops, safety boundaries |
 | **Security Check Required** | `rules/security-check-required.md` | Mandatory security gate incl. LLM-surface prompt-injection scan and skill scanners |
 | **Workflow Authoring** | `rules/workflow-authoring.md` | 12K size limit, splits, single responsibility, composition |
+| **Workflow Self-Improvement** | `rules/workflow-self-improvement.md` | Every non-trivial workflow or agent run: preflight, capture, run record, promotion, measured trend; metrics are diagnostic only |
 
 Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 92 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 94 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -156,14 +157,16 @@ See `workflows/README.md` for the categorized catalog of all 92 workflows. Highl
 | `workflows/document-creation.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/confluence-documentation.md`, `workflows/markdown-pdf-export.md` | Docs, diagrams, wiki, and PDF export |
 | `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/toolkit-maintenance.md`, `workflows/chat-knowledge-curation.md`, `workflows/context-compaction.md` | Growing and maintaining the toolkit itself |
 | `workflows/thesis-writing-main.md`, `workflows/notebook-analysis.md`, `workflows/data-pipeline-change.md`, `workflows/ml-experiment.md` | Data-science and thesis work |
+| `workflows/study-repo-to-publication.md` | Study topic to protected multi-language repo, Medium article, and LinkedIn post with bidirectional links and approval gates |
+| `workflows/run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes, append the run record, promote recurring mistakes, report trend metrics |
 
 All workflows by area:
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`
-- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`
+- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
 
 ## Skills at a Glance
@@ -190,6 +193,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **pathfinder** | CoLD-based vertical slicing of design docs and implementation plans |
 | **second-opinion** | Dual-model side-by-side sanity check of plans, designs, or code |
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
+| **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
 
 #### Engineering Practices And Languages
 
@@ -206,6 +210,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
+| **multi-language-study-repo** | One protected public repo per study topic with identical multi-language examples, golden-table tests, docs drift guards, and a code-by-component page |
 
 #### Review, Validation, And Quality Gates
 
@@ -287,6 +292,9 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
 | **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
 | **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
+| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, and an explicit approval gate |
+| **linkedin-publishing** | Post or repost on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard |
+| **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 
 #### Data Science, Notebooks, And Pipelines
 

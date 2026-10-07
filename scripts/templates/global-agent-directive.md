@@ -32,6 +32,10 @@ Together they require you to:
   point).
 - Let the root agent -- not a delegated task -- own file writes, commits,
   pushes, and replies to the human.
+- Close every non-trivial run with
+  `{{TOOLKIT_ROOT}}/rules/workflow-self-improvement.md`: preflight known
+  pitfalls, one run record written by the root, metrics line in the final
+  report.
 
 Use `{{TOOLKIT_ROOT}}/INTENTS.md` to route each ask to its primary skill,
 workflow, or rule before fanning out to specialists.

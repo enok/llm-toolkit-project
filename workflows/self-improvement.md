@@ -6,6 +6,10 @@ description: Capture mistakes as happy-path learnings, identify reusable skills/
 
 Run this at the end of any workflow or substantial task.
 
+## Phase 0 — Per-run retrospective
+
+Run the **run-retrospective** workflow (workflows/run-retrospective.md) in full first. One record per root run: the outermost workflow, or the orchestrator root, runs the retrospective once, at its very end, under the outermost (routed primary) workflow's name, never the agent's name. A nested workflow's `Final Step — Self-improvement`, a lane, and any workflow invoked by the retrospective itself (`capture-learning`, `toolkit-maintenance`) skip `workflows/self-improvement.md` entirely (its Phase 0 retrospective and the harvest) and hand their signals up as `mistake:` lines; the root's single pass covers them. The retrospective is the per-run entry point required by `rules/workflow-self-improvement.md`: it classifies this run's mistakes by signature, appends the run record, promotes recurring signatures up the ladder, verifies the promotions, and produces the metrics line for the final report. The phases below are the broader harvest — judging subagent evidence, converting repeated value into capability, and harvesting external skills — and reuse the retrospective's classified mistakes instead of re-deriving them. Stop after Phase 0 only when there is no subagent output to judge, no repeated-value candidate, and no external-skill candidate.
+
 ## Phase 1 — Judge execution evidence
 
 1. Review parent-agent and subagent outputs before learning from them.
@@ -15,8 +19,8 @@ Run this at the end of any workflow or substantial task.
 
 ## Phase 2 — Capture mistakes as learnings
 
-1. Review the session for errors, failed commands, wrong assumptions, subagent misses, tool gotchas, CI failures, or validation failures.
-2. If a mistake required trial-and-error or revealed a reusable gotcha, save a learning with:
+1. Review the session for errors, failed commands, wrong assumptions, subagent misses, tool gotchas, CI failures, or validation failures. Skip mistakes whose learning landed in Phase 0; a learning landed later goes into the next record as a `learning` promotion.
+2. If a mistake required trial-and-error or revealed a reusable gotcha (the `learning` rung of the ladder; cite it as `prevented_by` for its signature), save a learning with:
    - problem attempted
    - failed approaches and observed errors
    - happy path that should be followed next time
@@ -47,6 +51,7 @@ Run this at the end of any workflow or substantial task.
 
 Summarize:
 
+- the Phase 0 metrics line, promotions landed, and promotions deferred
 - subagent results accepted, rejected, or rerun and why
 - mistakes captured or explicitly not worth capturing
 - new or updated skills/workflows/rules/learnings

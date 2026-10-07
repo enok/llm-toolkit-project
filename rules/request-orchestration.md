@@ -221,6 +221,8 @@ before the affected task can be marked done.
 - If child findings conflict, reduce them into one decision with evidence, or rerun the narrowest conflicting lane. Do not average incompatible recommendations.
 - Treat low-evidence or out-of-scope child output as a redo or an explicit risk, not as accepted truth.
 - After substantial orchestration, extract reusable lessons: mistakes, missing route triggers, weak prompts, missing validators, source gaps, or better ways to solve the task.
+- Run the per-run loop in `rules/workflow-self-improvement.md` on every non-trivial request: before splitting, read the primary workflow's `## Known pitfalls` and the `preflight` output and turn relevant pitfalls into acceptance criteria; after the last verdict, run `workflows/run-retrospective.md` and end the final report with its metrics line.
+- Lanes report self-detected mistakes as `mistake: <signature> - <one line>` in their Decisions block; the root is the single writer of the run record and of any promotion.
 - Convert only validated, reusable lessons into durable toolkit assets through `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`, or `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
 
 ## Safety boundaries

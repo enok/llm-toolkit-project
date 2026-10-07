@@ -126,8 +126,12 @@ bounded produce->validate->refine loops; it does not restate them.
    Outcome:   done | blocked | partial — one line
    Evidence:  commit SHAs, file paths, command + exit code, artifact IDs
    Blockers:  the specific error text, or "none"
-   Decisions: what needs the human, or "none"
+   Decisions: what needs the human, or "none"; then one mistake: line per self-detected mistake (not a human decision)
    ```
+
+   Mistake lines read `mistake: <signature> - <one line>`
+   (`rules/workflow-self-improvement.md`); the orchestrator collects them for
+   the run record — lanes never write it.
 
    The cap is concrete and checkable: **40 lines or 400 words maximum,
    whichever is hit first, excluding fenced evidence blocks** (command
@@ -315,6 +319,10 @@ against one shared task state. This is mandatory in every mode, not optional:
   Verify exclusion before any commit/push; if the repo does not ignore it,
   add it to local `.git/info/exclude` (never to the tracked `.gitignore`
   just for this file).
+- **First-pass evidence.** When a row completes, its Evidence cell notes
+  `first-pass` or `iter <n>/<budget>` plus any mistake signatures, so the
+  closing retrospective reads first-pass yield from the table instead of
+  from memory.
 - In normal mode the root agent writes the file; in explicit LOA mode the LOA
   coordinator writes it under the same single-writer discipline as
   `LLM-STATE.md` (below). `TASKS_TABLE.md` is the human-facing general task
@@ -580,6 +588,7 @@ When invoked:
    - recurring gaps that should update an existing rule, workflow, skill, subagent, reference, script, template, or validation gate;
    - external skill or agent-pattern candidates that should go through `skills/external-skill-intake/SKILL.md`.
 10. Classify each evolution signal as `ignore`, `capture-learning`, `update-existing`, `propose-new-capability`, or `external-intake`, and include loop statistics (tasks needing >1 iteration, recurring defect classes, validator misses) as evolution input.
+11. Close with the retrospective, once per root run: the final wave ends, after its last validator verdict, with the root-owned `workflows/run-retrospective.md` per `rules/workflow-self-improvement.md` — the tasks table's first-pass evidence and the lanes' `mistake:` lines feed one run record, recurring signatures are promoted, and the final report carries the metrics line. Before splitting, fold the primary workflow's `preflight` pitfalls and `## Known pitfalls` into the acceptance criteria.
 
 Keep the critical path moving. Do not delegate tiny tasks, direct answers, or commands that need immediate parent judgment.
 

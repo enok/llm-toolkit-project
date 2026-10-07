@@ -19,6 +19,7 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 ### Security
 
 - [`notebook-hardcoded-aws-credentials.md`](./notebook-hardcoded-aws-credentials.md) — Notebook hardcoded AWS credentials must use `runtime_config.json`; never print secrets in notebook outputs (`notebook`, `aws`, `credentials`, `security`, `runtime-config`, `s3`).
+- [`linkedin-composer-file-inputs-belong-to-messaging-overlay.md`](./linkedin-composer-file-inputs-belong-to-messaging-overlay.md) — `input[id^="attachment-input"]` on LinkedIn belongs to the messaging overlay; forwarding a file there attaches it to a chat draft, so scope queries to the "Create post" dialog (`linkedin`, `composer`, `messaging-overlay`, `file-input`, `hazard`).
 
 ### Notebooks / Toolchain
 
@@ -63,6 +64,25 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`confluence-page-archive-is-ui-only-verify-via-status.md`](./confluence-page-archive-is-ui-only-verify-via-status.md) — Confluence page archive has no API/MCP surface; hand the user the click path and verify completion via an API readback of `status` (`confluence`, `archive`, `mcp`, `ui-only`, `verification`).
 - [`confluence-storage-normalization-and-link-rewriting-on-save.md`](./confluence-storage-normalization-and-link-rewriting-on-save.md) — Confluence rewrites entities and same-site links on save, so readbacks never byte-match; validate semantically (heading counts, fragment presence) instead (`confluence`, `storage-format`, `entity-encoding`, `readback-validation`).
 
+### Publishing / Browser Automation
+
+- [`medium-paste-splits-code-blocks-at-blank-lines.md`](./medium-paste-splits-code-blocks-at-blank-lines.md) — A blank line inside a pasted `<pre>` splits one file into several Medium code boxes; put a single space on blank lines before pasting (`medium`, `code-blocks`, `blank-lines`, `paste`, `html`).
+- [`medium-topic-autocomplete-swaps-typed-topic.md`](./medium-topic-autocomplete-swaps-typed-topic.md) — Medium topic input adds the first suggestion on Enter and a mouse click closed the dropdown without adding; dispatch a DOM click on the exact suggestion and verify the chip (`medium`, `publish-dialog`, `topics`, `autocomplete`, `dom-click`).
+- [`linkedin-cannot-attach-media-after-publishing.md`](./linkedin-cannot-attach-media-after-publishing.md) — LinkedIn cannot add media to a published post; repost with the image, delete the old post only with approval, and repoint back-links (`linkedin`, `media`, `publishing`, `repost`, `delete`).
+- [`browser-extension-file-upload-requires-session-staged-path.md`](./browser-extension-file-upload-requires-session-staged-path.md) — The browser file-upload tool accepted only the session-staged uploads path, not container output or Windows paths (`browser-automation`, `file-upload`, `session-staging`, `drag-and-drop`, `datatransfer`).
+
+### Diagrams
+
+- [`github-mermaid-custom-font-clips-labels.md`](./github-mermaid-custom-font-clips-labels.md) — GitHub's Mermaid viewer clips label ends when the init asks for a font viewers lack; commit Arial sources and swap fonts only at PNG render time (`mermaid`, `github`, `diagram`, `font-family`, `rendering`).
+- [`mermaid-classdiagram-styling-needs-style-statements.md`](./mermaid-classdiagram-styling-needs-style-statements.md) — In mermaid-cli 11 classDiagram, `cssClass`/`:::` did not colour boxes; use one `style` line per class and put annotations on their own line (`mermaid`, `class-diagram`, `styling`, `style-statement`, `annotations`).
+- [`mermaid-subgraph-direction-ignored-with-external-links.md`](./mermaid-subgraph-direction-ignored-with-external-links.md) — A Mermaid subgraph `direction` is ignored when its nodes link outside it, collapsing layouts into strips (`mermaid`, `flowchart`, `subgraph`, `direction`, `layout`).
+
+### Build / CI
+
+- [`cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md`](./cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md) — Cloud sandbox egress blocked npm, Maven Central and GitHub; run definitive builds on the user's machine with user-local toolchains (`sandbox`, `egress`, `registries`, `http-403`, `verification`).
+- [`typescript-7-needs-explicit-node-types-and-quoted-test-globs.md`](./typescript-7-needs-explicit-node-types-and-quoted-test-globs.md) — TypeScript 7 no longer auto-includes `@types`; add `@types/node` + `"types": ["node"]`, avoid removed options, and quote the `node --test` glob (`typescript`, `nodejs`, `tsconfig`, `node-test`, `glob`).
+- [`branch-protection-required-checks-need-stable-job-names.md`](./branch-protection-required-checks-need-stable-job-names.md) — Add required status checks after the first CI run and use job names that never change (no matrix-expanded names) (`github`, `branch-protection`, `ci`, `status-checks`, `job-names`).
+
 ### Git / Windows / Shell
 
 - [`git-bash-path-conversion-breaks-aws-cli-args.md`](./git-bash-path-conversion-breaks-aws-cli-args.md) — Git Bash's MSYS layer rewrites slash-prefixed arguments like CloudWatch log group names into Windows paths; set `MSYS_NO_PATHCONV=1` (`git-bash`, `msys`, `windows`, `aws-cli`, `path-conversion`).
@@ -71,6 +91,9 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`powershell-remove-item-recurse-deletes-junction-targets.md`](./powershell-remove-item-recurse-deletes-junction-targets.md) — PowerShell 5.1's `Remove-Item -Recurse -Force` on an NTFS junction deletes the target directory's contents, not just the link; check for reparse points first (`powershell`, `junction`, `symlink`, `remove-item`, `data-loss`).
 - [`stale-local-clone-false-negative-search.md`](./stale-local-clone-false-negative-search.md) — A zero-match grep in a stale local clone looks identical to "code was removed"; fetch and compare `git rev-list --count`, then search the remote ref directly with `git grep <ref>` (`git`, `grep`, `stale-clone`, `cross-repo`, `false-negative`).
 - [`windows-readonly-dir-blocks-git-checkout.md`](./windows-readonly-dir-blocks-git-checkout.md) — "Permission denied" on Windows `git checkout` is usually the ReadOnly directory attribute, not symlinks; clear it recursively and mark link surfaces skip-worktree (`windows`, `git`, `checkout`, `readonly`, `permission-denied`).
+- [`powershell-set-clipboard-ashtml-mangles-non-ascii.md`](./powershell-set-clipboard-ashtml-mangles-non-ascii.md) — Windows PowerShell 5.1 `Set-Clipboard -AsHtml` mangles non-ASCII characters; entity-encode them before the clipboard write (`powershell`, `clipboard`, `html`, `non-ascii`, `encoding`).
+- [`device-commit-to-existing-path-can-keep-stale-bytes.md`](./device-commit-to-existing-path-can-keep-stale-bytes.md) — A device commit to an existing path once kept the old bytes; write each version to a fresh filename and verify a marker on the machine (`device-bridge`, `file-transfer`, `stale-content`, `fresh-filename`, `verification`).
+- [`powershell-gh-jq-quoting-breaks.md`](./powershell-gh-jq-quoting-breaks.md) — Windows PowerShell breaks `gh --jq` quoting ("accepts 1 arg(s), received 5"); pipe `gh api` output to `ConvertFrom-Json` instead (`powershell`, `github-cli`, `jq`, `quoting`, `windows`).
 
 ### Agent Behavior / Validation
 
@@ -80,6 +103,7 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`diagnose-live-vs-source-before-assuming-source-causes-symptom.md`](./diagnose-live-vs-source-before-assuming-source-causes-symptom.md) — When a live resource and its IaC source disagree, compare live-vs-source directly before assuming source caused the symptom; drift can mean live is right and source is stale (`terraform`, `drift`, `live`, `source`, `root-cause`).
 - [`find-generator-not-just-instances.md`](./find-generator-not-just-instances.md) — A bad pattern repeated across many generated files means a shared generator is producing it; trace instances back to the template and fix both, or the pattern keeps recurring (`templates`, `generator`, `pattern`, `root-cause`, `regression`).
 - [`hanging-validator-trains-agents-to-skip-validation.md`](./hanging-validator-trains-agents-to-skip-validation.md) — A hanging validator (command-line argument overflow) is worse than no validator: agents learn to skip it; fix the root cause (e.g. `xargs`) and prove it with a large synthetic input (`validation`, `hang`, `timeout`, `xargs`, `testing`).
+- [`validators-must-scan-rendered-html-for-markdown-leftovers.md`](./validators-must-scan-rendered-html-for-markdown-leftovers.md) — Markdown left in converted HTML (e.g. `](http`) rendered as raw text on Medium; validators must scan the rendered HTML for leftovers (`validation`, `markdown`, `html`, `converter`, `medium`).
 
 ---
 

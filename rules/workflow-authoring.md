@@ -37,6 +37,11 @@ Rules for writing and maintaining workflow files in `workflows/`.
 - Compose larger behaviors by reference instead of copying the same instructions into multiple files.
 - Move supporting detail into references, templates, scripts, or companion workflows when it is not needed for every invocation.
 
+## Self-Improvement Hooks
+
+- Workflows need no retrospective phase of their own: `rules/workflow-self-improvement.md` is always on and runs `workflows/run-retrospective.md` after every non-trivial run. An existing `Final Step — Self-improvement` footer stays valid (run nested, it skips `workflows/self-improvement.md` entirely and hands `mistake:` lines up, per the rule's one-record-per-root-run clause); do not add new per-workflow retrospective phases.
+- Checklist promotions go into a `## Known pitfalls` section near the end of the owning workflow: one imperative bullet per mistake signature, ending with `(sig: <signature>)`. The section counts toward the size limit; when it crowds the limit, promote its oldest bullets to guards instead of dropping them (see `skills/run-retrospective/references/promotion-ladder.md`).
+
 ## Composition Pattern
 
 Workflows that compose other workflows (e.g., `ticket-research-and-implementation-and-validation`) should:

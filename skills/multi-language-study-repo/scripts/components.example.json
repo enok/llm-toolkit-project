@@ -1,0 +1,62 @@
+{
+  "title": "Code by component - Strategy in Java, Python, JavaScript and TypeScript",
+  "intro": "This page reads the example component by component: for each role of the pattern you see the same component in every language, one collapsible section per language. Files are shown whole and generated from the source tree, so they cannot drift. Run commands are in each language folder: [java](../java/README.md), [python](../python/README.md), [javascript](../javascript/README.md), [typescript](../typescript/README.md).",
+  "languages": [
+    {"key": "java", "label": "Java 25", "fence": "java", "dir": "java/src/main/java/com/example/patterns/strategy"},
+    {"key": "python", "label": "Python 3", "fence": "python", "dir": "python/src/pricing_demo"},
+    {"key": "javascript", "label": "JavaScript (ES2026)", "fence": "javascript", "dir": "javascript/src"},
+    {"key": "typescript", "label": "TypeScript 7", "fence": "typescript", "dir": "typescript/src"}
+  ],
+  "components": [
+    {
+      "title": "Strategy interface",
+      "role": "The Strategy declares the single operation every interchangeable algorithm must offer.",
+      "files": {
+        "java": ["PricingStrategy.java", "NamedPricing.java"],
+        "python": ["pricing_strategy.py"],
+        "javascript": ["pricing-strategy.js"],
+        "typescript": ["pricing-strategy.ts"]
+      }
+    },
+    {
+      "title": "Concrete strategies",
+      "role": "Each ConcreteStrategy implements one pricing algorithm behind the Strategy contract.",
+      "files": {
+        "java": ["FlatPricing.java", "TieredPricing.java"],
+        "python": ["strategies.py"],
+        "javascript": ["strategies.js"],
+        "typescript": ["strategies.ts"]
+      }
+    },
+    {
+      "title": "Value object",
+      "role": "The immutable Order is the data every strategy prices; it validates its own invariants.",
+      "files": {
+        "java": ["Order.java"],
+        "python": ["order.py"],
+        "javascript": ["order.js"],
+        "typescript": ["order.ts"]
+      }
+    },
+    {
+      "title": "Context",
+      "role": "The Checkout holds a Strategy by composition, delegates pricing to it and lets it be swapped at runtime.",
+      "files": {
+        "java": ["Checkout.java"],
+        "python": ["checkout.py"],
+        "javascript": ["checkout.js"],
+        "typescript": ["checkout.ts"]
+      }
+    },
+    {
+      "title": "Client (demo)",
+      "role": "The client picks strategies, hands them to the context and shows the runtime swap.",
+      "files": {
+        "java": ["Demo.java"],
+        "python": ["demo.py", "__main__.py", "__init__.py"],
+        "javascript": ["demo.js"],
+        "typescript": ["demo.ts", "index.ts"]
+      }
+    }
+  ]
+}

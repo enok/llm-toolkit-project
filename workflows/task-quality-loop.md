@@ -50,7 +50,7 @@ For iteration `i` in 1..budget:
 1. **Produce.** The producer executes the task at its assigned tier. On iterations after the first, the producer receives only: the original task, the acceptance criteria, and the previous verdict's defect list. Refinement is targeted — fix listed defects; do not restart from scratch or expand scope.
 2. **Validate.** The validator checks every acceptance criterion with evidence and returns the structured verdict (`pass` | `fail` | `escalate`, criteria checklist, numbered defects each classed `mechanical` or `reasoning`, regressions vs previous iteration, loop recommendation).
 3. **Decide.**
-   - `pass` -> task done. Record iterations used in the task table.
+   - `pass` -> task done. Record iterations used in the task table, and mark the task first-pass when `i = 1`.
    - `fail` and `i < budget` -> feed the defect list to the producer and continue.
    - `fail` and `i = budget` -> stop; mark the task `escalated` and hand the last output + full verdict history to the root agent.
    - `escalate` (any iteration) -> stop immediately; the task is mis-scoped, criteria are contradictory, or the same reasoning defect survived two consecutive iterations.
@@ -81,3 +81,5 @@ When a task arrives `escalated`, the root agent chooses explicitly — never sil
 ## Reporting
 
 The orchestrator's task table tracks the loop live: `Loop` column shows `used/budget` (e.g. `2/5`), `Status` gains `validating` and `refining` states, and escalated rows keep their full verdict history available for the root agent's final report. After the run, feed loop statistics (tasks that needed >1 iteration, recurring defect classes, validator misses) into `workflows/self-improvement.md` as evolution signals.
+
+Per task, report to the run record built by `workflows/run-retrospective.md`: iterations used (summed into `iterations`), the first-pass flag (counted in `first_pass` unless the task is later reopened), and a mistake signature for each distinct root cause behind the blocking defects of its `fail` verdicts, classified per `skills/run-retrospective/references/mistake-taxonomy.md`. An in-loop tier escalation adds a `tier-misassignment/...` signature; an `escalated` task is never first-pass.

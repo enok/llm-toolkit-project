@@ -34,6 +34,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **pathfinder** | CoLD-based vertical slicing of design docs and implementation plans |
 | **second-opinion** | Dual-model side-by-side sanity check of plans, designs, or code |
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
+| **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
 
 ### Engineering Practices And Languages
 
@@ -50,6 +51,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
+| **multi-language-study-repo** | One protected public repo per study topic with identical multi-language examples, golden-table tests, docs drift guards, and a code-by-component page |
 
 ### Review, Validation, And Quality Gates
 
@@ -131,6 +133,9 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
 | **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
 | **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
+| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, and an explicit approval gate |
+| **linkedin-publishing** | Post or repost on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard |
+| **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 
 ### Data Science, Notebooks, And Pipelines
 
