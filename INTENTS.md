@@ -85,6 +85,10 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | academic or thesis defense deck | `powerpoint-slides` | skill | `pptx-generator` |
 | convert PDF / DOCX / XLSX / Markdown | `document-conversion` | skill | `markdown-pdf-export` |
 | keep bilingual or paired docs in sync / translation drift | `bilingual-doc-sync` / `paired-doc-sync` / `translation-sync` | workflow | `documentation-reviewer` |
+| publish this article on Medium / turn this repo into a Medium story / fix a published Medium story | `medium-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
+| share this on LinkedIn with a diagram / repost with an image / replace my LinkedIn post | `linkedin-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
+| find the best YouTube video per language / verify these video links | `youtube-video-curation` | skill | `multi-language-study-repo`, `medium-publishing` |
+| study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `multi-language-study-repo`, `diagram-authoring`, `youtube-video-curation`, `medium-publishing`, `linkedin-publishing` |
 
 ## Security
 
@@ -117,6 +121,8 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | improve this toolkit / maintain the toolkit | `toolkit-maintenance` | workflow | `self-improvement`, `validate-toolkit-indexes`, `learnings/INDEX.md` |
 | capture a lesson / save this as a learning | `capture-learning` | workflow | `error-driven-learning` |
 | improve the toolkit from this work / capture mistakes | `self-improvement` | workflow | `capture-learning`, `external-skill-intake` |
+| run a retrospective / learn from this run's mistakes / what keeps going wrong in `<workflow>` / show the quality trend of a workflow | `run-retrospective` | workflow + skill | `rules/workflow-self-improvement.md`, `self-improvement`, `capture-learning`, `task-quality-loop` |
+| make every workflow learn from its mistakes / measure workflow accuracy over time | `rules/workflow-self-improvement.md` | rule | `run-retrospective`, `error-driven-learning`, `rules/request-orchestration.md` |
 | import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement`, `security` |
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
@@ -130,6 +136,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | Java patterns / Spring | `java-best-practices` | skill | `best-practices`, `testing`, `java-change-validator` |
 | JavaScript or TypeScript patterns / async | `js-ts-best-practices` | skill | `best-practices`, `testing` |
 | Python patterns | `python-best-practices` | skill | `best-practices`, `testing` |
+| create a study repo for `<topic>` in several languages / same example in Java, Python, JavaScript, and TypeScript | `multi-language-study-repo` | skill | `study-repo-to-publication`, `java-best-practices`, `python-best-practices`, `js-ts-best-practices`, `git-conventions` |
 | SOLID / clean code / architecture patterns | `best-practices` | skill | `system-architecture-specialist` |
 | testing patterns / coverage / AC traceability | `testing` | skill | `test-plan`, `run-tests` |
 | git conventions / branch naming / semantic commits | `git-conventions` | skill + rule | `commit-and-push` |

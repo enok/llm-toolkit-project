@@ -11,6 +11,7 @@ Apply these to every task.
 ### 1. Read Learnings First
 
 - Read `learnings/INDEX.md` before non-trivial work and follow any relevant happy path (`rules/error-driven-learning.md`).
+- Every non-trivial workflow or agent run also closes the self-improvement loop: preflight known pitfalls, capture mistakes with stable signatures, record the run, promote recurring mistakes, and read the trend (`rules/workflow-self-improvement.md`, `workflows/run-retrospective.md`).
 
 ### 2. Think Before Coding
 
@@ -127,6 +128,8 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Confluence" / "wiki page" / "promote deployed docs" | **confluence-documentation** workflow + skill; **confluence-documentation-specialist-validation**; **prod-doc-promoter-validation** |
 | "Verify the UI" / "compare with Figma" / "check exported images" | **ui-verify**, **figma-compare**, **image-quality-inspection** skills |
 | "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill; **pptx-generator** / **powerpoint-slides** skills |
+| "Publish this on Medium" / "share on LinkedIn with a diagram" / "best YouTube video per language" | **medium-publishing**, **linkedin-publishing**, **youtube-video-curation** skills |
+| "Study a topic and publish repo, Medium and LinkedIn" / "study repo in several languages" | **study-repo-to-publication** workflow + **multi-language-study-repo** skill |
 | "Security review" / "OWASP audit" / "threat model" | **security-report** workflow, **security**, **owasp-security-review**, **security-threat-model** skills |
 | "Cut a release" / "Maven release" / "E2E for release" | **release-manager**, **maven-release**, **e2e-release-verification** skills; **ticket-release** workflow |
 | "Load test" / "JMeter" | **jmeter-performance-testing** skill |
@@ -139,6 +142,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Create a specialist agent" / "improve the specialist" | **specialist-agent-factory** / **specialist-agent-evolution** workflows + skill |
 | "Compact this chat" / "mine chat history into assets" | **context-compaction** / **chat-knowledge-curation** workflows |
 | "Save this as a learning" / "improve the toolkit" | **capture-learning**, **self-improvement**, **toolkit-maintenance** workflows; **llm-context-engineering** skill |
+| "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under the always-on `rules/workflow-self-improvement.md` |
 | "Import external skills" | **external-skill-intake** skill |
 | "Java / Python / JavaScript / shell patterns" | **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **shell-scripting** skills |
 | "RAG" / "agent memory" / "LLM app architecture" | **llm-application-architecture** skill |
@@ -172,6 +176,7 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/request-orchestration.md`
 - `rules/security-check-required.md`
 - `rules/workflow-authoring.md`
+- `rules/workflow-self-improvement.md`
 
 Consumer-specific rule templates live in `rules/examples/`.
 
@@ -181,11 +186,11 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 `workflows/README.md` describes every workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair.
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`
-- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`
+- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
 - **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`
 
@@ -215,6 +220,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **pathfinder** | CoLD-based vertical slicing of design docs and implementation plans |
 | **second-opinion** | Dual-model side-by-side sanity check of plans, designs, or code |
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
+| **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
 
 ### Engineering Practices And Languages
 
@@ -231,6 +237,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
+| **multi-language-study-repo** | One protected public repo per study topic with identical multi-language examples, golden-table tests, docs drift guards, and a code-by-component page |
 
 ### Review, Validation, And Quality Gates
 
@@ -312,6 +319,9 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
 | **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
 | **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
+| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, and an explicit approval gate |
+| **linkedin-publishing** | Post or repost on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard |
+| **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 
 ### Data Science, Notebooks, And Pipelines
 

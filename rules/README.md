@@ -28,6 +28,7 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `request-orchestration.md` | Automatic request routing into specialists, model tiers, quality loops, and safe map-reduce execution |
 | `security-check-required.md` | Minimum security gate (toolkit scan, LLM-surface injection scan, skill scanners) before PR or merge |
 | `workflow-authoring.md` | 12K size limit, split conventions, single responsibility, and composition for `workflows/` |
+| `workflow-self-improvement.md` | Every non-trivial workflow or agent run does preflight, capture, run record, promotion, and measured trend; metrics are diagnostic only (Goodhart guard) |
 
 ## Examples
 

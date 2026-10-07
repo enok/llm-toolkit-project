@@ -23,6 +23,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `capture-learning.md` | Capture a trial-and-error discovery into the learnings inbox so any future LLM session goes directly to the happy path |
 | `self-improvement.md` | Capture mistakes as happy-path learnings, identify reusable skills/workflows, and safely harvest external LLM-tool skills |
 | `toolkit-maintenance.md` | Maintain the shared LLM toolkit — mine feedback, de-duplicate guidance, add generic skills/workflows, validate indexes, and sync clients |
+| `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
 
 ### Core Engineering
 
@@ -102,6 +103,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `bilingual-doc-sync.md` | Keep English and localized documentation or notebooks aligned during code and analysis changes |
 | `paired-doc-sync.md` | Keep paired docs, notebooks, and deliverables synchronized across languages or presentation variants |
 | `translation-sync.md` | Keep English and translated docs, labels, and examples synchronized after changes |
+| `study-repo-to-publication.md` | Study topic to protected multi-language repo with diagrams and curated videos, then a Medium article and a LinkedIn post, all linked both ways behind separate approval gates |
 
 ### Data Science, Thesis, And Notebooks
 
