@@ -129,7 +129,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Verify the UI" / "compare with Figma" / "check exported images" | **ui-verify**, **figma-compare**, **image-quality-inspection** skills |
 | "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill; **pptx-generator** / **powerpoint-slides** skills |
 | "Publish this on Medium" / "share on LinkedIn with a diagram" / "best YouTube video per language" | **medium-publishing**, **linkedin-publishing**, **youtube-video-curation** skills |
-| "Study a topic and publish repo, Medium and LinkedIn" / "study repo in several languages" | **study-repo-to-publication** workflow + **multi-language-study-repo** skill |
+| "Study a topic and publish repo, Medium and LinkedIn" / "study repo in one or more languages" / "reduce a study repo to one language" | **study-repo-to-publication** workflow + **multi-language-study-repo** skill |
 | "Security review" / "OWASP audit" / "threat model" | **security-report** workflow, **security**, **owasp-security-review**, **security-threat-model** skills |
 | "Cut a release" / "Maven release" / "E2E for release" | **release-manager**, **maven-release**, **e2e-release-verification** skills; **ticket-release** workflow |
 | "Load test" / "JMeter" | **jmeter-performance-testing** skill |
@@ -237,7 +237,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
-| **multi-language-study-repo** | One protected public repo per study topic with identical multi-language examples, golden-table tests, docs drift guards, and a code-by-component page |
+| **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
 
 ### Review, Validation, And Quality Gates
 
