@@ -4,3 +4,6 @@
 
 # Shell scripts must always be LF (bash breaks on CRLF)
 *.sh text eol=lf
+
+# Fixture lines with a single space are intentional (Medium blank-line workaround)
+tests/fixtures/medium-publishing/*.html -whitespace
