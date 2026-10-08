@@ -113,7 +113,7 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 | [content-angle.md](references/content-angle.md) | Article and post order for well-known topics: non-obvious applications first, cited framework claims, then explanation, diagrams, code |
 | [paste-recipe.md](references/paste-recipe.md) | HTML rules, code-block attributes, blank-line workaround, non-ASCII encoding, clipboard steps per OS |
 | [editor-verification.md](references/editor-verification.md) | DOM checks with JS snippets: images, `pre`, language attrs, SHA-256 per block (`.pre--content` innerText recipe), markdown leftovers |
-| [publish-dialog.md](references/publish-dialog.md) | Title/subtitle/topic limits, topic autocomplete workaround, preview image, editing a published story, one-link edit with the toolbar link button, the publish-click gate |
+| [publish-dialog.md](references/publish-dialog.md) | Title/subtitle/topic limits, topic autocomplete workaround, Change topics popover of a published story, preview image, editing a published story, one-link edit with the toolbar link button, the publish-click gate |
 | [scripts/medium_paste_html.py](scripts/medium_paste_html.py) | `build` and `check` CLI (Python 3.9+ stdlib); tests in `tests/test_medium_paste_html.py` |
 
 ## Known pitfalls
@@ -123,8 +123,11 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 - Hash each editor code block from `pre .pre--content` innerText, normalised (nbsp to space, trim,
   single-space lines to empty), never from `pre.innerText`. See
   learnings/medium-editor-code-block-hash-needs-pre-content-innertext.md.
-- Click the exact topic suggestion (never Enter) and read the topic chips back. See
-  learnings/medium-topic-autocomplete-swaps-typed-topic.md.
+- In the publish dialog, click the exact topic suggestion (never Enter) and read the topic
+  chips back. See learnings/medium-topic-autocomplete-swaps-typed-topic.md. In the Change topics
+  popover of a published story clicks did not add a topic: type until the exact topic is the
+  first suggestion, press Enter, read the chips back (publish-dialog.md section 7). See
+  learnings/medium-change-topics-popover-enter-adds-first-suggestion.md.
 - Entity-encode non-ASCII before putting HTML on the Windows PowerShell 5.1 clipboard (`build` does
   it). See learnings/powershell-set-clipboard-ashtml-mangles-non-ascii.md.
 - Scan the rendered paste HTML, title included, and the editor text for `](http` (`check` does the

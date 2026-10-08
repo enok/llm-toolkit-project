@@ -128,6 +128,12 @@ markdown that was never rendered to HTML. Scan what the editor holds, title incl
 only the Markdown source: a title such as `[[x] y](url)` once stayed raw text
 (`learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md`).
 
+When comparing editor or page text with the approved text, normalise first: in the
+editor, pasted straight quotes became curly quotes, and a heading's text held no-break
+spaces, so an exact match on the raw text failed. Map curly double and single quotes to
+`"` and `'` and no-break spaces to spaces before comparing
+(`learnings/medium-change-topics-popover-enter-adds-first-suggestion.md` records the same run).
+
 ## 5. Report
 
 Report counts (figures, on CDN, pre), each language, the hash table (index,
