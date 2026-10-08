@@ -1,5 +1,5 @@
 ---
-description: Capture a trial-and-error discovery into the learnings inbox so any future LLM session goes directly to the happy path
+description: Capture a trial-and-error discovery into `learnings/` so any future LLM session goes directly to the happy path
 ---
 
 # Capture Learning
@@ -75,6 +75,7 @@ Before saving, verify:
 - [ ] Root cause is explained — not just "use X instead of Y" but **why**.
 - [ ] File is 20–60 lines. If longer, split into multiple learnings.
 - [ ] Tags cover the keywords a future LLM would search for.
+- [ ] Every statement is a recorded fact: guidance that was not tried in the session is labelled as such (for example "General guidance, not observed in this session"), and no failed approach is invented.
 
 ### 5. Supplement tool-specific memory (optional)
 
@@ -102,12 +103,12 @@ This keeps the always-on `error-driven-learning` fast-scan working.
 
 ### 8. Commit or migrate
 
-If the durable destination is obvious in the same change — a rule, workflow, skill reference, script, test, or validation gate — update that asset instead of leaving a long-lived learning file, and skip the inbox entry.
+If the durable destination is obvious in the same change — a rule, workflow, skill reference, script, test, or validation gate — update that asset instead of writing a learning file.
 
-Otherwise stage and commit **both** the learning file and the INDEX update together. Use the Documentation commit category from `rules/git-conventions.md`:
+Otherwise stage and commit the learning file, its INDEX update, and the link from its owning asset together: a new learning ships in the same change as a `## Known pitfalls` bullet (or the path added to text that already states the lesson) in the skill, rule, workflow, or agent definition that owns it, and `tests/test_learning_promotion_coverage.py` fails when that link or the INDEX line is missing. Use the Documentation commit category from `rules/git-conventions.md`:
 
 ```bash
-git add learnings/<topic>.md learnings/INDEX.md
+git add learnings/<topic>.md learnings/INDEX.md <owning-asset-path>
 git commit -m "<TICKET-ID>: Add learning — <short description>"
 ```
 
@@ -117,7 +118,11 @@ If no ticket context exists, use a descriptive prefix:
 git commit -m "docs: Add learning — <short description>"
 ```
 
-`learnings/` is an inbox, not an archive. The **toolkit-maintenance** workflow consumes at most 5 learning files per run; after each selected file is migrated and validated, remove it from `learnings/` and update `learnings/INDEX.md`.
+The **toolkit-maintenance** workflow promotes at most 5 learning files per run; promoted files and their `learnings/INDEX.md` lines stay (`rules/error-driven-learning.md`).
+
+## Known pitfalls
+
+- Cite only facts recorded in the session and label untested guidance as such (for example "General guidance, not observed in this session"); never present untested behaviour as observed, and when the record states no failed approach, write "None recorded beyond the first attempt described in Problem." instead of inventing one. (sig: quality-defect/unobserved-claims-presented-as-fact)
 
 ---
 

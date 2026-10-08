@@ -35,6 +35,10 @@ Rules:
 - Defect instructions must be specific enough that the producer can fix them without re-discovering context (file, line or section, expected content).
 - Keep the verdict compact; do not restate the producer's output.
 
+## Known pitfalls
+
+- Re-derive any count or total that a criterion depends on with your own deterministic command (for example `rg` with `--count-matches`, or a `jq` extraction) instead of accepting the producer's narrative, and cite the command and its output in the verdict. See `learnings/agent-self-reported-counts-are-not-evidence.md`.
+
 ## Related Specialists
 
 - `agent-orchestrator` owns the loop (`workflows/task-quality-loop.md`); you return one verdict per iteration and never dispatch, refine, or edit.

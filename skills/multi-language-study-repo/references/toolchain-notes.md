@@ -187,7 +187,12 @@ Expand-Archive "$jdkRoot\jdk25.zip" -DestinationPath $jdkRoot -Force
 - Sync lane output to the machine as ONE archive (extract with `tar -xf`).
   Write each new version under a fresh filename and check a unique marker or
   length on the machine: overwriting an existing path once kept the old bytes
-  (learning `device-commit-to-existing-path-can-keep-stale-bytes`).
+  (`learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`).
+- For a PNG, compare decoded pixels, not byte hashes: a transfer can re-encode the file
+  (`learnings/device-bridge-transfer-reencodes-png-compare-decoded-pixels.md`). If staging a
+  file just written into a cloud-synced folder is refused as "hardlinked", wait for the sync to
+  settle and retry the same file; make no extra copy
+  (`learnings/synced-folder-fresh-file-staging-refused-as-hardlinked.md`).
 - Learning for this whole class of problems:
   `cloud-sandbox-egress-blocks-registries-verify-on-user-machine`.
 

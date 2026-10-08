@@ -34,7 +34,8 @@ learnings/
 ```
 
 - Every learning gets a one-line entry in `learnings/INDEX.md` under its category heading, committed together with the file.
-- In `toolkit-maintenance` runs, process learnings in batches of at most 5 files. After a selected learning is migrated into a durable asset and validated, delete or move the consumed file and update the index. If a selected learning cannot be safely migrated, leave it in place and report the blocker.
+- A new learning ships in the same change as its link from the owning skill, rule, workflow, or agent definition (a `## Known pitfalls` bullet, or the path added to text that already states the lesson, written as `learnings/<slug>.md`); `tests/test_learning_promotion_coverage.py` fails when a learning file is unlinked or has no `learnings/INDEX.md` line.
+- In `toolkit-maintenance` runs, process learnings in batches of at most 5 files. After a selected learning is migrated into a durable asset and validated, keep the file and its `learnings/INDEX.md` line: the owning asset and run records link it as evidence, and `scripts/validate-toolkit-indexes.sh` fails on a link to a missing file. Strike an INDEX line through only when the learning is superseded, naming the replacement; the owning asset then links both files. If a selected learning cannot be safely migrated, leave it in place and report the blocker.
 
 ## File format
 

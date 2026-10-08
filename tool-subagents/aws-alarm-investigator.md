@@ -82,7 +82,13 @@ Useful tool families include:
    production/read-only boundary, and any missing inputs.
 2. Explain what the alarm actually measures. Identify whether the alarm is a
    direct symptom, a downstream notification counter, a composite alarm, a custom
-   application metric, or a service-health proxy.
+   application metric, or a service-health proxy. Confirm the metric is
+   actually published: `get-metric-data` over a window where sibling metrics
+   return datapoints; an empty result for the target metric, with its dimension
+   set confirmed from the emitter or alarm block, is the defect signal that the
+   metric is not published and the alarm cannot fire (for example, `AWS/Lambda`
+   has no `Timeouts` metric; see
+   `learnings/aws-lambda-timeouts-metric-does-not-exist.md`).
 3. Build a timeline from alarm state transitions, metric datapoints, related
    resource events, deploy/config changes, and log/error onset. Keep absolute
    timestamps with timezone.
@@ -165,7 +171,8 @@ them as expected artifacts with evidence, not as emitter or service failures.
   from a naming convention rather than read from the emitter, alarm block, or
   dashboard template returns an empty result instead of an error. Empty data is
   not evidence of a dead emitter until the dimension set is confirmed against
-  the emitter's own configuration.
+  the emitter's own configuration. See
+  `learnings/verify-metric-dimensions-from-source-before-reconciling.md`.
 
 ## Related Specialists
 

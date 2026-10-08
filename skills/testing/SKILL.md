@@ -94,6 +94,12 @@ Each rule file contains:
 - Correct code example with explanation
 - Additional context and key rules
 
+## Known pitfalls
+
+- Normalise newlines (CRLF to LF) in the test helper that captures subprocess output before asserting on it: text-mode stdout writes CRLF on Windows and the assertions failed there. See `learnings/windows-text-stdout-crlf.md`. (sig: env-constraint/windows-text-stdout-crlf)
+- Store fixtures the changed-code gate cannot classify (HTML, Mermaid) under a `.txt` suffix; the suffix and `{{SPACE}}` rules are in `## Known pitfalls` of `skills/changed-code-quality-gate/SKILL.md`. See `learnings/quality-gate-blocks-unclassified-suffixes.md`.
+- When one defect shape repeats across many generated files, find the template or script that emits it, fix that generator first, then fix the instances in one change, and guard both sides: a contract test on the output and a lint on the generator source. See `learnings/find-generator-not-just-instances.md`.
+
 ## Related Skills
 
 This skill provides **universal testing discipline**. Pair it with language-specific testing patterns:

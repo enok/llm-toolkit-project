@@ -1,0 +1,16 @@
+(() => {
+  const proxy = document.getElementById('tmp-upload-proxy');
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  proxy['files'] = dt.files;
+  Object.assign(proxy, { files: dt.files });
+  Object.defineProperty(proxy, 'files', { value: dt.files });
+  Reflect.set(proxy, 'files', dt.files);
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'files').set.call(proxy, dt.files);
+  document
+    .getElementById('tmp-upload-proxy')
+    .files = dt.files;
+  proxy
+    .files = dt.files;
+  return proxy.files.length;
+})()

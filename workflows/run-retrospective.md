@@ -76,7 +76,7 @@ Run `run_retro.py candidates --log <scratch>/retro-draft.jsonl`. It lists each s
 
 | Level | Lands in | Through |
 | --- | --- | --- |
-| `learning` | `learnings/<name>.md` + `learnings/INDEX.md` line | `workflows/capture-learning.md` |
+| `learning` | `learnings/<name>.md` + `learnings/INDEX.md` line + a link from the owning asset | `workflows/capture-learning.md` |
 | `checklist` | one bullet in the owning workflow's or skill's `## Known pitfalls` section ending `(sig: <signature>)`, or a preflight/acceptance criterion | direct edit of the owning asset |
 | `guard` | script, validator, test, CI gate, or lint that fails on the original mistake | the owning skill or script plus its tests |
 | `rule` | a `rules/` change, or human escalation when redesign is needed | `workflows/toolkit-maintenance.md` |
@@ -93,7 +93,7 @@ Workflows invoked here (`capture-learning`, `toolkit-maintenance`) skip their ow
 
 1. **Guard:** add a regression fixture that reproduces the original mistake (for example under `tests/fixtures/<name>/`) and a test asserting the guard fails on it and passes on the fixed output. Run the test; cite command and exit code. Without a failing-first test it is not a guard: record the level that actually landed, or defer it.
 2. **Checklist:** the bullet is an imperative check, sits in `## Known pitfalls`, and ends with `(sig: <signature>)`; workflows stay within the size limit in `rules/workflow-authoring.md`.
-3. **Learning:** passes the quality check and approval gate of `workflows/capture-learning.md`.
+3. **Learning:** passes the quality check and approval gate of `workflows/capture-learning.md`, and the owning asset links the file (`tests/test_learning_promotion_coverage.py`).
 4. **Rule:** passes the validation phase of `workflows/toolkit-maintenance.md`.
 
 Then append the final record to the real log and confirm the log is valid:

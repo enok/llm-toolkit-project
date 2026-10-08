@@ -48,6 +48,12 @@ Return:
 - Do not delete the old pipeline before parity is verified.
 - Do not assume "same YAML" means "same behavior" — test the output.
 
+## Known pitfalls
+
+- Give every CI job that branch protection will require an explicit `name:` equal to its id, and do not use `strategy.matrix` for a required job (matrix-expanded names such as `python (3.12)` do not qualify); run several versions sequentially inside one job. Add required checks only after the first green PR run, using the names read back from it. See `learnings/branch-protection-required-checks-need-stable-job-names.md`. (sig: tool-misuse/required-check-matrix-job-name)
+- When a PR removes a CI job, rewrite the required status checks to the remaining job names BEFORE merging it: a required check whose job no longer runs never reports, and the PR waits forever. See `learnings/required-checks-must-follow-removed-ci-jobs.md`. (sig: coordination/required-check-removed-job)
+- Update required status checks by sending a JSON body with `--input <file>` to the PATCH `required_status_checks` endpoint; array form fields such as `gh api -f contexts[]=<check>` did not update them. See `learnings/gh-api-array-fields-for-required-checks.md`. (sig: tool-misuse/gh-api-array-fields-for-required-checks)
+
 ## Related Skills
 
 - **release-manager** — When CI migration affects release processes

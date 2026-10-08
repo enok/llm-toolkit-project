@@ -118,6 +118,11 @@ Each rule file contains:
 - Correct code example with explanation
 - Additional context and key rules
 
+## Known pitfalls
+
+- With TypeScript 6 or 7, declare the Node typings explicitly: add `@types/node` and `"types": ["node"]` in `tsconfig.json` (`@types/*` packages are no longer included automatically), set `module` and `moduleResolution` to `nodenext`, and avoid the removed options (`moduleResolution` `node` or `node10`, `baseUrl`, `target: es5`, `outFile`). See `learnings/typescript-7-needs-explicit-node-types-and-quoted-test-globs.md`.
+- Give `node --test` a quoted glob such as `node --test "dist/test/**/*.test.js"`, never a bare directory, which fails; commit `package-lock.json` so CI can run `npm ci`. See `learnings/typescript-7-needs-explicit-node-types-and-quoted-test-globs.md`.
+
 ## Related Skills
 
 - Project-local frontend guidance — React/Next.js performance optimization when the destination repo provides it

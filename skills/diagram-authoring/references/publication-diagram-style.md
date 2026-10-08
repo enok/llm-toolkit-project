@@ -17,7 +17,7 @@ Every `.mmd` source starts with exactly this one line (copy verbatim).
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "20px", "background": "#FFFFFF", "primaryColor": "#FFFFFF", "primaryBorderColor": "#1B1F23", "primaryTextColor": "#1B1F23", "secondaryColor": "#FDDCB5", "tertiaryColor": "#F5F7FA", "lineColor": "#3D4650", "textColor": "#1B1F23", "mainBkg": "#FFFFFF", "nodeBorder": "#1B1F23", "clusterBkg": "#F5F7FA", "clusterBorder": "#9AA5B1", "edgeLabelBackground": "#FFFFFF", "noteBkgColor": "#FFF6D6", "noteBorderColor": "#B8860B", "noteTextColor": "#1B1F23", "actorBkg": "#B8E2B4", "actorBorder": "#2F6B35", "actorTextColor": "#1B1F23", "actorLineColor": "#7A8794", "signalColor": "#3D4650", "signalTextColor": "#1B1F23", "labelBoxBkgColor": "#F5F7FA", "labelBoxBorderColor": "#7A8794", "labelTextColor": "#1B1F23", "loopTextColor": "#1B1F23", "activationBkgColor": "#DDEFDB", "activationBorderColor": "#2F6B35", "sequenceNumberColor": "#FFFFFF", "classText": "#1B1F23"}, "flowchart": {"curve": "linear", "nodeSpacing": 50, "rankSpacing": 60, "padding": 16, "htmlLabels": false}, "sequence": {"actorMargin": 50, "messageMargin": 38, "boxMargin": 10, "noteMargin": 10, "mirrorActors": false, "useMaxWidth": false}, "class": {"padding": 12, "htmlLabels": false}, "fontFamily": "Arial, Helvetica, sans-serif"}}%%
 ```
 
-- Font: the committed source says Arial. GitHub's viewer clipped the last characters of every label when the init named a font viewers do not have (Mermaid measured the fallback wrongly). Put a nicer font in only at PNG render time (section 8). `fontFamily` appears twice; a render-time swap must replace both.
+- Font: the committed source says Arial. GitHub's viewer clipped the last characters of every label when the init named a font viewers do not have (Mermaid measured the fallback wrongly). Put a nicer font in only at PNG render time (section 8; `learnings/github-mermaid-custom-font-clips-labels.md`). `fontFamily` appears twice; a render-time swap must replace both.
 - Text size: `fontSize` 20px is the floor; never lower it and never use `<small>` or tiny labels. `htmlLabels: false` keeps labels as SVG text, which survives GitHub and PNG export.
 - Text colour is always `#1B1F23`; the canvas is white (`-b white` when rendering).
 
@@ -55,7 +55,7 @@ Verified with mermaid-cli 11.16: all three grammars below render with the init l
 
 ### classDiagram
 
-- Colour with one `style ClassName <fill/stroke/stroke-width/stroke-dasharray from the palette>` line per class; omit `color:`. `cssClass` and `class X:::role` did not colour boxes.
+- Colour with one `style ClassName <fill/stroke/stroke-width/stroke-dasharray from the palette>` line per class; omit `color:`. `cssClass` and `class X:::role` did not colour boxes (`learnings/mermaid-classdiagram-styling-needs-style-statements.md`).
 - Annotations (`<<interface>>`, `<<lambda>>`) go on their own line inside the class body; on a member line they render as `<>`.
 - Keep at most 4 members per class. Mermaid draws an empty attributes compartment when a class has only methods (and an empty methods compartment when it has only attributes), which reads as broken. Give every class at least one attribute and one method, or accept the empty band knowingly.
 - Layout: `direction TB`; Client at the top, abstraction in the middle, implementers in one row below.
@@ -88,7 +88,7 @@ classDiagram
 - Apply roles with `class A,B concrete;` plus the `classDef` lines. Shapes carry meaning: rounded `(...)` components, stadium `([...])` start/end and callers, hexagon `{{...}}` ports and interfaces, rhombus `{...}` decisions, cylinder `[(...)]` stores. Quote every label with punctuation: `A["Port: Repository"]`.
 - Edge weight carries meaning and nothing else: thick `==>` only for the main request path, thin `-->` for the rest, dashed `-.->` for configuration or "implemented by". Edge labels are role words ("implemented by", "injects", "on error").
 - At most about 12 nodes, labels 5 words or fewer (28 characters).
-- The shape of the layout decides legibility. Measured in a sandbox render with mermaid-cli 11.16 at scale 2 (2026-10-07): a 7-node chain top-to-bottom rendered 608x1436 (2.4:1, too tall); an 8-node left-to-right layout with a two-way fan-out rendered 1568x226 (6.9:1, a strip whose text was also shrunk by the page-width cap in section 4); a top-to-bottom fan-out (caller, use case, two ports, two adapters, two targets) rendered 846x1140 (1:1.35, passes). Fan out, fold into ranks, or split into two diagrams; do not rely on a subgraph `direction` (ignored when its nodes link outside it).
+- The shape of the layout decides legibility. Measured in a sandbox render with mermaid-cli 11.16 at scale 2 (2026-10-07): a 7-node chain top-to-bottom rendered 608x1436 (2.4:1, too tall); an 8-node left-to-right layout with a two-way fan-out rendered 1568x226 (6.9:1, a strip whose text was also shrunk by the page-width cap in section 4); a top-to-bottom fan-out (caller, use case, two ports, two adapters, two targets) rendered 846x1140 (1:1.35, passes). Fan out, fold into ranks, or split into two diagrams; do not rely on a subgraph `direction` (ignored when its nodes link outside it; `learnings/mermaid-subgraph-direction-ignored-with-external-links.md`).
 
 ## 4. Legibility and layout
 
@@ -166,6 +166,8 @@ Do not use `chrome --headless --screenshot --window-size=W,H` for this: in a san
 ## 7. Pilot first
 
 Before restyling a whole set, render 2-3 pilots (one class, one sequence, one flowchart or SVG) and show them to the user. Apply the style to the full set only after the user accepts the pilots; a rejected style costs three diagrams, not thirty. Keep the pilot sources: they become the templates.
+
+Content check before each render: every panel shows the nodes the pattern at hand needs (in the recorded case: the contract, the implementations and an outside selector); a panel without them is redrawn, not shipped.
 
 ## 8. Optional render step (PNG for articles and social posts)
 

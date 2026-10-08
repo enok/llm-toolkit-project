@@ -28,22 +28,30 @@ When updating Gold schema:
 Use this script pattern to batch-fix column names in notebooks:
 
 ```python
-import json, os
+import json
 replacements = [
     ("'old_column_name'", "'new_column_name'"),
 ]
+
+def apply_all(line):
+    # Apply every pair to the same line; one output line per input line.
+    for old, new in replacements:
+        line = line.replace(old, new)
+    return line
+
 for fname in ["notebook.ipynb", "notebook.pt-BR.ipynb"]:
-    with open(fname) as f:
+    with open(fname, encoding="utf-8") as f:
         nb = json.load(f)
     for cell in nb["cells"]:
         if cell["cell_type"] == "code":
-            cell["source"] = [
-                line.replace(old, new) for old, new in replacements
-                for line in cell["source"]
-            ]
-    with open(fname, "w") as f:
+            cell["source"] = [apply_all(line) for line in cell["source"]]
+    with open(fname, "w", encoding="utf-8") as f:
         json.dump(nb, f, indent=1, ensure_ascii=False)
 ```
+
+Correction (2026-10-07): an earlier version of this snippet used a nested comprehension
+(`for old, new in replacements for line in cell["source"]`) that emitted every line once per
+replacement pair, duplicating the cell source whenever there were two or more pairs.
 
 # Why
 

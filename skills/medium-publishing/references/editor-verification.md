@@ -71,48 +71,45 @@ an unrecognised language name may be ignored.
 
 ## 3. SHA-256 of every code block against its source
 
-`pre.innerText` includes an extra language-label line the editor appends, so
-hash the `.pre--content` text instead. Normalise both sides identically:
-`\r\n` to `\n`, non-breaking space to space, trailing whitespace removed per
-line and at the end (this also erases the single-space blank-line workaround).
+Hash the text of `pre .pre--content` (its `innerText`), not `pre.innerText`: the latter
+includes the language label the editor adds, so it can never equal the source
+(`learnings/medium-editor-code-block-hash-needs-pre-content-innertext.md`). Normalise the
+editor text before hashing: replace non-breaking spaces with a space, trim, and turn every line
+that holds a single space into an empty line (those lines are the blank-line workaround from
+[paste-recipe.md](paste-recipe.md)). Compare the first 12 hex characters of the SHA-256 with the
+same prefix of each source block, stripped.
 
 ```js
 (async () => {
   const root = document.querySelector('article') || document.body;
-  const norm = s => s.replace(/\r\n/g, '\n').replace(/\u00a0/g, ' ')
-    .split('\n').map(l => l.replace(/\s+$/, '')).join('\n').replace(/\s+$/, '');
-  const sha256 = async s => [...new Uint8Array(await crypto.subtle.digest(
-    'SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('');
+  const norm = s => s.replace(/\u00a0/g, ' ').trim()
+    .split('\n').map(l => (l === ' ' ? '' : l)).join('\n');
+  const sha12 = async s => [...new Uint8Array(await crypto.subtle.digest(
+    'SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
   const out = [];
   for (const [i, p] of [...root.querySelectorAll('pre')].entries()) {
     const node = p.querySelector('.pre--content') || p;
-    out.push({ i, lang: p.getAttribute('data-code-block-lang'), sha: await sha256(norm(node.textContent)) });
+    out.push({ i, lang: p.getAttribute('data-code-block-lang'), sha12: await sha12(norm(node.innerText)) });
   }
   return out;
 })()
 ```
 
-Source side, same normalisation, one hash per file in the order the files
-appear in the article. Save as `hash_blocks.py` and run
-`python hash_blocks.py File1.java file2.py ...` (use `python3` where `python`
-is missing or is not Python 3):
+Source side, one prefix per file in the order the files appear in the article. Save as
+`hash_blocks.py` and run `python hash_blocks.py File1.java file2.py ...` (use `python3` where
+`python` is missing or is not Python 3). `read_text` reads CRLF as LF, matching the editor:
 
 ```python
 import hashlib, pathlib, sys
 
-def norm(text: str) -> str:
-    lines = text.replace("\r\n", "\n").replace("\u00a0", " ").split("\n")
-    return "\n".join(line.rstrip() for line in lines).rstrip()
-
 for name in sys.argv[1:]:
-    data = pathlib.Path(name).read_text(encoding="utf-8")
-    print(hashlib.sha256(norm(data).encode("utf-8")).hexdigest(), name)
+    text = pathlib.Path(name).read_text(encoding="utf-8").strip()
+    print(hashlib.sha256(text.encode("utf-8")).hexdigest()[:12], name)
 ```
 
-Every pair must match exactly. A mismatch names the block (index and
-language); fix the paste HTML and re-paste. Do not edit code in the editor.
-Plain mode 0 blocks (logs, expected output) can be hashed the same way when
-their source is a file.
+Every pair must match exactly. A mismatch names the block (index and language); fix the paste
+HTML and re-paste. Do not edit code in the editor. Plain mode 0 blocks (logs, expected output)
+can be hashed the same way when their source is a file.
 
 ## 4. Markdown leftovers and title
 
@@ -127,7 +124,9 @@ their source is a file.
 
 Expected: `mdLinkLeftovers` is 0 and the title is the intended plain text. Also
 skim the first screen for stray `**`, `##`, and backticks, which indicate
-markdown that was never rendered to HTML.
+markdown that was never rendered to HTML. Scan what the editor holds, title included, not
+only the Markdown source: a title such as `[[x] y](url)` once stayed raw text
+(`learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md`).
 
 ## 5. Report
 

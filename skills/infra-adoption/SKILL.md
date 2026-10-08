@@ -44,6 +44,11 @@ Return:
 - Do not skip the inventory step — unknown dependencies cause cascading failures.
 - Do not modify live infrastructure without explicit approval.
 
+## Known pitfalls
+
+- Before migrating or adopting state into a backend key, run `aws s3api head-object` on the target bucket+key and grep every Terraform root and open PR for the same bucket and key; on a hit, import the existing state or choose another key, and note the collision in the migration runbook. See learnings/terraform-state-migration-must-verify-target-key-unused.md.
+- When a root's plan wants to create resources another root owns, compare the planned resource addresses of both roots; "0 to destroy" does not prove the creates are safe. Either mark the legacy root targeted-apply-only with a committed README warning naming the safe `-target` addresses, or import the resources into the owning root and remove them from the legacy state. See learnings/terraform-targeted-apply-root-needs-warning.md.
+
 ## Related Skills
 
 - **terraform** — IaC module writing and testing

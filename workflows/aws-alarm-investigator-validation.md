@@ -76,6 +76,13 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
      `workflows/aws-alarm-investigator-evolution.md` through the normal
      toolkit-maintenance path
 
+## Known pitfalls
+
+- When `aws sts get-caller-identity` or `aws configure export-credentials` reports an expired SSO token, hand the login to the user at once (`aws sso login --profile <profile>`), continue every task that needs no AWS access, and park the AWS reads in a named resume list; never complete the browser approval yourself, and if you start a login for the user to claim, write its output to a file (not a pipe) and say the window expires in about ten minutes. See learnings/aws-sso-device-login-cannot-run-unattended.md.
+- Prove the alarm's metric exists before ranking hypotheses: run `aws cloudwatch get-metric-data` over a window where sibling metrics (`Invocations`, `Errors`, `Duration`) return datapoints; an empty result for the target metric, with its dimension set confirmed from the emitter or alarm block, is the defect signal that the metric is not published and the alarm cannot fire (`AWS/Lambda` publishes no `Timeouts` metric; recommend a Logs metric filter on `"Task timed out"`, or an alarm on `Duration` Maximum >= the configured function timeout). See learnings/aws-lambda-timeouts-metric-does-not-exist.md.
+- Take metric dimensions from the emitter, the alarm block, or the dashboard template, never from naming conventions; if an alarm on the same metric transitions while your query returns empty, your dimensions are wrong, not the traffic (`list-metrics --namespace <namespace>` enumerates the real sets). See learnings/verify-metric-dimensions-from-source-before-reconciling.md.
+- When an alarm sits in INSUFFICIENT_DATA during an outage or an idle period, check `treat_missing_data` against the metric kind: failure counts `notBreaching`, latencies and event-driven silence-detection alarms `breaching`; `missing` on a sparse alarm defeats N-of-N evaluation. See learnings/no-data-and-zero-are-different-in-monitoring.md.
+
 ---
 
 ## Evolution

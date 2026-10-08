@@ -12,10 +12,24 @@ that worked; the approaches that failed are listed so they are not retried.
 Read the HAZARD section first. Read [composer-automation.md](composer-automation.md) for the
 `deep` helper and the composer lookup used below.
 
+**Guard: run it before executing any upload snippet.** Save the snippet to a file and run
+
+```bash
+python3 skills/linkedin-publishing/scripts/check_upload_target.py <snippet-file>
+```
+
+(Windows: `python` or `py -3`). Exit 0 means the snippet references no messaging input, makes no
+document-wide file-input query, and forwards files only to the proxy input below. Exit 1 prints
+one `violation:` line per problem; exit 2 is a usage or file error. On any non-zero exit do not
+run the snippet: fix it or the call, then re-run the check. The guard lints snippet text only.
+Tests: `tests/test_linkedin_check_upload_target.py`.
+
 ## HAZARD: messaging file inputs
 
 `input[id^="attachment-input"]` belongs to the MESSAGING overlay, not to the post composer.
-Forwarding the image to that input attaches it to whatever chat draft is open.
+Forwarding the image to that input attaches it to whatever chat draft is open
+(`learnings/linkedin-composer-file-inputs-belong-to-messaging-overlay.md`). The guard above
+fails on exactly this mistake.
 
 - Scope every query to the "Create post" dialog; never query `document` for
   `input[type=file]` and pick the first hit.
@@ -31,13 +45,19 @@ Forwarding the image to that input attaches it to whatever chat draft is open.
 1. **Stage the PNG in the browser tool's session uploads folder.** Use the bridge that copies a
    file into the session's uploads area (in the recorded setup the staged path looked like
    `/mnt/user-data/uploads/<folder>/<file>.png`). The browser tool's file upload accepted only
-   this session-staged path. As a precaution, use a fresh filename for every revision of the
-   image: a file transfer to an already-existing path once kept the old bytes (see
-   `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`). Confirm the size or a
-   checksum of what the browser actually receives.
+   this session-staged path (`learnings/browser-extension-file-upload-requires-session-staged-path.md`).
+   - Use a fresh filename for every revision of the image: a file transfer to an
+     already-existing path once kept the old bytes (see
+     `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`).
+   - Confirm what the browser actually receives by its decoded pixels, not by a byte hash: a
+     device transfer can re-encode a PNG, so the bytes can differ while the picture is the same
+     (`learnings/device-bridge-transfer-reencodes-png-compare-decoded-pixels.md`).
+   - A file just written into a cloud-synced folder may be refused for staging as "hardlinked":
+     wait for the sync to settle and retry the same stage; do not make extra copies
+     (`learnings/synced-folder-fresh-file-staging-refused-as-hardlinked.md`).
 
 2. **Add a temporary light-DOM proxy input** (light DOM so ordinary element references can
-   target it):
+   target it; run the guard on the snippet first):
 
    ```js
    (() => {
@@ -53,7 +73,8 @@ Forwarding the image to that input attaches it to whatever chat draft is open.
 
 3. **Upload to the proxy** with the browser tool's file-upload action, targeting the proxy's
    element reference (find it with the tool's element finder) and passing the session-staged
-   path. Confirm the file reached the input:
+   path. The guard cannot see this action, so before it runs confirm the target reference is
+   the element with id `tmp-upload-proxy`. Then confirm the file reached the input:
 
    ```js
    document.getElementById('tmp-upload-proxy').files[0]?.name
@@ -104,6 +125,7 @@ Forwarding the image to that input attaches it to whatever chat draft is open.
 
 ## Checklist before Post
 
+- [ ] Every upload and drop snippet passed `check_upload_target.py` before it was executed.
 - [ ] The preview shows inside the "Create post" composer.
 - [ ] No messaging draft gained an attachment (check the overlay if one was open).
 - [ ] The proxy input is removed.

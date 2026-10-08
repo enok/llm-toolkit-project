@@ -65,6 +65,10 @@ git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED: remove duplicate files"
 - Preparing to push changes
 - Managing PR lifecycle
 
+## Known pitfalls
+
+- Pass an ABSOLUTE path to `git -C <repo> worktree add <path> <ref>`: `-C` makes git resolve relative paths against the repository, so a relative path silently creates the worktree inside the project root. `cd` out of a worktree before `git worktree remove`. See `learnings/git-c-worktree-relative-path-lands-in-repo-root.md`.
+
 ## Related
 
 - `rules/git-conventions.md` — Complete Git rules

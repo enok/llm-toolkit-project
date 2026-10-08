@@ -75,7 +75,7 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 
 | Source | Decision (date) | Why | Re-evaluate when |
 | --- | --- | --- | --- |
-| `https://github.com/browser-use/browser-harness` | Rejected (2026-08-21) | Requires CDP remote debugging on the user's real logged-in browser; built-in session-cookie sync to a third-party cloud via a pipe-to-shell binary install; bot-detection-evasion guidance; opt-out telemetry; over-broad "always use for any web interaction" trigger; self-modifying executable helper file; Trust Hub cannot return `SAFE`. Cover screenshot/evidence needs with API-native renders (for example `aws cloudwatch get-metric-widget-image`) or the agent environment's permission-gated browser surface instead. | An isolated-profile-only mode exists with no real-profile CDP requirement, no cookie cloud sync, and telemetry off by default. |
+| `https://github.com/browser-use/browser-harness` | Rejected (2026-08-21) | Requires CDP remote debugging on the user's real logged-in browser; built-in session-cookie sync to a third-party cloud via a pipe-to-shell binary install; bot-detection-evasion guidance; opt-out telemetry; over-broad "always use for any web interaction" trigger; self-modifying executable helper file; Trust Hub cannot return `SAFE`. Cover screenshot/evidence needs with API-native renders (for example `aws cloudwatch get-metric-widget-image`) or the agent environment's permission-gated browser surface instead. See `learnings/browser-harness-intake-rejected.md`. | An isolated-profile-only mode exists with no real-profile CDP requirement, no cookie cloud sync, and telemetry off by default. |
 
 ## Completion checklist
 

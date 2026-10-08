@@ -63,6 +63,10 @@ Return:
 - Do not modify global configurations without warning.
 - Do not skip verification — a setup isn't done until the smoke check passes.
 
+## Known pitfalls
+
+- When a consumer repo links toolkit directories through Windows junctions, anchor every linked path in its `.gitignore` with a leading `/` (a bare `workflows/` also ignores `docs/llm/workflows/`), and in the toolkit repo ignore the agent-side skill junction directories, because Git on Windows traverses junctions as real directories and duplicates their content. Do not commit LLM content to both repos. See `learnings/llm-toolkit-junction-architecture.md`.
+
 ## Related Skills
 
 - **runbook-authoring** — Formalize the setup as a reusable runbook

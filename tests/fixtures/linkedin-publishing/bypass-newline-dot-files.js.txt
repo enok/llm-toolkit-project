@@ -1,0 +1,8 @@
+(() => {
+  const target = pickInput();
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  target
+    .files = dt.files;
+  return target.id;
+})()

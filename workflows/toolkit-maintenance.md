@@ -38,7 +38,7 @@ knowledge, not a transient learning inbox. Treat git-ignored `docs/*` outputs as
 local review artifacts unless the user explicitly asks to promote them into a
 tracked documentation surface.
 
-For `learnings/`, process at most 5 files per maintenance run. Choose the oldest or highest-signal actionable files first and convert each selected lesson into durable toolkit assets (a rule, workflow step, skill reference, script check, or template). Learnings stay committed: after promotion, mark the learning's `learnings/INDEX.md` row as promoted (`~~strikethrough~~` plus a pointer to the durable asset) and add a `promoted_to:` line to its frontmatter instead of deleting the file. Leave remaining files for later runs.
+For `learnings/`, process at most 5 files per maintenance run. Choose the oldest or highest-signal actionable files first and convert each selected lesson into durable toolkit assets (a rule, workflow step, skill reference, script check, or template). Learnings stay committed: after promotion, keep the file and its plain `learnings/INDEX.md` line, and make sure the durable asset links `learnings/<slug>.md` (`tests/test_learning_promotion_coverage.py`); strike an INDEX line through only when the learning is superseded. Leave remaining files for later runs.
 
 Every maintenance report must summarize learning processing:
 
@@ -124,6 +124,13 @@ Then verify:
    `rules/git-conventions.md § PR File Change Table`.
 7. Open or update a draft PR, read the body back to verify the table, and never
    merge directly to a parent branch.
+
+## Known pitfalls
+
+- Before drafting a workflow gate, phase, or approval step, read the always-on rules and keep the draft consistent with them: no per-workflow retrospective phase (`rules/workflow-self-improvement.md`) and no blanket merge approval (`rules/external-write-authorization.md`). (sig: spec-gap/workflow-contradicted-existing-rule)
+- When promoting a learning or session evidence into a skill, rule, or reference, carry only recorded facts: label untested guidance as such and never state untested behaviour as observed. (sig: quality-defect/unobserved-claims-presented-as-fact)
+- When a change touches both a governance document and the script it describes (for example `skills/run-retrospective/references/promotion-ladder.md` and `run_retro.py`), write the CLI contract first and run every documented example against the script. (sig: validation-gap/governance-doc-script-drift)
+- When a validator hangs or times out, reproduce and fix the validator (for example batch large file lists with `find -print0 | xargs -0`) and prove the fix on a large synthetic input; do not skip it or call the hang environmental. See `learnings/hanging-validator-trains-agents-to-skip-validation.md`.
 
 ---
 

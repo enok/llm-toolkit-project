@@ -86,7 +86,7 @@ For any script created by an agent, Windows, Linux, and macOS support is require
 
 - `text-no-parse-ls` - Never parse `ls` output — use globs or `find -print0`
 - `text-read-files` - Use `while IFS= read -r line` for safe line-by-line reading
-- `text-find-print0` - Use `find -print0 | xargs -0` for filenames with spaces/special chars
+- `text-find-print0` - Use `find -print0 | xargs -0` for filenames with spaces/special chars; it is also the fix for a validator that hangs on a huge expanded argument list (`learnings/hanging-validator-trains-agents-to-skip-validation.md`)
 - `text-heredoc` - Use heredocs for multi-line strings, `<<-` for indented heredocs
 - `text-jq-validation` - Use `jq empty FILE` to parse-validate JSON; `jq -e 'type == "object"'` to assert shape; never `jq -e empty` (exit 4 on valid JSON)
 
@@ -127,6 +127,14 @@ References:
 
 - [references/source-backed-shell-tooling.md](references/source-backed-shell-tooling.md) — ShellCheck, Bats, portability, and CI validation choices.
 - [references/command-safety.md](references/command-safety.md) — a compact always-on summary of the destructive-command and confirmation gates (mirrors the toolkit's `rules/command-safety.md`) for consumer repos.
+
+## Known pitfalls
+
+- In Windows PowerShell, do not pass a `--jq '<filter>'` argument to `gh` (the recorded failure was `gh api`, "accepts 1 arg(s), received 5"); pipe the JSON to `ConvertFrom-Json` and select the fields in PowerShell. See `learnings/powershell-gh-jq-quoting-breaks.md`. (sig: tool-misuse/powershell-gh-jq-quoting)
+- Before `Remove-Item -Recurse -Force` on a path that may be an NTFS junction, test the `ReparsePoint` attribute and delete a link non-recursively with `[System.IO.Directory]::Delete($Path, $false)`: on PowerShell 5.1 the recursive delete removes the target directory's contents. See `learnings/powershell-remove-item-recurse-deletes-junction-targets.md`.
+- When a PowerShell 5.1 step writes a file that another tool will read, do not rely on the PowerShell redirect (the recorded redirect wrote a script as UTF-16 and Python could not read it); redirect through `cmd /c` or use `Out-File` with an explicit encoding, and use the BOM-less writer in `skills/shell-scripting/rules/ps-utf8-no-bom.md` when the consumer rejects a BOM. See `learnings/powershell-redirect-writes-utf16.md`. (sig: tool-misuse/powershell-redirect-writes-utf16)
+- Name PowerShell variables so that no two differ only by case: variable names are case-insensitive, and two variables that differed only by case overwrote each other. (sig: tool-misuse/powershell-case-insensitive-variables)
+- Under `$ErrorActionPreference = 'Stop'`, do not let a native command's stderr abort the script: wrap the native command with `cmd /c` or relax the preference for that call, and decide success from `$LASTEXITCODE` (`skills/shell-scripting/rules/ps-native-command-exit-codes.md`). (sig: tool-misuse/powershell-stop-aborts-on-native-stderr)
 
 ## Related Skills
 

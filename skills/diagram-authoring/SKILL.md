@@ -62,9 +62,9 @@ metadata:
 - Keep diagrams readable: split if labels or edges become dense.
 - Include a short legend only when it reduces ambiguity.
 - Prefer SVG export for Mermaid when producing committed docs, PDFs, or wiki attachments. Use PNG only when the destination requires raster output (publishing platforms usually do).
-- Font: GitHub's Mermaid viewer clips the ends of labels when the `init` asks for a font viewers lack. Committed sources use `"fontFamily": "Arial, Helvetica, sans-serif"`; swap in a nicer font only in a temp copy at PNG render time (and only if it is installed where you render).
-- `classDiagram` colour: `cssClass` and `:::` did not colour boxes in mermaid-cli 11. Write one `style ClassName fill:...,stroke:...` line per class. Put `<<interface>>` on its own line inside the class body; on a member line it renders as `<>`.
-- A subgraph's `direction` is ignored when its nodes link outside it, so a long chain collapses into a strip. Fan out, fold ranks, or split instead of relying on it.
+- Font: GitHub's Mermaid viewer clips the ends of labels when the `init` asks for a font viewers lack. Committed sources use `"fontFamily": "Arial, Helvetica, sans-serif"`; swap in a nicer font only in a temp copy at PNG render time (and only if it is installed where you render). See `learnings/github-mermaid-custom-font-clips-labels.md`.
+- `classDiagram` colour: `cssClass` and `:::` did not colour boxes in mermaid-cli 11. Write one `style ClassName fill:...,stroke:...` line per class. Put `<<interface>>` on its own line inside the class body; on a member line it renders as `<>`. See `learnings/mermaid-classdiagram-styling-needs-style-statements.md`.
+- A subgraph's `direction` is ignored when its nodes link outside it, so a long chain collapses into a strip. Fan out, fold ranks, or split instead of relying on it. See `learnings/mermaid-subgraph-direction-ignored-with-external-links.md`.
 - Renderers drift between versions (the same file laid out differently in 11.16 and 11.17). Render publication PNGs in one environment, the one the visual validator inspected, and commit those PNGs.
 - `mmdc` shrinks a wide flowchart (natural width above its 800 px page, `-w`) together with its text; pass `-w 2400` and compute legibility from the natural width.
 - For the publication look (init line, role palette, per-type grammar, GitHub compatibility, hexagonal SVG, pilot-first rule), follow `references/publication-diagram-style.md`; check the PNG at its destination width with `skills/image-quality-inspection/references/destination-legibility.md`.
@@ -104,6 +104,15 @@ metadata:
 - [ ] Publication diagrams: committed Mermaid sources use the safe font and stay byte-identical to their inline copies; PNGs were rendered in one environment and judged at destination width by a validator other than the producer.
 - [ ] Confluence/wiki copies link back to the repo source of truth.
 - [ ] Published wiki pages and attachments were read back after publishing and pass any destination content gates (no forbidden identifier patterns, no stale run/version labels).
+
+## Known pitfalls
+
+- Before restyling a set of publication diagrams, render 2-3 pilots in the candidate style
+  (`references/publication-diagram-style.md`, section 7) and get the user's acceptance first; do not
+  render the whole set on an unreviewed style. (sig: quality-defect/diagram-style-below-user-bar)
+- Before rendering, check that every panel shows the nodes the pattern at hand needs (in the
+  recorded case: the contract, the implementations and an outside selector). A panel without
+  them is redrawn. (sig: quality-defect/diagram-content-fidelity)
 
 ## Related
 

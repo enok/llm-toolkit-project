@@ -129,6 +129,11 @@ Poll at the job level so you can react as soon as any job fails:
 **CI passed:**
 1. Tell the user CI passed
 
+## Known pitfalls
+
+- In Windows PowerShell, do not pass `--jq '<filter>'` to `gh` (the recorded failure was `gh api`); run the command without `--jq` and pipe the JSON to `ConvertFrom-Json`. The polling commands above use `--jq` for POSIX shells. See `learnings/powershell-gh-jq-quoting-breaks.md`. (sig: tool-misuse/powershell-gh-jq-quoting)
+- If a job stays in progress with no output far beyond the usual 5-15 minutes (the recorded hang lasted 50 minutes), report it to the main agent as hung instead of polling on; the watcher stays read-only, and the main agent force-cancels and reruns the run, with the user's go, per `workflows/gh-fix-ci.md`. See `learnings/ci-run-hung-force-cancel.md`. (sig: env-constraint/ci-run-hung)
+
 ## Related Skills
 
 - **gh-fix-ci** workflow — Manual CI debugging when the watcher finds issues

@@ -86,7 +86,7 @@ When a capture trigger fires, invoke `workflows/capture-learning.md`. Summary:
 4. Root cause (*why* it works).
 5. Tags for future keyword scan.
 6. **User approval gate** before commit.
-7. Commit + append to `learnings/INDEX.md`.
+7. Commit + append to `learnings/INDEX.md`, in the same change as the link from the owning asset (a `## Known pitfalls` bullet or a link in existing text); `tests/test_learning_promotion_coverage.py` enforces both.
 
 ## Integration Points
 

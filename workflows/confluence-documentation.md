@@ -115,6 +115,10 @@ For architecture spikes, replacement proposals, and incident follow-up pages:
 6. Confirm the documentation-reviewer findings are resolved or explicitly
    reported as residual risk.
 
+## Known pitfalls
+
+- Before the backup manifest, any multi-page fetch, an archive request, or a readback check, apply the `## Known pitfalls` of `skills/confluence-documentation/SKILL.md`: sequential page fetches with an `id` check (learnings/confluence-mcp-parallel-getpage-can-return-wrong-page.md), version inferred as new - 1 with an increment-of-1 check (learnings/confluence-mcp-does-not-expose-page-version-number.md), archive as a UI-only step verified by `status` (learnings/confluence-page-archive-is-ui-only-verify-via-status.md), and semantic readback validation (learnings/confluence-storage-normalization-and-link-rewriting-on-save.md).
+
 ## Final Step — Self-improvement
 
 Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.

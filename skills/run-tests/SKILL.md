@@ -37,3 +37,7 @@ Use this skill to choose and execute the right verification strategy for a chang
 
 ## Evidence Hand-off
 - When the repo family provides a specialized evidence-capture skill for user-visible proof, hand the artifact work to that specialist skill instead of treating it as generic test execution only.
+
+## Known pitfalls
+
+- In a cloud sandbox, report build and test results as partial when registries return HTTP 403 or the sandbox toolchain lags the project's target versions; run the definitive build and tests on the user's machine and log each step's name, its exit code, and the toolchain versions as evidence. See `learnings/cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md`. (sig: env-constraint/sandbox-egress-blocks-registries)

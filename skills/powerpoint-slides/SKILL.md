@@ -826,3 +826,9 @@ Do not install dependencies implicitly from this skill. Verify they are already 
 **Node.js**: `pptxgenjs`
 **Python**: Pillow, lxml, markitdown with PPTX support
 **System**: `node`, `pandoc` (OMML conversion), `xelatex`, `pdfcrop`, `pdftoppm` (Poppler), `soffice` (LibreOffice), `pdfinfo` (Poppler), `dot`/`neato`/`fdp`/`circo` (Graphviz allowlist), `mmdc` (Mermaid CLI, optional)
+
+---
+
+## Known pitfalls
+
+- For a deck built from an official template (for example a formal defense), keep its logo, cover typography and brand chrome, and render the deck to PDF and full-slide images before delivery; a saved PPTX or extracted text does not prove the layout. Details in `skills/pptx-generator/references/pitfalls.md`. See learnings/powerpoint-template-visual-qa.md.

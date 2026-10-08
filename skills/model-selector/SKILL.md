@@ -56,7 +56,8 @@ prevents.
 
 - `light` — git operations, file moves, index/table-row edits, running a script
   and reporting pass/fail, mechanical sync, retrieval and mapping.
-- `standard` — doc drafting, config/overlay sync review, standard code edits,
+- `standard` — doc drafting, authoring learnings or skill references from a
+  recorded facts ledger, config/overlay sync review, standard code edits,
   ordinary review, summarization and evidence reduction.
 - `deep` — security evaluation, architecture and design, adversarial review,
   conflicting evidence, governance authoring.
@@ -69,6 +70,10 @@ Given a completed tasks table, compare the `Model/Effort` column against the
 lookup and report each overspend row with the model that should have run. A table
 where every row carries the session model is the signature defect: it means
 tiering never happened and every task inherited the root.
+
+## Known pitfalls
+
+- Assign authoring of learnings, skill references, or other prose that must stay faithful to a recorded facts ledger to `standard`, never `light`; `light` lanes invented failed approaches and wrong code and the files were rewritten at `standard`. (sig: tier-misassignment/light-tier-fact-bound-authoring)
 
 ## Related
 

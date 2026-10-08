@@ -26,3 +26,7 @@ Use when creating or editing notebooks for EDA, statistical analysis, clustering
 - Notebook can be rerun from a clean state.
 - Key logic is not trapped in cells only.
 - Findings and limitations are documented where future sessions can find them.
+
+## Known pitfalls
+
+- Take the bucket or path and profile declared in step 2 from environment variables or the project's runtime config file (`config/runtime_config.json`), never from literals in cells, and never `print()` them. See learnings/notebook-hardcoded-aws-credentials.md.

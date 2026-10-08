@@ -122,6 +122,11 @@ Any LLM tool loading only this skill still owes all of these duty sets from
 6. If the coordinator misses a reusable routing, SLA, state, or efficiency
    pattern, run `workflows/agent-orchestrator-evolution.md`.
 
+## Known pitfalls
+
+- Anchor every ledger edit (`TASKS_TABLE.md`, `CONTEXT_STATE.md`) to the current run's own section or unique row text, never to a bare row number, and assert the neighbouring rows before writing. (sig: coordination/ledger-row-edit-not-scoped-to-session)
+- Re-derive any count that gates a decision with a deterministic command instead of accepting a lane's summary. See `learnings/agent-self-reported-counts-are-not-evidence.md`.
+
 ## Related
 
 - `rules/request-orchestration.md` — the binding orchestration and model-selection contract

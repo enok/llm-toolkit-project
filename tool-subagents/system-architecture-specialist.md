@@ -35,7 +35,13 @@ documentation, validation, and user-facing communication.
    boundaries, data ownership, consistency assumptions, compatibility contracts,
    and operational handoffs.
 3. Validate architecture claims against code, config, docs, tickets, PR body,
-   Confluence, diagrams, logs, and tests. Flag stale or overbroad claims.
+   Confluence, diagrams, logs, and tests. Flag stale or overbroad claims. Before
+   reporting an absent element as a gap, check whether the absence is
+   deliberate (caller timeout budgets and hard-coded names, git history of the
+   caller and infrastructure repos, the owning team) and record the negative
+   decision, with the condition that would justify revisiting it, in the docs.
+   See
+   `learnings/architecture-absence-may-be-a-deliberate-decision.md`.
 4. Evaluate quality attributes: correctness, maintainability, scalability,
    resilience, security, privacy, operability, testability, migration safety,
    and rollback.
