@@ -53,6 +53,8 @@ If a wrong chip appeared, remove it with its close control and retry. If no
 exact suggestion exists, do not accept the first one; tell the user and ask
 for a replacement topic.
 
+In the Change topics popover of a published story the working method differs: section 7.
+
 ## 3. Preview image
 
 Open the preview-image control and choose one of the story's own images,
@@ -78,6 +80,13 @@ browser lands on, and report it.
 4. Verify on the post-redirect page: navigate the browser to the story URL,
    let redirects settle, and read that DOM. A quick `fetch` of the public URL
    right after saving may return a cached copy and look unchanged.
+
+Inserting a paragraph or a section into a live story (recorded run): click at the
+end of the block before the insertion point (screenshot coordinates), press End, then
+Enter for an empty paragraph, and paste. Paste plain text for a single paragraph and
+the section as HTML; an `<h2>` arrived with the same heading class as the story's other
+section headings. Read the inserted blocks back with the normalisation in
+`editor-verification.md` section 4 (the editor turned straight quotes into curly ones).
 
 ## 6. Replacing one link
 
@@ -124,3 +133,24 @@ re-checked in the latest session; verify the anchor the same way (step 5).
 
 To add a link to text that has none, select that text with a Range (`setStart` and `setEnd` on
 its text node) and paste the same way (earlier recipe, not re-tested).
+
+## 7. Changing topics of a published story
+
+In the story editor, the "..." menu has "Change topics": a popover with the current
+chips (each with a remove control), an "Add a topic..." field, and Save / Cancel.
+Observed in that popover (`learnings/medium-change-topics-popover-enter-adds-first-suggestion.md`):
+
+- A mouse click and a dispatched mousedown and click on a suggestion did not add it.
+- Enter added the first suggestion.
+
+This differs from the publish dialog (section 2): there a DOM click worked and Enter was
+unsafe; here a DOM click did not work, so Enter is the only method that worked, safe only when the exact
+topic is already the first suggestion.
+
+So: remove the chips to replace, type the topic until the exact topic is the first
+suggestion (read the list before pressing anything), press Enter, and read the chips back.
+Then click the popover's Save and "Save and publish" (section 5); whether Save alone
+publishes the topics was not checked. When the intended name is not offered as such
+(typing "SOLID" offered "Solidity", "Solid" and "Solid Principles"; "Solid" is a different
+topic), ask the user before substituting, unless the approved draft already names the
+substitute.
