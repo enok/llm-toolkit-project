@@ -47,13 +47,17 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 - For a widely covered topic, the article leads with non-obvious applications
   and every "hidden in `<framework>`" claim carries an official-source
   citation checked on the day: [content-angle.md](references/content-angle.md).
+- Every article follows the AIDA narrative (Attention, Interest, Desire, Action) and its
+  title names the highest-level concept the body supports, never more:
+  [aida-narrative.md](references/aida-narrative.md).
 
 ## Procedure
 
-1. **Check the angle, then build the paste HTML.** For a widely covered topic,
-   confirm the article order and the citations first; for every article, confirm
-   its "Principles behind it" section
-   ([content-angle.md](references/content-angle.md)). Render the article to
+1. **Check the angle and the AIDA stages, then build the paste HTML.** For a widely
+   covered topic, confirm the article order and the citations first; for every
+   article, confirm its "Principles behind it" section
+   ([content-angle.md](references/content-angle.md)) and its four AIDA stages and
+   role-positioned title ([aida-narrative.md](references/aida-narrative.md)). Render the article to
    HTML with absolute image URLs pinned to `<sha>`
    (`https://raw.githubusercontent.com/<owner>/<repo>/<sha>/...`), convert
    tables and inline code (Medium has neither), then run:
@@ -71,8 +75,8 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
    [paste-recipe.md](references/paste-recipe.md).
 2. **Get the draft approved first.** Creating the draft in the user's account is
    an external write. Show the full draft (title, subtitle, topics, preview
-   image choice, and the complete article text) in its own message, labelled
-   `NOT POSTED`. Then ask for approval in a separate turn, as plain text or a
+   image choice, the AIDA stage map, and the complete article text) in its own
+   message, labelled `NOT POSTED`. Then ask for approval in a separate turn, as plain text or a
    question that does not hide the draft. Create the draft only after the user
    says yes.
 3. **Paste.** Open a new story in the user's browser, put the paste HTML on the
@@ -111,6 +115,7 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 | File | Covers |
 | --- | --- |
 | [content-angle.md](references/content-angle.md) | Article and post order for well-known topics: non-obvious applications first, cited framework claims, then explanation, diagrams, code |
+| [aida-narrative.md](references/aida-narrative.md) | AIDA stages for every article and post, the LinkedIn and Medium mappings, title and hook positioning, retrofitting a published piece, pre-approval checklist with the stage map |
 | [paste-recipe.md](references/paste-recipe.md) | HTML rules, code-block attributes, blank-line workaround, non-ASCII encoding, clipboard steps per OS |
 | [editor-verification.md](references/editor-verification.md) | DOM checks with JS snippets: images, `pre`, language attrs, SHA-256 per block (`.pre--content` innerText recipe), markdown leftovers |
 | [publish-dialog.md](references/publish-dialog.md) | Title/subtitle/topic limits, topic autocomplete workaround, Change topics popover of a published story, preview image, editing a published story, one-link edit with the toolbar link button, the publish-click gate |
@@ -145,6 +150,10 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 - Check every code snippet that uses a framework API against the cited official doc (never call
   methods the doc describes as mutually exclusive together) and cite official pages only, not mirrors; see
   [content-angle.md](references/content-angle.md). (sig: quality-defect/snippet-contradicts-api-doc)
+- Structure every article and post as Attention, Interest, Desire, Action and show the stage map
+  with the draft; position the title on the highest-level concept the body supports. See
+  learnings/posts-need-aida-structure-and-role-positioning.md.
+  (sig: spec-gap/post-missing-aida-structure)
 - Write each paste file under a fresh filename and verify its length on the machine; a copy to an
   existing path can keep the old bytes. See learnings/device-commit-to-existing-path-can-keep-stale-bytes.md.
 
@@ -152,4 +161,4 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 
 - `rules/external-write-authorization.md` — approval boundary for every publish and edit
 - `skills/linkedin-publishing/SKILL.md` — the follow-up post that links back to the story
-- `workflows/study-repo-to-publication.md` — where this skill sits in the repo-to-Medium-to-LinkedIn flow
+- `workflows/study-repo-to-publication.md` and `workflows/study-publication-medium-linkedin.md` — where this skill sits in the repo-to-Medium-to-LinkedIn flow
