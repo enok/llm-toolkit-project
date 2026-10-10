@@ -89,6 +89,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | share this on LinkedIn with a diagram / repost with an image / replace my LinkedIn post | `linkedin-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
 | find the best YouTube video per language / verify these video links | `youtube-video-curation` | skill | `multi-language-study-repo`, `medium-publishing` |
 | study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `multi-language-study-repo`, `diagram-authoring`, `youtube-video-curation`, `medium-publishing`, `linkedin-publishing` |
+| publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `medium-publishing`, `linkedin-publishing`, `diagram-authoring`, `rules/external-write-authorization.md` |
 
 ## Security
 

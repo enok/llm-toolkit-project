@@ -53,6 +53,12 @@ Do not use it for replies to other people's comments (follow
 6. **Hashtags come from the study's tag list.** CamelCase, no spaces, at the end of the post, one
    for every important topic the post names and none for what it does not mention
    (`skills/multi-language-study-repo/references/tags-and-topics.md`).
+7. **Every post follows AIDA.** Attention in the first ~200 characters before the "see more"
+   cut, Interest in two or three lines, Desire as short items with results and the principles
+   line, Action as one primary next step (the article link, with the repo link beside it) plus
+   one specific question; hashtags after.
+   The title and hook name the highest-level concept the body supports.
+   `skills/medium-publishing/references/aida-narrative.md`.
 
 ## Preconditions
 
@@ -65,9 +71,11 @@ Do not use it for replies to other people's comments (follow
 
 ## Procedure
 
-1. Draft the post text and choose the image (angle and order for well-known topics:
-   `skills/medium-publishing/references/content-angle.md`). Show both to the user as a draft
-   labelled `NOT POSTED`; wait for explicit approval of the exact text.
+1. Draft the post text in AIDA order and choose the image (angle and order for well-known
+   topics: `skills/medium-publishing/references/content-angle.md`; stages:
+   `skills/medium-publishing/references/aida-narrative.md`). Show the text, the stage map, and
+   the image to the user as a draft labelled `NOT POSTED`; wait for explicit approval of the
+   exact text.
 2. Open the feed, start a post, and confirm the "Create post" dialog is the active surface.
    Leave any messaging overlay alone (no typing, uploading, or sending there); if a chat draft is
    open, note it so a stray attachment can be detected later.
@@ -122,7 +130,7 @@ Do not use it for replies to other people's comments (follow
 
 - Enforced by `scripts/check_upload_target.py`: run it on every upload snippet before executing it
   (any non-zero exit: do not run). See learnings/linkedin-composer-file-inputs-belong-to-messaging-overlay.md;
-  the workflow keeps the signature (`workflows/study-repo-to-publication.md`).
+  the workflow keeps the signature (`workflows/study-publication-medium-linkedin.md`).
 - Stage the PNG in the browser tool's session uploads folder and upload to the proxy input;
   other paths were rejected. See learnings/browser-extension-file-upload-requires-session-staged-path.md.
 - Attach the image before pressing Post: media cannot be added after publishing. See
@@ -135,6 +143,10 @@ Do not use it for replies to other people's comments (follow
   line edited into the old post's text, then repoint the article and README links; delete the old
   post only if the user asks. See learnings/linkedin-image-change-needs-new-post-with-more-pointer.md.
   (sig: spec-gap/image-change-needs-new-post-with-pointer)
+- Structure every post as Attention, Interest, Desire, Action, with the hook inside the "see
+  more" cut and the stage map shown with the draft. See
+  learnings/posts-need-aida-structure-and-role-positioning.md.
+  (sig: spec-gap/post-missing-aida-structure)
 - Verify an image that crossed the device bridge by decoded pixels, not by byte hash; a
   transfer can re-encode a PNG. See learnings/device-bridge-transfer-reencodes-png-compare-decoded-pixels.md.
   (sig: coordination/transfer-reencodes-png)
@@ -149,6 +161,7 @@ Do not use it for replies to other people's comments (follow
 ## Related
 
 - `skills/medium-publishing/SKILL.md` for the article side of the bidirectional links.
-- `skills/medium-publishing/references/content-angle.md` for what the post leads with.
-- `workflows/study-repo-to-publication.md` for where this step sits in the full
-  repo, article, post sequence.
+- `skills/medium-publishing/references/content-angle.md` for what the post leads with, and
+  `skills/medium-publishing/references/aida-narrative.md` for how it moves.
+- `workflows/study-repo-to-publication.md` and `workflows/study-publication-medium-linkedin.md`
+  for where this step sits in the full repo, article, post sequence.

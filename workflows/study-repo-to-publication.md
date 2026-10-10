@@ -22,7 +22,7 @@ Ask only what is missing, in one batch:
 
 1. Topic, source (book chapter, article), and example scope: one small realistic scenario, 3-6 components, deterministic output.
 2. Repo `<owner>/<repo>` with `<repo>` = `<prefix>-<topic>` (`<prefix>`: the user's series prefix) and the **language set**: one or more languages with target versions, the user's per-project choice (one is fine; never assume all four; versions per `skills/multi-language-study-repo/references/toolchain-notes.md`). Required checks follow: one job per language plus `docs`.
-3. **Content angle.** For a widely covered topic, article and post lead with non-obvious applications (architecture uses, where it hides in widely used frameworks), then principles, explanation, diagrams, code; each framework claim cites an official source checked on the day (`skills/medium-publishing/references/content-angle.md`).
+3. **Content angle, target role, narrative.** Ask the author's target role: titles and hooks lead with the highest-level concept the body credibly supports for that role (an architecture style over a class-level pattern), never more than the body delivers. Article and post follow AIDA (Attention, Interest, Desire, Action; `skills/medium-publishing/references/aida-narrative.md`). For a widely covered topic they lead with non-obvious applications (architecture uses, where it hides in widely used frameworks), then principles, explanation, diagrams, code; each framework claim cites an official source checked on the day (`skills/medium-publishing/references/content-angle.md`).
 4. Approval gates, each asked separately when reached, none implied by "do it all": repo creation plus protection; repo topics; every PR merge (Phase 6 rule); Medium draft creation; Medium publish; the Medium back-link edit; LinkedIn post; editing or deleting an earlier post. Phase 0 only confirms they will be asked.
 5. Environment readiness: device bridge, `gh` auth, browser signed in to Medium and LinkedIn, toolchains installable user-locally (no admin).
 
@@ -65,43 +65,17 @@ Open the first PR with the code, docs, and `ci.yml`: one job per chosen language
 
 Merge rule (here and in Phases 8 and 10): merge only after the user names the specific PR number and base branch in the current session; when CI is green, state both and ask (the Phase 0 list is not that approval). Merge with squash.
 
-## Phase 7 - Medium Draft, Approval, Publish
+## Phases 7-10 - Medium, README Links, LinkedIn, Back-Links
 
-Build from the merged repo content, never from memory, in the Phase 0 angle order. Use `skills/medium-publishing`: paste-ready HTML (`build`, then `check` until clean) with images pinned to the merged commit SHA.
-
-1. Creating the draft in the user's account is an external write. Show title, subtitle, topics, preview image, and the full article text, labelled `NOT POSTED`, in its own message; ask for approval in a separate turn before creating anything.
-2. After approval, paste into a new story and verify in the editor DOM: image count, code-block count and languages, SHA-256 of each block against its repo file, no Markdown leftovers.
-3. Fill the publish dialog (title <= 100 characters, subtitle <= 140, <= 5 topics read back as chips; diagram as preview) and stop. Report the verification, ask for the publish approval as its own question; material edits need a new approval.
-4. After explicit publish approval, publish, verify the public page after the redirect, record `<story-url>`.
-
-## Phase 8 - README Link PR
-
-Branch plus PR that adds `<story-url>` to the repo README. CI green, then merge under the merge rule.
-
-## Phase 9 - LinkedIn Post With Diagram
-
-1. Draft the post text (hook, key points, repo link, `<story-url>`, hashtags per `tags-and-topics.md`). Well-known topic: hook = the non-obvious application, image = the architecture-application diagram (else the strongest); one line names the main principles; re-check at feed size.
-2. Show the full text and image, labelled `NOT POSTED`, in their own message; ask for approval in a separate turn.
-3. After explicit approval follow `skills/linkedin-publishing`: image first, text verified by hash; report the hash match and image preview, get a separate go-ahead to click Post, then post, record `<post-url>`, decline boost prompts.
-4. Earlier post: edit text or alt text in place. New image: post anew, edit a `More... <post-url>` first line into the old post, repoint the article and README links; delete the old post only if asked (`skills/linkedin-publishing/references/repost-and-delete.md`). Each is its own approval.
-
-## Phase 10 - Back-Links
-
-Edit the Medium story to add `<post-url>`: show the exact change labelled `NOT POSTED`, get approval, apply, "Save and publish", verify on the public page. Open a README PR adding `<post-url>`, CI green, merge under the merge rule. Final check: all six links resolve (repo, Medium, LinkedIn each point to the other two).
+Run the **study-publication-medium-linkedin** workflow (workflows/study-publication-medium-linkedin.md) in full: Medium draft, approval and publish (7), README link PR (8), LinkedIn post with diagram (9), back-links (10). Its Known pitfalls apply to this run; the merge rule of Phase 6 binds Phases 8 and 10.
 
 ## Known pitfalls
 
-- Put a single space on blank lines inside code blocks before pasting into Medium, then check one code box per listing. (sig: platform-quirk/medium-blank-line-splits-code-block)
 - Treat sandbox checks as best-effort; build definitively on the user's machine. (sig: env-constraint/sandbox-egress-blocks-registries)
-- Enforced by `skills/linkedin-publishing/scripts/check_upload_target.py` on every upload snippet; never click Send. (sig: safety-near-miss/linkedin-file-input-is-messaging)
 - Write each device commit to a fresh filename and verify it on the machine (a PNG by decoded pixels); an existing path can keep the old bytes. (sig: coordination/device-commit-stale-bytes)
 - Keep Mermaid sources on `Arial, Helvetica, sans-serif`, swap fonts only in the PNG renderer, and check labels on GitHub. (sig: platform-quirk/github-mermaid-font-clipping)
-- Click the exact topic suggestion in Medium's publish dialog and read the chips back; Enter adds the first suggestion. (sig: platform-quirk/medium-topic-autocomplete-swaps-topic)
-- Attach the LinkedIn diagram before pressing Post; media cannot be added afterwards. (sig: platform-quirk/linkedin-no-media-after-publishing)
 - Name required checks after stable single jobs, never matrix-expanded names, and confirm they report. (sig: tool-misuse/required-check-matrix-job-name)
-- Entity-encode non-ASCII characters before putting HTML on the Windows PowerShell 5.1 clipboard. (sig: env-constraint/powershell-clipboard-html-mangles-non-ascii)
 - Pipe `gh api` into `ConvertFrom-Json` in PowerShell instead of using `gh --jq`. (sig: tool-misuse/powershell-gh-jq-quoting)
 - Check each diagram at the destination size (Medium column, LinkedIn feed), not only on GitHub. (sig: quality-defect/diagram-illegible-at-destination)
-- Scan the editor's rendered HTML, not only the source Markdown, for leftovers such as `](http`. (sig: validation-gap/markdown-leftovers-in-rendered-html)
 - Drop a removed CI job from the required checks BEFORE merging the PR that removes it. (sig: coordination/required-check-removed-job)
 - Correlate every pattern with design and architecture principles (SOLID etc.) and their tension: principles page, article section, post line. (sig: spec-gap/pattern-not-correlated-with-principles)

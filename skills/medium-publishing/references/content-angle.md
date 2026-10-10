@@ -1,6 +1,6 @@
 ---
 title: Content angle for well-known topics
-tags: [medium, linkedin, content-angle, non-obvious-applications, citations, fact-table, design-patterns]
+tags: [medium, linkedin, content-angle, non-obvious-applications, citations, fact-table, design-patterns, aida]
 ---
 
 # Content angle for well-known topics
@@ -11,34 +11,49 @@ the standard explanation many times and most posts repeat it. So the article
 and the social post lead with what is rarely posted, and the standard
 explanation, diagrams and code follow. Nothing is removed; the order changes.
 
+The angle decides what leads; AIDA (Attention, Interest, Desire, Action) frames how the
+article and the post move from that opening to the close, and the non-obvious claim is the
+Attention. Both orders below are marked with their AIDA stage and agree with the mappings
+in [aida-narrative.md](aida-narrative.md).
+
 ## Article order
 
-1. Title, subtitle and opening paragraph promise the non-obvious part: one
-   concrete architecture-level use, or one surprising "it hides inside
-   `<framework>`" fact. Not "what is `<topic>`".
-2. **Highlight 1 - architecture applications.** Where the concept shapes a
+1. Attention: title, subtitle and opening paragraph promise the non-obvious
+   part: one concrete architecture-level use, or one surprising "it hides
+   inside `<framework>`" fact. Not "what is `<topic>`". The title names the
+   highest-level concept the body supports (`aida-narrative.md`).
+2. Interest: the problem paragraph, right after the hook: the problem, the
+   context, why it matters.
+3. Desire: a short "what you get" list (benefits and results the repo holds),
+   then the body below.
+4. **Highlight 1 - architecture applications.** Where the concept shapes a
    seam between services, modules or layers rather than between two classes.
    At least one diagram of it (the repo's architecture page is the source).
-3. **Highlight 2 - where it hides in widely used frameworks and libraries.**
+5. **Highlight 2 - where it hides in widely used frameworks and libraries.**
    Three to five appearances in `<framework>`, each cited (next section).
-4. **Principles behind it** (section below): how the pattern realises the
+6. **Principles behind it** (section below): how the pattern realises the
    design and architecture principles it applies, and where it can violate them.
-5. The standard explanation, in your own words, and the generic diagram.
-6. The worked example: example diagram and the code (whole repo files,
+7. The standard explanation, in your own words, and the generic diagram.
+8. The worked example: example diagram and the code (whole repo files,
    identical under the hash check of `editor-verification.md`, one block per file).
-7. Links (repo, post), curated videos, one closing takeaway.
+9. Action: a closing next-step section, the call to action: the outcome or
+   recommendation as the closing takeaway, then the links (repo, post) and the
+   curated videos.
 
-A reader new to the topic still needs steps 5 and 6, and the repo teaches
+A reader new to the topic still needs steps 7 and 8, and the repo teaches
 them; they just no longer open the article.
 
 ## Post order (LinkedIn or similar)
 
-- The first lines, before the "see more" cut, state the non-obvious claim.
-- Then two or three short points: one architecture use and one or two cited
-  framework appearances.
-- One line names the two or three main principles the pattern realises (from
-  the repo's principles page).
-- Then the article link and the repo link; one hashtag per important topic the
+- Attention: the first lines, before the "see more" cut (about 200
+  characters), state the non-obvious claim.
+- Interest: two or three lines on the problem, the context, and why it matters.
+- Desire: two or three short points (one architecture use and one or two cited
+  framework appearances, with the results), and one line naming the two or
+  three main principles the pattern realises (from the repo's principles page).
+- Action: the article link as the one primary call to action, the repo link
+  beside it, and one specific question.
+- After the Action, one hashtag per important topic the
   post names (main topic, principle acronyms, architecture concepts, language, named
   frameworks), none for topics it does not mention
   (`skills/multi-language-study-repo/references/tags-and-topics.md`).
@@ -141,6 +156,7 @@ the legibility check of `skills/image-quality-inspection/references/destination-
 - The post's image is the architecture diagram and reads at feed width.
 - Every code snippet that uses a framework API was checked against the cited page (rule 7).
 - Article and post agree.
+- The stage map of [aida-narrative.md](aida-narrative.md) is shown with the draft.
 
 The angle changes the order of content, not the approval gates: the full
 text is still shown as `NOT POSTED` first. Changing an already published
