@@ -145,7 +145,9 @@ Format rules (the guard depends on them):
 
 ## 4. Medium article
 
-Medium is produced from the same components, never retyped:
+This section applies only when the consumer's positioning profile asks for a full tutorial article. The default study article is the short system-design article of `skills/medium-publishing/references/system-design-article.md`: it links the repo's code-by-component page and carries at most the profile's code budget (toolkit default: one snippet of at most 15 lines, one contiguous unchanged range of a repo file), never the whole listing.
+
+For a full-tutorial profile the Medium article is produced from the same components, never retyped:
 
 - One section for all chosen languages' code, with the same five components in
   the same order. Per component: a short H3 heading, one sentence on its role,

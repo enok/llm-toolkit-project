@@ -7,7 +7,8 @@ tags: [study-repo, design-principles, solid, architecture-principles, docs, tens
 
 Standing requirement: every study repo correlates its pattern with the design and architecture
 principles it applies, not only with the pattern's own definition. The page is generic for any
-pattern. It feeds the article's "Principles behind it" section and the post's one principle line
+pattern. It feeds the article's required one-sentence principles line (the full "Principles behind it"
+section only for a full-tutorial profile) and the post's optional principles line
 (`skills/medium-publishing/references/content-angle.md`); the three quote the same facts.
 
 ## What the page must hold
@@ -57,7 +58,7 @@ words; never paste passages from it.
 - Attributions stay out unless sourced. Any statement of who coined or taught a principle, and any
   quote, needs a citation to a primary source (the originator's own publication) or is left out.
   Never attribute from memory.
-- Article table and post line are copied from this page, so update the page first.
+- The article's principles sentence (or table, for a full-tutorial profile) and the post's optional line are copied from this page, so update the page first.
 - The page is a normal doc: relative links and diagrams are covered by `scripts/check_docs.py`.
 
 ## Skeleton

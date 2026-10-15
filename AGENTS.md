@@ -130,6 +130,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill; **pptx-generator** / **powerpoint-slides** skills |
 | "Publish this on Medium" / "share on LinkedIn with a diagram" / "best YouTube video per language" | **medium-publishing**, **linkedin-publishing**, **youtube-video-curation** skills |
 | "Study a topic and publish repo, Medium and LinkedIn" / "study repo in one or more languages" / "reduce a study repo to one language" | **study-repo-to-publication** workflow + **multi-language-study-repo** skill |
+| "Write / replace / review a publication (article or post)" / "position this article for my target role" / "replace the published story and post" | **study-publication-medium-linkedin** workflow; **publication-reviewer** agent; **publication-positioning** rule |
 | "Security review" / "OWASP audit" / "threat model" | **security-report** workflow, **security**, **owasp-security-review**, **security-threat-model** skills |
 | "Cut a release" / "Maven release" / "E2E for release" | **release-manager**, **maven-release**, **e2e-release-verification** skills; **ticket-release** workflow |
 | "Load test" / "JMeter" | **jmeter-performance-testing** skill |
@@ -171,6 +172,7 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/log-analysis-safety.md`
 - `rules/multi-agent-orchestration.md`
 - `rules/operational-doc-required.md`
+- `rules/publication-positioning.md`
 - `rules/release-safety.md`
 - `rules/repository-context-layers.md`
 - `rules/request-orchestration.md`
@@ -319,8 +321,8 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
 | **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
 | **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
-| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, and an explicit approval gate |
-| **linkedin-publishing** | Post or repost on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard |
+| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
+| **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
 | **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 
 ### Data Science, Notebooks, And Pipelines
@@ -354,7 +356,7 @@ Skills marked toolkit-local in `skills/README.md` (documentation governance, sec
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (25 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (26 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `publication-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 

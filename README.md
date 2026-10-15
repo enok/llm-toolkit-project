@@ -8,10 +8,10 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 
 | Area | Path | Purpose |
 | --- | --- | --- |
-| Rules | `rules/` | 21 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
+| Rules | `rules/` | 22 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, publication positioning, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
 | Workflows | `workflows/` | 94 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
 | Skills | `skills/` | 97 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
-| Tool subagents | `tool-subagents/` | 25 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
+| Tool subagents | `tool-subagents/` | 26 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
@@ -53,7 +53,7 @@ learnings/         indexed gotchas (read learnings/INDEX.md first)
 
 1. **Rules** travel with every request (`rules/request-orchestration.md` routes non-trivial work; `rules/security-check-required.md`, `rules/human-comment-reply-gate.md`, and `rules/external-write-authorization.md` gate side effects).
 2. **`agent-orchestrator`** (`tool-subagents/agent-orchestrator.md`) splits multi-lane work into a wave-ordered task table, assigns each task a complexity tier and concrete model through `model-selector`, runs every delegated task as a bounded produce-validate-refine loop (`workflows/task-quality-loop.md`, max 5 iterations), keeps a durable state ledger (`CONTEXT_STATE.md` + `TASKS_TABLE.md`), and enforces a 30-minute SLA per task.
-3. **Read-only specialists** (`pr-validator`, `java-change-validator`, `documentation-reviewer`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `system-architecture-specialist`, `diagram-creation-specialist`, `confluence-documentation-specialist`, `prod-doc-promoter`, `task-quality-judge`, `verifier`, ...) return evidence, findings, and draft replies; the root agent owns edits, commits, pushes, and human-facing replies.
+3. **Read-only specialists** (`pr-validator`, `java-change-validator`, `documentation-reviewer`, `publication-reviewer`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `system-architecture-specialist`, `diagram-creation-specialist`, `confluence-documentation-specialist`, `prod-doc-promoter`, `task-quality-judge`, `verifier`, ...) return evidence, findings, and draft replies; the root agent owns edits, commits, pushes, and human-facing replies.
 4. Each specialist ships as a **skill** entrypoint plus a **validation** workflow and an **evolution** workflow; `workflows/specialist-agent-factory.md` creates new ones.
 
 ## Quick Start
@@ -133,6 +133,7 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Log Analysis Safety** | `rules/log-analysis-safety.md` | Read-only, bounded, redacted log analysis |
 | **Multi-Agent Orchestration** | `rules/multi-agent-orchestration.md` | Parallel fanout, tier and validator handoff, when to serialize |
 | **Operational Doc Required** | `rules/operational-doc-required.md` | Recurring operations become runbooks; metric catalogs and wiki backup gates |
+| **Publication Positioning** | `rules/publication-positioning.md` | Read the consumer's publication profile first; AIDA order, budgets, sourced claims, `NOT POSTED` drafts, and a `publication-reviewer` pass before any draft is shown as ready |
 | **Release Safety** | `rules/release-safety.md` | Deploy order, verification, rollback, completion evidence |
 | **Repository Context Layers** | `rules/repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md` and provider pointers |
 | **Request Orchestration** | `rules/request-orchestration.md` | Routing into specialists, model-selection contract, quality loops, safety boundaries |
@@ -157,8 +158,8 @@ See `workflows/README.md` for the categorized catalog of all 94 workflows. Highl
 | `workflows/document-creation.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/confluence-documentation.md`, `workflows/markdown-pdf-export.md` | Docs, diagrams, wiki, and PDF export |
 | `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/toolkit-maintenance.md`, `workflows/chat-knowledge-curation.md`, `workflows/context-compaction.md` | Growing and maintaining the toolkit itself |
 | `workflows/thesis-writing-main.md`, `workflows/notebook-analysis.md`, `workflows/data-pipeline-change.md`, `workflows/ml-experiment.md` | Data-science and thesis work |
-| `workflows/study-repo-to-publication.md` | Study topic to a protected repo (one or more languages), a Medium article, and a LinkedIn post that lead with non-obvious applications for well-known topics, with bidirectional links and approval gates |
-| `workflows/study-publication-medium-linkedin.md` | Phases 7-10 of the study flow: Medium article and LinkedIn post in AIDA order with role-positioned titles, README link PRs, and back-links behind separate approval gates |
+| `workflows/study-repo-to-publication.md` | Study topic to a protected repo (one or more languages), a short profile-positioned Medium article, and a LinkedIn teaser post, validated by `check_publication.py` and `publication-reviewer`, with bidirectional links, a drafts-only mode, and approval gates |
+| `workflows/study-publication-medium-linkedin.md` | Phases 7-10 of the study flow: short system-design-first Medium article and LinkedIn teaser in AIDA order, a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replace-published-story path behind separate approval gates |
 | `workflows/run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes, append the run record, promote recurring mistakes, report trend metrics |
 
 All workflows by area:
@@ -294,8 +295,8 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
 | **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
 | **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
-| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, and an explicit approval gate |
-| **linkedin-publishing** | Post or repost on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard |
+| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
+| **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
 | **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 
 #### Data Science, Notebooks, And Pipelines
@@ -327,7 +328,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 
 ## Tool Subagents
 
-`tool-subagents/README.md` lists all 25 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, and cross-repo impact.
+`tool-subagents/README.md` lists all 26 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, and cross-repo impact.
 
 ## Integrations
 

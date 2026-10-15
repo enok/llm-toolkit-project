@@ -27,6 +27,7 @@ Match the validator to the task's evidence type; use `task-quality-judge` when n
 | Code change / diff | `code-reviewer` (+ `test-runner` when tests exist) |
 | Test selection / build evidence | `test-runner` |
 | Documentation, runbooks, generated LLM surfaces | `documentation-reviewer` |
+| Public article and social post drafts | `publication-reviewer` (with `skills/medium-publishing/scripts/check_publication.py`) |
 | Java changes | `java-change-validator` |
 | Security-sensitive work | `security-auditor` or `owasp-security-auditor` |
 | Diagrams / exported images | `diagram-creation-specialist` |

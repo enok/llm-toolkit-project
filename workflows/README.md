@@ -103,8 +103,8 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `bilingual-doc-sync.md` | Keep English and localized documentation or notebooks aligned during code and analysis changes |
 | `paired-doc-sync.md` | Keep paired docs, notebooks, and deliverables synchronized across languages or presentation variants |
 | `translation-sync.md` | Keep English and translated docs, labels, and examples synchronized after changes |
-| `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a Medium article and a LinkedIn post that lead with non-obvious applications for well-known topics, all linked both ways behind separate approval gates |
-| `study-publication-medium-linkedin.md` | Publish a merged study repo as a Medium article and a LinkedIn post in AIDA order with role-positioned titles, README link PRs, and back-links, behind separate approval gates (Phases 7-10 of `study-repo-to-publication.md`) |
+| `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a short profile-positioned Medium article and a LinkedIn teaser post validated by `check_publication.py` and `publication-reviewer`, all linked both ways behind separate approval gates |
+| `study-publication-medium-linkedin.md` | Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post in AIDA order per the consumer's positioning profile, with a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replacement path for live pieces, behind separate approval gates (Phases 7-10 of `study-repo-to-publication.md`) |
 
 ### Data Science, Thesis, And Notebooks
 
