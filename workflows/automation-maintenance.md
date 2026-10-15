@@ -47,6 +47,27 @@ enough search context.
 4. Report the automation ID, schedule, status, thread binding, and any changed
    fields.
 
+## Moving folders that automations use
+
+When a folder that an automation reads or writes is renamed, moved, or
+reorganized:
+
+- Before the first move, pause every automation that touches the folder and
+  write a recovery record (ID, enabled state before the pause, next run, pause
+  time) so any session can re-enable exactly those; re-enable an automation only
+  once every path it uses resolves. An attached folder is not editable through
+  the scheduling API: update the prompt through the API, then have the user
+  switch the attached folder in the task settings and re-enable it; prefer
+  attaching a stable parent folder. See learnings/scheduled-task-attached-folder-rename.md.
+- In a cloud-synced folder (for example Google Drive for desktop), rename and
+  move in place so file and folder IDs survive, overwrite edited files in place,
+  move (never re-create) pointer files, and ignore client-managed `desktop.ini`
+  files when verifying counts. See learnings/google-drive-desktop-folder-reorg.md.
+- When the files live on the user's computer and the session reaches them
+  through a device bridge, move files with the file-transfer tools (never large
+  pasted base64), refresh mounted files with `cat new > old`, and run whole-tree
+  scans natively on the computer. See learnings/cloud-session-device-bridge-file-io.md.
+
 ## Failure handling
 
 - If the requested automation cannot be uniquely identified, ask one concise
