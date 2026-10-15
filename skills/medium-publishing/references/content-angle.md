@@ -1,54 +1,89 @@
 ---
 title: Content angle for well-known topics
-tags: [medium, linkedin, content-angle, non-obvious-applications, citations, fact-table, design-patterns]
+tags: [medium, linkedin, content-angle, non-obvious-applications, citations, fact-table, design-patterns, aida, full-tutorial, teaser, positioning-profile]
 ---
 
 # Content angle for well-known topics
 
 Use this when the topic is widely covered: design patterns, common
 algorithms, standard data structures, textbook protocols. Readers have met
-the standard explanation many times and most posts repeat it. So the article
-and the social post lead with what is rarely posted, and the standard
-explanation, diagrams and code follow. Nothing is removed; the order changes.
+the standard explanation many times and most posts repeat it, so a piece that repeats it
+earns no attention.
 
-## Article order
+The publication profile ([positioning-profile.md](positioning-profile.md)) decides which shape
+applies:
 
-1. Title, subtitle and opening paragraph promise the non-obvious part: one
-   concrete architecture-level use, or one surprising "it hides inside
-   `<framework>`" fact. Not "what is `<topic>`".
-2. **Highlight 1 - architecture applications.** Where the concept shapes a
+- Default, system-design-first: the article is a short system design story with the study topic
+  inside it ([system-design-article.md](system-design-article.md)) and the post is a short teaser
+  (post order below). Non-obvious applications and cited framework facts are supporting evidence in
+  the body, never the hook, and the standard explanation, diagrams and code stay in the repo.
+- Full tutorial, only when the profile asks for it: the article and the post lead with what is
+  rarely posted (the non-obvious application or the cited framework fact), and the standard
+  explanation, diagrams and code follow (article order below). Nothing is removed; the order changes.
+
+AIDA (Attention, Interest, Desire, Action) frames how the article and the post move from the
+opening to the close. Both orders below are marked with their AIDA stage and agree with the
+mappings in [aida-narrative.md](aida-narrative.md).
+
+## Article order (full-tutorial profile only)
+
+Use this order only when the profile asks for a full tutorial. The default article is
+[system-design-article.md](system-design-article.md).
+
+1. Attention: title, subtitle and opening paragraph promise the non-obvious
+   part: one concrete architecture-level use, or one surprising "it hides
+   inside `<framework>`" fact. Not "what is `<topic>`". The title names the
+   highest-level concept the body supports (`aida-narrative.md`).
+2. Interest: the problem paragraph, right after the hook: the problem, the
+   context, why it matters.
+3. Desire: a short "what you get" list (benefits and results the repo holds),
+   then the body below.
+4. **Highlight 1 - architecture applications.** Where the concept shapes a
    seam between services, modules or layers rather than between two classes.
    At least one diagram of it (the repo's architecture page is the source).
-3. **Highlight 2 - where it hides in widely used frameworks and libraries.**
+5. **Highlight 2 - where it hides in widely used frameworks and libraries.**
    Three to five appearances in `<framework>`, each cited (next section).
-4. **Principles behind it** (section below): how the pattern realises the
+6. **Principles behind it** (section below): how the pattern realises the
    design and architecture principles it applies, and where it can violate them.
-5. The standard explanation, in your own words, and the generic diagram.
-6. The worked example: example diagram and the code (whole repo files,
+7. The standard explanation, in your own words, and the generic diagram.
+8. The worked example: example diagram and the code (whole repo files,
    identical under the hash check of `editor-verification.md`, one block per file).
-7. Links (repo, post), curated videos, one closing takeaway.
+9. Action: a closing next-step section, the call to action: the outcome or
+   recommendation as the closing takeaway, then the links (repo, post) and the
+   curated videos.
 
-A reader new to the topic still needs steps 5 and 6, and the repo teaches
+A reader new to the topic still needs steps 7 and 8, and the repo teaches
 them; they just no longer open the article.
 
-## Post order (LinkedIn or similar)
+## Post order (LinkedIn or similar): the teaser
 
-- The first lines, before the "see more" cut, state the non-obvious claim.
-- Then two or three short points: one architecture use and one or two cited
-  framework appearances.
-- One line names the two or three main principles the pattern realises (from
-  the repo's principles page).
-- Then the article link and the repo link; one hashtag per important topic the
-  post names (main topic, principle acronyms, architecture concepts, language, named
-  frameworks), none for topics it does not mention
+The post is a short teaser whose job is to send readers to the article. Its budgets come from the
+profile; toolkit defaults are at most 1,300 characters in total and a hook of at most 200.
+
+- Attention: the hook is the first paragraph of the post (the text before the first blank line),
+  at most the profile's hook budget (default 200 characters), and states the system design problem
+  or capability (under a full-tutorial profile only: the non-obvious claim). No study-topic name in
+  the hook under a system-design-first profile (`check_publication.py post --forbid <topic>`).
+- Interest: two or three lines on the problem, the context, and why it matters.
+- Desire: two or three short points on what the article shows: a design decision and its
+  trade-off, a result the repo holds (under a full-tutorial profile: one architecture use and one or
+  two cited framework appearances). A line naming the two or three main principles the pattern
+  realises (from the repo's principles page) is optional here; the article carries the required
+  sentence.
+- Action: the article link as the one primary call to action, the repo link optional and
+  secondary, and one specific question.
+- After the Action, at most 5 hashtags (or the profile cap), chosen by positioning with the
+  profile's primary focus first, each named in the post text, none for topics it does not mention
   (`skills/multi-language-study-repo/references/tags-and-topics.md`).
-- The image is the architecture-application diagram, checked at feed width.
-  The generic diagram is only a fallback when no architecture view exists.
+- The image is the article's hero diagram, checked at feed width (under a full-tutorial profile:
+  the architecture-application diagram). The generic diagram is only a fallback when no
+  architecture view exists.
 - The post claims nothing the article's fact table does not hold.
 
 ## Citing "hidden in `<framework>`" claims
 
-Every such claim is a row in a fact table kept with the repo (in the
+This section applies whenever a piece claims a framework appearance: at most two in the short
+article, three to five in a full tutorial. Every such claim is a row in a fact table kept with the repo (in the
 architecture page, or a docs page of its own when the repo has no architecture
 view), so the article and the post quote the same checked text:
 
@@ -72,8 +107,8 @@ Rules:
 4. **Unreachable source** (sandbox egress block, HTTP 403): the claim is
    unverified. Check it from the user's machine or drop it. Never fill the
    gap from memory.
-5. **Few and solid**: three to five cited claims beat ten weak ones. A claim
-   that fails the check is dropped, not softened.
+5. **Few and solid**: a few cited claims beat many weak ones (at most two in the short article,
+   three to five in a full tutorial). A claim that fails the check is dropped, not softened.
 6. Quote sparingly, with attribution, and link for the rest.
 7. **Snippets obey the cited doc.** Check every code snippet that uses a framework API against
    the cited official page before the approval gate: methods the page describes as
@@ -85,7 +120,8 @@ Rules:
 Look for seams where behavior is selected or plugged in: a policy chosen by
 configuration at a service boundary, per-tenant or per-market rules behind
 one port, interchangeable adapters behind a contract. For each one state what
-varies, what must stay fixed, the gain and the cost. Boxes in the diagram are
+varies, what must stay fixed, the gain and the cost. In the short article these seams are the
+design decisions and this view is the hero diagram. Boxes in the diagram are
 components or services, not classes; draw it with
 `skills/diagram-authoring/SKILL.md` and check it at the destination width
 (`skills/image-quality-inspection/SKILL.md`).
@@ -93,12 +129,15 @@ components or services, not classes; draw it with
 ## Principles behind it
 
 Every study article correlates the pattern with other design and architecture
-principles, also when the topic is not widely covered. The source is the repo's
+principles, also when the topic is not widely covered. In the short system-design article this is
+REQUIRED as ONE sentence in the "where the pattern lives" section naming the main principles the
+design realises, plus a link to the repo's principles page; in a teaser post it is optional; the
+full section below is the full-tutorial form only. The source is the repo's
 `docs/06-design-principles.md`
 (`skills/multi-language-study-repo/references/design-principles-doc.md`); the
-article and the post quote it and add nothing the page does not hold. Place the
-section after the architecture and framework sections, before or inside the
-standard explanation. Contents:
+article and the post quote it and add nothing the page does not hold. In the
+full-tutorial form, place the section after the architecture and framework
+sections, before or inside the standard explanation. Contents:
 
 | Principle | How the pattern realises it | Where it can be violated |
 | --- | --- | --- |
@@ -133,17 +172,26 @@ the legibility check of `skills/image-quality-inspection/references/destination-
 
 ## Before the approval gate
 
-- The opening promises the non-obvious angle; the standard material follows.
+- The profile is named in the draft message; `check_publication.py` exits 0 on the article and on
+  the post, and the `publication-reviewer` verdict is `pass`.
+- The opening matches the profile: the system design problem (default) or the non-obvious angle
+  (full tutorial). The standard material follows only in a full tutorial; otherwise it stays in the repo.
 - Every framework claim has a fact-table row with an official source and a
   check date on the day (see rule 2).
-- The "Principles behind it" section matches the repo's principles page, with
-  the tension; the post names the main principles in one line.
-- The post's image is the architecture diagram and reads at feed width.
+- The principles match the repo's principles page, with the tension: the required one sentence in
+  the short article, the "Principles behind it" section in a full tutorial; a teaser post may
+  carry one line naming them.
+- The post's image is the hero diagram (full tutorial: the architecture diagram) and reads at feed width.
 - Every code snippet that uses a framework API was checked against the cited page (rule 7).
 - Article and post agree.
+- The stage map of [aida-narrative.md](aida-narrative.md) is shown with the draft.
 
 The angle changes the order of content, not the approval gates: the full
-text is still shown as `NOT POSTED` first. Changing an already published
+text is still shown as `NOT POSTED` first. The profile's approval mode (`gated` or `drafts-only`)
+decides which external writes are pre-approved: in `drafts-only` only the creation of the two
+drafts is. Changing an already published
 story is an edit that needs approval; a published LinkedIn post cannot change
 its media, so a new image means a new post with a "More..." pointer in the old post
-(`skills/linkedin-publishing/references/repost-and-delete.md`).
+(`skills/linkedin-publishing/references/repost-and-delete.md`). A published piece whose shape
+misses the profile is replaced, not retitled
+([replace-published-story.md](replace-published-story.md)).

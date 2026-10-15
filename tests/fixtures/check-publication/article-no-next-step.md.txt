@@ -1,0 +1,53 @@
+# Retry policies are a gateway capability, not a client detail
+
+Most services hardcode one retry rule inside every client. When the rule has to change, every caller changes with it, and nobody can say which routes retry what.
+
+## The problem
+
+A checkout call, a nightly export and a payment write all fail differently. The checkout call needs a fast retry with jitter. The export can wait and try again every minute. The payment write must never be retried blindly, because a duplicate charge costs more than a failed request.
+
+When the rule lives inside each client, three things go wrong. The rules drift apart as teams copy and tweak them. Tests need real clocks and real sleeps. And a change of policy becomes a change of code in many repositories.
+
+## What you get
+
+- One place that decides how a route retries.
+- Policies you can test in microseconds with a fake clock.
+- A different rule for each call site, without a chain of conditionals.
+
+## The design
+
+The client asks a policy object for the next delay and for whether it may try again. The policy is chosen per route by the gateway, so the client never learns which rule it follows.
+
+```java
+public interface RetryPolicy {
+    Optional<Duration> nextDelay(int attempt, Throwable failure);
+}
+
+public final class ExponentialBackoff implements RetryPolicy {
+    public Optional<Duration> nextDelay(int attempt, Throwable failure) {
+        if (attempt >= 5) {
+            return Optional.empty();
+        }
+        long millis = 100L << attempt;
+        return Optional.of(Duration.ofMillis(millis));
+    }
+}
+```
+
+A fixed delay and a never-retry policy implement the same interface in a few lines each. The repository holds all three, the class diagram and the tests.
+
+![Class diagram](https://raw.githubusercontent.com/example-owner/retry-policies/0123456789abcdef0123456789abcdef01234567/docs/diagrams/class.png)
+
+## The architecture view
+
+Seen from the system, the same idea is a resilience policy table at the gateway: one row per route, one policy per row. Changing a row changes behaviour for every client behind that route, and the table is the single document a reviewer has to read.
+
+![Gateway policy table](https://raw.githubusercontent.com/example-owner/retry-policies/0123456789abcdef0123456789abcdef01234567/docs/diagrams/gateway.png)
+
+## Links
+
+Open the repository, run the tests and swap the policy for one route. Then tell me which retry rule has bitten you in production.
+
+- Repository: https://github.com/example-owner/retry-policies
+- LinkedIn post: https://www.linkedin.com/feed/update/urn:li:activity:0000000000000000000/
+- Video: https://www.youtube.com/watch?v=example

@@ -547,6 +547,9 @@ When invoked:
      chats, automations, scripts, or humans, including generated LLM surfaces,
      PR bodies, release notes, runbooks, wiki drafts, diagrams, and rendered
      artifacts;
+   - `publication-reviewer` for public article and social post drafts before
+     they are shown as ready: profile budgets, AIDA stage map, title and hook
+     positioning, sourced claims, hashtags, and article-post agreement;
    - `confluence-documentation-specialist` for Confluence page state, hierarchy,
      comments, attachments, rendered wiki evidence, and source-to-wiki drift;
    - `diagram-creation-specialist` for C4, AWS, sequence, Mermaid, PlantUML,
@@ -570,7 +573,7 @@ When invoked:
 5. Assign each task a complexity tier and produce a compact delegation plan: agent, task, inputs, expected output, write ownership, complexity tier, the requested model/effort taken from the client model map (see "Complexity tiering" below — mandatory on every dispatch whose platform exposes a model parameter), acceptance criteria, validator assignment, loop budget, and whether it can run in parallel.
 6. Run every delegated task as a bounded produce->validate->refine quality loop per `workflows/task-quality-loop.md`:
    - before dispatch, write verifiable acceptance criteria (mandatory vs advisory): for ticket-driven work the ticket's acceptance criteria are the mandatory set (subtasks must also stay aligned with the parent ticket's goal); if the goal cannot be made verifiable, pause and ask the user for clarification instead of starting the loop;
-   - assign a validator matched to the task's evidence type (`code-reviewer`, `test-runner`, `documentation-reviewer`, `java-change-validator`, `security-auditor`, `diagram-creation-specialist`, `pr-validator`, `dag-glue-specialist`, `terraform-specialist` (mandatory for Terraform/OpenTofu evidence), `system-architecture-specialist`, `log-analyst`; `task-quality-judge` or `verifier` when no domain specialist fits);
+   - assign a validator matched to the task's evidence type (`code-reviewer`, `test-runner`, `documentation-reviewer`, `publication-reviewer` (article and post drafts), `java-change-validator`, `security-auditor`, `diagram-creation-specialist`, `pr-validator`, `dag-glue-specialist`, `terraform-specialist` (mandatory for Terraform/OpenTofu evidence), `system-architecture-specialist`, `log-analyst`; `task-quality-judge` or `verifier` when no domain specialist fits);
    - the validator is always a separate invocation from the producer, read-only, and returns a structured verdict (`pass`/`fail`/`escalate`) with a numbered defect list classed `mechanical` or `reasoning`;
    - on `fail`, feed only the defect list back to the producer for a targeted refinement; **max 5 iterations per task** (budget 1 for deterministic `light` tasks — one production pass, one validation pass, no refinement);
    - after 2 consecutive `reasoning`-classed failures, escalate the producer one tier for the next iteration (platform-confirmed mechanism only);

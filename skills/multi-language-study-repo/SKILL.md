@@ -50,7 +50,7 @@ Explain the topic in your own words; never paste book passages.
 | 4 | Diagram specific to the example | `docs/04-example-diagram.md` + `docs/diagrams/` |
 | 5 | Code in every chosen language, component by component (one language: one folder, same page) | `docs/05-code-by-component.md` (generated) + one folder per language |
 | 6 | Design and architecture principles the pattern applies (SOLID, object-oriented, general, architecture), how each is realised, the tension and when not to use it ([design-principles-doc.md](references/design-principles-doc.md)) | `docs/06-design-principles.md` |
-| 9 | Architecture-level application, with diagrams (only if applicable; otherwise one line in the README saying why not); widely covered topic: also cited framework appearances in a fact table (`skills/medium-publishing/references/content-angle.md`) | `docs/09-architecture-perspective.md` |
+| 9 | Architecture-level application, with diagrams (only if applicable; otherwise one line in the README saying why not); it is also the source of the system design (hero) diagram of the short article (`skills/medium-publishing/references/system-design-article.md`); widely covered topic: also cited framework appearances in a fact table (`skills/medium-publishing/references/content-angle.md`) | `docs/09-architecture-perspective.md` |
 | 10 | Best video per chosen language, curated and verified (`youtube-video-curation`) | `docs/10-videos.md` |
 
 Also: `README.md` (index, run commands, links), `LICENSE`,
@@ -104,7 +104,11 @@ same whatever the language set.
     the article and post drafts, and a grown list re-sets the topics with a new
     approval ([tags-and-topics.md](references/tags-and-topics.md)).
 
-Then hand the finished repo to the publication stage.
+Then hand the finished repo to the publication stage. The repo is the complete teaching material;
+the publication stage shows a short system-design-first article and a teaser post that link to it
+and do not repeat it
+(`skills/medium-publishing/references/system-design-article.md`,
+`skills/medium-publishing/references/positioning-profile.md`).
 
 ## Reducing the language set later
 
@@ -192,7 +196,7 @@ config to copy.
 | [golden-table-spec.md](references/golden-table-spec.md) | Shared example spec: integer money, golden table, exact demo text, naming map (one column per chosen language) |
 | [code-by-component.md](references/code-by-component.md) | Component-first page (works with one language), GitHub `<details>` and Medium formats, config schema |
 | [design-principles-doc.md](references/design-principles-doc.md) | The principles page: required sections, principle checklist, tension, architecture correlation, citation rule, skeleton |
-| [tags-and-topics.md](references/tags-and-topics.md) | One tag list derived from the finished content; GitHub topics, Medium topics, LinkedIn hashtags (formats, limits, approvals) |
+| [tags-and-topics.md](references/tags-and-topics.md) | One tag list derived from the finished content; GitHub topics, Medium topics, LinkedIn hashtags (formats, limits, the hashtag cap, approvals) |
 | [toolchain-notes.md](references/toolchain-notes.md) | Per-language notes (Java 25, Python 3.12+, Node 24, TypeScript 7; read only the chosen ones), sandbox limits, user-local installs |
 
 ## Known pitfalls
@@ -200,8 +204,8 @@ config to copy.
 - Derive the tag list from the finished docs, then extend it from the article and post drafts
   (main topic, principles and acronyms, architecture concepts covered, language, named
   frameworks), keep it in one ledger, and check each destination's tags against it: GitHub
-  topics (the at most 20 the repo backs), Medium's five, post hashtags
-  ([tags-and-topics.md](references/tags-and-topics.md)).
+  topics (the at most 20 the repo backs), Medium's five, post hashtags (at most 5 or the profile
+  cap, chosen by positioning) ([tags-and-topics.md](references/tags-and-topics.md)).
   (sig: spec-gap/tags-miss-important-topics)
 
 ## Related

@@ -1,0 +1,10 @@
+# Example profile with a broken settings block
+
+The block below has a trailing comma, so `--profile` stops with exit code 2 and says where.
+
+```json
+{
+  "post": {"max_chars": 1300, "max_hashtags": 5,},
+  "article": {"max_words": 1300}
+}
+```

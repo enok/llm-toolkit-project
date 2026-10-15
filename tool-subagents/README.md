@@ -29,6 +29,7 @@ Every agent is a pair: `<name>.md` (YAML frontmatter — `name`, `description`, 
 | `dag-glue-specialist` | Read-only Airflow DAG, MWAA, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation |
 | `system-architecture-specialist` | Read-only application architecture, service boundary, data-flow, integration, and quality-attribute review |
 | `diagram-creation-specialist` | Read-only source-grounded diagram planning, notation, export, and image-quality validation |
+| `publication-reviewer` | Read-only validator for public article and social post drafts: profile budgets, AIDA stage map, title and hook positioning, sourced claims, hashtags, and article-post agreement |
 | `documentation-sync` | Docs and changelog drift |
 | `documentation-reviewer` | Read-only review for documentation created or changed by agents, chats, automations, scripts, or humans |
 | `confluence-documentation-specialist` | Read-only Confluence page, hierarchy, attachment, comment, and source-to-wiki validation |

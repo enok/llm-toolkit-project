@@ -85,10 +85,13 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | academic or thesis defense deck | `powerpoint-slides` | skill | `pptx-generator` |
 | convert PDF / DOCX / XLSX / Markdown | `document-conversion` | skill | `markdown-pdf-export` |
 | keep bilingual or paired docs in sync / translation drift | `bilingual-doc-sync` / `paired-doc-sync` / `translation-sync` | workflow | `documentation-reviewer` |
-| publish this article on Medium / turn this repo into a Medium story / fix a published Medium story / order a well-known topic's article by non-obvious applications first | `medium-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
+| publish this article on Medium / turn this repo into a Medium story / fix a published Medium story / write the short system-design-first study article (default; the non-obvious-applications-first order is for a full-tutorial profile only) | `medium-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
 | share this on LinkedIn with a diagram / repost with an image / replace my LinkedIn post | `linkedin-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
 | find the best YouTube video per language / verify these video links | `youtube-video-curation` | skill | `multi-language-study-repo`, `medium-publishing` |
 | study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `multi-language-study-repo`, `diagram-authoring`, `youtube-video-curation`, `medium-publishing`, `linkedin-publishing` |
+| publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `medium-publishing`, `linkedin-publishing`, `diagram-authoring`, `rules/external-write-authorization.md` |
+| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `medium-publishing`, `linkedin-publishing`, `publication-reviewer` |
+| review this article or post before I approve it / check a draft against my publication profile | `publication-reviewer` | subagent | `rules/publication-positioning.md`, `skills/medium-publishing/scripts/check_publication.py`, `documentation-reviewer` |
 
 ## Security
 
