@@ -108,6 +108,8 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`windows-text-stdout-crlf.md`](./windows-text-stdout-crlf.md) — Windows text-mode stdout writes CRLF, which broke subprocess output assertions; normalise newlines in the test helper before asserting (`windows`, `crlf`, `newline`, `subprocess`, `test-helpers`).
 - [`device-bridge-transfer-reencodes-png-compare-decoded-pixels.md`](./device-bridge-transfer-reencodes-png-compare-decoded-pixels.md) — A device-bridge transfer can re-encode a PNG: byte hashes differ while pixels match, so compare decoded pixels (`device-bridge`, `png`, `re-encode`, `checksum`, `pixels`).
 - [`synced-folder-fresh-file-staging-refused-as-hardlinked.md`](./synced-folder-fresh-file-staging-refused-as-hardlinked.md) — Staging a file just written into a cloud-synced folder can be refused as "hardlinked"; wait for the sync to settle and retry the same file, no extra copy (`device-bridge`, `staging`, `cloud-sync`, `hardlink`).
+- [`cloud-session-device-bridge-file-io.md`](./cloud-session-device-bridge-file-io.md) — Cloud session ↔ user PC over the device bridge: move files with SendUserFile + device_commit_files (md5), refresh with `cat new > old` (mount refuses unlink), run whole-tree scans natively via Desktop Commander, never paste large base64 into a heredoc (`device-bridge`, `device_bash`, `desktop-commander`, `base64`, `mount`, `unlink`, `md5`).
+- [`google-drive-desktop-folder-reorg.md`](./google-drive-desktop-folder-reorg.md) — Reorganize a Google Drive for desktop folder by renaming/moving in place (IDs survive), overwrite edited files in place, move never copy `.gsheet`/`.gdoc` pointers, and ignore Drive's own `desktop.ini` churn when verifying (`google-drive`, `file-id`, `folder-id`, `rename`, `desktop.ini`, `reorg`).
 
 ### Agent Behavior / Validation
 
@@ -136,3 +138,4 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [ ] Line appended to the appropriate category above in this INDEX.
 - [ ] User approval gate passed (per `workflows/capture-learning.md` §6).
 - [ ] Committed with a descriptive message.
+- [`scheduled-task-attached-folder-rename.md`](./scheduled-task-attached-folder-rename.md) — A computer-bound scheduled task's attached folder cannot be changed via the scheduling API: pause with a recovery record before a folder move, attach a stable parent folder, update prompts, and have the user switch the folder and re-enable (`scheduled-task`, `trigger`, `attached-folder`, `pause`, `resume`, `cowork`).
