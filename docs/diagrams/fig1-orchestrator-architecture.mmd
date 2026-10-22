@@ -1,0 +1,53 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "20px", "background": "#FFFFFF", "primaryColor": "#FFFFFF", "primaryBorderColor": "#1B1F23", "primaryTextColor": "#1B1F23", "secondaryColor": "#FDDCB5", "tertiaryColor": "#F5F7FA", "lineColor": "#3D4650", "textColor": "#1B1F23", "mainBkg": "#FFFFFF", "nodeBorder": "#1B1F23", "clusterBkg": "#F5F7FA", "clusterBorder": "#9AA5B1", "edgeLabelBackground": "#FFFFFF", "noteBkgColor": "#FFF6D6", "noteBorderColor": "#B8860B", "noteTextColor": "#1B1F23", "actorBkg": "#B8E2B4", "actorBorder": "#2F6B35", "actorTextColor": "#1B1F23", "actorLineColor": "#7A8794", "signalColor": "#3D4650", "signalTextColor": "#1B1F23", "labelBoxBkgColor": "#F5F7FA", "labelBoxBorderColor": "#7A8794", "labelTextColor": "#1B1F23", "loopTextColor": "#1B1F23", "activationBkgColor": "#DDEFDB", "activationBorderColor": "#2F6B35", "sequenceNumberColor": "#FFFFFF", "classText": "#1B1F23"}, "htmlLabels": false, "flowchart": {"wrappingWidth": 320, "curve": "linear", "nodeSpacing": 50, "rankSpacing": 60, "padding": 16, "htmlLabels": false}, "sequence": {"actorMargin": 50, "messageMargin": 38, "boxMargin": 10, "noteMargin": 10, "mirrorActors": false, "useMaxWidth": false}, "class": {"padding": 12, "htmlLabels": false}, "fontFamily": "Arial, Helvetica, sans-serif"}}%%
+flowchart TB
+    U(["User prompt"])
+    RI["AGENTS.md rules<br/>INTENTS.md router<br/>one primary capability"]
+    O["Thin root orchestrator<br/>split, assign, dispatch"]
+    C["Ledger, root-written<br/>TASKS_TABLE.md<br/>CONTEXT_STATE.md<br/>state, facts, resume"]
+    M["model-selector tiers<br/>each task, then wave<br/>dispatch carries task,<br/>criteria, constraints,<br/>ledger path"]
+    T(["Trivial request:<br/>answered inline"])
+    L1["light → haiku<br/>retrieve, scan,<br/>run tests"]
+    L2["standard → sonnet<br/>draft, review,<br/>reduce evidence"]
+    L3["deep → opus<br/>architecture,<br/>security"]
+    V["Validator ≠ producer<br/>four-block return<br/>fail → refine, max 5 iterations"]
+    X["Root = frontier tier<br/>(the session model)<br/>reduces, judges,<br/>owns all writes"]
+    G{"Exact user<br/>instruction?"}
+    E(["Yes: external write<br/>PR, email, chat"])
+    N(["No: draft NOT POSTED<br/>ask for approval"])
+    R["Retrospective<br/>run record"]
+    P["Promote:<br/>learning,<br/>checklist,<br/>guard, rule"]
+
+    U ==> RI
+    RI ==> O
+    O <-.-> C
+    O ==> M
+    O -.-> T
+    M ==> L1
+    M ==> L2
+    M ==> L3
+    L1 <==> V
+    L2 <==> V
+    L3 <==> V
+    V ==> X
+    X ==> G
+    G --> E
+    G --> N
+    X --> R
+    R --> P
+    P -.-> RI
+
+    classDef client fill:#FFFFFF,stroke:#1B1F23,stroke-width:2.5px,color:#1B1F23
+    classDef context fill:#B8E2B4,stroke:#2F6B35,stroke-width:2.5px,color:#1B1F23
+    classDef strategy fill:#FDDCB5,stroke:#B35C0F,stroke-width:2.5px,color:#1B1F23
+    classDef concrete fill:#F7B267,stroke:#B35C0F,stroke-width:2.5px,color:#1B1F23
+    classDef data fill:#BBDDF7,stroke:#1F5FA8,stroke-width:2.5px,color:#1B1F23
+    classDef external fill:#FFFFFF,stroke:#3D4650,stroke-width:2px,stroke-dasharray:6 4,color:#1B1F23
+
+    class U client
+    class O,X context
+    class RI,M,R,P strategy
+    class L1,L2,L3,V concrete
+    class C data
+    class T,G,E,N external
+    linkStyle 13,14,15,16 stroke-width:2.5px
+    linkStyle 2,4,17 stroke-width:2.5px,stroke-dasharray:8 5

@@ -1,0 +1,45 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "20px", "background": "#FFFFFF", "primaryColor": "#FFFFFF", "primaryBorderColor": "#1B1F23", "primaryTextColor": "#1B1F23", "secondaryColor": "#FDDCB5", "tertiaryColor": "#F5F7FA", "lineColor": "#3D4650", "textColor": "#1B1F23", "mainBkg": "#FFFFFF", "nodeBorder": "#1B1F23", "clusterBkg": "#F5F7FA", "clusterBorder": "#9AA5B1", "edgeLabelBackground": "#FFFFFF", "noteBkgColor": "#FFF6D6", "noteBorderColor": "#B8860B", "noteTextColor": "#1B1F23", "actorBkg": "#B8E2B4", "actorBorder": "#2F6B35", "actorTextColor": "#1B1F23", "actorLineColor": "#7A8794", "signalColor": "#3D4650", "signalTextColor": "#1B1F23", "labelBoxBkgColor": "#F5F7FA", "labelBoxBorderColor": "#7A8794", "labelTextColor": "#1B1F23", "loopTextColor": "#1B1F23", "activationBkgColor": "#DDEFDB", "activationBorderColor": "#2F6B35", "sequenceNumberColor": "#FFFFFF", "classText": "#1B1F23"}, "htmlLabels": false, "flowchart": {"wrappingWidth": 320, "curve": "linear", "nodeSpacing": 50, "rankSpacing": 60, "padding": 16, "htmlLabels": false}, "sequence": {"actorMargin": 50, "messageMargin": 38, "boxMargin": 10, "noteMargin": 10, "mirrorActors": false, "useMaxWidth": false}, "class": {"padding": 12, "htmlLabels": false}, "fontFamily": "Arial, Helvetica, sans-serif"}}%%
+flowchart TB
+    TR(["Scheduled trigger<br/>profile cadence"])
+    OR["Root: tasks table<br/>tier, model, wave"]
+    SN["tracker_ops known,<br/>approvals; run state<br/>known.json goes to L2"]
+    L1["L1 inbox<br/>standard<br/>→ sonnet"]
+    L2["L2 board search<br/>standard<br/>→ sonnet"]
+    L3["L3 board status<br/>light<br/>→ haiku"]
+    AP["Root approvals:<br/>rows the owner marked<br/>in an earlier run"]
+    RV["Root re-checks kept<br/>postings, judges lanes"]
+    AR["Approve: submit,<br/>move → Applied<br/>Reject: move → Excluded<br/>Later, none: stays"]
+    WR["tracker_ops append<br/>→ For Approval<br/>exclude → Excluded"]
+    M["tracker_ops move<br/>Interviewing, Closed<br/>from lane evidence"]
+    G["tracker_ops gaps<br/>(optional)"]
+    D(["Digest to owner<br/>every run"])
+
+    TR ==> OR
+    OR ==> SN
+    SN --> L1
+    SN ==> L2
+    SN --> L3
+    SN --> AP
+    L1 --> RV
+    L2 ==> RV
+    L3 --> RV
+    AP --> AR
+    RV ==> WR
+    RV --> M
+    WR ==> G
+    G ==> D
+    M --> D
+    AR --> D
+
+    classDef client fill:#FFFFFF,stroke:#1B1F23,stroke-width:2.5px,color:#1B1F23
+    classDef context fill:#B8E2B4,stroke:#2F6B35,stroke-width:2.5px,color:#1B1F23
+    classDef concrete fill:#F7B267,stroke:#B35C0F,stroke-width:2.5px,color:#1B1F23
+    classDef data fill:#BBDDF7,stroke:#1F5FA8,stroke-width:2.5px,color:#1B1F23
+    classDef external fill:#FFFFFF,stroke:#3D4650,stroke-width:2px,stroke-dasharray:6 4,color:#1B1F23
+
+    class TR client
+    class OR,RV,AP,AR context
+    class L1,L2,L3 concrete
+    class SN,WR,M,G data
+    class D external
+    linkStyle 2,4,5,6,8,9,11,14,15 stroke-width:2.5px
