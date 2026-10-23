@@ -1,6 +1,6 @@
 ---
 title: Publication diagram style
-tags: [diagrams, mermaid, svg, publication, github, readme, article, palette, class-diagram, sequence, flowchart, hexagonal, ports-and-adapters]
+tags: [diagrams, mermaid, svg, publication, github, readme, article, carousel, pdf, palette, class-diagram, sequence, flowchart, hexagonal, ports-and-adapters]
 ---
 
 # Publication diagram style
@@ -95,7 +95,7 @@ classDiagram
 The thresholds (effective text size, aspect ratio, margin, resolution floor) and their worked numbers live only in `skills/image-quality-inspection/references/destination-legibility.md`; apply them to every PNG and do not copy them here. What this style adds:
 
 - Never lower the init `fontSize` (20px) and never use `<small>` or tiny labels. A diagram too wide to pass the legibility check is split or given fewer participants or nodes, not shrunk.
-- Keep node count and label length within the limits in section 3.
+- Keep node count and label length within the limits in section 3; an article-column or carousel image uses the tighter node cap in `destination-legibility.md`.
 - `mmdc` fits diagrams whose `useMaxWidth` is true (the flowchart default) into its page width (`-w`, default 800), so a diagram whose natural width is larger is silently shrunk, text included. Measured in a sandbox render with mermaid-cli 11.16 at scale 2 (2026-10-07): a flowchart with natural width 1385 px came out 1568 px wide; with `-w 2400` it came out 2770 px wide at natural size. A PNG exactly 1568 px wide at scale 2 is the signature of that cap. Pass a large `-w` (section 8), and compute effective text from the SVG's natural `viewBox` width as described in `destination-legibility.md`.
 - Pilot sizes from the original run (scale 2, before the margin): class 1568x1256, flowchart 1568x1700, sequence 2032x1490. The two 1568-px widths match the page-width cap above, so their text may have been shrunk; recompute every PNG from its natural width.
 
@@ -218,3 +218,33 @@ if __name__ == "__main__":
 - When the longest side is under the 2000 px floor of the image-quality gate, render at `-s 3` (and pad 72). Legibility does not change with scale (see `destination-legibility.md`); only sharpness improves.
 - In a container or as root, pass a puppeteer config through `extra` (`-p puppeteer.json` with `--no-sandbox` and, if the bundled browser is missing, `executablePath`).
 - Render all publication PNGs in one environment and commit those files; hand them to an independent validator before use.
+
+## 9. Carousel pages (HTML to PDF and PNG)
+
+One `<section class="slide">` per page, all 1080x1350 px, system fonts, a neutral `<title>` (it becomes the PDF title), and a footer `<span class="pg">n/N</span>` that the renderer fills. Set `@page { size: 1080px 1350px; margin: 0 }`. Type floors per `destination-legibility.md` section 2 (a phone shows the page at about 0.35x); page margin 96 px. A diagram slide keeps the node cap in `destination-legibility.md`.
+
+Render with headless Chromium (Python; one-time `python -m playwright install chromium`; runs the same on Windows, Linux, and macOS). Usage: `python render_carousel.py slides.html out-dir`.
+
+```python
+import sys
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+src, out = Path(sys.argv[1]).resolve(), Path(sys.argv[2])
+out.mkdir(parents=True, exist_ok=True)
+with sync_playwright() as p:
+    browser = p.chromium.launch()  # in containers: launch(args=["--no-sandbox"])
+    page = browser.new_page(viewport={"width": 1080, "height": 1350}, device_scale_factor=2)
+    page.goto(src.as_uri())
+    page.wait_for_load_state("networkidle")
+    page.evaluate("() => { const p = [...document.querySelectorAll('.pg')]; p.forEach((e, i) => e.textContent = `${i + 1}/${p.length}`) }")
+    bad = page.evaluate("() => [...document.querySelectorAll('.slide')].flatMap((s, i) => s.scrollHeight > s.clientHeight + 1 || s.scrollWidth > s.clientWidth + 1 ? [i + 1] : [])")
+    if bad:
+        sys.exit(f"overflow on slides {bad}")  # fix the HTML, never shrink text to fit
+    page.pdf(path=str(out / "carousel.pdf"), width="1080px", height="1350px", print_background=True, prefer_css_page_size=True)
+    for i, el in enumerate(page.query_selector_all(".slide"), 1):
+        el.screenshot(path=str(out / f"slide-{i:02d}.png"))
+    browser.close()
+```
+
+An overflow exits non-zero before any PDF is written. Then run the PDF checks in `skills/image-quality-inspection/references/image-quality-gate.md` and inspect every page at phone width.

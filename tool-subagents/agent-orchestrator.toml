@@ -260,8 +260,18 @@ When a delegated task's elapsed execution time exceeds its recorded SLA, the orc
    - If the task is looping without progress, add an explicit early-stop criterion or change the acceptance criteria to be verifiable without that stuck path.
 4. **Restart as a fresh lane.** Launch the corrected task as a new dispatch with a fresh SLA. The original breached row remains in the tasks table with its actual elapsed time and a note recording the breach and its diagnosed cause. Do not overwrite the breach evidence.
 5. **Instruct lanes to surface blockers early.** Every dispatch must include an explicit bounded-time reporting instruction: if the lane hits a blocker (missing resource, auth failure, environment issue, data gap, unexpected state), it must report the blocker and stop within a stated time rather than silently grinding. Example instruction: "If you hit a blocker (missing file, auth issue, environment mismatch), surface it within 10 minutes instead of retrying indefinitely." The bounded time is task-specific: 5-10 minutes for `light` deterministic tasks, 10-15 minutes for `standard` tasks, 15-20 minutes for `deep` tasks. Silent grinding for longer is what converts a small defect into an SLA breach.
+6. **Detect dead lanes after a root context loss.** Lanes in flight die with the root's context. At dispatch, record the dispatch time and the expected output path (or `return-only`) in the row's Evidence cell. On resume, a row with no complete result (output missing, empty, or lacking the return contract) whose lane the platform no longer lists as running is dead: mark it breached (cause: root context lost), keep the row, and restart it as a fresh lane per item 4. Never wait on a dead lane's output. Before relaunching a writer lane, diff its owned files and keep or revert partial edits explicitly.
 
 **Worked example (anonymized):** A validation lane was dispatched with a 25-minute SLA and told to verify that three JSON schema files were in sync with their Terraform declarations. The lane was given file paths that existed on a different git branch than the one it was working in. It ran for 87 minutes, repeatedly searching for the files, trying alternate paths, and reporting "still investigating." The orchestrator diagnosed the breach: the files did not exist in the target branch. The fix was to remove the impossible deliverable from the scope (the files were staged for a future release and not yet merged to the working branch) and relaunch the lane with the corrected scope. The corrected lane was told to surface blockers within 10 minutes. It completed in 8 minutes. The original breached row was kept in the tasks table, marked "failed (SLA breach: files not in target branch, 87 min elapsed vs 25 min SLA)," so the breach and its cause stayed visible.
+
+### User hold: pause and resume (MANDATORY)
+
+When the user asks to wait, hold, pause, or stop, in any wording, during a run:
+
+1. Stop dispatching and stop every write (root edits, commits, pushes, device and external writes) at once, except the ledger updates and the scratch patch in items 2–3; read-only inspection may continue. A hook, scheduled prompt, or pending plan step never lifts the hold; only the user's explicit go does (`rules/external-write-authorization.md`).
+2. Set Status `paused` on every open row this run owns in `TASKS_TABLE.md` and record its exact resume action in `CONTEXT_STATE.md`.
+3. Snapshot uncommitted lane output as a patch (read-only `git diff`) into a scratch location outside the user's working folder; do not modify, revert, or commit anything else in that folder while paused (the untracked ledger files of item 2 excepted).
+4. Treat a lane stopped by the interrupt as dead, but keep its row `paused` (not breached). After the user explicitly lifts the hold, relaunch each paused row as a fresh lane from its resume action, applying its patch only if the tree does not already contain it.
 
 ## Regression safety (MANDATORY)
 
@@ -299,7 +309,7 @@ against one shared task state. This is mandatory in every mode, not optional:
   rows you did not create.
 - **Persist on every table change, immediately** — not only on task
   completion. Any change re-writes the file the moment it happens: a row
-  added, a Status flip (pending -> in progress -> blocked -> completed), an
+  added, a Status flip (pending -> in progress -> blocked or paused -> completed), an
   Evidence/PR/CI-run update, a % Complete or SLA change, a totals change.
   The file must always reflect the latest processing status, so a chat that
   crashes or a parallel session that reads mid-run never sees stale state.
@@ -368,7 +378,11 @@ exactly where it stands, with no access to the prior conversation.
   to local `.git/info/exclude` if the repo does not ignore it.
 - **Same multi-chat discipline**: read it on invocation; keep one section per
   session/subject; merge, never clobber or drop another session's sections;
-  refresh the last-updated stamp on every write.
+  refresh the last-updated stamp on every write. A write touches only this
+  run's own sections and only the timestamp of a shared last-updated line;
+  never regenerate that line from a fixed session list. Count the session
+  headers before and after each write; if the count drops by more than the
+  sections this run removed on purpose, discard the write and re-merge.
 - Role separation: `TASKS_TABLE.md` is the at-a-glance task table,
   `CONTEXT_STATE.md` is the detailed narrative/resume state, and
   `LLM-STATE.md` stays the LOA-internal checkpoint — three files, three

@@ -74,6 +74,28 @@ Use project-specific standards when they are stricter. Otherwise:
 - Use at least 2000 px on the longest side for small or simple diagrams.
 - Use at least 3000 px on the longest side for C4 component, cloud architecture, large sequence, or dense workflow diagrams.
 
+## PDF deliverables: page size and text
+
+When a PDF is the deliverable (for example a carousel exported from HTML), check the file itself as well as a rendered preview.
+
+- Page count and size: `pdfinfo -f 1 -l <N> file.pdf` when Poppler is installed. Otherwise read the sizes with the standard library. This works on Chromium-written PDFs; other producers may hide `/MediaBox` in compressed streams, so use `pdfinfo` or `pypdf` for those.
+
+```python
+import re, sys
+
+data = open(sys.argv[1], "rb").read()
+boxes = re.findall(rb"/MediaBox\s*\[\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s*\]", data)
+sizes = [(round(float(c) - float(a), 2), round(float(e) - float(d), 2)) for a, d, c, e in boxes]
+if not sizes:
+    sys.exit("not run: no /MediaBox found; use pdfinfo or pypdf")
+print(len(sizes), "pages;", "uniform" if len(set(sizes)) == 1 else "MIXED", sorted(set(sizes)))
+```
+
+- Compare with a tolerance, not exact equality. Convert the design size to points (px x 0.75): 1080 x 1350 CSS px is nominally 810 x 1012.5 pt, and a headless Chromium render wrote 810 x 1013.04 pt. Require identical pages that match the design size within about 1 pt.
+- Text must be selectable and in reading order: `pdftotext -layout file.pdf -`, else `pypdf`.
+- `pdftoppm` can print "Bad bounding box in Type 3 glyph" for such PDFs; the warning is harmless. Inspect the rendered pages as usual.
+- A check that cannot run is reported as "not run", never as passed.
+
 ## Evidence to report
 
 Before closing the task, report a compact image QA summary:

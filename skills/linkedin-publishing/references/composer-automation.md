@@ -104,6 +104,30 @@ goes first was not recorded; if one appears, or if the text was pasted before th
 the card with its x button. The URL stays in the text either way; re-verify the hash and the
 image afterwards.
 
+## Platform limits (verified 2026-10-01)
+
+Third-party figures unless marked primary (LinkedIn's member help pages could not be fetched).
+Re-verify after a few months, and never promise an outcome from them.
+
+- Post text: 3,000 characters counting spaces, emoji and line breaks (third-party:
+  https://authoredup.com/blog/linkedin-character-limit ,
+  https://contentin.io/blog/linkedin-post-specs/). First comment: 1,250 (third-party: authoredup).
+- "See more" cut: about 140 characters on mobile, 210 on desktop, varying with line breaks
+  (third-party: same sources). Put the claim itself before the mobile cut.
+- Document (PDF) posts: PDF, PPT, PPTX, DOC, DOCX; at most 100 MB and 300 pages (primary, API
+  documentation:
+  https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/documents-api).
+  Every page the same size; no official pixel size (1080x1350 is common third-party advice:
+  https://heymark.ai/en/solutions/linkedin-carousel-pdf/ ,
+  https://espirian.co.uk/linkedin-document-posts/).
+- Contested (sources disagree, platform unconfirmed): hashtag counts, and reach penalties for
+  posts with an external link. Never promise an outcome from either.
+- Images with C2PA provenance metadata can be labelled as AI-generated (third-party news:
+  https://commsroom.co/linkedin-enhances-ai-transparency-with-new-content-labels/): do not strip
+  it. No rule on disclosing AI-written text was found.
+- Draft one sentence of alt text per image with the post; the editor of a published post can
+  change it later.
+
 ## Publish and read the post URL
 
 1. After the user has approved the exact text and the hash matches, click Post.
