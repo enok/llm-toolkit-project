@@ -178,6 +178,23 @@ cd <original-application-worktree>
 git branch --show-current  # must equal <ticket-branch>
 ```
 
+**5b. Push from a sandbox without credentials** (the Step 4 approval gate still comes first). Commit and validate in the sandbox clone, then hand the commits to the user's machine as a bundle (`<name>` is `<branch>` with `/` replaced by `-`, so file paths stay valid):
+
+```bash
+# sandbox clone: bundle only the new commits (bundle the whole branch if the user's repo may lack the base)
+git bundle create <transfer-dir>/<name>.bundle origin/<base-branch>..<branch>
+git bundle verify <transfer-dir>/<name>.bundle
+# user's machine, in their repository: fetch into a branch name that does not exist locally yet, validate and push from a separate worktree
+git fetch <transfer-dir>/<name>.bundle <branch>:<branch>
+git worktree add ../<repo>-<name>-push <branch>
+cd ../<repo>-<name>-push
+# run the validators here, then push from this worktree
+git push origin <branch>
+cd - && git worktree remove ../<repo>-<name>-push
+```
+
+Keep `<transfer-dir>` outside `.git`; device bridges can refuse writes into it (file transfer: `learnings/cloud-session-device-bridge-file-io.md`). Never check out, reset, or stash in the user's own working tree: the fetch adds a branch ref only, and their dirty files stay untouched.
+
 ---
 
 ## Step 6 — Reply to PR Comments

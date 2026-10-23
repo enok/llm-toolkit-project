@@ -25,4 +25,4 @@ Do not accept claims at face value. Prefer evidence over narrative.
 
 ## Known pitfalls
 
-- Re-derive any count or total that gates a decision with your own deterministic command (for example `rg "<pattern>" --count-matches` or a `jq` extraction), not from the producer's or another agent's summary, and record the command and its output as evidence. See `learnings/agent-self-reported-counts-are-not-evidence.md`.
+- Re-derive any count or total that gates a decision with your own deterministic command (for example `rg "<pattern>" --count-matches` or a `jq` extraction), not from the producer's or another agent's summary, and record the command and its output as evidence. When a claim cites a commit, run counts and quote checks against that commit (`git ls-tree -r <sha>`, `git show <sha>:<path>`), not the working tree, whose uncommitted files produce false corrections; when reviewing uncommitted edits, scope counts to the reviewed paths (`git diff <base> -- <paths>`). State the SHA, or `working tree on <base-sha>`, beside each count. See `learnings/agent-self-reported-counts-are-not-evidence.md`.

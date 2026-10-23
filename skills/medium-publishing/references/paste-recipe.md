@@ -33,6 +33,7 @@ use `python3` where `python` is missing or is not Python 3 (Windows often has a
 | Images are absolute `https` URLs from `raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>` | Medium re-hosts pasted images, so the source must be fetchable by anyone; a SHA (not a branch) stops caching from serving a stale diagram. | author; `check` flags unpinned or foreign URLs |
 | Entity-encode every non-ASCII character as `&#NNN;` | See section 3. | `build`; `check` flags leftovers |
 | Start the document with the `<h1>` title | The title field is expected to take the first heading (untested); confirm it after pasting. | author |
+| The AI-assistance note sits within the first two paragraphs (paragraph 2 by default): one plain line worded by the author; AI-generated images get a caption note | Medium's AI content policy (https://help.medium.com/hc/en-us/articles/22576852947223-Artificial-Intelligence-AI-content-policy, undated page, verified 2026-10-01) asks for disclosure within the first two paragraphs and a caption on AI-generated images; the policy page states that undisclosed AI-generated stories get "Network Only" distribution; fabricated statistics are prohibited. This toolkit applies the assistive exemption to grammar and spelling help only. Put no caption, metadata or self-score line between the lede and the note. The author confirms the wording and what it claims (`content-angle.md`, "Claims other than framework appearances"). Re-verify the policy before relying on it. | author; read the first 200 words in the editor |
 
 Language names used by the script (extension to Medium language): `java`,
 `py` to `python`, `js` to `javascript`, `ts` to `typescript`, `kt` to `kotlin`,
@@ -104,3 +105,6 @@ a rich copy from a rendered page may drop the code-block attributes
 - Code files in the repo and the code in the article are the same bytes.
 - Title is at most 100 characters and subtitle at most 140
   ([publish-dialog.md](publish-dialog.md)).
+- The paste copy holds story content only: strip metadata, HTML comments and
+  self-score or review lines (`check` does not flag them). Any block above the
+  AI-assistance note can push it beyond the first two paragraphs (section 1).
