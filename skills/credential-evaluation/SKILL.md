@@ -21,8 +21,9 @@ this skill.
 ## Contract
 
 1. **Orchestrate first.** Follow `rules/request-orchestration.md` and
-   `tool-subagents/agent-orchestrator.md`: print the tasks table with tier and
-   explicit model per lane before work starts.
+   `tool-subagents/agent-orchestrator.md`: print the tasks table defined in
+   its "Tasks table contract" (tier and explicit model per lane) before work
+   starts and after every completed lane.
    - Wave 1: three read-only research lanes in parallel, each `standard`
      (sonnet / medium): L1 awarding-body legitimacy, L2 home-country
      recognition, L3 market perception + alternatives.

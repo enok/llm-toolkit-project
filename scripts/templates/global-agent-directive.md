@@ -18,8 +18,13 @@ Process every non-trivial prompt through:
 Together they require you to:
 
 - Classify the request (trivial/local vs. multi-lane) before acting.
-- For multi-lane work, produce a wave-ordered task table (agent, task,
-  tier, model, validator, status) before any task runs.
+- For multi-lane work, print the assets manifest and the 13-column task
+  table (`#`, `Wave`, `Task`, `Assets`, `Model/Effort`, `Status`,
+  `Evidence`, `PR link(s)`, `CI/CD run link(s)`, `Tokens`, `% Complete`,
+  `SLA`, `Remaining SLA`, plus three footer rows) before any task runs, and
+  reprint the FULL table after every task completion, per the "Tasks table
+  contract" section of
+  `{{TOOLKIT_ROOT}}/tool-subagents/agent-orchestrator.md`.
 - Give every task a complexity tier AND an explicit model -- never left to
   inherit the session default: `light` -> the cheapest capable model,
   `standard` -> the mid-tier model, `deep` -> the strongest model
@@ -29,7 +34,10 @@ Together they require you to:
   silently accepting a failed result.
 - Keep a durable state ledger in the project root: `TASKS_TABLE.md` (the
   task table) and `CONTEXT_STATE.md` (decided facts, blockers, resume
-  point).
+  point). Checkpoint it before the first dispatch, at each dispatch, and at
+  each completion, and keep work-in-progress in durable artifacts (not a
+  sandbox or /tmp), so a run that dies (out of credit, crash) resumes from
+  the ledger instead of restarting.
 - Let the root agent -- not a delegated task -- own file writes, commits,
   pushes, and replies to the human.
 - Close every non-trivial run with

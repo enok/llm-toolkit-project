@@ -65,7 +65,12 @@ not two. Whenever a consumer has a configured notification route and a standing
 authorization covering it, every print of the table is also sent to the matching
 channel — first table, after each task completion, and immediately when a task
 becomes blocked, with the blocked send naming what is blocked and what the user
-must decide.
+must decide. The prints being mirrored are the full-table prints defined in
+`tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets,
+tokens, prints, checkpoints": after planning, after every completion, failure,
+or escalation, on a block or SLA breach, and as the final table. The chat
+print is always the full table; each mirrored message carries the format
+approved with the route (see the last bullet below).
 
 - **The route and its authorization are configuration, not defaults.** They live
   with the consumer as a consumer-configured notification route (for example
@@ -80,22 +85,23 @@ must decide.
   Equally, a standing authorization does not survive a missing connection — when
   the transport is unavailable, say the mirror was skipped and why rather than
   silently dropping it.
-- **Every mirrored table carries the requester header**, because these channels
+- **Every mirrored message carries the requester header**, because these channels
   serve multiple people and an unattributed table is ambiguous.
 - **A skipped send is reported, never assumed delivered.** Treat the mirror as
   part of the table's completion: if the table was printed and the send did not
   happen, that is an open item, not a detail.
 - **The pre-approved format is narrow.** Each mirrored message carries only the
-  status-line format approved with the route (agent, one-line result, complexity
-  tier); anything else returns to the draft-and-approve flow in
-  `rules/human-comment-reply-gate.md`.
+  format approved with the route: by default the status line (agent, one-line
+  result, complexity tier) of each row that changed; the full table only when
+  the route's approval names it. Anything else returns to the draft-and-approve
+  flow in `rules/human-comment-reply-gate.md`.
 
 ## Per-task quality loop
 
 - Every delegated task runs as a bounded produce->validate->refine loop per `workflows/task-quality-loop.md`, with **max 5 iterations per task** (budget 1 for deterministic `light` tasks).
 - Before dispatch, each task gets verifiable acceptance criteria and a read-only validator matched to its evidence type (see the selection map in `workflows/task-quality-loop.md`); `task-quality-judge` covers tasks with no domain specialist.
 - The validator is never the producer. On `fail`, only the defect list goes back to the producer for targeted refinement; on `escalate` or an exhausted budget, the task returns to the normal-mode root agent or explicit-LOA coordinator marked `escalated` with its verdict history.
-- A task is `done` only after its validator returns `pass`; never silently accept a failed result and never loop past the budget.
+- A task is `completed` only after its validator returns `pass`; never silently accept a failed result and never loop past the budget.
 
 ## Model selection contract (MANDATORY)
 
@@ -212,7 +218,7 @@ before the affected task can be marked done.
 - In normal mode the root stays on the strongest available model. In explicit
   LOA mode the parent remains a reconciliation/final checker while each async
   task uses the coordinator's economical, platform-confirmed tier mapping.
-- Present the delegation plan as a table (agent, task, complexity tier, validator, loop budget, rough time estimate, which wave/parallel group it runs in, and a status column updated as tasks move through pending/running/validating/refining/done/escalated) so the user can see the fanout before it runs and track it while it runs.
+- Present the delegation plan as the 13-column tasks table defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints" (wave, assets, model/effort, status, evidence, tokens, baseline and remaining SLA), so the user can see the fanout before it runs and track it while it runs. Do not restate or trim the columns here.
 - Inside a quality loop, escalate the producer one tier after 2 consecutive `reasoning`-classed failures; `mechanical` failures refine at the same tier.
 
 ## Result judgment and learning
@@ -239,3 +245,9 @@ before the affected task can be marked done.
 - Ask each agent for concise, structured output that another agent can act on quickly, under the capped four-block return contract (outcome / evidence / blockers / decisions) in `tool-subagents/agent-orchestrator.md` "Thin orchestrator and the durable state ledger".
 - Merge duplicate findings, resolve conflicts, and present only the useful result to the user.
 - Prefer map-reduce summaries over dumping raw subagent transcripts.
+- Every orchestrated prompt prints the assets manifest and the full tasks table
+  after planning and after every task completion, per the print cadence in
+  `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns,
+  assets, tokens, prints, checkpoints". It also checkpoints the ledger before
+  each dispatch and at each completion, so a run that dies (out of credit,
+  crash) resumes from the ledger instead of restarting.
