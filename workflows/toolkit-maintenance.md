@@ -131,6 +131,7 @@ Then verify:
 - When promoting a learning or session evidence into a skill, rule, or reference, carry only recorded facts: label untested guidance as such and never state untested behaviour as observed. (sig: quality-defect/unobserved-claims-presented-as-fact)
 - When a change touches both a governance document and the script it describes (for example `skills/run-retrospective/references/promotion-ladder.md` and `run_retro.py`), write the CLI contract first and run every documented example against the script. (sig: validation-gap/governance-doc-script-drift)
 - When a validator hangs or times out, reproduce and fix the validator (for example batch large file lists with `find -print0 | xargs -0`) and prove the fix on a large synthetic input; do not skip it or call the hang environmental. See `learnings/hanging-validator-trains-agents-to-skip-validation.md`.
+- When a Cowork session cannot read `skills/` or `tool-subagents/` through the device bridge ("Permission denied"), read the toolkit from a shallow cloud clone and push from a fresh `origin/main` worktree on the PC via Desktop Commander; never touch the user's own dirty clone, and still present learnings before commit and merge only with explicit approval. See `learnings/cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md`.
 
 ---
 

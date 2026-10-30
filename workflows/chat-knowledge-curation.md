@@ -117,6 +117,11 @@ if ($LASTEXITCODE -eq 0) {
 }
 ```
 
+On Windows with only the Microsoft Store Python, run the bash gate scripts through Git Bash with a
+`python3`/`python` shim and the user Scripts folder on PATH, and run the gates before committing (the
+changed-skill scans read only uncommitted changes). See
+`learnings/windows-security-gate-python-stub-and-committed-skills.md`.
+
 If any skill is new or modified, also run:
 
 ```bash

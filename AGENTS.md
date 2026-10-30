@@ -149,6 +149,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows + skills |
 | "Thesis" / "ABNT" | **thesis-writing-main** workflow; **abnt-formatting** skill |
 | "Job scan" / "job search" / "track my applications" | **job-search-pipeline** workflow + skill; **job-search-setup** workflow for a new candidate |
+| "Is this course / degree / MBA / certification worth it" / "does it carry weight in the market" | **credential-evaluation** skill |
 
 ---
 
@@ -341,6 +342,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | Skill | Purpose |
 | --- | --- |
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
+| **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
 
 ### Thesis And Academic Formatting
 

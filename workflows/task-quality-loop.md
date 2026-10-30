@@ -34,6 +34,7 @@ Match the validator to the task's evidence type; use `task-quality-judge` when n
 | Airflow/Glue/ETL | `dag-glue-specialist` |
 | Architecture claims | `system-architecture-specialist` |
 | Log/evidence reduction | `log-analyst` |
+| Web research findings / advisory synthesis | `verifier` at `light` as a claim check: the root lists the load-bearing claims with their source URLs; the verdict per claim is PASS / FAIL / UNVERIFIED with a short quote (template: `skills/credential-evaluation/references/lane-prompts.md`) |
 | Alarm RCA / hypotheses | `aws-alarm-investigator` |
 | Completion claims, mixed or generic output | `task-quality-judge` or `verifier` |
 
