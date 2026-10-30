@@ -315,6 +315,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | Skill | Purpose |
 | --- | --- |
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
+| **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
 
 #### Thesis And Academic Formatting
 
