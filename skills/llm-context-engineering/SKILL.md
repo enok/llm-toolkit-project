@@ -49,3 +49,4 @@ If guidance contains real internal hostnames, Jira ticket IDs, customer data, re
 ## Known pitfalls
 
 - Keep the always-loaded skill surface to each skill's name and one-line description and load the full `SKILL.md` only when the skill is invoked; let each consumer list only the skills it needs in `docs/llm/toolkit-selection.txt` so unlisted skills are never surfaced. Do not embed skill content in rules files or inline all skills in `AGENTS.md`. See `learnings/llm-adaptive-skill-loading.md`.
+- Counts of skills, workflows, or learnings in README and catalog files drift from the directories they describe: recompute any count from disk before quoting it, and update the catalog count in the change that adds or removes an item. See `learnings/readme-catalog-counts-drift-from-disk.md`. (sig: validation-gap/catalog-counts-drift-from-disk)

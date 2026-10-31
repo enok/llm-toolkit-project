@@ -171,6 +171,9 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | check my applications / move my tracker rows / recruiter replies | `job-search-pipeline` | workflow + skill | `skills/job-search-pipeline/scripts/tracker_ops.py` |
 | set up a job search for me / adopt my job tracker / schedule my job scan | `job-search-setup` | workflow | `job-search-pipeline`, `automation-maintenance` |
 | is this course / degree / MBA / certification worth it for my career / does it carry weight in the market | `credential-evaluation` | skill | `agent-orchestrator`, `task-quality-loop`, `skills/credential-evaluation/references/lane-prompts.md` |
+| remove these from my LinkedIn profile / update my LinkedIn skills/certifications/experience / delete old skills, courses, certifications / set my end date on a role / add a skill or project | `linkedin-profile-maintenance` | skill | `agent-orchestrator`, `career-profile-sync`, `skills/linkedin-profile-maintenance/references/details-pages.md` |
+| sync my CV with LinkedIn / keep my profile, CV and job-search files consistent / I left my employer, update everything / re-render my CV | `career-profile-sync` | workflow | `linkedin-profile-maintenance`, `cv-truthfulness-reviewer`, `task-quality-loop` |
+| check my CV for unsupported claims / is every claim in my CV or profile true / check my CV against my repos and master CV | `cv-truthfulness-reviewer` | subagent | `career-profile-sync`, `task-quality-loop` |
 
 ## Provider Surfaces
 

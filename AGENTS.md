@@ -150,6 +150,9 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Thesis" / "ABNT" | **thesis-writing-main** workflow; **abnt-formatting** skill |
 | "Job scan" / "job search" / "track my applications" | **job-search-pipeline** workflow + skill; **job-search-setup** workflow for a new candidate |
 | "Is this course / degree / MBA / certification worth it" / "does it carry weight in the market" | **credential-evaluation** skill |
+| "Remove these from my LinkedIn profile" / "update my LinkedIn skills/certifications/experience" / "clean up my LinkedIn" / "set my end date" | **linkedin-profile-maintenance** skill |
+| "Sync my CV with LinkedIn" / "I left my employer, update everywhere" / "keep my CV, profile and job files consistent" | **career-profile-sync** workflow (review step: **cv-truthfulness-reviewer**) |
+| "Check my CV for unsupported claims" / "is every claim in my CV or profile true" | **cv-truthfulness-reviewer** subagent |
 
 ---
 
@@ -193,7 +196,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`
 - **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
-- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`
+- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`
 
 ---
 
@@ -343,6 +346,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | --- | --- |
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
 | **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
+| **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 
 ### Thesis And Academic Formatting
 
@@ -356,7 +360,7 @@ Skills marked toolkit-local in `skills/README.md` (documentation governance, sec
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (25 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (26 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `cv-truthfulness-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 

@@ -43,7 +43,13 @@ command such as `wc -c` on the sandbox copy proves nothing about the machine. Th
 rule applies to the archive when lane output is synced as one archive (zip, device
 commit, `tar -xf` on the machine): give each archive version a fresh name.
 
-Durable guidance: skills/multi-language-study-repo/references/toolchain-notes.md
+Variant: re-committing a file staged under the SAME path once wrote an older version of it.
+Stage every commit in a fresh staging subfolder (new directory per attempt, not only a new
+filename), commit from there, and compare the SHA-256 computed on the machine with the
+sandbox hash. The session did not show which layer (the reused staged copy or the
+destination) served the old bytes; treat it as unknown - the hash check on the device catches either case.
+
+Durable guidance: skills/multi-language-study-repo/references/toolchain-notes.md; workflows/career-profile-sync.md (Phase 6)
 
 # Why
 
