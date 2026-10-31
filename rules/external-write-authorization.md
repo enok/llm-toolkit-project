@@ -25,6 +25,15 @@ checked independently from the technical task.
 - Finding a defect (for example stale documentation) authorizes reporting it,
   not publishing the fix.
 
+## Presenting an approval request
+
+- Show the full proposal or draft as its own plain message first, then ask the
+  approval question in a separate turn. A question widget or multiple-choice
+  prompt can hide the text placed before it, so the approver may be asked to
+  decide on text they never saw.
+- Do not summarize the proposal inside the question. The approver answers about
+  the exact text shown above it.
+
 ## PR lifecycle state is external state
 
 A history rewrite that removes every commit or diff from an open PR can close

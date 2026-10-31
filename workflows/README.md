@@ -81,6 +81,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `aws-airflow-terraform-project.md` | Project-local companion to aws-airflow-terraform-change for the data-platform repo (Airflow DAGs plus Terraform roots) |
 | `aws-data-pipeline-ops.md` | Inspect AWS-backed data pipelines with read-first S3, MWAA, Airflow, CloudWatch, and Secrets Manager operations |
 | `aws-data-platform-ops.md` | Inspect or operate AWS-backed data pipelines with explicit scope, verification, and evidence |
+| `folder-reorganization.md` | Reorganize a folder tree without breaking automations, scripts, documents, or cloud-sync links: inspect, propose, approve, pause automations, execute with rollback, verify, resume, report |
 
 ### Documentation, Diagrams, And Wiki
 

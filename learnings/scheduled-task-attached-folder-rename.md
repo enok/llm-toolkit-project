@@ -14,6 +14,8 @@ A folder reorg renamed a folder that a computer-bound Claude scheduled task had 
 - Computer use on the Claude desktop app: the app does not resolve as a controllable app.
 - Creating a replacement task with the new folder (keeping the old one disabled):
   refused by the auto-mode permission check; re-enabling a task can be refused the same way.
+- `fire_trigger` for a one-off catch-up was refused by the auto-mode classifier once too. A single
+  retry after the owner explicitly asked to finish the pending tasks went through.
 
 # Solution
 - Before the move: pause every task that reads the folder and write a pause record
@@ -23,7 +25,8 @@ A folder reorg renamed a folder that a computer-bound Claude scheduled task had 
 - After the move: update prompts with `update_trigger` (re-signed for the computer), then ask
   the user to change the attached folder in the task settings and toggle the task on.
 - Keep a task paused while any path it uses is broken; record skipped runs and offer a
-  one-off `fire_trigger` catch-up.
+  one-off `fire_trigger` catch-up. Check the run history before firing: see
+  `learnings/scheduled-run-resumes-after-usage-limit.md`.
 
 # Why
 Folder attachments are approved by the user on the device and are not editable through the

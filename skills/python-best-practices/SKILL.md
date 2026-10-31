@@ -124,6 +124,10 @@ Each rule file contains:
 - Correct code example with explanation
 - Additional context and key rules
 
+## Known pitfalls
+
+- Do not pass a Windows path as the replacement string of `re.sub` (the recorded failure was `re.error: bad escape \o`): the replacement is parsed as a template. Pass a function (`lambda m: new`) or use `str.replace` when no regex is needed. See `learnings/python-re-sub-windows-path-replacement.md`.
+
 ## Related Skills
 
 - **best-practices** — SOLID principles, architecture patterns, resilience (language-agnostic foundations that Python implements)
