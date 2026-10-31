@@ -141,6 +141,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | --- | --- |
 | `job-search-pipeline.md` | Run one job scan for a candidate profile: inbox and board reconciliation, owner-approved applications, new-posting discovery and screening, guarded tracker update, skill gaps, digest |
 | `job-search-setup.md` | Onboard a candidate: build the profile from CV and criteria, create or adopt the tracker, wire connectors, dry run, schedule the recurring scan |
+| `career-profile-sync.md` | Keep employment facts, skills, and certifications consistent across a public profile, the CV and its master, and job-search files: ledger first, one-pass update list with intentional snapshots, profile edits, CV re-render and visual check, truthfulness review, hash-checked device writes |
 
 Many workflows fan out independent read-only lanes; follow `rules/multi-agent-orchestration.md` and the per-task quality loop in `workflows/task-quality-loop.md` when doing so. Project-local companions (`*-project.md`, `documentation-sync-project.md`, thesis workflows) carry this toolkit's data-science/thesis context and are safe to ignore in other consumers.
 

@@ -42,6 +42,11 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
 - Run the PC security gates per `windows-security-gate-python-stub-and-committed-skills.md`.
 - The usual gates still apply on this path: present learnings before commit (capture-learning
   approval) and merge only on explicit approval (no blanket merge).
+- **Variant - run a script that lives in a protected folder:** read it (cloud clone or Desktop
+  Commander), copy it to a non-protected folder with the desktop shell, run the copy there, and
+  park the copy in a folder the owner reviews for deletion.
+
+Durable guidance: workflows/toolkit-maintenance.md (Known pitfalls); workflows/career-profile-sync.md (Phase 6)
 
 # Why
 The bridge refuses folder names it treats as Claude's own data folders, so `skills/` and

@@ -9,13 +9,13 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 | Area | Path | Purpose |
 | --- | --- | --- |
 | Rules | `rules/` | 21 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
-| Workflows | `workflows/` | 94 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
-| Skills | `skills/` | 97 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
-| Tool subagents | `tool-subagents/` | 25 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
+| Workflows | `workflows/` | 97 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
+| Skills | `skills/` | 100 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
+| Tool subagents | `tool-subagents/` | 26 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
-| Learnings | `learnings/` | 59 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
+| Learnings | `learnings/` | 83 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
 | Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export |
 | Tests and CI | `tests/`, `.github/workflows/` | Unit tests for the validators and GitHub Actions that run the full gate on `main` |
 | Docs | `docs/` | Provider path map, repo setup prompt, Jira setup |
@@ -144,7 +144,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 94 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 97 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -168,7 +168,7 @@ All workflows by area:
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`
 - **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
-- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`
+- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`
 
 ## Skills at a Glance
 
@@ -316,6 +316,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | --- | --- |
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
 | **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
+| **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 
 #### Thesis And Academic Formatting
 
@@ -327,7 +328,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 
 ## Tool Subagents
 
-`tool-subagents/README.md` lists all 25 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, and cross-repo impact.
+`tool-subagents/README.md` lists all 26 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, and CV/profile truthfulness.
 
 ## Integrations
 
