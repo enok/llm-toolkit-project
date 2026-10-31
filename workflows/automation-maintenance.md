@@ -52,9 +52,10 @@ enough search context.
 When a folder that an automation reads or writes is renamed, moved, or
 reorganized:
 
-- Before the first move, pause every automation that touches the folder and
-  write a recovery record (ID, enabled state before the pause, next run, pause
-  time) so any session can re-enable exactly those; re-enable an automation only
+- Before the first move, pause every automation that touches the folder (an
+  external write: right after the owner approves the plan, or earlier only when
+  the owner asked) and write a recovery record (ID, enabled state before the
+  pause, next run, pause time) so any session can re-enable exactly those; re-enable an automation only
   once every path it uses resolves. An attached folder is not editable through
   the scheduling API: update the prompt through the API, then have the user
   switch the attached folder in the task settings and re-enable it; prefer
@@ -67,6 +68,33 @@ reorganized:
   through a device bridge, move files with the file-transfer tools (never large
   pasted base64), refresh mounted files with `cat new > old`, and run whole-tree
   scans natively on the computer. See learnings/cloud-session-device-bridge-file-io.md.
+
+For the full reorganization procedure (inspect, propose, approve, execute,
+verify, resume) use `workflows/folder-reorganization.md`.
+
+## Catch-up runs and overlapping sessions
+
+A run the scheduler marks FAILED with a usage-limit reason may resume on its
+own once usage returns (an observed overlap whose cause was inferred from
+timing, not confirmed). A hand-fired catch-up can then run beside it. See
+learnings/scheduled-run-resumes-after-usage-limit.md.
+
+- Before a catch-up, read the task's run history and `last_run`. Prefer the
+  next scheduled run when the skipped run is not time-critical.
+- Fire at most once. Put a catch-up note in the fire text: what the earlier
+  attempts did, that this run starts from scratch, and that it must check for a
+  run already done today.
+- Recommended: add a single-run guard to every scheduled prompt: at the start, detect a run
+  already done or in progress today (for example the digest already sent, a
+  state marker, freshly modified files), then send a one-line note and stop.
+- After a suspected overlap, run a read-only integrity audit of the shared
+  files (duplicate ids, contradictory states) before trusting them. Write
+  shared files only with an mtime guard; if the mtime changed, re-read and redo.
+- If a permission check denies a fire, create or enable call, do not retry or
+  work around it (no replacement task, no other tool). Tell the owner the exact
+  UI action (Run now, or the task's settings). Retry once only if the owner then
+  explicitly asks you to do that same action. See
+  learnings/scheduled-task-attached-folder-rename.md.
 
 ## Failure handling
 

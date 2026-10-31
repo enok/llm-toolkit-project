@@ -68,6 +68,7 @@ git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED: remove duplicate files"
 ## Known pitfalls
 
 - Pass an ABSOLUTE path to `git -C <repo> worktree add <path> <ref>`: `-C` makes git resolve relative paths against the repository, so a relative path silently creates the worktree inside the project root. `cd` out of a worktree before `git worktree remove`. See `learnings/git-c-worktree-relative-path-lands-in-repo-root.md`.
+- When the PR's branch is checked out in another local worktree, do not merge with `gh pr merge N --squash --delete-branch`: its local branch cleanup runs against a branch that the other worktree has checked out. Merge with `gh pr merge N --squash --match-head-commit <sha>` (no `--delete-branch`), then verify the worktree is clean, run `git worktree remove <path>`, `git branch -D <branch>` and `git fetch --prune`. Repos with auto-delete enabled remove the remote head themselves. Merge only under the merge rule in `rules/git-conventions.md`. (sig: tool-misuse/pr-merge-delete-branch-with-checked-out-worktree)
 
 ## Related
 
