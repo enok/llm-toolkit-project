@@ -30,6 +30,7 @@ import stat
 import sys
 import tempfile
 import time
+import unicodedata
 import urllib.parse
 from pathlib import Path
 
@@ -1172,8 +1173,7 @@ class PluginScan:
             nxt = text[pos + 1] if pos + 1 < len(text) else ""
             if ch == "\ufeff" and is_code and (prev in "\"'" or nxt in "\"'"):
                 continue  # a byte-order mark written as test data inside a string literal
-            if (ch in "\ufe0e\ufe0f" and prev and not _selector(prev) and not _selector(nxt)
-                    and not HIDDEN_RX.match(prev) and (ord(prev) >= 0x2000 or nxt == "\u20e3")):
+            if ch in "\ufe0e\ufe0f" and not _selector(nxt) and _presentation_base(prev, nxt):
                 # one presentation selector right after a visible symbol or emoji, or in a keycap. Emoji
                 # presentation (FE0F) is ordinary and unlimited; text presentation (FE0E) is rare, so more than
                 # three on one line could carry a FE0E/FE0F bit pattern and is reported
@@ -1344,6 +1344,18 @@ def is_test_path(rel: str) -> bool:
 
 
 MAX_EXEMPT_SELECTORS = 3
+# emoji with a standardized variation sequence whose general category is not a symbol (So/Sk/Sm/Sc)
+EMOJI_NON_SYMBOL_BASES = frozenset("\u2139\u203c\u2049\u3030\u303d")
+
+
+def _presentation_base(prev: str, nxt: str) -> bool:
+    """Allow-list for a presentation selector: a visible symbol (So, Sk, Sm, Sc), one of the few emoji that are
+    not symbols, or a keycap base (digit, #, *) followed by U+20E3. Never spaces, controls, marks or letters."""
+    if not prev:
+        return False
+    if prev in "0123456789#*":
+        return nxt == "\u20e3"
+    return unicodedata.category(prev) in ("So", "Sk", "Sm", "Sc") or prev in EMOJI_NON_SYMBOL_BASES
 
 
 def _selector(ch: str) -> bool:

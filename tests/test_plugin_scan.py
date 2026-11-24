@@ -614,8 +614,15 @@ class RefinementTests(ScanCase):
                                          "Second line \u2764\ufe0f\n## \u26a0\ufe0f\u26a0\ufe0f\u26a0\ufe0f WARNING "
                                          "\u26a0\ufe0f\u26a0\ufe0f\u26a0\ufe0f\nText style \u2764\ufe0e \u263a\ufe0e \u2602\ufe0e\n")
         write(root, "notes/blank.md", "a\u3164b \u115f \u1160 \uffa0\n")
+        for name, space in (("emsp", "\u2003"), ("idsp", "\u3000"), ("mmsp", "\u205f")):
+            bits = "".join(space + ("\ufe0e" if b == "1" else "\ufe0f") for b in "01101001")
+            write(root, f"notes/{name}.md", f"Plain{bits} text\n")
+        write(root, "notes/letters.md", "a\ufe0f b\ufe0e \u0301\ufe0f\n")
+        write(root, "notes/clean.md", "\u26a0\ufe0f" * 6 + " heading\nkeys 1\ufe0f\u20e3 #\ufe0f\u20e3 *\ufe0f\u20e3\n"
+                                       "info \u2139\ufe0f \u00a9\ufe0f \u2122\ufe0f\n")
         found = {f["file"] for f in self.scan(root)["findings"] if f["rule"] == "hidden-unicode"}
-        self.assertEqual(found, {"skills/a/SKILL.md", "skills/b/SKILL.md", "skills/c/SKILL.md", "notes/blank.md"})
+        self.assertEqual(found, {"skills/a/SKILL.md", "skills/b/SKILL.md", "skills/c/SKILL.md", "notes/blank.md",
+                                 "notes/emsp.md", "notes/idsp.md", "notes/mmsp.md", "notes/letters.md"})
 
     def test_s11_windows_device_names(self):
         for name in ("CON", "nul", "com1", "LPT9", "aux.md", "PRN"):
