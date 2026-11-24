@@ -122,7 +122,7 @@ owner approves in Phase 7.
 2. `plugins.py plan remove <name>` prints the removal step for each tool
    whose catalog entry has the plugin. Exit `3`: the
    plugin is protective; stop. Pass `--i-understand` only on an explicit owner
-   instruction naming that plugin.
+   instruction naming that plugin. Exit `7`: the plugin is not in the catalog.
 3. Present every removal as a proposal with its reason; the owner confirms
    each one. Record the outcome with `decide`, then re-run Phase 8.
 

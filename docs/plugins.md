@@ -162,6 +162,7 @@ exist to block or review unsafe actions; detected by a heuristic, so check
 
 `plan add` never consults the catalog. Without `name@marketplace` it assumes
 the marketplace named in `--marketplace-dir`, else `claude-plugins-official`.
+`plan remove` uses the origin recorded in the catalog, else `claude-plugins-official`.
 
 Exit `0`, `2` invalid name, `3` refused, `7` unknown: `remove` when the plugin
 is not in the catalog; `add` only with `--marketplace-dir`, when the name is
@@ -239,7 +240,7 @@ Rules (severity: high blocks, medium needs review, info passes):
 | MCP | `mcp-server` (info), `mcp-unpinned-package` (medium; also a `npm`/`bun`/`pnpm`/`yarn` run or start whose `package.json` script installs with version ranges or calls an unpinned `npx`-style package), `mcp-literal-secret` (high), `mcp-insecure-url` (medium; plain http to localhost is allowed) |
 | Bundled code | `download-exec`, `dynamic-exec-remote`, `credential-store-access`, `persistence`, `destructive-fs`, `opaque-binary` (high); `privilege-escalation`, `obfuscation`, `bot-evasion` (medium) |
 | Skills, commands, agents | `instruction-override`, `hidden-unicode` (high); `mandate-language`, `broad-tools` (medium); `inline-shell` (info) |
-| Secrets | `secret` (high), `secret-example` (info: an elided, templated or plain-word value, or one named fake, dummy, example, sample or placeholder) |
+| Secrets | `secret` (high), `secret-example` (info: an elided, templated or plain-word value, a value that contains fake, dummy, example, sample or placeholder, or a low-entropy value whose key name contains one of those words) |
 | Names | `hidden-unicode` (high) for a newline, control, bidi or invisible character in a file or folder name |
 | Other | `symlink-escape` (high), `file-limit-reached`, `capability-limit-reached` (medium), `large-file-skipped`, `network-hosts`, `unreadable-file` (info) |
 
@@ -248,15 +249,16 @@ severity):
 
 | Rule | High | Medium |
 | --- | --- | --- |
-| `download-exec` | shell script line that runs it; program line with an execution sink (subprocess, `os.system`, `exec`/`spawn`, `shell=True` and similar) | shell line that only prints or comments it; program line without a sink (for example a suggested `fix=` string); any Markdown prose |
+| `download-exec` | shell script line that runs it, including after a printed part chained with `;`, `&&`, `\|\|`, `\|`, a backtick or `$(`; program line that has an execution sink (subprocess, `os.system`, `exec`/`spawn`, `shell=True` and similar), or that assigns the command to a name a sink in the same file uses (directly, in an f-string, format or concatenation, or through simple `b = a` copies) | shell line where only a printed or commented part (`echo`, `printf`, `#`) comes before it; any other program line (for example a suggested `fix=` string that is only printed); any Markdown prose |
 | `secret` | token formats (AWS key id, private key, GitHub, Slack, Stripe, Google, OpenAI, JWT) anywhere except tests; keyword assignments in code and config | any finding in a plugin's own tests or examples; a keyword assignment in Markdown |
 | `hidden-unicode` | everywhere, and tag characters even in tests | other hidden characters in a plugin's own tests or examples |
-| `instruction-override` | prose and other code blocks | inside a fenced code block whose heading trail names adversarial, injection, fixture, attack or similar material |
+| `instruction-override` | prose, other code blocks, and every file outside the folders named in the next column | inside a fenced code block whose heading trail names adversarial, injection, fixture, attack or similar material, in a file under a `tests`, `test`, `fixtures`, `examples`, `evals` or `prompts` folder |
 
 Hidden characters are zero-width and joiner characters, bidi controls
 (including U+061C), variation selectors (U+FE00 to U+FE0F, U+E0100 to
-U+E01EF; a selector after a symbol or emoji, or in a keycap such as 1️⃣, is
-allowed) and tag
+U+E01EF; one U+FE00 to U+FE0F selector right after a symbol or emoji, or in a
+keycap such as 1️⃣, is allowed; a selector next to another selector, and any
+U+E0100 to U+E01EF selector, is a finding) and tag
 characters. A byte-order mark at the start of a file or inside a string
 literal in code is allowed.
 
@@ -268,6 +270,10 @@ What the scanner does not prove:
 - Words that mark a phrase as described rather than instructed ("never",
   "avoid", "for example") suppress some prose findings, so an attacker can
   hide behind them; a human reviews every plugin that matters.
+- The program-file check for `download-exec` follows a command string only
+  through a direct assignment and simple `b = a` copies in the same file; a
+  string built in pieces, passed through a function, a container or another
+  file, rates medium.
 - A `review` or `block` verdict is a reason to read the evidence, not a
   conclusion. Many legitimate plugins document installers that pipe a
   download into a shell.

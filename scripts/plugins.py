@@ -22,6 +22,7 @@ import argparse
 import importlib.util
 import ipaddress
 import json
+import math
 import os
 import re
 import shutil
@@ -496,10 +497,54 @@ _EXEC_SINK = re.compile(r"\bsubprocess\.|\bos\.(?:system|popen|exec\w*)\s*\(|\bP
                         r"|\bchild_process\b|\b(?:execSync|execFileSync|spawnSync|spawn|exec|execFile)\s*\("
                         r"|\bsystem\s*\(|\bBun\.\$|\$`|\bRuntime\.getRuntime\(\)\.exec|\bProcess\.Start\b"
                         r"|\bStart-Process\b|\bInvoke-Expression\b|\biex\b|`[^`\n]*\|\s*(?:ba)?sh[^`\n]*`")
+_CHAINED = re.compile(r";|&&|\|\||\||`|\$\(")
+
+
+def _shell_download_severity(seg, m):
+    """Medium only when the text before the match prints or comments it and chains no other command."""
+    before = seg[:m.start()]
+    return "medium" if _PRINTED_LINE.match(before) and not _CHAINED.search(before) else True
+
+
 DOWNLOAD_EXEC_SHELL = Rule("download-exec", "high", DOWNLOAD_EXEC.keys, DOWNLOAD_EXEC.rx.pattern,
-                           check=lambda seg, _m: "medium" if _PRINTED_LINE.match(seg) else True)
+                           check=_shell_download_severity)
 DOWNLOAD_EXEC_PROGRAM = Rule("download-exec", "high", DOWNLOAD_EXEC.keys, DOWNLOAD_EXEC.rx.pattern,
                              check=lambda seg, _m: True if _EXEC_SINK.search(seg) else "medium")
+# the fenced-sample downgrade applies only to material kept in these folders, never to an arbitrary skill file
+FIXTURE_DIRS = {"tests", "test", "fixtures", "examples", "evals", "prompts"}
+_ASSIGNED_NAME = re.compile(r"^\s*(?:(?:const|let|var|my|local|export)\s+)?\$?([A-Za-z_]\w{0,80})\s*(?::[^=\n]{0,80})?=(?!=)")
+_ALIAS = re.compile(r"^\s*(?:(?:const|let|var|my|local)\s+)?\$?([A-Za-z_]\w{0,80})\s*=\s*\$?([A-Za-z_]\w{0,80})\s*;?\s*$")
+_IDENT = re.compile(r"[A-Za-z_]\w{0,80}")
+
+
+def program_download_rule(text: str) -> Rule:
+    """download-exec for a program file: high when the matched line has an execution sink, or when the line
+    assigns the command to a name that a sink in the same file uses (directly, inside an f-string, format or
+    concatenation, or through simple `b = a` aliases); otherwise medium (a printed suggestion)."""
+    used, aliases = set(), {}
+    for _line, seg in iter_segments(text):
+        m = _EXEC_SINK.search(seg)
+        if m:
+            used.update(_IDENT.findall(seg[m.start():]))
+        a = _ALIAS.match(seg)
+        if a:
+            aliases.setdefault(a.group(1), set()).add(a.group(2))
+    frontier = list(used)
+    while frontier:  # a name used by a sink makes every name it was copied from used too
+        for source in aliases.get(frontier.pop(), ()):
+            if source not in used:
+                used.add(source)
+                frontier.append(source)
+
+    def severity(seg, _m):
+        if _EXEC_SINK.search(seg):
+            return True
+        name = _ASSIGNED_NAME.match(seg)
+        return True if name and name.group(1) in used else "medium"
+
+    return Rule("download-exec", "high", DOWNLOAD_EXEC.keys, DOWNLOAD_EXEC.rx.pattern, check=severity)
+
+
 _FIXTURE_HEADING = re.compile(r"(?i)adversar|injection|fixture|attack|malicious|red[- ]team|hostile|jailbreak")
 
 
@@ -1035,13 +1080,18 @@ class PluginScan:
         self._hidden(rel, text, is_code)
         if is_code:
             shell = ext in SHELL_EXT or (not ext and re.match(r"#![^\n]*\b(?:ba|z|k|da)?sh\b", text) is not None)
-            self.apply(CODE_RULES + ((DOWNLOAD_EXEC_SHELL,) if shell else (DOWNLOAD_EXEC_PROGRAM,)), rel, text, low)
+            if shell:
+                download = DOWNLOAD_EXEC_SHELL
+            else:
+                download = program_download_rule(text)
+            self.apply(CODE_RULES + (download,), rel, text, low)
             self.apply((DYNAMIC_EXEC_PY,) if ext in (".py", ".pyw") else
                        (DYNAMIC_EXEC_JS,) if ext in (".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx")
                        else (), rel, text, low)
         if surface:
             self.apply(SURFACE_RULES, rel, text, low,
-                       downgrade={"instruction-override": fixture_fence_lines(text)})
+                       downgrade={"instruction-override": fixture_fence_lines(text)
+                                  if FIXTURE_DIRS.intersection(p.lower() for p in parts[:-1]) else set()})
             self._front_matter_tools(rel, text)
             if "commands" in parts[:-1]:
                 m = INLINE_SHELL_RX.search(text)
@@ -1120,8 +1170,9 @@ class PluginScan:
             nxt = text[pos + 1] if pos + 1 < len(text) else ""
             if ch == "\ufeff" and is_code and (prev in "\"'" or nxt in "\"'"):
                 continue  # a byte-order mark written as test data inside a string literal
-            if "\ufe00" <= ch <= "\ufe0f" and prev and (ord(prev) >= 0x2000 or nxt == "\u20e3"):
-                continue  # variation selector after a symbol or emoji (text or emoji presentation)
+            if ("\ufe00" <= ch <= "\ufe0f" and prev and not _selector(prev) and not _selector(nxt)
+                    and (ord(prev) >= 0x2000 or nxt == "\u20e3")):
+                continue  # one variation selector right after a symbol or emoji (text or emoji presentation)
             if ch == "\u200d" and (_emoji(prev) or _emoji(nxt)):
                 continue  # emoji sequence joiner
             if ch in "\u200c\u200d\u200e\u200f" and (_script_letter(prev) or _script_letter(nxt)):
@@ -1251,12 +1302,24 @@ STRONG_SECRET_RULES = {"aws-access-key-id", "private-key", "github-token", "slac
 _WORDY_VALUE = re.compile(r"[A-Za-z]{1,40}\d{0,6}(?:[-_:./](?:[A-Za-z]{1,40}\d{0,6}|\d{1,6})){0,10}")
 
 
+def _low_entropy(value: str) -> bool:
+    counts = {}
+    for ch in value:
+        counts[ch] = counts.get(ch, 0) + 1
+    entropy = -sum(n / len(value) * math.log2(n / len(value)) for n in counts.values()) if value else 0.0
+    return len(counts) < 10 or entropy < 3.0
+
+
 def example_value(value: str, context: str = "") -> bool:
     """A keyword-assignment value that is a stand-in, not a credential: elided, templated, plain words, or
-    named (value or key just before it) fake, dummy or example."""
+    named fake, dummy, example, sample or placeholder (the key name just before it counts only for a
+    low-entropy value)."""
     value = value.rstrip(";,")
-    if re.search(r"(?i)fake|dummy|example|sample|placeholder", value + " " + context[-40:]):
+    marker = re.compile(r"(?i)fake|dummy|example|sample|placeholder")
+    if marker.search(value):
         return True
+    if marker.search(context[-40:]) and _low_entropy(value):
+        return True  # the key name counts only for a value that does not look random
     if any(mark in value for mark in ("...", "…", "{", "}", "$", "%", "<", ">", "*")):
         return True
     return _WORDY_VALUE.fullmatch(value) is not None or len(set(value.lower())) < 8
@@ -1268,6 +1331,10 @@ def is_test_path(rel: str) -> bool:
     return (any(p in ("test", "tests", "__tests__", "fixtures", "testdata", "spec", "examples", "example")
                 for p in parts[:-1])
             or name.startswith("test_") or ".test." in name or ".spec." in name or name.endswith("_test.py"))
+
+
+def _selector(ch: str) -> bool:
+    return bool(ch) and ("\ufe00" <= ch <= "\ufe0f" or "\U000e0100" <= ch <= "\U000e01ef")
 
 
 def _emoji(ch: str) -> bool:
