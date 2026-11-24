@@ -147,6 +147,12 @@ Re-run with `--apply`/`-Apply` when:
 Both cases are idempotent: re-running is always safe, and anything
 already correct reports `unchanged`.
 
+To make this automatic, set `LLM_KB_REFRESH_SURFACES=1` in the knowledge
+base configuration (`docs/knowledge-base.md`): the scheduled index refresh
+then re-runs this installer in apply mode, never forced, whenever the
+checkout's HEAD changed. `python3 scripts/kb.py surfaces refresh` does the
+same on demand; blocked paths are reported and left alone.
+
 ## Uninstalling
 
 There is no built-in uninstall subcommand; remove the links and the

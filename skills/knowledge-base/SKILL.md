@@ -52,6 +52,7 @@ Run from the toolkit root: `python3 scripts/kb.py <command>` (Windows:
 | `sessions --since ISO [--root P] [--json] [--force]` | Opt-in digest of local session transcripts; refuses unless `LLM_KB_HARVEST_SESSIONS=1` or `--force` |
 | `schedule install\|remove\|status [--hours 8-20/2] [--days 1-5]` | OS scheduler entry that runs `scheduled-run` |
 | `scheduled-run` | Start the stack if needed, fast-forward a clean corpus on its default branch, re-index, log one status line |
+| `surfaces refresh [--dry-run]`, `surfaces status` | Re-run the global installer for every installed tool after new knowledge landed (automatic in `scheduled-run` when `LLM_KB_REFRESH_SURFACES=1`) |
 | `hook install\|remove\|status [--settings P]` | Opt-in prompt hook that adds KB hits to each prompt as reference data |
 
 ## Exit codes

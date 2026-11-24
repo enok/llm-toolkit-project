@@ -43,6 +43,7 @@ TIMEOUT_DEFAULT = 120
 TIMEOUT_GIT = 120
 TIMEOUT_COMPOSE_UP = 600
 TIMEOUT_INGEST = 1800
+TIMEOUT_SURFACES = 300
 DOCKER_WAIT_SECONDS = 180
 HEALTH_WAIT_SECONDS = 120
 WAIT_INTERVAL = 5
@@ -61,6 +62,7 @@ DEFAULTS = {
     "LLM_KB_SCAN_SECONDS": "30",
     "LLM_KB_SYNC_SAFE_INDEX": "1",
     "LLM_KB_HARVEST_SESSIONS": "0",
+    "LLM_KB_REFRESH_SURFACES": "0",
 }
 
 # compose variable -> config key (exact names from the design contract)
@@ -1196,6 +1198,113 @@ def cmd_schedule(args) -> int:
     return 0 if state is not None else 1
 
 
+# --------------------------------------------------------------------------- surfaces refresh
+
+def surfaces_command(corpus, windows: bool, apply: bool = True) -> list:
+    """Pure: installer command from the corpus checkout itself. Never contains the force option."""
+    if windows:
+        from pathlib import PureWindowsPath
+        root = PureWindowsPath(str(corpus))
+        cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+               str(root / "scripts" / "install-global-surfaces.ps1")]
+        if apply:
+            cmd.append("-Apply")
+        return cmd + ["-ToolkitRoot", str(root)]
+    root = Path(str(corpus))
+    cmd = ["bash", (root / "scripts" / "install-global-surfaces.sh").as_posix()]
+    if apply:
+        cmd.append("--apply")
+    return cmd + ["--toolkit-root", root.as_posix()]
+
+
+def surfaces_blocked_rows(output: str) -> int:
+    """Count `blocked` rows in the installer's table (TOOL  SURFACE  ACTION  DETAIL, two-space separated)."""
+    count = 0
+    for line in (output or "").splitlines():
+        cols = re.split(r"\s{2,}", line.strip())
+        if len(cols) >= 3 and cols[2] == "blocked":
+            count += 1
+    return count
+
+
+def classify_surfaces(returncode: int, output: str):
+    """('refreshed'|'partial'|'failed', blocked_count)."""
+    if returncode == 0:
+        return "refreshed", 0
+    blocked = surfaces_blocked_rows(output)
+    m = re.search(r"Done with (\d+) blocked path", output or "")
+    if returncode not in (124, 127) and blocked >= 1 and m and int(m.group(1)) == blocked:
+        return "partial", blocked
+    return "failed", blocked
+
+
+def corpus_head(corpus):
+    proc = git_run(corpus, "rev-parse", "HEAD")
+    head = proc.stdout.strip() if proc.returncode == 0 else ""
+    return head or None
+
+
+def surfaces_head_file(cfg) -> Path:
+    return data_dir(cfg) / "state" / "surfaces-head"
+
+
+def read_surfaces_head(cfg):
+    try:
+        return surfaces_head_file(cfg).read_text(encoding="utf-8").strip() or None
+    except OSError:
+        return None
+
+
+def surfaces_due(cfg):
+    """(due, recorded, current). Not due when the corpus has no readable HEAD."""
+    current = corpus_head(cfg["LLM_KB_CORPUS_DIR"])
+    recorded = read_surfaces_head(cfg)
+    return (current is not None and current != recorded), recorded, current
+
+
+def do_surfaces_refresh(cfg, apply=True):
+    """Run the corpus checkout's installer. Returns (outcome, blocked, output); raises KBError (exit 2)."""
+    if not (data_dir(cfg) / "state").is_dir():
+        raise KBError("data folder missing, run init")
+    corpus = Path(cfg["LLM_KB_CORPUS_DIR"])
+    windows = detect_os() == "Windows"
+    script = corpus / "scripts" / ("install-global-surfaces.ps1" if windows else "install-global-surfaces.sh")
+    if not script.is_file():
+        raise KBError(f"installer not found: {script.as_posix()}")
+    proc = run_cmd(surfaces_command(corpus, windows, apply), timeout=TIMEOUT_SURFACES)
+    output = (proc.stdout or "") + (proc.stderr or "")
+    outcome, blocked = classify_surfaces(proc.returncode, output)
+    if apply and outcome in ("refreshed", "partial"):
+        head = corpus_head(corpus)
+        if head:
+            surfaces_head_file(cfg).write_text(head + "\n", encoding="utf-8")
+    return outcome, blocked, output
+
+
+def cmd_surfaces(args) -> int:
+    cfg = load_config()
+    if args.action == "status":
+        due, recorded, current = surfaces_due(cfg)
+        out(f"recorded HEAD: {recorded or 'none'}")
+        out(f"corpus HEAD: {current or 'unknown'}")
+        out("refresh: due" if due else "refresh: up to date")
+        return 0
+    outcome, blocked, output = do_surfaces_refresh(cfg, apply=not args.dry_run)
+    if args.dry_run:
+        out(output.rstrip())
+        out("dry run: no state written")
+        return 0 if outcome == "refreshed" else 1
+    if outcome == "refreshed":
+        out("surfaces refreshed")
+        return 0
+    if outcome == "partial":
+        out(f"surfaces partial ({blocked} blocked): blocked paths are left as they are; the HEAD is recorded")
+        return 0
+    err(output.rstrip()[-2000:])
+    out("surfaces refresh failed")
+    return 1
+
+
 # --------------------------------------------------------------------------- scheduled-run
 
 def git_run(corpus, *args):
@@ -1272,6 +1381,15 @@ def cmd_scheduled_run(args) -> int:
             notes.append("pull ok" if pull.returncode == 0 else "pull failed")
         else:
             notes.append(f"pull skipped ({reason})")
+        if truthy(cfg["LLM_KB_REFRESH_SURFACES"]):
+            try:
+                due, _, _ = surfaces_due(cfg)
+                if due:
+                    outcome, blocked, _ = do_surfaces_refresh(cfg)
+                    notes.append({"refreshed": "surfaces refreshed",
+                                  "partial": f"surfaces partial ({blocked} blocked)"}.get(outcome, "surfaces refresh failed"))
+            except (KBError, OSError):
+                notes.append("surfaces refresh failed")
         idx = run_compose(cfg, "--profile", "tools", "run", "--rm", "-T", "ingest", timeout=TIMEOUT_INGEST)
         if idx.returncode:
             raise RuntimeError("index failed")
@@ -1538,6 +1656,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("action", choices=["install", "remove", "status"])
     s.add_argument("--settings")
     s.set_defaults(func=cmd_hook)
+
+    s = sub.add_parser("surfaces", help="refresh the toolkit's global tool surfaces (skills, agents, instruction block)")
+    s.add_argument("action", choices=["refresh", "status"])
+    s.add_argument("--dry-run", action="store_true", help="refresh: show the installer plan, change and record nothing")
+    s.set_defaults(func=cmd_surfaces)
 
     s = sub.add_parser("doctor", help="check docker, data folder, service")
     s.add_argument("--deep", action="store_true",

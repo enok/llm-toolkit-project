@@ -172,7 +172,8 @@ sync.
    and 3.
 2. `python3 scripts/kb.py inbox archive <name>...` for the inbox names listed
    in the merged pull request's body, and only those.
-3. `python3 scripts/kb.py index`. The archived items leave the index here
+3. `python3 scripts/kb.py index`; then `python3 scripts/kb.py surfaces refresh` when
+   `LLM_KB_REFRESH_SURFACES=1`, so every installed tool sees the new knowledge. The archived items leave the index here
    at the latest; the background scan also drops them within
    `LLM_KB_SCAN_SECONDS`.
 4. Remove the worktree of the merged branch, if one is still registered

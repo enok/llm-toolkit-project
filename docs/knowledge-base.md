@@ -114,6 +114,7 @@ comments. Process environment overrides file values.
 | `LLM_KB_SCAN_SECONDS` | `30` | Incremental scan interval. |
 | `LLM_KB_SYNC_SAFE_INDEX` | `1` | Keep the HNSW index off disk (cloud-sync safe). |
 | `LLM_KB_HARVEST_SESSIONS` | `0` | Opt-in local session digest. |
+| `LLM_KB_REFRESH_SURFACES` | `0` | `1`: `scheduled-run` re-runs the global installer when the corpus HEAD changed, so every installed tool gets new knowledge. |
 
 `kb.py` renders `<data-folder>/state/compose.env` and runs
 `docker compose -p llm-toolkit-kb -f <toolkit>/kb/docker-compose.yml --env-file <data-folder>/state/compose.env ...`.
@@ -169,6 +170,7 @@ Each command is `./scripts/kb.sh <command>` or `.\scripts\kb.ps1 <command>`.
 | `sync-status [--json] [--mark [ISO]] [--no-fetch]` | One-call summary for the scheduled sync; prints `now`. `--mark [ISO]` stores the given time as the watermark (default: the time this command started; pass the `now` printed at the start of the sync). `--no-fetch` skips `git fetch`. |
 | `sessions --since ISO [--root P] [--json] [--force]` | Opt-in session digest (see Security). |
 | `schedule install\|remove\|status [--hours 8-20/2] [--days 1-5]` | Manage the OS scheduler entry. |
+| `surfaces refresh [--dry-run]`, `surfaces status` | Run the corpus checkout's `install-global-surfaces` in apply mode (never forced) and record the HEAD it ran for; `status` says whether a refresh is due. |
 | `scheduled-run` | What the scheduler runs (see Scheduler). |
 | `hook install\|remove\|status [--settings P]` | Manage the prompt hook. Default settings path `~/.claude/settings.json`. |
 | `doctor [--deep]` | Check docker, compose, data folder, compose file, service health. `--deep` also restarts `chroma` and `service`, waits up to 120 s for health, calls `POST /verify`, runs one search, and exits 1 when a step fails. |

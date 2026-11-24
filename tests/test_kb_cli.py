@@ -1443,5 +1443,189 @@ class IterationThreeTests(KBTestCase):  # N3, N4, N5, N6
         self.assertIn("deletion guard", text)
 
 
+TABLE_OK = """TOOL    SURFACE   ACTION     DETAIL
+----    -------   ------     ------
+claude  skills    unchanged  /h/.claude/skills -> /t/skills
+gemini  skills    updated    /h/.gemini/skills -> /t/skills
+
+Done. Global surfaces installed for: claude gemini
+"""
+TABLE_PARTIAL = """TOOL    SURFACE   ACTION     DETAIL
+----    -------   ------     ------
+claude  skills    unchanged  /h/.claude/skills -> /t/skills
+gemini  skills    blocked    existing non-link path at /h/.gemini/skills; rerun with --force
+
+Done with 1 blocked path(s). Re-run with --force after checking the backups it would take.
+"""
+TABLE_BLOCKED_PLUS_ERROR = TABLE_PARTIAL + "line 99: unexpected failure\n"
+
+
+class SurfacesCommandTests(KBTestCase):  # row 22
+    def test_posix_command_is_pure_uses_corpus_and_never_forces(self):
+        cmd = kb.surfaces_command("/data/corpus", windows=False)
+        self.assertEqual(cmd, ["bash", "/data/corpus/scripts/install-global-surfaces.sh", "--apply",
+                               "--toolkit-root", "/data/corpus"])
+        self.assertEqual(kb.surfaces_command("/data/corpus", windows=False, apply=False),
+                         ["bash", "/data/corpus/scripts/install-global-surfaces.sh", "--toolkit-root", "/data/corpus"])
+
+    def test_windows_command(self):
+        cmd = kb.surfaces_command("C:/code/corpus", windows=True)
+        self.assertEqual(cmd[:6], ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                                   "C:\\code\\corpus\\scripts\\install-global-surfaces.ps1"])
+        self.assertEqual(cmd[6:], ["-Apply", "-ToolkitRoot", "C:\\code\\corpus"])
+        self.assertNotIn("-Apply", kb.surfaces_command("C:/code/corpus", windows=True, apply=False))
+
+    def test_never_force_and_corpus_not_running_checkout(self):
+        for windows in (False, True):
+            joined = " ".join(kb.surfaces_command("/elsewhere/corpus", windows)).lower()
+            self.assertNotIn("force", joined)
+            self.assertNotIn(REPO.as_posix().lower(), joined)
+
+    def test_installer_must_exist_in_corpus_checkout(self):
+        rc, _, err = self.run_main("surfaces", "refresh")
+        self.assertEqual(rc, 2)
+        self.assertIn("installer not found", err)
+
+    def test_missing_data_folder_exit_2(self):
+        import shutil
+        shutil.rmtree(self.data)
+        self.assertEqual(self.run_main("surfaces", "refresh")[0], 2)
+
+    def test_classification_from_installer_output(self):
+        self.assertEqual(kb.classify_surfaces(0, TABLE_OK), ("refreshed", 0))
+        self.assertEqual(kb.classify_surfaces(1, TABLE_PARTIAL), ("partial", 1))
+        self.assertEqual(kb.classify_surfaces(1, TABLE_BLOCKED_PLUS_ERROR)[0], "partial")  # count matches the footer
+        self.assertEqual(kb.classify_surfaces(1, "boom: no table at all\n"), ("failed", 0))
+        self.assertEqual(kb.classify_surfaces(124, TABLE_PARTIAL)[0], "failed")  # timeout
+        self.assertEqual(kb.classify_surfaces(1, TABLE_PARTIAL.replace("Done with 1", "Done with 2"))[0], "failed")
+        self.assertEqual(kb.surfaces_blocked_rows(TABLE_PARTIAL), 1)
+
+
+@unittest.skipUnless(subprocess.run(["git", "--version"], capture_output=True).returncode == 0, "git missing")
+class SurfacesRefreshFlowTests(KBTestCase):
+    def setUp(self):
+        super().setUp()
+        git(self.tmp, "init", "-q", "-b", "main", str(self.corpus))
+        (self.corpus / "scripts").mkdir()
+        (self.corpus / "scripts" / "install-global-surfaces.sh").write_text("#!/bin/sh\n")
+        (self.corpus / "AGENTS.md").write_text("x\n")
+        git(self.corpus, "add", "-A")
+        git(self.corpus, "commit", "-q", "-m", "i")
+        self.head = git(self.corpus, "rev-parse", "HEAD").stdout.strip()
+        self.calls = []
+        self.installer = (0, TABLE_OK)
+
+    def fake(self, cmd, **kw):
+        self.calls.append(list(cmd))
+        if cmd[0] == "git":
+            if "pull" in cmd:
+                return subprocess.CompletedProcess(cmd, 0, "", "")
+            return subprocess.run(cmd, capture_output=True, text=True)
+        if cmd[0] == "bash":
+            return subprocess.CompletedProcess(cmd, self.installer[0], self.installer[1], "")
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    def go(self, *argv):
+        with mock.patch.object(kb, "run_cmd", self.fake), mock.patch.object(kb, "detect_os", return_value="Linux"), \
+                mock.patch.object(kb, "docker_ready", return_value=(True, "docker ready")):
+            return self.run_main(*argv)
+
+    def installer_calls(self):
+        return [c for c in self.calls if c[0] == "bash"]
+
+    def head_file(self):
+        return self.data / "state" / "surfaces-head"
+
+    def test_refresh_refreshed_records_head_exit_0(self):
+        rc, text, _ = self.go("surfaces", "refresh")
+        self.assertEqual(rc, 0)
+        self.assertIn("surfaces refreshed", text)
+        self.assertEqual(self.head_file().read_text().strip(), self.head)
+        self.assertIn("--apply", self.installer_calls()[0])
+        self.assertIn(self.corpus.as_posix(), self.installer_calls()[0])
+
+    def test_refresh_partial_records_head_exit_0_with_note(self):
+        self.installer = (1, TABLE_PARTIAL)
+        rc, text, _ = self.go("surfaces", "refresh")
+        self.assertEqual(rc, 0)
+        self.assertIn("partial (1 blocked)", text)
+        self.assertEqual(self.head_file().read_text().strip(), self.head)
+
+    def test_refresh_failed_exit_1_no_head(self):
+        self.installer = (1, "Traceback: nope\n")
+        rc, text, _ = self.go("surfaces", "refresh")
+        self.assertEqual(rc, 1)
+        self.assertFalse(self.head_file().exists())
+
+    def test_dry_run_writes_nothing_and_passes_no_apply(self):
+        rc, text, _ = self.go("surfaces", "refresh", "--dry-run")
+        self.assertEqual(rc, 0)
+        self.assertFalse(self.head_file().exists())
+        self.assertNotIn("--apply", self.installer_calls()[0])
+        self.assertEqual(len(self.installer_calls()), 1)
+
+    def test_status_due_then_up_to_date(self):
+        rc, text, _ = self.go("surfaces", "status")
+        self.assertEqual(rc, 0)
+        self.assertIn(f"corpus HEAD: {self.head}", text)
+        self.assertIn("recorded HEAD: none", text)
+        self.assertIn("refresh: due", text)
+        self.go("surfaces", "refresh")
+        text = self.go("surfaces", "status")[1]
+        self.assertIn(f"recorded HEAD: {self.head}", text)
+        self.assertIn("up to date", text)
+
+    def test_scheduled_run_default_calls_nothing(self):
+        rc, text, _ = self.go("scheduled-run")
+        self.assertEqual(rc, 0)
+        self.assertEqual(self.installer_calls(), [])
+        self.assertNotIn("surfaces", text)
+
+    def test_scheduled_run_key_on_refreshes_between_pull_and_index(self):
+        os.environ["LLM_KB_REFRESH_SURFACES"] = "1"
+        rc, text, _ = self.go("scheduled-run")
+        self.assertEqual(rc, 0)
+        self.assertIn("surfaces refreshed", text)
+        pos = lambda pred: next(i for i, c in enumerate(self.calls) if pred(c))
+        pull, inst, idx = (pos(lambda c: c[0] == "git" and "pull" in c), pos(lambda c: c[0] == "bash"),
+                           pos(lambda c: "ingest" in c))
+        self.assertLess(pull, inst)
+        self.assertLess(inst, idx)
+        self.go("scheduled-run")  # HEAD unchanged: not due again
+        self.assertEqual(len(self.installer_calls()), 1)
+        (self.corpus / "new.md").write_text("n\n")
+        git(self.corpus, "add", "-A")
+        git(self.corpus, "commit", "-q", "-m", "more")
+        self.go("scheduled-run")
+        self.assertEqual(len(self.installer_calls()), 2)
+
+    def test_partial_in_status_line(self):
+        os.environ["LLM_KB_REFRESH_SURFACES"] = "1"
+        self.installer = (1, TABLE_PARTIAL)
+        rc, text, _ = self.go("scheduled-run")
+        self.assertEqual(rc, 0)
+        self.assertIn("surfaces partial (1 blocked)", text)
+
+    def test_failure_does_not_skip_index_or_change_exit_code(self):
+        os.environ["LLM_KB_REFRESH_SURFACES"] = "1"
+        self.installer = (1, "Traceback\n")
+        rc, text, _ = self.go("scheduled-run")
+        self.assertEqual(rc, 0)
+        self.assertIn("surfaces refresh failed", text)
+        self.assertIn("index ok", text)
+        self.assertTrue([c for c in self.calls if "ingest" in c])
+        self.assertFalse(self.head_file().exists())  # retried next run
+
+    def test_missing_installer_in_corpus_counts_as_failed_not_fatal(self):
+        os.environ["LLM_KB_REFRESH_SURFACES"] = "1"
+        (self.corpus / "scripts" / "install-global-surfaces.sh").unlink()
+        git(self.corpus, "add", "-A")
+        git(self.corpus, "commit", "-q", "-m", "rm")
+        rc, text, _ = self.go("scheduled-run")
+        self.assertEqual(rc, 0)
+        self.assertIn("surfaces refresh failed", text)
+        self.assertIn("index ok", text)
+
+
 if __name__ == "__main__":
     unittest.main()
