@@ -184,6 +184,10 @@ git branch --show-current  # must equal <ticket-branch>
 
 For each addressed PR comment (S2 fixes), reply with what changed and where.
 
+## Known pitfalls
+
+- Probe push access with `git push --dry-run` and the pull-request tool's auth status at the start of the run, not with `git ls-remote`: a successful anonymous read of a public repository proves no write credential, and when none exists ask the owner to sign in before planning on a push. See `learnings/public-repo-read-does-not-prove-push-access.md`. (sig: wrong-assumption/anonymous-read-taken-as-push-credentials)
+
 ---
 
 ## Final Step — Self-improvement

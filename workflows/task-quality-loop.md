@@ -89,3 +89,4 @@ Per task, report to the run record built by `workflows/run-retrospective.md`: it
 ## Known pitfalls
 
 - When a validator reports the same defect shape in several files, trace it to the shared generator or template and fix it there before refining the instances; a fix to the instances alone lets the generator emit the defect again. See `learnings/find-generator-not-just-instances.md`.
+- Compile-check Python in a clean-tree gate or read-only review in memory (`compile(open(path, 'rb').read(), path, 'exec')` or `ast.parse`), not with `python -m py_compile`, which writes a `__pycache__` file even under `-B` or `PYTHONDONTWRITEBYTECODE`; if it was run, remove the folder and confirm the tree is clean. See `learnings/py-compile-writes-bytecode-despite-no-bytecode-flag.md`. (sig: tool-misuse/compile-check-wrote-bytecode-into-reviewed-tree)
