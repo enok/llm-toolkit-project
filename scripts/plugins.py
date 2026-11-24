@@ -201,7 +201,8 @@ def write_json_atomic(path: Path, data) -> None:
 # --------------------------------------------------------------------------- text helpers
 
 HIDDEN_CHARS = ("\u200b\u200c\u200d\u200e\u200f\u2060\u2061\u2062\u2063\u2064\ufeff\u180e\u061c"
-                "\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufe00-\ufe0f")
+                "\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufe00-\ufe0f"
+                "\u2800\u3164\u115f\u1160\uffa0")  # last five render blank (Braille blank, Hangul fillers)
 TAG_CHARS = "\U000e0000-\U000e007f"
 HIDDEN_RX = re.compile("[" + HIDDEN_CHARS + TAG_CHARS + "\U000e0100-\U000e01ef]")
 TAG_RX = re.compile("[" + TAG_CHARS + "]")
@@ -1162,6 +1163,7 @@ class PluginScan:
 
     def _hidden(self, rel, text, is_code=False):
         reported = 0
+        exempted = {}  # line start -> selectors exempted on that line
         for m in HIDDEN_RX.finditer(text):
             pos, ch = m.start(), m.group(0)
             if ch == "\ufeff" and pos == 0:
@@ -1170,9 +1172,17 @@ class PluginScan:
             nxt = text[pos + 1] if pos + 1 < len(text) else ""
             if ch == "\ufeff" and is_code and (prev in "\"'" or nxt in "\"'"):
                 continue  # a byte-order mark written as test data inside a string literal
-            if ("\ufe00" <= ch <= "\ufe0f" and prev and not _selector(prev) and not _selector(nxt)
-                    and (ord(prev) >= 0x2000 or nxt == "\u20e3")):
-                continue  # one variation selector right after a symbol or emoji (text or emoji presentation)
+            if (ch in "\ufe0e\ufe0f" and prev and not _selector(prev) and not _selector(nxt)
+                    and not HIDDEN_RX.match(prev) and (ord(prev) >= 0x2000 or nxt == "\u20e3")):
+                # one presentation selector right after a visible symbol or emoji, or in a keycap. Emoji
+                # presentation (FE0F) is ordinary and unlimited; text presentation (FE0E) is rare, so more than
+                # three on one line could carry a FE0E/FE0F bit pattern and is reported
+                if ch == "\ufe0f":
+                    continue
+                start = text.rfind("\n", 0, pos) + 1
+                exempted[start] = exempted.get(start, 0) + 1
+                if exempted[start] <= MAX_EXEMPT_SELECTORS:
+                    continue
             if ch == "\u200d" and (_emoji(prev) or _emoji(nxt)):
                 continue  # emoji sequence joiner
             if ch in "\u200c\u200d\u200e\u200f" and (_script_letter(prev) or _script_letter(nxt)):
@@ -1331,6 +1341,9 @@ def is_test_path(rel: str) -> bool:
     return (any(p in ("test", "tests", "__tests__", "fixtures", "testdata", "spec", "examples", "example")
                 for p in parts[:-1])
             or name.startswith("test_") or ".test." in name or ".spec." in name or name.endswith("_test.py"))
+
+
+MAX_EXEMPT_SELECTORS = 3
 
 
 def _selector(ch: str) -> bool:

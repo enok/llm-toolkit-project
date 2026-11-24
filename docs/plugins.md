@@ -256,11 +256,12 @@ severity):
 
 Hidden characters are zero-width and joiner characters, bidi controls
 (including U+061C), variation selectors (U+FE00 to U+FE0F, U+E0100 to
-U+E01EF; one U+FE00 to U+FE0F selector right after a symbol or emoji, or in a
-keycap such as 1️⃣, is allowed; a selector next to another selector, and any
-U+E0100 to U+E01EF selector, is a finding) and tag
-characters. A byte-order mark at the start of a file or inside a string
-literal in code is allowed.
+U+E01EF), tag characters, and characters that render blank (U+2800, U+3164,
+U+115F, U+1160, U+FFA0). U+FE0F (emoji presentation) directly after a visible symbol or
+emoji, or in a keycap such as 1️⃣, is allowed without limit; U+FE0E (text
+presentation) there is allowed up to three times per line. Every other selector,
+including one after a blank or hidden character, is a finding. A byte-order mark at the start of a file or
+inside a string literal in code is allowed.
 
 What the scanner does not prove:
 
