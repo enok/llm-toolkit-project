@@ -994,7 +994,7 @@ class SchedulerPathTests(KBTestCase):  # D1
 
     def test_build_path_adds_existing_dirs_and_dedupes(self):
         home_docker = os.path.expanduser("~/.docker/bin")
-        present = {home_docker, "/usr/local/bin"}
+        present = {home_docker, "/usr/local/bin", "/usr/bin", "/bin"}
         got = kb.build_path("/usr/bin:/usr/local/bin:/bin", exists=lambda p: p in present)
         self.assertEqual(got.split(os.pathsep), ["/usr/bin", "/usr/local/bin", "/bin", home_docker])
         self.assertNotIn("/opt/homebrew/bin", got)
@@ -1134,6 +1134,10 @@ class InitToolkitDirTests(KBTestCase):  # D4
         for key in ("LLM_KB_DATA_DIR", "LLM_KB_CORPUS_DIR"):
             os.environ.pop(key)
         self.other = self.tmp / "other-checkout"
+        (self.other / "scripts").mkdir(parents=True)
+        (self.other / "kb").mkdir()
+        (self.other / "scripts" / "kb.py").write_text("")
+        (self.other / "kb" / "docker-compose.yml").write_text("")
 
     def test_toolkit_dir_is_repointed_and_others_kept(self):
         (self.tmp / "kb.env").write_text("LLM_KB_COLLECTION=keep\n")
@@ -1366,6 +1370,77 @@ class WrapperTests(unittest.TestCase):  # S-L6 and shellcheck SC1007
         proc = subprocess.run(["sh", str(REPO / "scripts" / "kb.sh"), "--help"], capture_output=True,
                               cwd=tempfile.gettempdir())
         self.assertEqual(proc.returncode, 0)
+
+
+class IterationThreeTests(KBTestCase):  # N3, N4, N5, N6
+    def test_n3_init_refuses_non_toolkit_dir_and_changes_nothing(self):
+        bogus = self.tmp / "not-a-toolkit"
+        bogus.mkdir()
+        (bogus / "scripts").mkdir()
+        (bogus / "scripts" / "kb.py").write_text("")  # compose file missing
+        envf = self.tmp / "kb.env"
+        envf.write_text("LLM_KB_COLLECTION=keep\n")
+        before = envf.read_text()
+        calls = []
+        with mock.patch.object(kb, "run_cmd", lambda c, **kw: calls.append(list(c)) or ok_proc(c)):
+            rc, _, err = self.run_main("init", "--toolkit-dir", str(bogus))
+        self.assertEqual(rc, 2)
+        self.assertEqual(len(err.strip().splitlines()), 1)
+        self.assertEqual(envf.read_text(), before)
+        self.assertEqual(calls, [])
+        self.assertEqual(self.run_main("init", "--toolkit-dir", str(self.tmp / "missing"))[0], 2)
+
+    def test_n4_path_keeps_only_safe_absolute_existing_unique_dirs(self):
+        good, good2, writable = self.tmp / "g1", self.tmp / "g2", self.tmp / "ww"
+        for d in (good, good2, writable):
+            d.mkdir()
+        os.chmod(good, 0o755)
+        os.chmod(good2, 0o755)
+        os.chmod(writable, 0o777)
+        raw = os.pathsep.join([str(good), "relative/bin", str(self.tmp / "gone"), str(writable), str(good2), str(good)])
+        got = kb.build_path(raw).split(os.pathsep)
+        self.assertEqual([p for p in got if p.startswith(str(self.tmp))], [str(good), str(good2)])
+        self.assertNotIn("relative/bin", got)
+        self.assertEqual(len(got), len(set(got)))
+        env = kb.scheduler_env(kb.build_path(raw))
+        self.assertNotIn(str(writable), env["PATH"])
+
+    def test_n5_bad_mark_exits_2_one_line_no_traceback(self):
+        rc, text, err = self.run_main("sync-status", "--no-fetch", "--mark", "not-a-date")
+        self.assertEqual(rc, 2)
+        self.assertEqual(len(err.strip().splitlines()), 1)
+        self.assertNotIn("Traceback", err)
+        self.assertFalse((self.data / "state" / "sync-state.json").exists())
+
+    def ingest_calls(self, *argv):
+        self.make_corpus()
+        calls = []
+        with mock.patch.object(kb, "run_cmd", lambda c, **kw: calls.append(list(c)) or ok_proc(c)):
+            self.run_main(*argv)
+        return [c for c in calls if "ingest" in c]
+
+    def test_n6_allow_mass_delete_adds_env_to_one_shot_run_only(self):
+        (call,) = self.ingest_calls("index", "--allow-mass-delete")
+        self.assertEqual(call[-8:], ["--profile", "tools", "run", "--rm", "-T", "-e", "KB_ALLOW_MASS_DELETE=1",
+                                     "ingest"])
+        self.assertLess(call.index("-e"), call.index("ingest"))
+        (plain,) = self.ingest_calls("index")
+        self.assertNotIn("KB_ALLOW_MASS_DELETE=1", plain)
+        self.assertNotIn("-e", plain)
+
+    def test_n6_scheduled_run_never_passes_it(self):
+        with mock.patch.object(kb, "docker_ready", return_value=(True, "ready")):
+            calls = self.ingest_calls("scheduled-run")
+        self.assertTrue(calls)
+        self.assertFalse([c for c in calls if any("MASS_DELETE" in a for a in c)])
+
+    def test_n6_help_describes_flag_in_one_line(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf), self.assertRaises(SystemExit):
+            kb.main(["index", "--help"])
+        text = buf.getvalue()
+        self.assertIn("--allow-mass-delete", text)
+        self.assertIn("deletion guard", text)
 
 
 if __name__ == "__main__":

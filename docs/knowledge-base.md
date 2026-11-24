@@ -142,7 +142,9 @@ containers receive them unchanged.
 - The service scans for changes every `LLM_KB_SCAN_SECONDS`. A full
   `index` also removes chunks of files that no longer exist, with two
   guards: it deletes nothing for a source whose walk saw zero files, and it
-  refuses to remove more than 50% of a source's tracked files.
+  refuses to remove more than 50% of a source's tracked files (sources with
+  20 or more tracked files; `index --allow-mass-delete` lifts this for one run,
+  never the zero-files rule).
 - Archived inbox items leave the index: the stack mounts
   `<data-folder>/archive` read-only, and in both the background scan and a
   full `index` an inbox entry is deleted when its file is absent from
@@ -159,12 +161,12 @@ Each command is `./scripts/kb.sh <command>` or `.\scripts\kb.ps1 <command>`.
 | --- | --- |
 | `init [--data-dir P] [--toolkit-dir P] [--corpus P] [--port N]` | Create the data folder, write `kb.env`. |
 | `up [--build]`, `down`, `status [--json]` | Start, stop, inspect the stack. |
-| `index` | Full re-index (`docker compose --profile tools run --rm -T ingest`). |
+| `index [--allow-mass-delete]` | Full re-index (`docker compose --profile tools run --rm -T ingest`). The flag lifts the 50% removal guard for that one run. |
 | `search "<q>" [-k N] [--kind K] [--source S] [--max-distance D] [--json]` | Print `distance  kind  <source>:<path> › heading` (with `[pending]` on inbox hits) and a 300-character excerpt per hit. |
 | `check <file\|-> [--source S] [--json]` | Intake gate: secret scan, `scripts/scan-llm-surface-security.py` when present, duplicate check, suggested destination. `--source S` compares only against that source. Re-check an inbox item with `--source repo`; without it the item matches itself as a duplicate. |
 | `add <file\|-> --title T [--kind K] [--origin O] [--allow-near]` | Run `check`, then write an inbox item. |
 | `inbox [--json]`, `inbox archive <name>...` | List pending items; move items to `archive/` (never deletes). |
-| `sync-status [--json] [--mark [ISO]] [--no-fetch]` | One-call summary for the scheduled sync; prints `now`. `--mark` stores the watermark (default: the time the run started; or the ISO time given). `--no-fetch` skips `git fetch`. |
+| `sync-status [--json] [--mark [ISO]] [--no-fetch]` | One-call summary for the scheduled sync; prints `now`. `--mark [ISO]` stores the given time as the watermark (default: the time this command started; pass the `now` printed at the start of the sync). `--no-fetch` skips `git fetch`. |
 | `sessions --since ISO [--root P] [--json] [--force]` | Opt-in session digest (see Security). |
 | `schedule install\|remove\|status [--hours 8-20/2] [--days 1-5]` | Manage the OS scheduler entry. |
 | `scheduled-run` | What the scheduler runs (see Scheduler). |

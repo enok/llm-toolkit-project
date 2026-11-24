@@ -343,6 +343,10 @@ def http_json(cfg, method, path, payload=None, timeout=10):
 # --------------------------------------------------------------------------- init / stack
 
 def cmd_init(args) -> int:
+    if args.toolkit_dir:
+        tk = Path(os.path.expanduser(args.toolkit_dir))
+        if not (tk / "scripts" / "kb.py").is_file() or not (tk / "kb" / "docker-compose.yml").is_file():
+            raise KBError(f"not a toolkit checkout (needs scripts/kb.py and kb/docker-compose.yml): {tk.as_posix()}")
     path = env_file_path()
     current = read_env_file(path)
     updates = {}
@@ -409,7 +413,8 @@ def cmd_status(args) -> int:
 def cmd_index(args) -> int:
     cfg = load_config()
     ensure_ready(cfg)
-    return run_compose(cfg, "--profile", "tools", "run", "--rm", "-T", "ingest", capture_output=False,
+    extra = ["-e", "KB_ALLOW_MASS_DELETE=1"] if args.allow_mass_delete else []
+    return run_compose(cfg, "--profile", "tools", "run", "--rm", "-T", *extra, "ingest", capture_output=False,
                        timeout=TIMEOUT_INGEST).returncode
 
 
@@ -816,6 +821,11 @@ def read_watermark(cfg):
 
 def cmd_sync_status(args) -> int:
     started = utcnow()  # taken before anything is read, so a later --mark cannot skip new records
+    if args.mark:
+        try:
+            parse_iso(args.mark)
+        except ValueError:
+            raise KBError(f"--mark needs an ISO date or time, got {one_line(args.mark)[:40]!r}")
     cfg = load_config()
     watermark = read_watermark(cfg)
     try:
@@ -969,8 +979,16 @@ def scheduler_command(cfg=None) -> list:
 EXTRA_PATH_DIRS = ("~/.docker/bin", "/usr/local/bin", "/opt/homebrew/bin")
 
 
+def world_writable(path) -> bool:
+    try:
+        return bool(os.stat(path).st_mode & 0o002)
+    except OSError:
+        return False
+
+
 def build_path(current=None, exists=None) -> str:
-    """Install-time PATH plus the usual docker locations that exist, de-duplicated, order kept."""
+    """Install-time PATH plus the usual docker locations: only absolute, existing, not world-writable
+    directories, de-duplicated, order kept."""
     exists = exists or os.path.isdir
     current = os.environ.get("PATH", "") if current is None else current
     parts = [p for p in current.split(os.pathsep) if p]
@@ -980,6 +998,8 @@ def build_path(current=None, exists=None) -> str:
             parts.append(expanded)
     seen, result = set(), []
     for part in parts:
+        if not os.path.isabs(part) or not exists(part) or world_writable(part):
+            continue
         if part not in seen:
             seen.add(part)
             result.append(part)
@@ -1459,6 +1479,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_status)
 
     s = sub.add_parser("index", help="full re-index")
+    s.add_argument("--allow-mass-delete", action="store_true",
+                   help="lift the 50%% deletion guard for this one run (never the zero-files rule)")
     s.set_defaults(func=cmd_index)
 
     s = sub.add_parser("search", help="semantic search (plain-text fallback exits 3)")

@@ -30,6 +30,8 @@ import kb_core
 log = logging.getLogger("kb.ingest")
 
 SOURCES = ("repo", "inbox")
+MASS_DELETE_MIN_TRACKED = 20  # the 50% guard applies from this many tracked files of a source
+MASS_DELETE_FLAG = "kb.py index --allow-mass-delete"
 
 
 def display_path(source: str, rel: str) -> str:
@@ -80,8 +82,10 @@ def build_records(source: str, rel: str, text: str, sha: str) -> list:
 class Scanner:
     """Keeps the index in step with the corpus roots. Thread-safe (one scan at a time)."""
 
-    def __init__(self, store, sources: dict):
+    def __init__(self, store, sources: dict, allow_mass_delete: bool = False):
         self.store = store
+        # lifts only the 50% guard of a full ingest; the zero-files rule always holds
+        self.allow_mass_delete = bool(allow_mass_delete)
         self.sources = dict(sources)
         self.lock = threading.Lock()
         self.quarantined: dict = {}
@@ -194,10 +198,15 @@ class Scanner:
             if not seen:
                 self._error(report, f"{source}: walk saw no files; {len(missing)} removals skipped")
                 missing = []
-            elif len(missing) * 2 > len(existing):
+            elif (
+                len(existing) >= MASS_DELETE_MIN_TRACKED
+                and len(missing) * 2 > len(existing)
+                and not self.allow_mass_delete
+            ):
                 self._error(
                     report,
-                    f"{source}: refusing to remove {len(missing)} of {len(existing)} tracked files (over 50%)",
+                    f"{source}: refusing to remove {len(missing)} of {len(existing)} tracked files (over 50%); "
+                    f"if the deletion is intended, run `{MASS_DELETE_FLAG}`",
                 )
                 missing = []
         if delete_missing:
@@ -253,6 +262,12 @@ def write_state(state_dir: str, report: dict) -> None:
         log.warning("could not write ingest state (%s)", type(exc).__name__)
 
 
+def mass_delete_allowed(env=None) -> bool:
+    """``KB_ALLOW_MASS_DELETE=1`` (set by ``kb.py index --allow-mass-delete`` for one run)."""
+    env = os.environ if env is None else env
+    return str(env.get("KB_ALLOW_MASS_DELETE", "")).strip() == "1"
+
+
 def main() -> int:
     kb_core.configure_logging()
     cfg = kb_core.service_config()
@@ -263,7 +278,11 @@ def main() -> int:
     except RuntimeError as exc:
         print(f"ingest: {exc}", file=sys.stderr)
         return 2
-    scanner = Scanner(kb, {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root})
+    scanner = Scanner(
+        kb,
+        {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root},
+        allow_mass_delete=mass_delete_allowed(),
+    )
     report = scanner.scan(delete_missing=True)
     write_state(cfg.state_dir, report)
     print(

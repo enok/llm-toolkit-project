@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -695,13 +696,13 @@ class RefinementIngestGuardTests(unittest.TestCase):
         self.assertTrue(any("walk saw no files" in e for e in report["errors"]))
 
     def test_refuses_to_remove_more_than_half(self):
-        paths = self._files(4)
+        paths = self._files(20)
         self.scanner.scan()
-        for path in paths[:3]:
+        for path in paths[:11]:
             path.unlink()
         report = self.scanner.scan(delete_missing=True)
         self.assertEqual(report["removed"], [])
-        self.assertEqual(len(self.store.existing_files("repo")), 4)
+        self.assertEqual(len(self.store.existing_files("repo")), 20)
         self.assertTrue(any("over 50%" in e for e in report["errors"]))
 
     def test_removes_up_to_half(self):
@@ -798,13 +799,14 @@ class ArchivedInboxRemovalTests(unittest.TestCase):
         repo_files = [write(self.repo, f"note{i}.md", f"# N{i}\nbody\n") for i in range(4)]
         inbox_item = write(self.inbox, "note0.md", "same name in the inbox\n")
         self.scanner.scan()
-        for path in repo_files[:3]:
-            path.unlink()
         self._archive(inbox_item)  # archive/note0.md now exists
-        for name in ("note1.md", "note2.md"):
+        for name in ("note1.md", "note2.md", "note3.md"):
             (self.archive / name).write_text("archived copy", encoding="utf-8")
+        repo_files[3].unlink()  # vanished from repo, same name archived: the background scan keeps it
         report = self.scanner.scan(delete_missing=False)
         self.assertEqual(report["removed"], ["inbox/note0.md"])  # only the inbox entry goes
+        self.assertEqual(len(self.store.existing_files("repo")), 4)
+        repo_files[3].write_text("# N3\nbody\n", encoding="utf-8")
         report = self.scanner.scan(delete_missing=True)
         self.assertEqual(report["removed"], [])
         self.assertEqual(len(self.store.existing_files("repo")), 4)
@@ -835,6 +837,144 @@ class ArchivedInboxRemovalTests(unittest.TestCase):
         services = yaml.safe_load(compose)["services"]
         for name in ("service", "ingest"):
             self.assertTrue(any(v.endswith("/archive:/corpus/archive:ro") for v in services[name]["volumes"]), name)
+
+
+class MassDeleteOverrideTests(unittest.TestCase):
+    """N6: the 50% guard needs 20+ tracked files; KB_ALLOW_MASS_DELETE=1 lifts it, never the zero-files rule."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self._tmp.name) / "repo"
+        self.repo.mkdir()
+        self.store = FakeStore()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _indexed(self, n):
+        paths = [write(self.repo, f"rules/r{i:02d}.md", f"# R{i}\nbody {i}\n") for i in range(n)]
+        ingest.Scanner(self.store, {"repo": str(self.repo)}).scan()
+        return paths
+
+    def _full(self, allow=False):
+        return ingest.Scanner(self.store, {"repo": str(self.repo)}, allow_mass_delete=allow).scan(delete_missing=True)
+
+    def test_19_tracked_mass_deletion_allowed_without_flag(self):
+        paths = self._indexed(19)
+        for path in paths[:15]:
+            path.unlink()
+        report = self._full()
+        self.assertEqual(len(report["removed"]), 15)
+        self.assertEqual(report["errors"], [])
+
+    def test_20_tracked_refused_and_message_names_the_flag(self):
+        paths = self._indexed(20)
+        for path in paths[:15]:
+            path.unlink()
+        report = self._full()
+        self.assertEqual(report["removed"], [])
+        self.assertEqual(len(self.store.existing_files("repo")), 20)
+        self.assertTrue(any("kb.py index --allow-mass-delete" in e for e in report["errors"]), report["errors"])
+
+    def test_20_tracked_with_variable_allowed(self):
+        paths = self._indexed(20)
+        for path in paths[:15]:
+            path.unlink()
+        self.assertTrue(ingest.mass_delete_allowed({"KB_ALLOW_MASS_DELETE": "1"}))
+        for off in ({}, {"KB_ALLOW_MASS_DELETE": "0"}, {"KB_ALLOW_MASS_DELETE": "yes"}):
+            self.assertFalse(ingest.mass_delete_allowed(off), off)
+        with mock.patch.dict(os.environ, {"KB_ALLOW_MASS_DELETE": "1"}):
+            allow = ingest.mass_delete_allowed()
+        report = self._full(allow=allow)
+        self.assertEqual(len(report["removed"]), 15)
+        self.assertEqual(len(self.store.existing_files("repo")), 5)
+
+    def test_zero_files_seen_still_deletes_nothing_with_variable(self):
+        paths = self._indexed(20)
+        for path in paths:
+            path.unlink()
+        report = self._full(allow=True)
+        self.assertEqual(report["removed"], [])
+        self.assertEqual(self.store.deletes, [])
+        self.assertTrue(any("walk saw no files" in e for e in report["errors"]))
+
+    def test_background_scan_never_deletes_even_with_flag(self):
+        paths = self._indexed(20)
+        for path in paths[:15]:
+            path.unlink()
+        report = ingest.Scanner(self.store, {"repo": str(self.repo)}, allow_mass_delete=True).scan()
+        self.assertEqual(report["removed"], [])
+        self.assertEqual(self.store.deletes, [])
+
+    def test_compose_passes_variable_to_ingest_only(self):
+        compose = (REPO / "kb" / "docker-compose.yml").read_text(encoding="utf-8")
+        self.assertIn("KB_ALLOW_MASS_DELETE: ${KB_ALLOW_MASS_DELETE:-0}", compose)
+        try:
+            import yaml
+        except ImportError:
+            return
+        services = yaml.safe_load(compose)["services"]
+        self.assertIn("KB_ALLOW_MASS_DELETE", services["ingest"]["environment"])
+        self.assertIn("KB_COLLECTION", services["ingest"]["environment"])
+        self.assertNotIn("KB_ALLOW_MASS_DELETE", services["service"]["environment"])
+
+
+class ScanCostAndCredentialTests(unittest.TestCase):
+    """N1 (bounded scan time, window boundaries) and N2 (code expressions, empty URL user)."""
+
+    def test_adversarial_input_scans_fast(self):
+        size = 500 * 1024
+        for pattern in ("password_", "passwordA", "a."):
+            text = pattern * (size // len(pattern))
+            for fn in (kb_core.find_secrets, kb_core.mask_secrets):
+                start = time.monotonic()
+                fn(text)
+                elapsed = time.monotonic() - start
+                self.assertLess(elapsed, 2.0, f"{fn.__name__} on {pattern!r}: {elapsed:.2f}s")
+
+    def test_secret_straddling_a_window_boundary_is_found(self):
+        step = kb_core.SCAN_WINDOW - kb_core.SCAN_OVERLAP
+        for cut in (kb_core.SCAN_WINDOW, step, 2 * step):
+            # one long line, the key sits so the 4 KB cut falls inside it
+            prefix = "x " * ((cut - 10) // 2)
+            line = prefix + AWS + " " + "y " * 3000
+            self.assertGreater(len(line), kb_core.SCAN_WINDOW)
+            start = line.index(AWS)
+            self.assertLess(start, cut)
+            self.assertGreater(start + len(AWS), cut)
+            self.assertEqual(kb_core.find_secrets(line), ["aws-access-key-id"], cut)
+            masked = kb_core.mask_secrets(line)
+            self.assertNotIn(AWS, masked)
+            self.assertEqual(masked.count("[REDACTED:aws-access-key-id]"), 1)
+            self.assertEqual(len(masked), len(line) - len(AWS) + len("[REDACTED:aws-access-key-id]"))
+
+    def test_multiline_offsets_mask_the_right_text(self):
+        text = "line one\n" + "z" * 5000 + "\n" + kv("DB_PASSWORD", "=", "Xk9@q2Lm#77Zp!aa") + "\nend\n"
+        masked = kb_core.mask_secrets(text)
+        self.assertTrue(masked.endswith("DB_PASSWORD=[REDACTED:secret-assignment]\nend\n"))
+        self.assertTrue(masked.startswith("line one\n" + "z" * 5000 + "\n"))
+
+    def test_code_expressions_are_not_secrets(self):
+        clean = [
+            kv("auth_token", " = ", "sha256(payload).hexdigest()"),
+            kv("secret", " = ", "os.urandom(32).hex()"),
+            kv("token", " = ", "base64.b64encode(raw).decode()"),
+            kv("password_regex", ": ", "^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}$"),
+            kv("api_key", " = ", "load_secret_value_v2[index]"),
+            kv("token", " = ", "make_token_for_user42{user}"),
+        ]
+        for text in clean:
+            self.assertEqual(kb_core.find_secrets(text), [], text)
+        self.assertIn("secret-assignment", kb_core.find_secrets(kv("DB_PASSWORD", "=", "Xk9@q2Lm#77Zp!aa")))
+
+    def test_url_credentials_with_empty_user(self):
+        long_pw = "Zq8wLm3Pt7Rv2Ks9x"
+        text = "redis" + "://:" + long_pw + "@cache.internal:6379/0"
+        self.assertEqual(kb_core.find_secrets(text), ["url-credentials"])
+        self.assertNotIn(long_pw, kb_core.mask_secrets(text))
+        for clean in ("redis" + "://:" + "short1@cache", "redis" + "://:" + "${REDIS_PASSWORD}" + "@cache",
+                      "redis" + "://:" + "<password>" + "@cache"):
+            self.assertEqual(kb_core.find_secrets(clean), [], clean)
 
 
 class RefinementServiceTests(unittest.TestCase):

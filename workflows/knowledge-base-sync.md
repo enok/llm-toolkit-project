@@ -35,7 +35,7 @@ else.
 
 1. `python3 scripts/kb.py sync-status --json`: service health, pending inbox
    items, run-log records newer than the watermark, corpus git state, and the
-   session-digest count when enabled.
+   session-digest count when enabled. Note the `now` timestamp it prints.
 2. When the service is not healthy: `python3 scripts/kb.py doctor`, then
    `python3 scripts/kb.py up`. If it is still unreachable, report the blocker
    and stop: the intake gate needs `check`.
@@ -182,8 +182,8 @@ sync.
 
 1. Store the new watermark only after the records were handled (pull request
    pushed, or every record judged to have no candidate):
-   `python3 scripts/kb.py sync-status --mark` (stores the time that run
-   started, so records written meanwhile are not skipped).
+   `python3 scripts/kb.py sync-status --mark <now from Phase 0>` (stores that
+   time, so records written during this pass are not skipped).
 2. Report, briefly: the pull request link, or `NOT POSTED`; counts per source;
    each item with its destination or rejection reason; items archived; the KB
    health line from `sync-status`; open items that need the owner; and the

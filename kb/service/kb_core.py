@@ -126,8 +126,8 @@ _REFERENCE_PREFIXES = ("secrets.", "env.", "vars.", "settings.", "config.", "$")
 # keyword with an identifier prefix and suffix: DB_PASSWORD_PROD, SECRET_KEY_BASE, client_secret, apiKey.
 # A suffix glued to the keyword must start upper-case or with a digit, so "tokenizer" is not a key.
 _SECRET_KEY = (
-    r"(?P<key>(?<![A-Za-z0-9_.\-])[A-Za-z0-9_.\-]*(?:password|passwd|secret|token|api[_\-]?key)"
-    r"(?-i:[A-Z0-9][A-Za-z0-9]*)?(?:[_\-][A-Za-z0-9]*)*)"
+    r"(?P<key>(?<![A-Za-z0-9_.\-])[A-Za-z0-9_.\-]{0,64}(?:password|passwd|secret|token|api[_\-]?key)"
+    r"(?-i:[A-Z0-9][A-Za-z0-9]{0,64})?(?:[_\-][A-Za-z0-9]{0,64}){0,8})"
 )
 # a key whose last segment names a reference to a secret (an id, a path, a name), not the secret itself
 _REFERENCE_KEY_SUFFIXES = frozenset(
@@ -163,7 +163,10 @@ _SECRET_RULES = (
     ("bearer-token", re.compile(r"\b[Bb]earer[ \t]+(?P<v>[A-Za-z0-9\-._~+/]{20,}=*)"), True),
     (
         "url-credentials",
-        re.compile(r"\b[A-Za-z][A-Za-z0-9+.\-]*://[^\s:/@'\"<>]+:(?P<v>[^\s:/@'\"<>]+)@[^\s/@'\"<>]+"),
+        re.compile(
+            r"\b[A-Za-z][A-Za-z0-9+.\-]{0,31}://(?P<user>[^\s:/@'\"<>]{0,256}):"
+            r"(?P<v>[^\s:/@'\"<>]{1,256})@[^\s/@'\"<>]"
+        ),
         False,
     ),
     (
@@ -171,7 +174,9 @@ _SECRET_RULES = (
         re.compile(
             _SECRET_KEY
             + r"['\"]?[ \t]*(?::=|=>|=|:)[ \t]*"
-            + r"(?:(?P<qq>['\"])(?P<q>[^'\"\s]{16,})(?P=qq)|(?P<u>[^\s'\"]{16,}))",
+            # unquoted: lookahead + backreference act as an atomic group, so the value cannot shrink
+            # to slip past the "not followed by ( [ {" check (a call or index is code, not a secret)
+            + r"(?:(?P<qq>['\"])(?P<q>[^'\"\s]{16,})(?P=qq)|(?=(?P<u>[^\s'\"()\[\]{}]{16,}))(?P=u)(?![(\[{]))",
             re.IGNORECASE | re.MULTILINE,
         ),
         None,  # quoted literal: any 16+ chars; unquoted: needs letters and digits
@@ -197,7 +202,42 @@ def _has_letter_and_digit(value: str) -> bool:
     return any(c.isdigit() for c in value) and any(c.isalpha() for c in value)
 
 
+SCAN_WINDOW = 4096
+SCAN_OVERLAP = 256
+
+
+def _iter_windows(text: str) -> Iterator[tuple[int, str]]:
+    """Lines capped at 4 KB: a longer line is cut into 4 KB windows overlapping by 256 chars.
+
+    Keeps every rule linear in the input (no rule can backtrack across a whole file),
+    while a secret shorter than the overlap that straddles a cut is still seen whole.
+    """
+    offset = 0
+    for line in text.splitlines(keepends=True):
+        if len(line) <= SCAN_WINDOW:
+            yield offset, line
+        else:
+            step = SCAN_WINDOW - SCAN_OVERLAP
+            start = 0
+            while True:
+                yield offset + start, line[start:start + SCAN_WINDOW]
+                if start + SCAN_WINDOW >= len(line):
+                    break
+                start += step
+        offset += len(line)
+
+
 def _iter_secret_spans(text: str) -> Iterator[tuple[str, int, int, int]]:
+    seen = set()
+    for base, window in _iter_windows(text):
+        for name, start, end, order in _iter_window_spans(window):
+            span = (name, base + start, base + end, order)
+            if span not in seen:
+                seen.add(span)
+                yield span
+
+
+def _iter_window_spans(text: str) -> Iterator[tuple[str, int, int, int]]:
     for order, (name, rx, needs_mix) in enumerate(_SECRET_RULES):
         for m in rx.finditer(text):
             group = "v"
@@ -208,8 +248,11 @@ def _iter_secret_spans(text: str) -> Iterator[tuple[str, int, int, int]]:
                 else:
                     group, mix = "u", True
             value = m.group(group)
-            if name == "url-credentials" and value.lower() in _URL_PLACEHOLDER_PASSWORDS:
-                continue
+            if name == "url-credentials":
+                if value.lower() in _URL_PLACEHOLDER_PASSWORDS:
+                    continue
+                if not m.group("user") and len(value) < 16:
+                    continue  # empty user: only a long password counts (redis://:<pw>@host)
             if name == "secret-assignment":
                 last = re.split(r"[_.\-]", m.group("key").lower())[-1]
                 if last in _REFERENCE_KEY_SUFFIXES or _CAMEL_REFERENCE.search(m.group("key")):

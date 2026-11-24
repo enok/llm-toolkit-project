@@ -48,7 +48,10 @@ services:
     image: llm-toolkit-kb:local
     profiles: ["tools"]
     command: ["ingest.py"]
-    environment: *kb-environment
+    environment:
+      <<: *kb-environment
+      # set to 1 for one run by `kb.py index --allow-mass-delete`; lifts only the 50% removal guard
+      KB_ALLOW_MASS_DELETE: ${KB_ALLOW_MASS_DELETE:-0}
     volumes: *kb-volumes
     depends_on:
       - chroma
