@@ -150,6 +150,13 @@ class KBTestCase(unittest.TestCase):
         self.addCleanup(self._tmp.cleanup)
         kb.set_core(StubCore)
         self.addCleanup(kb.set_core, None)
+        # No test may really wait or depend on what is installed on the machine running it:
+        # on a machine with the container desktop app present, the start-and-wait loop would
+        # otherwise sleep for real. Tests that exercise the loop patch these two again.
+        for name, replacement in (("sleep", lambda seconds: None), ("docker_app_present", lambda: False)):
+            default = mock.patch.object(kb, name, replacement)
+            default.start()
+            self.addCleanup(default.stop)
         if self.LAYOUT:
             for sub in kb.DATA_SUBDIRS:
                 (self.data / sub).mkdir(parents=True)
@@ -1625,6 +1632,25 @@ class SurfacesRefreshFlowTests(KBTestCase):
         self.assertEqual(rc, 0)
         self.assertIn("surfaces refresh failed", text)
         self.assertIn("index ok", text)
+
+
+
+class NoRealWaitTests(KBTestCase):
+    """Guard: a failing stack start must not wait for a desktop app that happens to be installed."""
+
+    def test_scheduled_run_does_not_sleep_when_app_is_installed_on_this_machine(self):
+        self.make_corpus()
+        real_sleeps = []
+
+        def fail(cmd, **kw):
+            return subprocess.CompletedProcess(cmd, 1, "", "boom")
+
+        with mock.patch.object(kb, "run_cmd", fail), \
+                mock.patch.object(kb.time, "sleep", real_sleeps.append), \
+                mock.patch.object(kb, "detect_os", return_value="Darwin"):
+            rc, _text, _ = self.run_main("scheduled-run")
+        self.assertEqual(rc, 1)
+        self.assertEqual(real_sleeps, [])
 
 
 if __name__ == "__main__":
