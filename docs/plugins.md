@@ -267,6 +267,11 @@ inside a string literal in code is allowed.
 
 What the scanner does not prove:
 
+- Hidden-text detection works from a list of known invisible and blank-rendering
+  characters plus an allow-list of symbol categories for emoji presentation
+  selectors. A blank-looking symbol that is on neither list could still carry
+  text one bit at a time; treat unexplained runs of odd symbols in a `pass`
+  plugin as a reason to read the file.
 - A `pass` means no rule matched. It does not prove the plugin is safe: code
   can fetch and run instructions at run time, an MCP server can change what
   it does after install, and a rule can miss a reworded pattern.

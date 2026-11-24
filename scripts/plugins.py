@@ -203,7 +203,7 @@ def write_json_atomic(path: Path, data) -> None:
 
 HIDDEN_CHARS = ("\u200b\u200c\u200d\u200e\u200f\u2060\u2061\u2062\u2063\u2064\ufeff\u180e\u061c"
                 "\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufe00-\ufe0f"
-                "\u2800\u3164\u115f\u1160\uffa0")  # last five render blank (Braille blank, Hangul fillers)
+                "\u2800\u3164\u115f\u1160\uffa0\u303f\U0001d159")  # blank-rendering: Braille blank, Hangul fillers, half fill space, null notehead
 TAG_CHARS = "\U000e0000-\U000e007f"
 HIDDEN_RX = re.compile("[" + HIDDEN_CHARS + TAG_CHARS + "\U000e0100-\U000e01ef]")
 TAG_RX = re.compile("[" + TAG_CHARS + "]")
@@ -1355,6 +1355,8 @@ def _presentation_base(prev: str, nxt: str) -> bool:
         return False
     if prev in "0123456789#*":
         return nxt == "\u20e3"
+    if HIDDEN_RX.match(prev):
+        return False
     return unicodedata.category(prev) in ("So", "Sk", "Sm", "Sc") or prev in EMOJI_NON_SYMBOL_BASES
 
 
