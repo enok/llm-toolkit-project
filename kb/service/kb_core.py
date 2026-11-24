@@ -69,6 +69,7 @@ class ServiceConfig:
     chroma_port: int = 8000
     repo_root: str = "/corpus/repo"
     inbox_root: str = "/corpus/inbox"
+    archive_root: str = "/corpus/archive"
     state_dir: str = "/state"
 
 

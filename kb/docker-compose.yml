@@ -15,6 +15,7 @@ x-kb-environment: &kb-environment
 x-kb-volumes: &kb-volumes
   - "${KB_CORPUS_DIR:?KB_CORPUS_DIR is required}:/corpus/repo:ro"
   - "${KB_DATA_DIR:?KB_DATA_DIR is required}/inbox:/corpus/inbox:ro"
+  - "${KB_DATA_DIR:?KB_DATA_DIR is required}/archive:/corpus/archive:ro"
   - "${KB_DATA_DIR:?KB_DATA_DIR is required}/models:/root/.cache/chroma"
   - "${KB_DATA_DIR:?KB_DATA_DIR is required}/state:/state"
 

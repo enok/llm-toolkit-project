@@ -714,6 +714,129 @@ class RefinementIngestGuardTests(unittest.TestCase):
         self.assertEqual(report["errors"], [])
 
 
+class ArchivedInboxRemovalTests(unittest.TestCase):
+    """Iteration 3: archived inbox items leave the index (both passes, exempt from the 50% guard)."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        base = Path(self._tmp.name)
+        self.repo, self.inbox, self.archive = base / "repo", base / "inbox", base / "archive"
+        for d in (self.repo, self.inbox, self.archive):
+            d.mkdir()
+        self.store = FakeStore()
+        self.scanner = ingest.Scanner(
+            self.store, {"repo": str(self.repo), "inbox": str(self.inbox), "archive": str(self.archive)}
+        )
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _items(self, n):
+        return [write(self.inbox, f"2026-01-0{i + 1}-item{i}.md", f"---\ntitle: I{i}\n---\nnote {i}\n") for i in range(n)]
+
+    def _archive(self, path):
+        path.rename(self.archive / path.name)  # what `kb.py inbox archive` does
+
+    def test_archived_item_removed_by_background_scan_and_full_ingest(self):
+        items = self._items(4)
+        write(self.repo, "rules/r.md", "# R\nbody\n")
+        self.scanner.scan()
+        self._archive(items[0])
+        report = self.scanner.scan(delete_missing=False)
+        self.assertEqual(report["removed"], ["inbox/" + items[0].name])
+        self.assertNotIn(items[0].name, self.store.existing_files("inbox"))
+        self._archive(items[1])
+        fresh = ingest.Scanner(self.store, dict(self.scanner.sources))
+        report = fresh.scan(delete_missing=True)
+        self.assertEqual(report["removed"], ["inbox/" + items[1].name])
+        self.assertEqual(sorted(self.store.existing_files("inbox")), sorted(p.name for p in items[2:]))
+        self.assertEqual(report["errors"], [])
+
+    def test_missing_but_not_archived_is_kept(self):
+        items = self._items(2)
+        self.scanner.scan()
+        items[0].unlink()
+        for full in (False, True):
+            report = self.scanner.scan(delete_missing=full)
+            self.assertEqual(report["removed"], [])
+            self.assertIn(items[0].name, self.store.existing_files("inbox"))
+
+    def test_archive_root_missing_or_unreadable_deletes_nothing(self):
+        items = self._items(2)
+        self.scanner.scan()
+        self._archive(items[0])
+        moved = self.archive / items[0].name
+        hidden = Path(self._tmp.name) / "archive-moved"
+        self.archive.rename(hidden)  # archive root missing
+        report = self.scanner.scan()
+        self.assertEqual(report["removed"], [])
+        self.assertIn(items[0].name, self.store.existing_files("inbox"))
+        self.assertTrue(any("archive: not readable" in e for e in report["errors"]))
+        hidden.rename(self.archive)
+        self.assertTrue(moved.exists())
+        with mock.patch.object(ingest.os, "listdir", side_effect=PermissionError("denied")):
+            report = self.scanner.scan(delete_missing=True)
+        self.assertEqual(report["removed"], [])
+        self.assertIn(items[0].name, self.store.existing_files("inbox"))
+        self.assertEqual(self.store.deletes, [])
+
+    def test_archived_removal_ignores_the_50_percent_guard(self):
+        items = self._items(4)
+        self.scanner.scan()
+        for path in items[:3]:
+            self._archive(path)
+        report = self.scanner.scan(delete_missing=True)
+        self.assertEqual(sorted(report["removed"]), sorted("inbox/" + p.name for p in items[:3]))
+        self.assertEqual(list(self.store.existing_files("inbox")), [items[3].name])
+        self.assertEqual(report["errors"], [])
+        self._archive(items[3])  # the inbox walk now sees zero files: still removed
+        report = self.scanner.scan(delete_missing=True)
+        self.assertEqual(report["removed"], ["inbox/" + items[3].name])
+        self.assertEqual(self.store.existing_files("inbox"), {})
+
+    def test_repo_file_with_archived_name_is_never_touched(self):
+        repo_files = [write(self.repo, f"note{i}.md", f"# N{i}\nbody\n") for i in range(4)]
+        inbox_item = write(self.inbox, "note0.md", "same name in the inbox\n")
+        self.scanner.scan()
+        for path in repo_files[:3]:
+            path.unlink()
+        self._archive(inbox_item)  # archive/note0.md now exists
+        for name in ("note1.md", "note2.md"):
+            (self.archive / name).write_text("archived copy", encoding="utf-8")
+        report = self.scanner.scan(delete_missing=False)
+        self.assertEqual(report["removed"], ["inbox/note0.md"])  # only the inbox entry goes
+        report = self.scanner.scan(delete_missing=True)
+        self.assertEqual(report["removed"], [])
+        self.assertEqual(len(self.store.existing_files("repo")), 4)
+        self.assertEqual(self.store.deletes, [("inbox", "note0.md")])
+
+    def test_names_are_plain_file_names_only(self):
+        for bad in ("../x.md", "sub/x.md", "sub\\x.md", "..", ".", "", "/etc/passwd", "a\x00b"):
+            self.assertFalse(ingest.is_plain_name(bad), bad)
+        self.assertTrue(ingest.is_plain_name("2026-01-01-x.md"))
+        # an index entry with a nested path is never matched against the archive
+        nested = write(self.inbox, "sub/deep.md", "nested note\n")
+        self.scanner.scan()
+        nested.unlink()
+        (self.archive / "deep.md").write_text("x", encoding="utf-8")
+        (self.archive / "sub").mkdir()
+        (self.archive / "sub" / "deep.md").write_text("x", encoding="utf-8")
+        self.assertEqual(self.scanner.scan()["removed"], [])
+        self.assertIn("sub/deep.md", self.store.existing_files("inbox"))
+
+    def test_compose_mounts_archive_read_only(self):
+        compose = (REPO / "kb" / "docker-compose.yml").read_text(encoding="utf-8")
+        self.assertIn('"${KB_DATA_DIR:?KB_DATA_DIR is required}/archive:/corpus/archive:ro"', compose)
+        self.assertEqual(kb_core.ServiceConfig().archive_root, "/corpus/archive")
+        try:
+            import yaml
+        except ImportError:
+            return
+        services = yaml.safe_load(compose)["services"]
+        for name in ("service", "ingest"):
+            self.assertTrue(any(v.endswith("/archive:/corpus/archive:ro") for v in services[name]["volumes"]), name)
+
+
 class RefinementServiceTests(unittest.TestCase):
     """S-L2, S-M4, /verify and /dedupe source from the refinement contract."""
 

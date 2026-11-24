@@ -172,7 +172,9 @@ sync.
    and 3.
 2. `python3 scripts/kb.py inbox archive <name>...` for the inbox names listed
    in the merged pull request's body, and only those.
-3. `python3 scripts/kb.py index`.
+3. `python3 scripts/kb.py index`. The archived items leave the index here
+   at the latest; the background scan also drops them within
+   `LLM_KB_SCAN_SECONDS`.
 4. Remove the worktree of the merged branch, if one is still registered
    (`git -C <corpus> worktree list`).
 
@@ -180,7 +182,8 @@ sync.
 
 1. Store the new watermark only after the records were handled (pull request
    pushed, or every record judged to have no candidate):
-   `python3 scripts/kb.py sync-status --mark`.
+   `python3 scripts/kb.py sync-status --mark` (stores the time that run
+   started, so records written meanwhile are not skipped).
 2. Report, briefly: the pull request link, or `NOT POSTED`; counts per source;
    each item with its destination or rejection reason; items archived; the KB
    health line from `sync-status`; open items that need the owner; and the

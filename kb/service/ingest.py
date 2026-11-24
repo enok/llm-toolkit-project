@@ -5,6 +5,12 @@ in the background: it indexes new and changed files and never removes the
 chunks of files that disappeared. ``python ingest.py`` runs a full pass with
 ``delete_missing=True`` so vanished files leave the index.
 
+Archived inbox items leave the index in both passes: an inbox entry whose file
+is gone from the inbox while a file of the same plain name exists in the
+archive root is deleted. That targeted removal is exempt from the full-ingest
+guards and never applies to ``repo``; it is the only way an inbox entry leaves
+the index (an inbox file that vanished without reaching the archive is kept).
+
 Files whose content matches a secret rule are quarantined: never indexed, and
 only their path and the rule names are kept (never the matched text).
 """
@@ -28,6 +34,19 @@ SOURCES = ("repo", "inbox")
 
 def display_path(source: str, rel: str) -> str:
     return rel if source == "repo" else f"{source}/{rel}"
+
+
+def is_plain_name(name: str) -> bool:
+    """True for a bare file name that cannot leave its folder (no separators, no dot-only names)."""
+    return (
+        isinstance(name, str)
+        and bool(name)
+        and name not in (".", "..")
+        and "/" not in name
+        and "\\" not in name
+        and "\x00" not in name
+        and os.path.basename(name) == name
+    )
 
 
 def utc_iso(ts: float | None = None) -> str:
@@ -154,6 +173,21 @@ class Scanner:
             if rel not in seen:
                 self.quarantined.pop(shown, None)
         missing = sorted(set(existing) - seen)
+        if source == "inbox" and missing:
+            archived = self._archived(missing, report)
+            for rel in archived:
+                try:
+                    self.store.delete_file(source, rel)
+                    tracked.discard(rel)
+                    report["removed"].append(display_path(source, rel))
+                except Exception as exc:  # noqa: BLE001
+                    self._error(report, f"{display_path(source, rel)}: {type(exc).__name__}")
+            # inbox entries leave the index only through the archive; any other vanished
+            # inbox file (a half-synced folder, a manual delete) is kept for a human to resolve
+            kept = [rel for rel in missing if rel not in archived]
+            if kept and delete_missing:
+                self._error(report, f"inbox: {len(kept)} entries missing from inbox and archive; kept")
+            missing = []
         if delete_missing and missing:
             # S-M2: an empty or half-visible root (a bind source Docker created empty, a sync folder
             # still downloading) must never wipe the index; refuse and leave a visible error instead.
@@ -175,6 +209,18 @@ class Scanner:
                 except Exception as exc:  # noqa: BLE001
                     self._error(report, f"{display_path(source, rel)}: {type(exc).__name__}")
         self._files[source] = len(tracked)
+
+    def _archived(self, missing: list, report: dict) -> list:
+        """Missing inbox entries whose plain file name is present in the archive root."""
+        root = self.sources.get("archive")
+        if not root:
+            return []
+        try:
+            names = {name for name in os.listdir(root) if os.path.isfile(os.path.join(root, name))}
+        except OSError as exc:
+            self._error(report, f"archive: not readable ({type(exc).__name__}); archived removals skipped")
+            return []
+        return [rel for rel in missing if is_plain_name(rel) and rel in names]
 
     def _stat_paths(self, source: str):
         return [rel for (src, rel) in self._stat if src == source]
@@ -217,7 +263,7 @@ def main() -> int:
     except RuntimeError as exc:
         print(f"ingest: {exc}", file=sys.stderr)
         return 2
-    scanner = Scanner(kb, {"repo": cfg.repo_root, "inbox": cfg.inbox_root})
+    scanner = Scanner(kb, {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root})
     report = scanner.scan(delete_missing=True)
     write_state(cfg.state_dir, report)
     print(

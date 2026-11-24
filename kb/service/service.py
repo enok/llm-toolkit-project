@@ -338,7 +338,7 @@ def main() -> int:
     except RuntimeError as exc:
         log.error("%s", exc)
         return 2
-    scanner = ingest.Scanner(kb, {"repo": cfg.repo_root, "inbox": cfg.inbox_root})
+    scanner = ingest.Scanner(kb, {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root})
     app = KBApp(kb, cfg, scanner)
     stop = threading.Event()
     threading.Thread(target=_background_scan, args=(scanner, cfg.scan_seconds, stop), daemon=True).start()

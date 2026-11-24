@@ -4,7 +4,7 @@ Local vector index of this toolkit. A Chroma server and a small Python
 service run in Docker; the CLI is `scripts/kb.py` (wrappers `scripts/kb.sh`,
 `scripts/kb.ps1`).
 
-- `docker-compose.yml` - the `llm-toolkit-kb` stack (`chroma`, `service`, `ingest`).
+- `docker-compose.yml` - the `llm-toolkit-kb` stack (`chroma`, `service`, `ingest`); only `service` publishes a port, on `127.0.0.1`.
 - `service/` - service image sources (`kb_core.py`, `store.py`, `ingest.py`, `service.py`).
 
 Setup, configuration, CLI and API reference, security model, troubleshooting

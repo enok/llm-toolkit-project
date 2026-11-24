@@ -41,14 +41,14 @@ Run from the toolkit root: `python3 scripts/kb.py <command>` (Windows:
 
 | Command | Use |
 | --- | --- |
-| `search "<q>" [-k N] [--kind K] [--source S] [--max-distance D] [--json]` | Ranked hits; `--source repo` for merged knowledge, `--source inbox` for pending items |
+| `search "<q>" [-k N] [--kind K] [--source S] [--max-distance D] [--json]` | Ranked hits (`distance  kind  <source>:<path> › heading`, `[pending]` on inbox hits); `--source repo` for merged knowledge, `--source inbox` for pending items |
 | `check <file\|-> [--source S] [--json]` | Intake gate: secret check, LLM-surface scan when present, duplicate verdict, suggested destination kind; re-check an inbox item with `--source repo` (it matches itself otherwise) |
 | `add <file\|-> --title T [--kind K] [--origin O] [--allow-near]` | Run `check`, then write the item to the pending inbox |
 | `inbox [--json]`, `inbox archive <name>...` | List pending items; move promoted items to the archive (never deletes) |
-| `status [--json]`, `doctor [--deep]` | Stack state; checks for Docker, compose, data folder, ports, service health; `--deep` restarts the stack, calls `POST /verify` and runs one search |
-| `init [--data-dir P] [--toolkit-dir P] [--corpus P] [--port N] [--chroma-port N]` | Create the data folder layout and write or update the user-level `kb.env` (idempotent) |
+| `status [--json]`, `doctor [--deep]` | Stack state; checks for Docker, compose, data folder, compose file, service health; `--deep` restarts the stack, calls `POST /verify` and runs one search |
+| `init [--data-dir P] [--toolkit-dir P] [--corpus P] [--port N]` | Create the data folder layout and write or update the user-level `kb.env` (idempotent) |
 | `up [--build]`, `down`, `index` | Start or stop the stack; full re-index |
-| `sync-status [--json] [--mark] [--no-fetch]` | One-call summary for the scheduled sync; `--mark` stores the new watermark |
+| `sync-status [--json] [--mark [ISO]] [--no-fetch]` | One-call summary for the scheduled sync; `--mark` stores the watermark (default: when the run started) |
 | `sessions --since ISO [--root P] [--json] [--force]` | Opt-in digest of local session transcripts; refuses unless `LLM_KB_HARVEST_SESSIONS=1` or `--force` |
 | `schedule install\|remove\|status [--hours 8-20/2] [--days 1-5]` | OS scheduler entry that runs `scheduled-run` |
 | `scheduled-run` | Start the stack if needed, fast-forward a clean corpus on its default branch, re-index, log one status line |
@@ -64,6 +64,7 @@ Run from the toolkit root: `python3 scripts/kb.py <command>` (Windows:
 | `check` | 4 | Security hit (matched text is never printed) |
 | `check` | 5 | Near: a merge decision is needed |
 | `check` | 6 | Service unreachable |
+| any | 2 | Setup error, for example `data folder missing, run init` (`add`, `inbox archive`, `up`, `index`, `scheduled-run` do not create folders) |
 | `add` | - | Refuses when `check` returns 3, 4 or 6, and 5 unless `--allow-near` |
 
 What each verdict requires is the table in `rules/knowledge-base.md` duty 3.
