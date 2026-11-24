@@ -128,6 +128,10 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | run a retrospective / learn from this run's mistakes / what keeps going wrong in `<workflow>` / show the quality trend of a workflow | `run-retrospective` | workflow + skill | `rules/workflow-self-improvement.md`, `self-improvement`, `capture-learning`, `task-quality-loop` |
 | make every workflow learn from its mistakes / measure workflow accuracy over time | `rules/workflow-self-improvement.md` | rule | `run-retrospective`, `error-driven-learning`, `rules/request-orchestration.md` |
 | import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement`, `security` |
+| add or install a plugin / find a plugin in the marketplace | `plugin-intake` | workflow | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
+| remove unnecessary plugins / prune plugins | `plugin-intake` | workflow | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
+| audit installed plugins / are my plugins safe | `plugin-intake` | workflow | `llm-toolchain-provisioning`, `scripts/plugins.py`, `docs/plugins.md` |
+| which plugin, skill or agent is best for this task | `rules/plugin-governance.md` | rule | `agent-orchestrator`, `knowledge-base`, `scripts/plugins.py` |
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
 | set up dev-tools in this repo / get started | `onboarding` | skill | `scripts/setup-repo.sh`, `docs/repo-setup-prompt.md` |

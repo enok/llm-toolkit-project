@@ -25,8 +25,8 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
-| **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest |
-| **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories |
+| **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest; plugin catalog via `scripts/plugins.py` |
+| **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories; plugin-specific checks for `workflows/plugin-intake.md` |
 | **error-driven-learning** | Always-on discipline: read `learnings/INDEX.md` before work and capture trial-and-error discoveries after it |
 | **onboarding** | Get started with this toolkit in a repo, or add it to one |
 | **project-discovery** | Understand a project: structure, architecture, flows, how-tos, related projects |

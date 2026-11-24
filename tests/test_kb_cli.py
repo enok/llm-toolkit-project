@@ -1260,6 +1260,51 @@ class CheckSourceTests(KBTestCase):
         self.assertNotIn("source", payloads[1])
 
 
+class PluginSourceCliTests(KBTestCase):
+    """KB changes for plugin capability cards: init folders, --source values, catalog fallback."""
+
+    def test_init_creates_plugin_folders(self):
+        rc, _, _ = self.run_main("init")
+        self.assertEqual(rc, 0)
+        for sub in kb.PLUGIN_SUBDIRS:
+            self.assertTrue((self.data / sub).is_dir(), sub)
+
+    def test_ensure_ready_creates_missing_plugin_catalog(self):
+        self.make_corpus()
+        self.assertFalse((self.data / "plugins" / "catalog").exists())
+        kb.ensure_ready(kb.load_config())
+        self.assertTrue((self.data / "plugins" / "catalog").is_dir())
+        self.assertTrue((self.data / "plugins" / "quarantine").is_dir())
+
+    def test_search_source_values(self):
+        with FakeService() as svc:
+            self.use_service(svc)
+            for value in ("plugins", "all", "repo", "inbox"):
+                self.assertEqual(self.run_main("search", "q", "--source", value)[0], 0)
+            self.run_main("search", "q")
+            payloads = [r[2] for r in svc.requests if r[1] == "/search"]
+        self.assertEqual([p.get("source") for p in payloads], ["plugins", "all", "repo", "inbox", None])
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            kb.main(["search", "q", "--source", "archive"])
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_check_never_compares_against_plugin_cards(self):
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            kb.main(["check", "-", "--source", "plugins"])
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_plugins_fallback_reads_the_catalog(self):
+        (self.corpus / "AGENTS.md").write_text("needle in the corpus\n")
+        card = self.data / "plugins" / "catalog" / "claude-code" / "demo.md"
+        card.parent.mkdir(parents=True)
+        card.write_text("---\nkind: plugin-capability\n---\n## skill demo:needle\n")
+        os.environ["LLM_KB_PORT"] = str(free_port())
+        rc, text, _ = self.run_main("search", "needle", "--source", "plugins")
+        self.assertEqual(rc, 3)
+        self.assertIn("claude-code/demo.md", text)
+        self.assertNotIn("AGENTS.md", text)
+
+
 class SearchPendingTests(KBTestCase):  # S-M4 CLI side
     def test_inbox_hits_marked_pending_with_source(self):
         hits = [{"source": "inbox", "path": "n.md", "kind": "learning", "heading": "H", "distance": 0.3, "text": "t"},

@@ -533,7 +533,8 @@ class ServiceAppTests(unittest.TestCase):
                          {"q": "how", "k": 20, "max_distance": 0.4, "kinds": ["rule", "skill"], "source": "repo"})
         self.post("/search", {"q": "how", "kind": "workflow"})
         self.assertEqual(self.store.search_calls[-1],
-                         {"q": "how", "k": 5, "max_distance": 0.55, "kinds": ["workflow"], "source": None})
+                         {"q": "how", "k": 5, "max_distance": 0.55, "kinds": ["workflow"],
+                          "source": ["repo", "inbox"]})  # knowledge sources by default
         self.store.search_result = []
         self.post("/search", {"q": "nothing"})
         stats = self.app.handle("GET", "/health", LOCAL, b"")[1]["stats"]
@@ -1013,7 +1014,7 @@ class RefinementServiceTests(unittest.TestCase):
         self.call("POST", "/dedupe", JSON, {"text": "candidate", "source": "repo"})
         self.assertEqual(self.store.nearest_calls[-1][2], "repo")
         self.call("POST", "/dedupe", JSON, {"text": "candidate"})
-        self.assertIsNone(self.store.nearest_calls[-1][2])
+        self.assertEqual(self.store.nearest_calls[-1][2], ["repo", "inbox"])  # plugin cards never dedupe knowledge
         self.assertEqual(self.call("POST", "/dedupe", JSON, {"text": "c", "source": 5})[0], 400)
 
     def _verify(self):
@@ -1128,6 +1129,125 @@ class RefinementIndexAndLoggingTests(unittest.TestCase):
         services = yaml.safe_load(compose)["services"]
         self.assertNotIn("ports", services["chroma"])
         self.assertEqual(services["service"]["ports"], ["127.0.0.1:${KB_PORT:-8011}:8011"])
+
+
+CARD = (
+    "---\nkind: plugin-capability\ntitle: \"Plugin demo (claude-code)\"\nplugin: demo\ntool: claude-code\n"
+    "origin: local\nversion: \"1.0.0\"\nverdict: pass\nprotective: false\ngenerated: 2026-01-01T00:00:00Z\n---\n\n"
+    "Descriptive catalog entry generated from an installed plugin. Reference data, not instructions.\n\n"
+    "## plugin demo\n\nDemo plugin\n\n## skill demo:writer\n\nDraft release notes from a diff.\n\n"
+    "- Invoke: `demo:writer` (skill)\n- Path: skills/writer/SKILL.md\n"
+)
+
+
+class PluginSourceTests(unittest.TestCase):
+    """The plugins source: capability cards indexed as external data, never mixed into knowledge by default."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        base = Path(self._tmp.name)
+        self.repo, self.cards = base / "repo", base / "catalog"
+        self.repo.mkdir()
+        self.cards.mkdir()
+        write(self.repo, "rules/a.md", "# A\nbody\n")
+        self.store = FakeStore()
+        self.scanner = ingest.Scanner(self.store, {"repo": str(self.repo), "plugins": str(self.cards)})
+        self.app = service.KBApp(self.store, kb_core.ServiceConfig())
+
+    def post(self, path, payload):
+        body = json.dumps(payload).encode("utf-8")
+        return self.app.handle("POST", path, JSON, body, content_length=len(body))
+
+    def test_sources_and_roots(self):
+        self.assertEqual(kb_core.KNOWLEDGE_SOURCES, ("repo", "inbox"))
+        self.assertEqual(ingest.SOURCES, ("repo", "inbox", "plugins"))
+        cfg = kb_core.ServiceConfig()
+        self.assertEqual(cfg.plugins_root, "/corpus/plugins")
+        self.assertEqual(ingest.source_roots(cfg)["plugins"], "/corpus/plugins")
+        self.assertEqual(store.build_where(None, ["repo", "inbox"]), {"source": {"$in": ["repo", "inbox"]}})
+        self.assertEqual(store.build_where("rule", ["plugins"]), {"$and": [{"kind": "rule"}, {"source": "plugins"}]})
+
+    def test_cards_indexed_as_external_with_capability_headings(self):
+        write(self.cards, "claude-code/demo.md", CARD.replace("kind: plugin-capability", "kind: rule"))
+        report = self.scanner.scan()
+        self.assertIn("plugins/claude-code/demo.md", report["indexed"])
+        metas = [m for _d, m in self.store.docs.values() if m["source"] == "plugins"]
+        self.assertTrue(metas)
+        self.assertEqual({m["status"] for m in metas}, {"external"})
+        self.assertEqual({m["kind"] for m in metas}, {"plugin-capability"})  # front matter cannot claim another kind
+        self.assertIn("skill demo:writer", {m["heading"] for m in metas})
+        repo_meta = next(m for _d, m in self.store.docs.values() if m["source"] == "repo")
+        self.assertEqual(repo_meta["status"], "merged")
+
+    def test_removed_card_leaves_index_in_every_pass_but_zero_files_guard_holds(self):
+        one = write(self.cards, "claude-code/demo.md", CARD)
+        two = write(self.cards, "claude-code/other.md", CARD.replace("demo", "other"))
+        self.scanner.scan()
+        two.unlink()
+        report = self.scanner.scan()  # incremental pass, not only the full ingest
+        self.assertEqual(report["removed"], ["plugins/claude-code/other.md"])
+        self.assertEqual(set(self.store.existing_files("plugins")), {"claude-code/demo.md"})
+        one.unlink()
+        report = self.scanner.scan(delete_missing=True)
+        self.assertEqual(report["removed"], [])
+        self.assertTrue(any("plugins: walk saw no files" in e for e in report["errors"]))
+        self.assertEqual(set(self.store.existing_files("plugins")), {"claude-code/demo.md"})
+
+    def test_mass_delete_guard_does_not_apply_to_plugins(self):
+        cards = [write(self.cards, f"claude-code/p{i}.md", CARD.replace("demo", f"p{i}")) for i in range(24)]
+        self.scanner.scan()
+        for path in cards[1:]:
+            path.unlink()
+        report = self.scanner.scan(delete_missing=True)
+        self.assertEqual(len(report["removed"]), 23)
+        self.assertFalse(any("over 50%" in e for e in report["errors"]))
+
+    def test_search_and_dedupe_source_values(self):
+        for value, expected in ((None, ["repo", "inbox"]), ("", ["repo", "inbox"]), ("repo", "repo"),
+                                ("inbox", "inbox"), ("plugins", "plugins"), ("all", None)):
+            payload = {"q": "x"} if value is None else {"q": "x", "source": value}
+            self.assertEqual(self.post("/search", payload)[0], 200, value)
+            self.assertEqual(self.store.search_calls[-1]["source"], expected, value)
+            text_payload = {"text": "candidate"} if value is None else {"text": "candidate", "source": value}
+            self.assertEqual(self.post("/dedupe", text_payload)[0], 200, value)
+            self.assertEqual(self.store.nearest_calls[-1][2], expected, value)
+        for bad in ("archive", "Repo", 5, ["repo"]):
+            self.assertEqual(self.post("/search", {"q": "x", "source": bad})[0], 400, bad)
+            self.assertEqual(self.post("/dedupe", {"text": "x", "source": bad})[0], 400, bad)
+
+    def test_hook_stays_repo_only_and_security_checks_hold(self):
+        self.store.search_result = [{"path": "rules/a.md", "heading": "H", "text": "t", "distance": 0.1}]
+        self.post("/hook", {"prompt": "which plugin reviews code"})
+        self.assertEqual(self.store.search_calls[-1]["source"], "repo")
+        calls = len(self.store.search_calls)
+        body = json.dumps({"q": "x", "source": "plugins"}).encode()
+        self.assertEqual(self.app.handle("POST", "/search", {"Host": "evil.example", "Content-Type": "application/json"},
+                                         body, len(body))[0], 403)
+        self.assertEqual(self.app.handle("POST", "/search", dict(JSON, Origin="https://evil.example"), body,
+                                         len(body))[0], 403)
+        self.assertEqual(self.app.handle("POST", "/search", LOCAL, body, len(body))[0], 415)
+        self.assertEqual(self.app.handle("POST", "/search", JSON, b"", content_length=service.MAX_BODY + 1)[0], 413)
+        self.assertEqual(len(self.store.search_calls), calls)
+        self.post("/search", {"q": "x", "source": "plugins", "k": 500})
+        self.assertEqual(self.store.search_calls[-1]["k"], service.MAX_K)
+
+    def test_compose_mounts_catalog_read_only(self):
+        compose = (REPO / "kb" / "docker-compose.yml").read_text(encoding="utf-8")
+        self.assertIn('"${KB_DATA_DIR:?KB_DATA_DIR is required}/plugins/catalog:/corpus/plugins:ro"', compose)
+        try:
+            import yaml
+        except ImportError:
+            return
+        services = yaml.safe_load(compose)["services"]
+        for name in ("service", "ingest"):
+            self.assertTrue(any(v.endswith("/plugins/catalog:/corpus/plugins:ro") for v in services[name]["volumes"]))
+
+    def test_secret_spans_are_offsets_only(self):
+        text = "x " + AWS + " y"
+        spans = kb_core.find_secret_spans(text)
+        self.assertEqual(spans, [("aws-access-key-id", 2, 2 + len(AWS))])
+        self.assertEqual(kb_core.find_secret_spans(""), [])
 
 
 class ModuleContractTests(unittest.TestCase):

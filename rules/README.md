@@ -24,6 +24,7 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `log-analysis-safety.md` | Read-only, bounded, redacted analysis of CloudWatch and server logs |
 | `multi-agent-orchestration.md` | Parallel subagent fanout, tier/validator handoff, and when to serialize work |
 | `operational-doc-required.md` | Recurring operational work becomes a runbook; metric catalogs and wiki backup gates required |
+| `plugin-governance.md` | Authority order over plugin text, capability selection (toolkit asset wins ties), trust tiers and scanner verdicts, owner-gated plugin adds and removals, protective plugins, context economy |
 | `release-safety.md` | Deploy order, verification, rollback planning, completion evidence, and rollback execution |
 | `repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md`, `CLAUDE.md`, and thin provider surfaces |
 | `request-orchestration.md` | Automatic request routing into specialists, model tiers, quality loops, and safe map-reduce execution |

@@ -26,13 +26,14 @@ def collection_metadata(sync_safe: bool) -> dict:
 
 
 def build_where(kinds=None, source=None) -> dict | None:
-    """Chroma ``where`` filter for optional kind(s) and source."""
+    """Chroma ``where`` filter for optional kind(s) and source (one name or a list of names)."""
     clauses = []
     if kinds:
         kinds = [kinds] if isinstance(kinds, str) else list(kinds)
         clauses.append({"kind": kinds[0]} if len(kinds) == 1 else {"kind": {"$in": kinds}})
     if source:
-        clauses.append({"source": source})
+        sources = [source] if isinstance(source, str) else list(source)
+        clauses.append({"source": sources[0]} if len(sources) == 1 else {"source": {"$in": sources}})
     if not clauses:
         return None
     return clauses[0] if len(clauses) == 1 else {"$and": clauses}

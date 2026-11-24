@@ -14,6 +14,9 @@ Security posture:
 - Indexed passages are returned as data and never interpreted; the hook serves
   reviewed (``repo``) passages only, quoted under a header saying they are
   reference data, not instructions.
+- ``/search`` and ``/dedupe`` cover the knowledge sources (``repo``, ``inbox``) unless
+  ``source`` names ``plugins`` (generated plugin capability cards) or ``all``, so a
+  plugin card is never mistaken for toolkit knowledge or a duplicate of it.
 """
 
 from __future__ import annotations
@@ -90,6 +93,20 @@ def _float_param(payload: dict, key: str, default: float) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise BadRequest(f"'{key}' must be a number")
     return float(value)
+
+
+def _source_param(payload: dict):
+    """Source filter for the store: knowledge sources by default, one source by name, or None for all."""
+    value = payload.get("source")
+    if value is None or value == "":
+        return list(kb_core.KNOWLEDGE_SOURCES)
+    if not isinstance(value, str):
+        raise BadRequest("'source' must be a string")
+    if value == "all":
+        return None
+    if value not in kb_core.ALL_SOURCES:
+        raise BadRequest("'source' must be one of: " + ", ".join(kb_core.ALL_SOURCES + ("all",)))
+    return value
 
 
 def _text_param(payload: dict, key: str) -> str:
@@ -199,21 +216,17 @@ class KBApp:
                 kinds = [x for x in kinds if x] or None
             else:
                 raise BadRequest("'kind' must be a string or a list of strings")
-        source = payload.get("source")
-        if source is not None and not isinstance(source, str):
-            raise BadRequest("'source' must be a string")
-        hits = self.store.search(q=q, k=k, max_distance=max_distance, kinds=kinds, source=source or None)
+        source = _source_param(payload)
+        hits = self.store.search(q=q, k=k, max_distance=max_distance, kinds=kinds, source=source)
         self._count(hits)
         return {"hits": hits}
 
     def dedupe(self, payload: dict) -> dict:
         text = _text_param(payload, "text")
         k = _int_param(payload, "k", 3)
-        source = payload.get("source")
-        if source is not None and not isinstance(source, str):
-            raise BadRequest("'source' must be a string")
+        source = _source_param(payload)
         pieces = kb_core.split_text(text)[:MAX_DEDUPE_PIECES] or [text[: kb_core.CHUNK_SIZE]]
-        nearest = self.store.nearest(pieces, k=k, source=source or None)
+        nearest = self.store.nearest(pieces, k=k, source=source)
         best = min((n["distance"] for n in nearest if n.get("distance") is not None), default=None)
         verdict = kb_core.dedupe_verdict(best, self.config.dup_distance, self.config.near_distance)
         return {"verdict": verdict, "nearest": nearest[:k]}
@@ -338,7 +351,7 @@ def main() -> int:
     except RuntimeError as exc:
         log.error("%s", exc)
         return 2
-    scanner = ingest.Scanner(kb, {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root})
+    scanner = ingest.Scanner(kb, ingest.source_roots(cfg))
     app = KBApp(kb, cfg, scanner)
     stop = threading.Event()
     threading.Thread(target=_background_scan, args=(scanner, cfg.scan_seconds, stop), daemon=True).start()

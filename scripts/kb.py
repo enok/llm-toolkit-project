@@ -78,6 +78,10 @@ COMPOSE_VARS = [
     ("KB_SYNC_SAFE_INDEX", "LLM_KB_SYNC_SAFE_INDEX"),
 ]
 DATA_SUBDIRS = ("chroma", "inbox", "archive", "models", "state")
+# plugin catalog cards (mounted read-only as the "plugins" source) and fetched plugins under review
+PLUGIN_SUBDIRS = ("plugins/catalog", "plugins/quarantine")
+SEARCH_SOURCES = ("repo", "inbox", "plugins", "all")
+KNOWLEDGE_SOURCES = ("repo", "inbox")
 FALLBACK_EXTENSIONS = {".md", ".txt", ".sh", ".ps1", ".py", ".js", ".json", ".yml", ".yaml", ".toml", ".cmd"}
 FALLBACK_SKIP_DIRS = {"node_modules", "__pycache__"}
 FALLBACK_SKIP_FILES = {"TASKS_TABLE.md", "CONTEXT_STATE.md", "LLM-STATE.md", "package-lock.json"}
@@ -293,6 +297,10 @@ def ensure_ready(cfg) -> None:
     corpus = Path(cfg["LLM_KB_CORPUS_DIR"])
     if not corpus.is_dir() or not corpus_has_content(corpus):
         raise KBError(f"corpus folder missing or empty (needs AGENTS.md or an indexable file): {corpus.as_posix()}")
+    # a data folder made by an older init lacks the plugin catalog; create it here so the
+    # container engine never creates the bind source itself (it would belong to another user)
+    for sub in PLUGIN_SUBDIRS:
+        (base / sub).mkdir(parents=True, exist_ok=True)
 
 
 # --------------------------------------------------------------------------- core module
@@ -369,7 +377,7 @@ def cmd_init(args) -> int:
         update_env_file(path, changed)
     cfg = load_config()
     base = data_dir(cfg)
-    for sub in DATA_SUBDIRS:
+    for sub in DATA_SUBDIRS + PLUGIN_SUBDIRS:
         (base / sub).mkdir(parents=True, exist_ok=True)
     compose_env = write_compose_env(cfg)
     out(f"env file: {path}")
@@ -489,7 +497,8 @@ def cmd_search(args) -> int:
             core = get_core(cfg)
         except KBError:
             core = None
-        found = fallback_search(Path(cfg["LLM_KB_CORPUS_DIR"]), args.query, core)
+        root = data_dir(cfg) / "plugins" / "catalog" if args.source == "plugins" else Path(cfg["LLM_KB_CORPUS_DIR"])
+        found = fallback_search(root, args.query, core)
         if args.json:
             out(json.dumps({"fallback": True, "hits": found}, indent=2))
         else:
@@ -1605,14 +1614,16 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("query")
     s.add_argument("-k", type=int, default=5)
     s.add_argument("--kind")
-    s.add_argument("--source")
+    s.add_argument("--source", choices=SEARCH_SOURCES,
+                   help="default: knowledge sources (repo and inbox); plugins = capability cards; all = everything")
     s.add_argument("--max-distance", type=float)
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_search)
 
     s = sub.add_parser("check", help="intake gate: secrets, security scan, dedupe")
     s.add_argument("file", help="file path or - for stdin")
-    s.add_argument("--source", help="only compare against this source (repo or inbox)")
+    s.add_argument("--source", choices=KNOWLEDGE_SOURCES,
+                   help="only compare against this source (default: repo and inbox; plugin cards never count)")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_check)
 

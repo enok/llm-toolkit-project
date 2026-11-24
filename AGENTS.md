@@ -78,7 +78,7 @@ llm-toolkit-project/
 ├── learnings/                 # Indexed trial-and-error discoveries (INDEX.md first)
 ├── kb/                        # Local vector knowledge-base runtime (Docker); CLI scripts/kb.py, guide docs/knowledge-base.md
 ├── docs/                      # tool-compatibility-paths, repo-setup-prompt, jira-setup, docs/llm/
-├── scripts/                   # Setup, sync, validation, security gate, quality gate, PDF export
+├── scripts/                   # Setup, sync, validation, security gate, quality gate, PDF export, plugin catalog (plugins.py, guide docs/plugins.md)
 ├── tests/                     # Unit tests for the validators and bootstrap contracts
 ├── .github/workflows/         # CI: validate.yml, changed-code-quality-gate.yml
 └── .agents .claude .codex .cursor .windsurf (.agent .gemini .opencode)   # Thin provider links
@@ -148,6 +148,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Save this as a learning" / "improve the toolkit" | **capture-learning**, **self-improvement**, **toolkit-maintenance** workflows; **llm-context-engineering** skill |
 | "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under the always-on `rules/workflow-self-improvement.md` |
 | "Import external skills" | **external-skill-intake** skill |
+| "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | **plugin-intake** workflow, `scripts/plugins.py`, under `rules/plugin-governance.md` |
 | "Java / Python / JavaScript / shell patterns" | **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **shell-scripting** skills |
 | "RAG" / "agent memory" / "LLM app architecture" | **llm-application-architecture** skill |
 | "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows + skills |
@@ -180,6 +181,7 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/log-analysis-safety.md`
 - `rules/multi-agent-orchestration.md`
 - `rules/operational-doc-required.md`
+- `rules/plugin-governance.md`
 - `rules/release-safety.md`
 - `rules/repository-context-layers.md`
 - `rules/request-orchestration.md`
@@ -195,7 +197,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 `workflows/README.md` describes every workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair.
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`

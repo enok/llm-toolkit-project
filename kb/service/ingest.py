@@ -13,6 +13,11 @@ the index (an inbox file that vanished without reaching the archive is kept).
 
 Files whose content matches a secret rule are quarantined: never indexed, and
 only their path and the rule names are kept (never the matched text).
+
+The ``plugins`` source holds generated capability cards (``plugins.py catalog``),
+indexed with status ``external``. The catalog is regenerated wholesale, so a card
+that disappeared leaves the index in every pass and the 50 % guard does not apply;
+the zero-files guard still does.
 """
 
 from __future__ import annotations
@@ -29,13 +34,20 @@ import kb_core
 
 log = logging.getLogger("kb.ingest")
 
-SOURCES = ("repo", "inbox")
+SOURCES = kb_core.ALL_SOURCES
+STATUS_BY_SOURCE = {"repo": "merged", "inbox": "pending", "plugins": "external"}
 MASS_DELETE_MIN_TRACKED = 20  # the 50% guard applies from this many tracked files of a source
 MASS_DELETE_FLAG = "kb.py index --allow-mass-delete"
 
 
 def display_path(source: str, rel: str) -> str:
     return rel if source == "repo" else f"{source}/{rel}"
+
+
+def source_roots(cfg) -> dict:
+    """Container roots of every source (plus the archive root used for inbox removals)."""
+    return {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root,
+            "plugins": cfg.plugins_root}
 
 
 def is_plain_name(name: str) -> bool:
@@ -58,10 +70,13 @@ def utc_iso(ts: float | None = None) -> str:
 def build_records(source: str, rel: str, text: str, sha: str) -> list:
     """Chunk records ``(id, document, metadata)`` for one clean file."""
     front = kb_core.parse_front_matter(text)[0] if rel.lower().endswith(".md") else {}
-    kind = kb_core.classify_kind(rel, front if source == "inbox" else None)
+    if source == "plugins":
+        kind = kb_core.PLUGIN_KIND  # cards declare it; any other front-matter kind is not trusted
+    else:
+        kind = kb_core.classify_kind(rel, front if source == "inbox" else None)
     chunks = kb_core.chunk_document(display_path(source, rel), text)
     total = len(chunks)
-    status = "merged" if source == "repo" else "pending"
+    status = STATUS_BY_SOURCE.get(source, "pending")
     records = []
     for n, chunk in enumerate(chunks):
         meta = {
@@ -192,14 +207,17 @@ class Scanner:
             if kept and delete_missing:
                 self._error(report, f"inbox: {len(kept)} entries missing from inbox and archive; kept")
             missing = []
-        if delete_missing and missing:
+        # plugin cards are regenerated wholesale: a vanished card leaves the index in every pass
+        remove = delete_missing or source == "plugins"
+        if remove and missing:
             # S-M2: an empty or half-visible root (a bind source Docker created empty, a sync folder
             # still downloading) must never wipe the index; refuse and leave a visible error instead.
             if not seen:
                 self._error(report, f"{source}: walk saw no files; {len(missing)} removals skipped")
                 missing = []
             elif (
-                len(existing) >= MASS_DELETE_MIN_TRACKED
+                source != "plugins"
+                and len(existing) >= MASS_DELETE_MIN_TRACKED
                 and len(missing) * 2 > len(existing)
                 and not self.allow_mass_delete
             ):
@@ -209,7 +227,7 @@ class Scanner:
                     f"if the deletion is intended, run `{MASS_DELETE_FLAG}`",
                 )
                 missing = []
-        if delete_missing:
+        if remove:
             for rel in missing:
                 try:
                     self.store.delete_file(source, rel)
@@ -278,11 +296,7 @@ def main() -> int:
     except RuntimeError as exc:
         print(f"ingest: {exc}", file=sys.stderr)
         return 2
-    scanner = Scanner(
-        kb,
-        {"repo": cfg.repo_root, "inbox": cfg.inbox_root, "archive": cfg.archive_root},
-        allow_mass_delete=mass_delete_allowed(),
-    )
+    scanner = Scanner(kb, source_roots(cfg), allow_mass_delete=mass_delete_allowed())
     report = scanner.scan(delete_missing=True)
     write_state(cfg.state_dir, report)
     print(

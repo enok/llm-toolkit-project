@@ -47,6 +47,12 @@ KIND_BY_SEGMENT = {
 KNOWN_KINDS = frozenset(KIND_BY_SEGMENT.values()) | {"index", "other"}
 DEFAULT_INBOX_KIND = "learning"
 
+# Knowledge sources are what search, dedupe and the intake gate cover by default. "plugins" holds
+# generated capability cards of installed third-party plugins (descriptive data, status "external").
+KNOWLEDGE_SOURCES = ("repo", "inbox")
+ALL_SOURCES = ("repo", "inbox", "plugins")
+PLUGIN_KIND = "plugin-capability"
+
 HOOK_MAX_HITS = 4
 HOOK_MAX_CHARS = 500
 HOOK_HEADER = (
@@ -70,6 +76,7 @@ class ServiceConfig:
     repo_root: str = "/corpus/repo"
     inbox_root: str = "/corpus/inbox"
     archive_root: str = "/corpus/archive"
+    plugins_root: str = "/corpus/plugins"
     state_dir: str = "/state"
 
 
@@ -270,6 +277,13 @@ def find_secrets(text: str) -> list[str]:
         return []
     found = {span[0] for span in _iter_secret_spans(text)}
     return [name for name, _rx, _m in _SECRET_RULES if name in found]
+
+
+def find_secret_spans(text: str) -> list[tuple[str, int, int]]:
+    """``(rule, start, end)`` of each secret match, ordered by position (offsets only, never the text)."""
+    if not text:
+        return []
+    return [(name, start, end) for name, start, end, _o in sorted(_iter_secret_spans(text), key=lambda s: (s[1], s[3]))]
 
 
 def mask_secrets(text: str) -> str:
