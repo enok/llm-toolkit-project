@@ -1,0 +1,1277 @@
+#!/usr/bin/env python3
+"""Host command-line tool for the toolkit knowledge base (stdlib only).
+
+Talks to the local KB service over HTTP on 127.0.0.1 and drives the Docker
+compose stack. Shared pure helpers (secret detection, front matter, corpus
+walking) come from kb/service/kb_core.py, imported by path and never copied.
+
+Exit codes: search fallback 3; check 0 novel / 3 duplicate / 4 security /
+5 near / 6 service unreachable; setup errors 2.
+"""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import os
+import platform
+import plistlib
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+import unicodedata
+import urllib.error
+import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path
+
+PROJECT = "llm-toolkit-kb"
+LAUNCHD_LABEL = "dev.llm-toolkit.kb-sync"
+WIN_TASK = "llm-toolkit-kb-sync"
+CRON_MARKER = "# llm-toolkit-kb-sync"
+HOOK_PREFIX = "curl -s --max-time 2 http://localhost:"
+HOOK_SUFFIX = "/hook -d @-"
+DEFAULT_HOURS = "8-20/2"
+DEFAULT_DAYS = "1-5"
+
+DEFAULTS = {
+    "LLM_KB_DATA_DIR": "~/.llm-toolkit/kb-data",
+    "LLM_KB_TOOLKIT_DIR": "",
+    "LLM_KB_CORPUS_DIR": "",
+    "LLM_KB_CHROMA_PORT": "8010",
+    "LLM_KB_PORT": "8011",
+    "LLM_KB_COLLECTION": "llm-toolkit",
+    "LLM_KB_MAX_DISTANCE": "0.55",
+    "LLM_KB_DUP_DISTANCE": "0.12",
+    "LLM_KB_NEAR_DISTANCE": "0.30",
+    "LLM_KB_SCAN_SECONDS": "30",
+    "LLM_KB_SYNC_SAFE_INDEX": "1",
+    "LLM_KB_HARVEST_SESSIONS": "0",
+}
+
+# compose variable -> config key (exact names from the design contract)
+COMPOSE_VARS = [
+    ("KB_DATA_DIR", "LLM_KB_DATA_DIR"),
+    ("KB_CORPUS_DIR", "LLM_KB_CORPUS_DIR"),
+    ("KB_CHROMA_PORT", "LLM_KB_CHROMA_PORT"),
+    ("KB_PORT", "LLM_KB_PORT"),
+    ("KB_COLLECTION", "LLM_KB_COLLECTION"),
+    ("KB_MAX_DISTANCE", "LLM_KB_MAX_DISTANCE"),
+    ("KB_DUP_DISTANCE", "LLM_KB_DUP_DISTANCE"),
+    ("KB_NEAR_DISTANCE", "LLM_KB_NEAR_DISTANCE"),
+    ("KB_SCAN_SECONDS", "LLM_KB_SCAN_SECONDS"),
+    ("KB_SYNC_SAFE_INDEX", "LLM_KB_SYNC_SAFE_INDEX"),
+]
+DATA_SUBDIRS = ("chroma", "inbox", "archive", "models", "state")
+FALLBACK_EXTENSIONS = {".md", ".txt", ".sh", ".ps1", ".py", ".js", ".json", ".yml", ".yaml", ".toml", ".cmd"}
+FALLBACK_SKIP_DIRS = {"node_modules", "__pycache__"}
+FALLBACK_SKIP_FILES = {"TASKS_TABLE.md", "CONTEXT_STATE.md", "LLM-STATE.md", "package-lock.json"}
+
+
+class KBError(Exception):
+    """User-facing setup error (exit 2)."""
+
+
+class ServiceUnavailable(Exception):
+    """The KB service could not be reached."""
+
+
+# --------------------------------------------------------------------------- utils
+
+def toolkit_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def iso(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def parse_iso(value: str) -> datetime:
+    text = str(value).strip()
+    if text.endswith(("Z", "z")):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        dt = datetime.strptime(text[:10], "%Y-%m-%d")
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def posix_abs(p) -> str:
+    return Path(os.path.expanduser(str(p))).resolve().as_posix()
+
+
+def out(text: str = "") -> None:
+    print(text)
+
+
+def err(text: str) -> None:
+    print(text, file=sys.stderr)
+
+
+def run_cmd(cmd, **kwargs):
+    """The single place that executes external commands (patched in tests)."""
+    kwargs.setdefault("capture_output", True)
+    kwargs.setdefault("text", True)
+    kwargs.setdefault("encoding", "utf-8")
+    kwargs.setdefault("errors", "replace")
+    return subprocess.run(list(cmd), **kwargs)
+
+
+# --------------------------------------------------------------------------- config
+
+def env_file_path(environ=None) -> Path:
+    environ = os.environ if environ is None else environ
+    custom = environ.get("LLM_KB_ENV_FILE")
+    if custom:
+        return Path(os.path.expanduser(custom))
+    return Path.home() / ".llm-toolkit" / "kb.env"
+
+
+def parse_env_text(text: str) -> dict:
+    values = {}
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        if line.startswith("export "):
+            line = line[7:].lstrip()
+        key, _, val = line.partition("=")
+        key = key.strip()
+        val = val.strip()
+        if len(val) >= 2 and val[0] == val[-1] and val[0] in "\"'":
+            val = val[1:-1]
+        if key:
+            values[key] = val
+    return values
+
+
+def read_env_file(path: Path) -> dict:
+    try:
+        return parse_env_text(Path(path).read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+
+
+def update_env_file(path: Path, updates: dict) -> None:
+    """Set keys in place, keep every other line (comments, unknown keys) untouched."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    pending = dict(updates)
+    result = []
+    for raw in lines:
+        stripped = raw.strip()
+        key = None
+        if stripped and not stripped.startswith("#") and "=" in stripped:
+            key = stripped.split("=", 1)[0].replace("export ", "", 1).strip()
+        if key in pending:
+            result.append(f"{key}={pending.pop(key)}")
+        else:
+            result.append(raw)
+    for key, val in pending.items():
+        result.append(f"{key}={val}")
+    path.write_text("\n".join(result) + "\n", encoding="utf-8")
+
+
+def load_config(environ=None) -> dict:
+    """Defaults < env file < process env. Directory values are made absolute."""
+    environ = os.environ if environ is None else environ
+    cfg = dict(DEFAULTS)
+    cfg.update({k: v for k, v in read_env_file(env_file_path(environ)).items() if k.startswith("LLM_KB_")})
+    cfg.update({k: v for k, v in environ.items() if k.startswith("LLM_KB_") and k != "LLM_KB_ENV_FILE"})
+    if not cfg["LLM_KB_TOOLKIT_DIR"]:
+        cfg["LLM_KB_TOOLKIT_DIR"] = toolkit_root().as_posix()
+    if not cfg["LLM_KB_CORPUS_DIR"]:
+        cfg["LLM_KB_CORPUS_DIR"] = cfg["LLM_KB_TOOLKIT_DIR"]
+    for key in ("LLM_KB_DATA_DIR", "LLM_KB_TOOLKIT_DIR", "LLM_KB_CORPUS_DIR"):
+        cfg[key] = posix_abs(cfg[key])
+    return cfg
+
+
+def data_dir(cfg) -> Path:
+    return Path(cfg["LLM_KB_DATA_DIR"])
+
+
+def truthy(value) -> bool:
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def render_compose_env(cfg) -> str:
+    lines = ["# generated by scripts/kb.py - do not edit"]
+    for compose_name, key in COMPOSE_VARS:
+        val = cfg[key]
+        if key in ("LLM_KB_DATA_DIR", "LLM_KB_CORPUS_DIR"):
+            val = posix_abs(val)
+        lines.append(f"{compose_name}={val}")
+    return "\n".join(lines) + "\n"
+
+
+def write_compose_env(cfg) -> Path:
+    state = data_dir(cfg) / "state"
+    state.mkdir(parents=True, exist_ok=True)
+    target = state / "compose.env"
+    target.write_text(render_compose_env(cfg), encoding="utf-8")
+    return target
+
+
+def compose_command(cfg, *args) -> list:
+    """Build (never execute) a docker compose invocation."""
+    toolkit = Path(cfg["LLM_KB_TOOLKIT_DIR"])
+    env_file = Path(cfg["LLM_KB_DATA_DIR"]) / "state" / "compose.env"
+    return [
+        "docker", "compose", "-p", PROJECT,
+        "-f", (toolkit / "kb" / "docker-compose.yml").as_posix(),
+        "--env-file", env_file.as_posix(),
+        *args,
+    ]
+
+
+def run_compose(cfg, *args, **kwargs):
+    write_compose_env(cfg)
+    return run_cmd(compose_command(cfg, *args), **kwargs)
+
+
+# --------------------------------------------------------------------------- core module
+
+_CORE = None
+
+
+def set_core(module) -> None:
+    """Inject kb_core (tests) or reset with None."""
+    global _CORE
+    _CORE = module
+
+
+def get_core(cfg=None):
+    global _CORE
+    if _CORE is not None:
+        return _CORE
+    toolkit = Path((cfg or load_config())["LLM_KB_TOOLKIT_DIR"])
+    path = toolkit / "kb" / "service" / "kb_core.py"
+    if not path.is_file():
+        raise KBError(f"shared module not found: {path}")
+    spec = importlib.util.spec_from_file_location("llm_kb_core", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules.setdefault("llm_kb_core", module)
+    spec.loader.exec_module(module)
+    _CORE = module
+    return module
+
+
+# --------------------------------------------------------------------------- http
+
+def service_url(cfg, path) -> str:
+    return f"http://127.0.0.1:{cfg['LLM_KB_PORT']}{path}"
+
+
+def http_json(cfg, method, path, payload=None, timeout=10):
+    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(service_url(cfg, path), data=data, method=method)
+    if data is not None:
+        req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8") or "{}")
+    except urllib.error.HTTPError as exc:
+        raise ServiceUnavailable(f"HTTP {exc.code} from {path}") from exc
+    except (urllib.error.URLError, OSError, ValueError) as exc:
+        raise ServiceUnavailable(str(exc)) from exc
+
+
+# --------------------------------------------------------------------------- init / stack
+
+def cmd_init(args) -> int:
+    path = env_file_path()
+    current = read_env_file(path)
+    updates = {}
+    if args.data_dir:
+        updates["LLM_KB_DATA_DIR"] = posix_abs(args.data_dir)
+    if args.corpus:
+        updates["LLM_KB_CORPUS_DIR"] = posix_abs(args.corpus)
+    if args.port:
+        updates["LLM_KB_PORT"] = str(args.port)
+    if args.chroma_port:
+        updates["LLM_KB_CHROMA_PORT"] = str(args.chroma_port)
+    if "LLM_KB_DATA_DIR" not in current and "LLM_KB_DATA_DIR" not in updates:
+        updates["LLM_KB_DATA_DIR"] = posix_abs(os.environ.get("LLM_KB_DATA_DIR") or DEFAULTS["LLM_KB_DATA_DIR"])
+    if "LLM_KB_TOOLKIT_DIR" not in current:
+        updates["LLM_KB_TOOLKIT_DIR"] = toolkit_root().as_posix()
+    changed = {k: v for k, v in updates.items() if current.get(k) != v}
+    if changed or not path.exists():
+        update_env_file(path, changed)
+    cfg = load_config()
+    base = data_dir(cfg)
+    for sub in DATA_SUBDIRS:
+        (base / sub).mkdir(parents=True, exist_ok=True)
+    compose_env = write_compose_env(cfg)
+    out(f"env file: {path}")
+    out(f"data dir: {base.as_posix()}")
+    out(f"compose env: {compose_env.as_posix()}")
+    return 0
+
+
+def cmd_up(args) -> int:
+    cfg = load_config()
+    cmd = ["up", "-d"] + (["--build"] if args.build else [])
+    return run_compose(cfg, *cmd, capture_output=False).returncode
+
+
+def cmd_down(args) -> int:
+    return run_compose(load_config(), "down", capture_output=False).returncode
+
+
+def cmd_status(args) -> int:
+    cfg = load_config()
+    try:
+        health = http_json(cfg, "GET", "/health", timeout=5)
+    except ServiceUnavailable as exc:
+        if args.json:
+            out(json.dumps({"service": "down", "error": str(exc)}))
+        else:
+            out(f"service: down ({exc})")
+        return 1
+    if args.json:
+        out(json.dumps({"service": "up", "health": health}, indent=2))
+    else:
+        out(f"service: up  collection={health.get('collection')} chunks={health.get('chunks')} "
+            f"files={health.get('files')} last_scan={health.get('last_scan')}")
+        quarantined = health.get("quarantined") or {}
+        if quarantined:
+            out(f"quarantined files: {len(quarantined)}")
+    return 0
+
+
+def cmd_index(args) -> int:
+    cfg = load_config()
+    return run_compose(cfg, "--profile", "tools", "run", "--rm", "-T", "ingest", capture_output=False).returncode
+
+
+# --------------------------------------------------------------------------- search
+
+def fallback_search(corpus: Path, query: str, core=None, limit=10) -> list:
+    terms = [t for t in re.split(r"\W+", query.lower()) if t]
+    results = []
+    if not terms:
+        return results
+    files = []
+    if core is not None and hasattr(core, "iter_corpus_files"):
+        files = [(rel, Path(ab)) for rel, ab in core.iter_corpus_files(str(corpus))]
+    else:
+        for root, dirs, names in os.walk(corpus, followlinks=False):
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in FALLBACK_SKIP_DIRS]
+            for name in names:
+                p = Path(root) / name
+                if name.startswith(".") or name in FALLBACK_SKIP_FILES or p.is_symlink():
+                    continue
+                if p.suffix.lower() in FALLBACK_EXTENSIONS:
+                    files.append((p.relative_to(corpus).as_posix(), p))
+    for rel, path in files:
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        low = text.lower()
+        score = sum(1 for t in terms if t in low)
+        if not score:
+            continue
+        excerpt = ""
+        for line in text.splitlines():
+            if any(t in line.lower() for t in terms):
+                excerpt = line.strip()[:300]
+                break
+        results.append((score, sum(low.count(t) for t in terms), rel, excerpt))
+    results.sort(key=lambda r: (-r[0], -r[1], r[2]))
+    return [{"path": r[2], "matched_terms": r[0], "excerpt": r[3]} for r in results[:limit]]
+
+
+def cmd_search(args) -> int:
+    cfg = load_config()
+    payload = {"q": args.query, "k": args.k}
+    if args.kind:
+        payload["kind"] = args.kind
+    if args.source:
+        payload["source"] = args.source
+    payload["max_distance"] = args.max_distance if args.max_distance is not None else float(cfg["LLM_KB_MAX_DISTANCE"])
+    try:
+        hits = http_json(cfg, "POST", "/search", payload).get("hits", [])
+    except ServiceUnavailable as exc:
+        err(f"service unreachable ({exc}); plain-text fallback over the corpus")
+        try:
+            core = get_core(cfg)
+        except KBError:
+            core = None
+        found = fallback_search(Path(cfg["LLM_KB_CORPUS_DIR"]), args.query, core)
+        if args.json:
+            out(json.dumps({"fallback": True, "hits": found}, indent=2))
+        else:
+            for item in found:
+                out(f"{item['matched_terms']} terms  {item['path']}")
+                if item["excerpt"]:
+                    out(f"    {item['excerpt']}")
+        return 3
+    if args.json:
+        out(json.dumps({"hits": hits}, indent=2))
+        return 0
+    for hit in hits:
+        heading = hit.get("heading") or ""
+        pointer = f"{hit.get('path')} › {heading}" if heading else str(hit.get("path"))
+        out(f"{float(hit.get('distance', 0)):.3f}  {hit.get('kind')}  {pointer}")
+        excerpt = " ".join(str(hit.get("text", "")).split())[:300]
+        if excerpt:
+            out(f"    {excerpt}")
+    if not hits:
+        out("no hits within the distance cut-off")
+    return 0
+
+
+# --------------------------------------------------------------------------- intake gate
+
+def read_input(source: str) -> str:
+    if source == "-":
+        return sys.stdin.read()
+    return Path(source).read_text(encoding="utf-8")
+
+
+def scanner_rules(cfg, text: str) -> list:
+    """Run the toolkit's surface scanner on the candidate; return rule names only."""
+    script = Path(cfg["LLM_KB_TOOLKIT_DIR"]) / "scripts" / "scan-llm-surface-security.py"
+    if not script.is_file():
+        return []
+    with tempfile.TemporaryDirectory(prefix="kb-check-") as tmp:
+        target = Path(tmp) / "docs"
+        target.mkdir()
+        (target / "candidate.md").write_text(text, encoding="utf-8")
+        proc = run_cmd([sys.executable, "-I", str(script), "--root", tmp])
+    if proc.returncode == 0:
+        return []
+    rules = []
+    for line in (proc.stderr or "").splitlines():
+        m = re.match(r"^docs[\\/]candidate\.md:\d+: ([^:\s]+):", line)
+        if m and m.group(1) not in rules:
+            rules.append(m.group(1))
+    return rules or ["surface-scan"]
+
+
+def suggest_kind(text: str, front: dict) -> str:
+    if front.get("kind"):
+        return str(front["kind"])
+    head = text[:800].lower()
+    if "trigger:" in head and "description:" in head:
+        return "rule"
+    if front.get("name") and front.get("description"):
+        return "skill"
+    if re.search(r"^#+\s*(steps|procedure|workflow)\b", text, re.I | re.M):
+        return "workflow"
+    return "learning"
+
+
+def run_check(cfg, text: str) -> dict:
+    core = get_core(cfg)
+    front, _body = core.parse_front_matter(text)
+    result = {"exit_code": 0, "verdict": None, "rules": [], "nearest": [], "destination": suggest_kind(text, front or {})}
+    rules = list(core.find_secrets(text))
+    for rule in scanner_rules(cfg, text):
+        if rule not in rules:
+            rules.append(rule)
+    if rules:
+        result.update(exit_code=4, verdict="security", rules=rules)
+        return result
+    try:
+        resp = http_json(cfg, "POST", "/dedupe", {"text": text, "k": 3})
+    except ServiceUnavailable as exc:
+        result.update(exit_code=6, verdict="unreachable", error=str(exc))
+        return result
+    verdict = resp.get("verdict", "novel")
+    result["verdict"] = verdict
+    result["nearest"] = resp.get("nearest", [])
+    result["exit_code"] = {"novel": 0, "duplicate": 3, "near": 5}.get(verdict, 0)
+    return result
+
+
+def print_check(result: dict, as_json: bool) -> None:
+    if as_json:
+        out(json.dumps(result, indent=2))
+        return
+    if result["verdict"] == "security":
+        out("security: BLOCKED (nothing was saved). Rules: " + ", ".join(result["rules"]))
+        return
+    if result["verdict"] == "unreachable":
+        out(f"service unreachable: {result.get('error')}")
+        return
+    out(f"verdict: {result['verdict']}")
+    out(f"suggested destination: {result['destination']}")
+    for item in result["nearest"]:
+        out(f"  {float(item.get('distance', 0)):.3f}  {item.get('source')}:{item.get('path')} › {item.get('heading', '')}")
+
+
+def cmd_check(args) -> int:
+    cfg = load_config()
+    result = run_check(cfg, read_input(args.file))
+    print_check(result, args.json)
+    return result["exit_code"]
+
+
+def slugify(title: str) -> str:
+    ascii_title = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode("ascii").lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", ascii_title).strip("-")[:60].strip("-")
+    return slug or "note"
+
+
+def build_inbox_text(title, kind, origin, created, body) -> str:
+    return (
+        "---\n"
+        f"title: {json.dumps(title, ensure_ascii=False)}\n"
+        f"kind: {kind}\n"
+        f"origin: {json.dumps(origin, ensure_ascii=False)}\n"
+        f"created: {created}\n"
+        "status: pending\n"
+        "---\n\n"
+        f"{body.strip()}\n"
+    )
+
+
+def cmd_add(args) -> int:
+    cfg = load_config()
+    text = read_input(args.file)
+    result = run_check(cfg, text)
+    if result["exit_code"] == 4:
+        print_check(result, False)
+        err("refused: security findings")
+        return 4
+    if result["exit_code"] == 6:
+        print_check(result, False)
+        err("refused: service unreachable, dedupe could not run")
+        return 6
+    if result["exit_code"] == 3:
+        print_check(result, False)
+        err("refused: duplicate of existing knowledge")
+        return 3
+    if result["exit_code"] == 5 and not args.allow_near:
+        print_check(result, False)
+        err("refused: near match needs a merge decision (use --allow-near to add anyway)")
+        return 5
+    core = get_core(cfg)
+    front, body = core.parse_front_matter(text)
+    kind = args.kind or (front or {}).get("kind") or result["destination"]
+    origin = args.origin or (front or {}).get("origin") or "manual"
+    now = utcnow()
+    inbox = data_dir(cfg) / "inbox"
+    inbox.mkdir(parents=True, exist_ok=True)
+    stem = f"{now.strftime('%Y-%m-%d')}-{slugify(args.title)}"
+    target = inbox / f"{stem}.md"
+    n = 2
+    while target.exists():
+        target = inbox / f"{stem}-{n}.md"
+        n += 1
+    target.write_text(build_inbox_text(args.title, kind, origin, iso(now), body), encoding="utf-8")
+    out(f"added: {target.name} (kind={kind}, status=pending)")
+    try:
+        http_json(cfg, "POST", "/reindex", {}, timeout=30)
+    except ServiceUnavailable:
+        pass
+    return 0
+
+
+# --------------------------------------------------------------------------- inbox
+
+def list_inbox(cfg) -> list:
+    inbox = data_dir(cfg) / "inbox"
+    items = []
+    if not inbox.is_dir():
+        return items
+    core = None
+    try:
+        core = get_core(cfg)
+    except KBError:
+        pass
+    for path in sorted(inbox.glob("*.md")):
+        meta = {}
+        if core is not None:
+            meta, _ = core.parse_front_matter(path.read_text(encoding="utf-8", errors="replace"))
+        items.append({"name": path.name, "title": (meta or {}).get("title", ""), "kind": (meta or {}).get("kind", ""),
+                      "created": (meta or {}).get("created", ""), "status": (meta or {}).get("status", "")})
+    return items
+
+
+def archive_items(cfg, names) -> list:
+    base = data_dir(cfg)
+    archive = base / "archive"
+    archive.mkdir(parents=True, exist_ok=True)
+    moved = []
+    for name in names:
+        if Path(name).name != name or name in ("", ".", ".."):
+            raise KBError(f"not an inbox item name: {name}")
+        src = base / "inbox" / name
+        if not src.is_file():
+            raise KBError(f"not in inbox: {name}")
+        dst = archive / name
+        n = 2
+        while dst.exists():
+            dst = archive / f"{src.stem}-{n}{src.suffix}"
+            n += 1
+        shutil.move(str(src), str(dst))
+        moved.append(dst.name)
+    return moved
+
+
+def cmd_inbox(args) -> int:
+    cfg = load_config()
+    rest = list(args.args)
+    if rest and rest[0] == "archive":
+        if len(rest) < 2:
+            raise KBError("inbox archive needs at least one item name")
+        for name in archive_items(cfg, rest[1:]):
+            out(f"archived: {name}")
+        return 0
+    if rest:
+        raise KBError(f"unknown inbox action: {rest[0]}")
+    items = list_inbox(cfg)
+    if args.json:
+        out(json.dumps(items, indent=2))
+    else:
+        for item in items:
+            out(f"{item['name']}  kind={item['kind']}  {item['title']}")
+        if not items:
+            out("inbox is empty")
+    return 0
+
+
+# --------------------------------------------------------------------------- sync-status
+
+def run_log_path(environ=None) -> Path:
+    environ = os.environ if environ is None else environ
+    if environ.get("LLM_RUN_LOG"):
+        return Path(os.path.expanduser(environ["LLM_RUN_LOG"]))
+    return Path.home() / ".llm-toolkit" / "run-log.jsonl"
+
+
+def record_time(rec: dict):
+    for key in ("ts", "timestamp", "time", "created", "date"):
+        if rec.get(key):
+            try:
+                return parse_iso(rec[key])
+            except (ValueError, TypeError):
+                return None
+    return None
+
+
+def run_log_since(path: Path, watermark):
+    """Return (records newer than watermark, undated count)."""
+    records, undated = [], 0
+    try:
+        lines = Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return records, undated
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(rec, dict):
+            continue
+        when = record_time(rec)
+        if when is None:
+            undated += 1
+        elif watermark is None or when > watermark:
+            records.append(rec)
+    return records, undated
+
+
+def git_state(corpus: Path, fetch=True) -> dict:
+    def git(*a, timeout=30):
+        return run_cmd(["git", "-C", str(corpus), *a], timeout=timeout)
+    try:
+        if git("rev-parse", "--is-inside-work-tree").returncode != 0:
+            return {"git": False}
+        branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        clean = git("status", "--porcelain").stdout.strip() == ""
+        if fetch:
+            git("fetch", "--quiet", timeout=60)
+        behind = None
+        proc = git("rev-list", "--count", "HEAD..@{u}")
+        if proc.returncode == 0:
+            behind = int(proc.stdout.strip() or 0)
+        return {"git": True, "branch": branch, "clean": clean, "behind": behind}
+    except (OSError, subprocess.SubprocessError, ValueError) as exc:
+        return {"git": False, "error": str(exc)}
+
+
+def read_watermark(cfg):
+    path = data_dir(cfg) / "state" / "sync-state.json"
+    try:
+        value = json.loads(path.read_text(encoding="utf-8")).get("watermark")
+        return parse_iso(value) if value else None
+    except (OSError, ValueError):
+        return None
+
+
+def cmd_sync_status(args) -> int:
+    cfg = load_config()
+    watermark = read_watermark(cfg)
+    try:
+        health = http_json(cfg, "GET", "/health", timeout=5)
+        service = {"up": True, "chunks": health.get("chunks"), "files": health.get("files"),
+                   "last_scan": health.get("last_scan"), "quarantined": sorted((health.get("quarantined") or {}).keys())}
+    except ServiceUnavailable as exc:
+        service = {"up": False, "error": str(exc)}
+    records, undated = run_log_since(run_log_path(), watermark)
+    report = {
+        "service": service,
+        "pending_inbox": list_inbox(cfg),
+        "watermark": iso(watermark) if watermark else None,
+        "run_log": {"new": len(records), "undated": undated, "records": records[-20:]},
+        "corpus": git_state(Path(cfg["LLM_KB_CORPUS_DIR"]), fetch=not args.no_fetch),
+    }
+    if truthy(cfg["LLM_KB_HARVEST_SESSIONS"]):
+        since = watermark or parse_iso("1970-01-01")
+        report["sessions_changed"] = len(list(session_files(Path(os.path.expanduser("~/.claude/projects")), since)))
+    if args.mark:
+        state = data_dir(cfg) / "state"
+        state.mkdir(parents=True, exist_ok=True)
+        (state / "sync-state.json").write_text(json.dumps({"watermark": iso(utcnow())}) + "\n", encoding="utf-8")
+        report["marked"] = True
+    if args.json:
+        out(json.dumps(report, indent=2))
+    else:
+        out(f"service: {'up' if service['up'] else 'down'}")
+        out(f"pending inbox items: {len(report['pending_inbox'])}")
+        out(f"run-log records since {report['watermark'] or 'the beginning'}: {len(records)}")
+        corpus = report["corpus"]
+        if corpus.get("git"):
+            out(f"corpus: branch={corpus['branch']} clean={corpus['clean']} behind={corpus['behind']}")
+        else:
+            out("corpus: not a git checkout")
+        if "sessions_changed" in report:
+            out(f"session files changed: {report['sessions_changed']}")
+    return 0
+
+
+# --------------------------------------------------------------------------- sessions
+
+def session_files(root: Path, since: datetime):
+    if not root.is_dir():
+        return
+    for path in sorted(root.rglob("*.jsonl")):
+        try:
+            if path.is_symlink():
+                continue
+            if datetime.fromtimestamp(path.stat().st_mtime, timezone.utc) >= since:
+                yield path
+        except OSError:
+            continue
+
+
+def message_text(rec: dict) -> tuple:
+    role = rec.get("type") or (rec.get("message") or {}).get("role") or rec.get("role")
+    msg = rec.get("message", rec)
+    content = msg.get("content") if isinstance(msg, dict) else None
+    text = ""
+    if isinstance(content, str):
+        text = content
+    elif isinstance(content, list):
+        text = "\n".join(b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text")
+    return role, text.strip()
+
+
+def digest_session(path: Path, root: Path, core) -> dict:
+    first_user, last_assistant = "", ""
+    with path.open("r", encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(rec, dict):
+                continue
+            role, text = message_text(rec)
+            if not text:
+                continue
+            if role == "user" and not first_user and not text.startswith("<"):
+                first_user = text
+            elif role == "assistant":
+                last_assistant = text
+    try:
+        project = path.relative_to(root).parts[0]
+    except (ValueError, IndexError):
+        project = path.parent.name
+    return {
+        "project": project,
+        "session": path.stem,
+        "first_prompt": core.mask_secrets(first_user)[:200],
+        "last_assistant": core.mask_secrets(last_assistant)[:600],
+    }
+
+
+def cmd_sessions(args) -> int:
+    cfg = load_config()
+    if not (truthy(cfg["LLM_KB_HARVEST_SESSIONS"]) or args.force):
+        err("refused: session harvesting is opt-in (set LLM_KB_HARVEST_SESSIONS=1 or pass --force)")
+        return 2
+    core = get_core(cfg)
+    root = Path(os.path.expanduser(args.root)) if args.root else Path.home() / ".claude" / "projects"
+    digests = [digest_session(p, root, core) for p in session_files(root, parse_iso(args.since))]
+    if args.json:
+        out(json.dumps(digests, indent=2, ensure_ascii=False))
+    else:
+        for d in digests:
+            out(f"[{d['project']}] {d['session']}")
+            out(f"  prompt: {d['first_prompt']}")
+            out(f"  result: {d['last_assistant']}")
+        if not digests:
+            out("no session files changed since the given time")
+    return 0
+
+
+# --------------------------------------------------------------------------- scheduler (pure generators)
+
+def parse_field(spec: str, lo: int, hi: int) -> list:
+    """Parse cron-style 'a', 'a-b', 'a-b/s', 'a,b' lists into sorted ints."""
+    values = set()
+    for part in str(spec).split(","):
+        part = part.strip()
+        step = 1
+        if "/" in part:
+            part, _, s = part.partition("/")
+            step = int(s)
+        if part in ("", "*"):
+            a, b = lo, hi
+        elif "-" in part:
+            x, _, y = part.partition("-")
+            a, b = int(x), int(y)
+        else:
+            a = b = int(part)
+        if step < 1 or a > b or a < lo or b > hi:
+            raise KBError(f"invalid schedule field: {spec}")
+        values.update(range(a, b + 1, step))
+    return sorted(values)
+
+
+def scheduler_command(cfg=None) -> list:
+    return [sys.executable, str(Path(__file__).resolve()), "scheduled-run"]
+
+
+def make_cron_line(hours: str, days: str, command: list) -> str:
+    parse_field(hours, 0, 23)
+    parse_field(days, 0, 7)
+    return f"0 {hours} * * {days} {' '.join(shlex.quote(c) for c in command)} {CRON_MARKER}"
+
+
+def make_launchd_plist(hours: str, days: str, command: list, log_path: str) -> dict:
+    intervals = [{"Weekday": d % 7, "Hour": h, "Minute": 0}
+                 for d in parse_field(days, 0, 7) for h in parse_field(hours, 0, 23)]
+    return {
+        "Label": LAUNCHD_LABEL,
+        "ProgramArguments": list(command),
+        "StartCalendarInterval": intervals,
+        "StandardOutPath": log_path,
+        "StandardErrorPath": log_path,
+    }
+
+
+WIN_DAYS = {0: "SUN", 1: "MON", 2: "TUE", 3: "WED", 4: "THU", 5: "FRI", 6: "SAT", 7: "SUN"}
+
+
+def make_schtasks_args(hours: str, days: str, command: list) -> list:
+    """Return a list of schtasks /Create argument lists (one task, or one per hour)."""
+    hrs = parse_field(hours, 0, 23)
+    day_names = []
+    for d in parse_field(days, 0, 7):
+        name = WIN_DAYS[d]
+        if name not in day_names:
+            day_names.append(name)
+    tr = subprocess.list2cmdline(command)
+    base = ["/Create", "/F", "/SC", "WEEKLY", "/D", ",".join(day_names)]
+    steps = {b - a for a, b in zip(hrs, hrs[1:])}
+    if len(hrs) == 1 or len(steps) == 1:
+        step = steps.pop() if steps else 1
+        args = base + ["/TN", WIN_TASK, "/TR", tr, "/ST", f"{hrs[0]:02d}:00"]
+        if len(hrs) > 1:
+            span = (hrs[-1] - hrs[0]) * 60 + 1
+            args += ["/RI", str(step * 60), "/DU", f"{span // 60:04d}:{span % 60:02d}"]
+        return [args]
+    return [base + ["/TN", f"{WIN_TASK}-{h:02d}", "/TR", tr, "/ST", f"{h:02d}:00"] for h in hrs]
+
+
+def detect_os() -> str:
+    return platform.system()
+
+
+def launchd_path() -> Path:
+    return Path.home() / "Library" / "LaunchAgents" / f"{LAUNCHD_LABEL}.plist"
+
+
+def cron_edit(current: str, line=None) -> str:
+    """Drop our marked line(s) from crontab text; append `line` when given."""
+    kept = [l for l in current.splitlines() if CRON_MARKER not in l]
+    if line:
+        kept.append(line)
+    return "\n".join(kept) + "\n" if kept else ""
+
+
+def read_crontab() -> str:
+    proc = run_cmd(["crontab", "-l"])
+    return proc.stdout if proc.returncode == 0 else ""
+
+
+def cmd_schedule(args) -> int:
+    cfg = load_config()
+    system = detect_os()
+    command = scheduler_command(cfg)
+    action = args.action
+    if system == "Darwin":
+        plist_path = launchd_path()
+        domain = f"gui/{os.getuid()}"
+        if action == "install":
+            log = (data_dir(cfg) / "state" / "schedule.log").as_posix()
+            plist_path.parent.mkdir(parents=True, exist_ok=True)
+            with plist_path.open("wb") as fh:
+                plistlib.dump(make_launchd_plist(args.hours, args.days, command, log), fh)
+            run_cmd(["launchctl", "bootout", f"{domain}/{LAUNCHD_LABEL}"])
+            rc = run_cmd(["launchctl", "bootstrap", domain, str(plist_path)]).returncode
+            out(f"installed {LAUNCHD_LABEL} ({plist_path})")
+            return rc
+        if action == "remove":
+            run_cmd(["launchctl", "bootout", f"{domain}/{LAUNCHD_LABEL}"])
+            if plist_path.is_file():
+                plist_path.unlink()
+            out(f"removed {LAUNCHD_LABEL}")
+            return 0
+        proc = run_cmd(["launchctl", "print", f"{domain}/{LAUNCHD_LABEL}"])
+        out(f"{LAUNCHD_LABEL}: {'loaded' if proc.returncode == 0 else 'not loaded'}")
+        return 0 if proc.returncode == 0 else 1
+    if system == "Windows":
+        hrs = parse_field(args.hours, 0, 23)
+        names = [WIN_TASK] + [f"{WIN_TASK}-{h:02d}" for h in hrs]
+        if action == "install":
+            for task in make_schtasks_args(args.hours, args.days, command):
+                rc = run_cmd(["schtasks", *task]).returncode
+                if rc:
+                    return rc
+            out(f"installed {WIN_TASK}")
+            return 0
+        if action == "remove":
+            for name in names:
+                run_cmd(["schtasks", "/Delete", "/TN", name, "/F"])
+            out(f"removed {WIN_TASK}")
+            return 0
+        found = [n for n in names if run_cmd(["schtasks", "/Query", "/TN", n]).returncode == 0]
+        out(f"{WIN_TASK}: {', '.join(found) if found else 'not installed'}")
+        return 0 if found else 1
+    current = read_crontab()
+    if action == "install":
+        new = cron_edit(current, make_cron_line(args.hours, args.days, command))
+        proc = run_cmd(["crontab", "-"], input=new)
+        out("installed crontab entry" if proc.returncode == 0 else f"crontab failed: {proc.stderr}")
+        return proc.returncode
+    if action == "remove":
+        new = cron_edit(current)
+        proc = run_cmd(["crontab", "-"], input=new) if new != current else None
+        out("removed crontab entry")
+        return proc.returncode if proc else 0
+    present = any(CRON_MARKER in l for l in current.splitlines())
+    out(f"crontab entry: {'installed' if present else 'not installed'}")
+    return 0 if present else 1
+
+
+# --------------------------------------------------------------------------- scheduled-run
+
+def default_branch(corpus: Path):
+    proc = run_cmd(["git", "-C", str(corpus), "symbolic-ref", "--short", "refs/remotes/origin/HEAD"])
+    if proc.returncode == 0 and proc.stdout.strip():
+        return proc.stdout.strip().split("/", 1)[-1]
+    return None
+
+
+def can_fast_forward(corpus: Path):
+    """(ok, reason): only on the default branch with a clean tree."""
+    if run_cmd(["git", "-C", str(corpus), "rev-parse", "--is-inside-work-tree"]).returncode != 0:
+        return False, "not a git checkout"
+    branch = run_cmd(["git", "-C", str(corpus), "rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip()
+    default = default_branch(corpus)
+    allowed = {default} if default else {"main", "master"}
+    if branch not in allowed:
+        return False, f"on branch {branch}, not the default branch"
+    if run_cmd(["git", "-C", str(corpus), "status", "--porcelain"]).stdout.strip():
+        return False, "working tree not clean"
+    return True, "ok"
+
+
+def cmd_scheduled_run(args) -> int:
+    cfg = load_config()
+    base = data_dir(cfg)
+    for sub in DATA_SUBDIRS:
+        (base / sub).mkdir(parents=True, exist_ok=True)
+    notes = []
+    status = "ok"
+    try:
+        up = run_compose(cfg, "up", "-d")
+        if up.returncode:
+            raise RuntimeError("stack start failed")
+        notes.append("stack up")
+        ok, reason = can_fast_forward(Path(cfg["LLM_KB_CORPUS_DIR"]))
+        if ok:
+            pull = run_cmd(["git", "-C", cfg["LLM_KB_CORPUS_DIR"], "pull", "--ff-only"])
+            notes.append("pull ok" if pull.returncode == 0 else "pull failed")
+        else:
+            notes.append(f"pull skipped ({reason})")
+        idx = run_compose(cfg, "--profile", "tools", "run", "--rm", "-T", "ingest")
+        if idx.returncode:
+            raise RuntimeError("index failed")
+        notes.append("index ok")
+    except (RuntimeError, OSError) as exc:
+        status = "error"
+        notes.append(str(exc))
+    line = f"{iso(utcnow())} {status} {'; '.join(notes)}"
+    with (base / "state" / "schedule.log").open("a", encoding="utf-8") as fh:
+        fh.write(line + "\n")
+    out(line)
+    return 0 if status == "ok" else 1
+
+
+# --------------------------------------------------------------------------- hook
+
+def hook_command(port) -> str:
+    return f"{HOOK_PREFIX}{port}{HOOK_SUFFIX}"
+
+
+def is_own_hook(entry) -> bool:
+    cmd = entry.get("command", "") if isinstance(entry, dict) else ""
+    return isinstance(cmd, str) and cmd.startswith(HOOK_PREFIX) and cmd.endswith(HOOK_SUFFIX)
+
+
+def settings_path(args) -> Path:
+    if args.settings:
+        return Path(os.path.expanduser(args.settings))
+    return Path.home() / ".claude" / "settings.json"
+
+
+def load_settings(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        raise KBError(f"settings file is not valid JSON, refusing to edit: {path} ({exc})")
+    if not isinstance(data, dict):
+        raise KBError(f"settings file is not a JSON object: {path}")
+    return data
+
+
+def backup_file(path: Path) -> Path:
+    stamp = utcnow().strftime("%Y%m%dT%H%M%S%fZ")
+    target = path.with_name(f"{path.name}.bak-{stamp}")
+    shutil.copy2(path, target)
+    return target
+
+
+def hook_install(settings: dict, command: str) -> dict:
+    hooks = settings.setdefault("hooks", {})
+    groups = hooks.setdefault("UserPromptSubmit", [])
+    for group in groups:
+        for entry in group.get("hooks", []) if isinstance(group, dict) else []:
+            if is_own_hook(entry):
+                entry["command"] = command
+                return settings
+    groups.append({"hooks": [{"type": "command", "command": command}]})
+    return settings
+
+
+def hook_remove(settings: dict) -> bool:
+    groups = settings.get("hooks", {}).get("UserPromptSubmit") if isinstance(settings.get("hooks"), dict) else None
+    if not isinstance(groups, list):
+        return False
+    changed = False
+    for group in list(groups):
+        if not isinstance(group, dict) or not isinstance(group.get("hooks"), list):
+            continue
+        kept = [e for e in group["hooks"] if not is_own_hook(e)]
+        if len(kept) != len(group["hooks"]):
+            changed = True
+            group["hooks"] = kept
+            if not kept and set(group.keys()) <= {"hooks", "matcher"}:
+                groups.remove(group)
+    if changed and not groups:
+        del settings["hooks"]["UserPromptSubmit"]
+        if not settings["hooks"]:
+            del settings["hooks"]
+    return changed
+
+
+def cmd_hook(args) -> int:
+    cfg = load_config()
+    path = settings_path(args)
+    settings = load_settings(path)
+    if args.action == "status":
+        groups = (settings.get("hooks") or {}).get("UserPromptSubmit") or []
+        present = any(is_own_hook(e) for g in groups if isinstance(g, dict) for e in g.get("hooks", []))
+        out(f"hook: {'installed' if present else 'not installed'} ({path})")
+        return 0 if present else 1
+    if args.action == "install":
+        if path.exists():
+            out(f"backup: {backup_file(path)}")
+        hook_install(settings, hook_command(cfg["LLM_KB_PORT"]))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(settings, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        out(f"hook installed in {path}")
+        return 0
+    if not path.exists():
+        out("nothing to remove")
+        return 0
+    backup = backup_file(path)
+    if hook_remove(settings):
+        path.write_text(json.dumps(settings, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        out(f"hook removed from {path} (backup: {backup})")
+    else:
+        backup.unlink()
+        out("hook was not installed")
+    return 0
+
+
+# --------------------------------------------------------------------------- doctor
+
+def cmd_doctor(args) -> int:
+    import socket
+    cfg = load_config()
+    problems = 0
+
+    def report(label, ok, detail=""):
+        nonlocal problems
+        problems += 0 if ok else 1
+        out(f"{'ok  ' if ok else 'FAIL'} {label}{(' - ' + detail) if detail else ''}")
+
+    report("docker on PATH", shutil.which("docker") is not None)
+    if shutil.which("docker"):
+        proc = run_cmd(["docker", "compose", "version"])
+        report("docker compose", proc.returncode == 0, (proc.stdout or proc.stderr).strip()[:80])
+    base = data_dir(cfg)
+    report("data folder", all((base / s).is_dir() for s in DATA_SUBDIRS), base.as_posix())
+    report("compose file", (Path(cfg["LLM_KB_TOOLKIT_DIR"]) / "kb" / "docker-compose.yml").is_file())
+    for label, key in (("chroma port", "LLM_KB_CHROMA_PORT"), ("service port", "LLM_KB_PORT")):
+        with socket.socket() as s:
+            s.settimeout(1)
+            listening = s.connect_ex(("127.0.0.1", int(cfg[key]))) == 0
+        out(f"info {label} {cfg[key]}: {'in use' if listening else 'free'}")
+    try:
+        health = http_json(cfg, "GET", "/health", timeout=3)
+        report("service health", True, f"{health.get('chunks')} chunks")
+    except ServiceUnavailable as exc:
+        report("service health", False, str(exc))
+    return 0 if problems == 0 else 1
+
+
+# --------------------------------------------------------------------------- argparse
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(prog="kb.py", description="Toolkit knowledge base command-line tool.")
+    sub = p.add_subparsers(dest="command", metavar="<command>")
+    sub.required = True
+
+    s = sub.add_parser("init", help="create the data folder and kb.env (idempotent)")
+    s.add_argument("--data-dir")
+    s.add_argument("--corpus")
+    s.add_argument("--port", type=int)
+    s.add_argument("--chroma-port", type=int)
+    s.set_defaults(func=cmd_init)
+
+    s = sub.add_parser("up", help="start the stack")
+    s.add_argument("--build", action="store_true")
+    s.set_defaults(func=cmd_up)
+
+    s = sub.add_parser("down", help="stop the stack")
+    s.set_defaults(func=cmd_down)
+
+    s = sub.add_parser("status", help="service status")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_status)
+
+    s = sub.add_parser("index", help="full re-index")
+    s.set_defaults(func=cmd_index)
+
+    s = sub.add_parser("search", help="semantic search (plain-text fallback exits 3)")
+    s.add_argument("query")
+    s.add_argument("-k", type=int, default=5)
+    s.add_argument("--kind")
+    s.add_argument("--source")
+    s.add_argument("--max-distance", type=float)
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_search)
+
+    s = sub.add_parser("check", help="intake gate: secrets, security scan, dedupe")
+    s.add_argument("file", help="file path or - for stdin")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_check)
+
+    s = sub.add_parser("add", help="gate, then write a pending inbox item")
+    s.add_argument("file", help="file path or - for stdin")
+    s.add_argument("--title", required=True)
+    s.add_argument("--kind")
+    s.add_argument("--origin")
+    s.add_argument("--allow-near", action="store_true")
+    s.set_defaults(func=cmd_add)
+
+    s = sub.add_parser("inbox", help="list pending items; 'inbox archive <name>...' moves items to archive/")
+    s.add_argument("args", nargs="*")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_inbox)
+
+    s = sub.add_parser("sync-status", help="one-call summary for the scheduled sync")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--mark", action="store_true", help="store the new watermark")
+    s.add_argument("--no-fetch", action="store_true", help="skip git fetch")
+    s.set_defaults(func=cmd_sync_status)
+
+    s = sub.add_parser("sessions", help="opt-in digest of local session transcripts (stdout only)")
+    s.add_argument("--since", required=True)
+    s.add_argument("--root")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--force", action="store_true")
+    s.set_defaults(func=cmd_sessions)
+
+    s = sub.add_parser("schedule", help="install, remove or show the OS scheduler entry")
+    s.add_argument("action", choices=["install", "remove", "status"])
+    s.add_argument("--hours", default=DEFAULT_HOURS)
+    s.add_argument("--days", default=DEFAULT_DAYS)
+    s.set_defaults(func=cmd_schedule)
+
+    s = sub.add_parser("scheduled-run", help="what the scheduler runs")
+    s.set_defaults(func=cmd_scheduled_run)
+
+    s = sub.add_parser("hook", help="opt-in prompt hook in agent-CLI settings")
+    s.add_argument("action", choices=["install", "remove", "status"])
+    s.add_argument("--settings")
+    s.set_defaults(func=cmd_hook)
+
+    s = sub.add_parser("doctor", help="check docker, data folder, ports, service")
+    s.set_defaults(func=cmd_doctor)
+    return p
+
+
+def main(argv=None) -> int:
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+    args = build_parser().parse_args(argv)
+    try:
+        return int(args.func(args) or 0)
+    except KBError as exc:
+        err(f"error: {exc}")
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

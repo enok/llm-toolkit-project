@@ -113,6 +113,7 @@ metadata:
 - Before rendering, check that every panel shows the nodes the pattern at hand needs (in the
   recorded case: the contract, the implementations and an outside selector). A panel without
   them is redrawn. (sig: quality-defect/diagram-content-fidelity)
+- Do not label a diagram as built when it shows a target design: check each drawn control against the sources, retitle, name the gaps in the text and in the diagram, then re-validate. See `learnings/target-design-drawn-as-built-retitle-and-name-gaps.md`. (sig: validation-gap/target-design-drawn-as-built)
 
 ## Related
 

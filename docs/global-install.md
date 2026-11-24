@@ -97,6 +97,32 @@ markers. Its content is rendered from
 re-run replaces only the text between the markers -- any of your own
 notes above or below the block are left exactly as they were.
 
+## Knowledge base (recommended)
+
+After the surfaces are installed, set up the local knowledge base so agents
+can query the toolkit instead of re-reading it. It needs Docker with
+compose, Python 3 and git. Details, configuration and troubleshooting are
+in `docs/knowledge-base.md`.
+
+```bash
+./scripts/kb.sh init
+./scripts/kb.sh up --build
+./scripts/kb.sh index
+./scripts/kb.sh schedule install
+```
+
+```powershell
+.\scripts\kb.ps1 init
+.\scripts\kb.ps1 up --build
+.\scripts\kb.ps1 index
+.\scripts\kb.ps1 schedule install
+```
+
+Pass `--data-dir <data-folder>` to `init` to keep the index outside the
+default `~/.llm-toolkit/kb-data`. Run these once per machine. To remove it
+later, run `schedule remove`, `hook remove` and `down` (see
+`docs/knowledge-base.md`).
+
 ## Refreshing after `git pull`
 
 The links point at paths inside this repository, not at specific file

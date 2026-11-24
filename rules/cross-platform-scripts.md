@@ -35,3 +35,4 @@ Checksums used as contract pins (SHA256 of a shipped file, fixture, or template)
 - Use `#!/usr/bin/env bash` only when Bash features are required.
 - Keep scripts executable when committed from POSIX environments.
 - Quote paths and variables because workspace paths may contain spaces.
+- Under zsh (the macOS default shell) quote glob patterns and do not rely on unquoted command variables splitting into words; put multi-step logic in a bash or python script. See `learnings/zsh-unquoted-glob-and-unsplit-variable-fail.md`.

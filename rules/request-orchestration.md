@@ -29,6 +29,7 @@ Apply this rule at the start of every non-trivial chat request. The user does no
 
 - Keep root context small. Load only the primary workflow or skill plus directly required helper rules, references, and subagents.
 - The root/orchestrator stays thin: it holds the durable state ledger, the open decisions awaiting the human, and the lanes in flight — everything else is read from disk on demand. Point lanes at the ledger instead of pasting context into their prompts, and record each finding once so no later lane re-derives it. See `tool-subagents/agent-orchestrator.md` "Thin orchestrator and the durable state ledger" for the binding contract.
+- Knowledge base first: before splitting, query the toolkit knowledge base (`kb.py search`, `-k 5` or fewer, at most one refined query per question) and point lanes at the hits by path instead of re-reading catalogs or source; fall back to `learnings/INDEX.md` and direct reads when it is unreachable and say so (`rules/knowledge-base.md`, `tool-subagents/agent-orchestrator.md` "Knowledge base first and knowledge write-back").
 - Prefer single-responsibility skills, rules, workflows, and agents; compose them for larger tasks instead of duplicating or inlining long guidance.
 - If a workflow needs more detail than fits the size limit, split the reusable phase into another workflow and call it by path from the parent.
 - Do not load broad catalogs or entire reference trees unless the request needs them.
@@ -223,6 +224,7 @@ before the affected task can be marked done.
 - After substantial orchestration, extract reusable lessons: mistakes, missing route triggers, weak prompts, missing validators, source gaps, or better ways to solve the task.
 - Run the per-run loop in `rules/workflow-self-improvement.md` on every non-trivial request: before splitting, read the primary workflow's `## Known pitfalls` and the `preflight` output and turn relevant pitfalls into acceptance criteria; after the last verdict, run `workflows/run-retrospective.md` and end the final report with its metrics line.
 - Lanes report self-detected mistakes as `mistake: <signature> - <one line>` in their Decisions block; the root is the single writer of the run record and of any promotion.
+- Lanes report reusable knowledge as `knowledge: <kind> - <one line>` in their Decisions block; the root runs the intake gate and is the single writer of `kb.py add` and of promotions (`rules/knowledge-base.md` duties 2-4).
 - Convert only validated, reusable lessons into durable toolkit assets through `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`, or `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
 
 ## Safety boundaries

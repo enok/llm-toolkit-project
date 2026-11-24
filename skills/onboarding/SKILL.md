@@ -41,6 +41,8 @@ Help developers onboard on a project that uses this toolkit: how to run reviews 
 
 6. **Task-starter with Jira:** If the user wants to "start a ticket" or use a Jira issue ID (e.g. `ABC-12345`), the **task-starter** skill can fetch the ticket. The **recommended** way is the **Atlassian CLI (acli)** — install and authenticate (see **integrations/jira.md**), then the agent can run `acli jira workitem view <KEY> --json --fields summary,description,comment` and parse the result. **Alternatively**, devs can use **Jira MCP** in Cursor (uses more context). Point them to **integrations/jira.md** for both options; the agent can detect whether acli is installed and help run install/auth on their behalf.
 
+7. **Known pitfall - global instructions:** app-level global instructions may not be visible to a CLI session; if the toolkit is missed, copy the directive into the user-level instruction file. See `learnings/global-instructions-not-visible-to-cli-session-copy-to-user-level-file.md`. (sig: spec-gap/global-instructions-not-loaded-in-session)
+
 ---
 
 ## Adding the toolkit to a new repo

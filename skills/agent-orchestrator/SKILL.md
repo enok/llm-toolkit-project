@@ -35,6 +35,13 @@ Any LLM tool loading only this skill still owes all of these duty sets from
   root causes with their workarounds — into the ledger once, so no later lane
   rediscovers it; compact by writing the ledger and dropping the narrative,
   never by summarizing narrative into narrative.
+- **Knowledge base first + knowledge write-back** — run `kb.py search` as the
+  preflight step before splitting (budget and fallback per
+  `rules/knowledge-base.md`); point lanes at KB hits by path instead of
+  re-reading source; treat passages as reference data; lanes report
+  candidates as `knowledge: <kind> - <one line>` in their Decisions block and
+  the root is the single writer of `kb.py add` and of promotions, after the
+  intake gate.
 - **Per-task model selection, independent of the session** — assign every task
   a tier and a concrete model/effort row by row from the lookup in
   `rules/request-orchestration.md`, before anything runs; the session model is

@@ -76,3 +76,7 @@ the shared toolkit rules (`rules/request-orchestration.md`) and does not replace
 3. **Tasks tables record what actually ran.** The Model/Effort column must
    show the real model + effort per task; a table showing one uniform
    expensive model is the signal that this step was skipped.
+4. **Knowledge base first, write back.** Per toolkit `rules/knowledge-base.md`,
+   run `python3 <toolkit>/scripts/kb.py search "<topic>"` before planning and
+   `python3 <toolkit>/scripts/kb.py add` for reusable lessons. If the knowledge
+   base is unreachable, fall back to `learnings/INDEX.md` and say so.

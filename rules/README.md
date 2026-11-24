@@ -20,6 +20,7 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `external-write-authorization.md` | Bind every external mutation (tickets, PR metadata, wiki, chat, email) to an explicit current instruction |
 | `git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, PR lifecycle, rebase, duplicate-file gate |
 | `human-comment-reply-gate.md` | Draft-and-approve gate for any human-facing review or comment reply |
+| `knowledge-base.md` | Query the toolkit knowledge base before reading source; write reusable knowledge back through an intake gate (dedupe, security, classification, indexes); improvement check on every change |
 | `log-analysis-safety.md` | Read-only, bounded, redacted analysis of CloudWatch and server logs |
 | `multi-agent-orchestration.md` | Parallel subagent fanout, tier/validator handoff, and when to serialize work |
 | `operational-doc-required.md` | Recurring operational work becomes a runbook; metric catalogs and wiki backup gates required |
