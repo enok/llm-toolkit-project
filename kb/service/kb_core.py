@@ -11,6 +11,7 @@ evaluated, executed or interpreted as instructions.
 from __future__ import annotations
 
 import hashlib
+import logging
 import os
 import re
 from dataclasses import dataclass
@@ -96,8 +97,21 @@ def service_config(env: Mapping[str, str] | None = None) -> ServiceConfig:
         scan_seconds=max(5, _env_int(env, "KB_SCAN_SECONDS", 30)),
         sync_safe_index=(env.get("KB_SYNC_SAFE_INDEX", "1").strip() not in ("0", "false", "False", "no")),
         chroma_host=(env.get("KB_CHROMA_HOST") or "chroma").strip(),
-        chroma_port=_env_int(env, "KB_CHROMA_INTERNAL_PORT", 8000),
     )
+
+
+QUIET_CLIENT_LOGGERS = ("httpx", "httpcore")
+
+
+def quiet_client_loggers() -> None:
+    """The vector-store client logs one INFO line per HTTP request; keep only warnings."""
+    for name in QUIET_CLIENT_LOGGERS:
+        logging.getLogger(name).setLevel(logging.WARNING)
+
+
+def configure_logging(level: int = logging.INFO) -> None:
+    logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    quiet_client_loggers()
 
 
 # --------------------------------------------------------------------------- secrets
@@ -108,7 +122,18 @@ _PLACEHOLDER_MARKERS = (
 )
 _REFERENCE_PREFIXES = ("secrets.", "env.", "vars.", "settings.", "config.", "$")
 
-_SECRET_KEY = r"(?<![A-Za-z0-9_.\-])[A-Za-z0-9_.\-]*(?:password|passwd|secret|token|api[_\-]?key)(?:[_\-]?(?:access[_\-]?)?key)?"
+# keyword with an identifier prefix and suffix: DB_PASSWORD_PROD, SECRET_KEY_BASE, client_secret, apiKey.
+# A suffix glued to the keyword must start upper-case or with a digit, so "tokenizer" is not a key.
+_SECRET_KEY = (
+    r"(?P<key>(?<![A-Za-z0-9_.\-])[A-Za-z0-9_.\-]*(?:password|passwd|secret|token|api[_\-]?key)"
+    r"(?-i:[A-Z0-9][A-Za-z0-9]*)?(?:[_\-][A-Za-z0-9]*)*)"
+)
+# a key whose last segment names a reference to a secret (an id, a path, a name), not the secret itself
+_REFERENCE_KEY_SUFFIXES = frozenset(
+    {"id", "name", "arn", "path", "file", "ref", "url", "uri", "env", "var", "type", "length", "len",
+     "count", "limit", "header", "field", "policy", "version", "ttl", "expiry", "expires"}
+)
+
 _SECRET_RULES = (
     ("aws-access-key-id", re.compile(r"\b(?P<v>(?:AKIA|ASIA|ABIA|ACCA)[A-Z0-9]{16})\b"), False),
     (
@@ -122,22 +147,39 @@ _SECRET_RULES = (
         False,
     ),
     ("slack-token", re.compile(r"\b(?P<v>xox[abposr]-[A-Za-z0-9\-]{10,})"), False),
+    ("stripe-key", re.compile(r"(?<![A-Za-z0-9])(?P<v>(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,})"), False),
+    ("google-api-key", re.compile(r"(?<![A-Za-z0-9])(?P<v>AIza[0-9A-Za-z_\-]{35})(?![0-9A-Za-z_\-])"), False),
     (
         "openai-key",
         re.compile(r"(?<![A-Za-z0-9_\-])(?P<v>sk-(?:proj-|svcacct-|admin-|ant-)?[A-Za-z0-9_\-]{20,})"),
         True,
     ),
+    (
+        "jwt",
+        re.compile(r"(?<![A-Za-z0-9_\-])(?P<v>eyJ[A-Za-z0-9_\-]{8,}\.eyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,})"),
+        False,
+    ),
     ("bearer-token", re.compile(r"\b[Bb]earer[ \t]+(?P<v>[A-Za-z0-9\-._~+/]{20,}=*)"), True),
+    (
+        "url-credentials",
+        re.compile(r"\b[A-Za-z][A-Za-z0-9+.\-]*://[^\s:/@'\"<>]+:(?P<v>[^\s:/@'\"<>]+)@[^\s/@'\"<>]+"),
+        False,
+    ),
     (
         "secret-assignment",
         re.compile(
             _SECRET_KEY
             + r"['\"]?[ \t]*(?::=|=>|=|:)[ \t]*"
-            + r"(?:(?P<qq>['\"])(?P<q>[^'\"\s]{16,})(?P=qq)|(?P<u>[A-Za-z0-9+/_\-.~=]{16,})(?=$|[\s,;]))",
+            + r"(?:(?P<qq>['\"])(?P<q>[^'\"\s]{16,})(?P=qq)|(?P<u>[^\s'\"]{16,}))",
             re.IGNORECASE | re.MULTILINE,
         ),
         None,  # quoted literal: any 16+ chars; unquoted: needs letters and digits
     ),
+)
+_CAMEL_REFERENCE = re.compile(r"[a-z0-9](?:Id|ID|Name|Path|Url|URL|Arn|ARN)$")
+# URL passwords that are documentation stand-ins, not credentials
+_URL_PLACEHOLDER_PASSWORDS = frozenset(
+    {"password", "passwd", "pass", "pwd", "pw", "secret", "token", "user", "username", "x", "***", "****"}
 )
 
 
@@ -165,6 +207,12 @@ def _iter_secret_spans(text: str) -> Iterator[tuple[str, int, int, int]]:
                 else:
                     group, mix = "u", True
             value = m.group(group)
+            if name == "url-credentials" and value.lower() in _URL_PLACEHOLDER_PASSWORDS:
+                continue
+            if name == "secret-assignment":
+                last = re.split(r"[_.\-]", m.group("key").lower())[-1]
+                if last in _REFERENCE_KEY_SUFFIXES or _CAMEL_REFERENCE.search(m.group("key")):
+                    continue
             if not value or _is_placeholder(value):
                 continue
             if mix and not _has_letter_and_digit(value):
@@ -327,7 +375,8 @@ def _is_junction(path: str) -> bool:
 def iter_corpus_files(root) -> Iterator[tuple[str, str]]:
     """Yield ``(rel_posix_path, abs_path)`` of indexable files under ``root``.
 
-    Symlinks (and Windows junctions) are never followed nor yielded.
+    Symlinks (and Windows junctions) are never followed nor yielded. A ``.toml`` file
+    with a sibling ``.md`` of the same stem is skipped (mirrored agent definitions).
     """
     root = os.path.abspath(str(root))
     if not os.path.isdir(root):
@@ -340,7 +389,11 @@ def iter_corpus_files(root) -> Iterator[tuple[str, str]]:
                 continue
             keep.append(d)
         dirnames[:] = keep
+        names = set(filenames)
         for name in sorted(filenames):
+            stem, ext = os.path.splitext(name)
+            if ext.lower() == ".toml" and f"{stem}.md" in names:
+                continue  # mirrored definition: the sibling .md carries the same content
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, root).replace(os.sep, "/")
             try:
@@ -515,19 +568,25 @@ def _strip_breadcrumb(text: str) -> str:
 
 
 def build_hook_context(hits) -> str:
-    """Render at most 4 hits as quoted reference data under a header line ('' when no hits)."""
+    """Render at most 4 hits as quoted reference data under a header line ('' when no hits).
+
+    Pointer and passage both sit inside the quoted block, so nothing retrieved
+    appears outside the quote.
+    """
     hits = [h for h in (hits or []) if isinstance(h, dict)][:HOOK_MAX_HITS]
     if not hits:
         return ""
     lines = [HOOK_HEADER]
-    for hit in hits:
+    for n, hit in enumerate(hits, 1):
         pointer = _one_line(hit.get("path", ""))
         heading = _one_line(hit.get("heading", ""))
         if heading:
             pointer = f"{pointer}{SEP}{heading}"
-        lines.append(f"- {pointer[:200]}")
+        lines.append(f"> [{n}] {pointer[:200]}")
         passage = _strip_breadcrumb(str(hit.get("text", ""))).strip()
         passage = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", " ", passage)[:HOOK_MAX_CHARS]
         for pline in passage.split("\n"):
-            lines.append(f"  > {pline}".rstrip())
+            lines.append(f"> {pline}".rstrip())
+        if n < len(hits):
+            lines.append(">")
     return "\n".join(lines)

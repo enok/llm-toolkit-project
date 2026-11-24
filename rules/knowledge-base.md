@@ -18,7 +18,7 @@ The toolkit knowledge base (KB) is a local vector index over this repository plu
 
 - Anything a run learns that is reusable beyond this run (a happy path after trial and error, a tool gotcha, a routing gap, a better procedure) goes to both the KB and the repository, after the intake gate (duty 3):
   1. `python3 scripts/kb.py add <file|-> --title "<title>" --kind <kind> --origin <origin>` puts it in the pending inbox at once, so the next search finds it.
-  2. The existing promotion workflows carry it into the right asset on a pull request: `workflows/knowledge-base-sync.md` on its schedule, or `workflows/capture-learning.md`, `workflows/chat-knowledge-curation.md`, and `workflows/toolkit-maintenance.md` when the run promotes it itself. The sync archives the inbox item after the merge.
+  2. The existing promotion workflows carry it into the right asset on a pull request: `workflows/knowledge-base-sync.md` when an agent run is scheduled for it, or `workflows/capture-learning.md`, `workflows/chat-knowledge-curation.md`, and `workflows/toolkit-maintenance.md` when the run promotes it itself. The sync archives the inbox item after the merge.
 - In an orchestrated run the root is the single writer of `kb.py add` and of promotions; lanes report candidates as `knowledge: <kind> - <one line>` in their Decisions block (`tool-subagents/agent-orchestrator.md`).
 - **Never stored, in the KB or the repository:** raw session transcripts (only distilled, generic summaries are), secrets and credentials, personal data, company, product, person, host, or ticket names, and machine-specific paths. Consumer-specific facts go to the consumer repository's `docs/llm/`.
 

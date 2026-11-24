@@ -174,17 +174,27 @@ if ((Test-Command 'rtk') -and -not $DryRun) {
 if ($profileName -ne 'minimal' -and -not $NoKb) {
     Write-Host '== Knowledge base =='
     $kbPy = Join-Path $scriptDir 'kb.py'
-    $kbInit = @($kbPy, 'init')
+    $kbInit = @('init')
     if ($KbDataDir) { $kbInit += @('--data-dir', $KbDataDir) }
     $kbSteps = @(
         $kbInit,
-        @($kbPy, 'up', '--build'),
-        @($kbPy, 'index'),
-        @($kbPy, 'schedule', 'install')
+        @('up', '--build'),
+        @('index'),
+        @('schedule', 'install')
     )
-    $kbLater = ($kbSteps | ForEach-Object { "python $($_ -join ' ')" }) -join ' && '
+    # Interpreter: py -3, then python, then python3 (first one found).
+    $kbPython = $null
+    if (Test-Command 'py') { $kbPython = @('py', '-3') }
+    elseif (Test-Command 'python') { $kbPython = @('python') }
+    elseif (Test-Command 'python3') { $kbPython = @('python3') }
+    function ConvertTo-QuotedArg([string]$text) { return "'" + $text.Replace("'", "''") + "'" }
+    $kbPyShown = if ($kbPython) { $kbPython -join ' ' } else { 'python' }
+    # One PowerShell-5.1-safe line: commands joined with '; ', paths single-quoted.
+    $kbLater = ($kbSteps | ForEach-Object {
+        "$kbPyShown $(ConvertTo-QuotedArg $kbPy) " + (($_ | ForEach-Object { ConvertTo-QuotedArg $_ }) -join ' ')
+    }) -join '; '
     $dockerReady = $false
-    if (-not $DryRun -and (Test-Command 'docker') -and (Test-Command 'python')) {
+    if (-not $DryRun -and $kbPython -and (Test-Command 'docker')) {
         $eap = $ErrorActionPreference
         $ErrorActionPreference = 'Continue'
         docker compose version *> $null
@@ -195,17 +205,20 @@ if ($profileName -ne 'minimal' -and -not $NoKb) {
         $dockerReady = ($composeExit -eq 0 -and $infoExit -eq 0)
     }
     if ($DryRun) {
-        foreach ($step in $kbSteps) { Write-Host "[dry-run] python $($step -join ' ')" }
+        foreach ($step in $kbSteps) { Write-Host "[dry-run] $kbPyShown $kbPy $($step -join ' ')" }
+    } elseif (-not $kbPython) {
+        Write-Host "Knowledge base skipped: python3 is missing. Run later: $kbLater"
+        $manual.Add('Knowledge base (needs python3 first)')
     } elseif (-not $dockerReady) {
         Write-Host "Knowledge base skipped: Docker with compose is missing or its daemon is not running. Run later: $kbLater"
         $manual.Add('Knowledge base (start Docker, then run the command printed above)')
     } else {
         $kbOk = $true
         foreach ($step in $kbSteps) {
-            Write-Host "+ python $($step -join ' ')"
+            Write-Host "+ $kbPyShown $kbPy $($step -join ' ')"
             $eap = $ErrorActionPreference
             $ErrorActionPreference = 'Continue'
-            & python @step
+            & $kbPython[0] @($kbPython | Select-Object -Skip 1) $kbPy @step
             $stepExit = $LASTEXITCODE
             $ErrorActionPreference = $eap
             if ($stepExit -ne 0) { $kbOk = $false; break }

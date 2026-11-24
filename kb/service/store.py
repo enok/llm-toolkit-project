@@ -121,11 +121,16 @@ class KBStore:
             })
         return hits
 
-    def nearest(self, texts: list, k: int = 3) -> list:
+    def nearest(self, texts: list, k: int = 3, source=None) -> list:
         """Nearest chunks over several query texts, best distance per (source, path, heading)."""
         if not texts or self.count() == 0:
             return []
-        res = self.collection.query(query_texts=list(texts), n_results=int(k), include=["metadatas", "distances"])
+        res = self.collection.query(
+            query_texts=list(texts),
+            n_results=int(k),
+            where=build_where(None, source),
+            include=["metadatas", "distances"],
+        )
         best: dict = {}
         for metas, dists in zip(res.get("metadatas") or [], res.get("distances") or []):
             for meta, dist in zip(metas or [], dists or []):
@@ -140,6 +145,25 @@ class KBStore:
             {"source": s, "path": p, "heading": h, "distance": round(d, 4)}
             for (s, p, h), d in ranked
         ]
+
+    # ---------------------------------------------------------------- read-back check (/verify)
+
+    def sample_embeddings(self, n: int = 3) -> list:
+        """``[(id, [float, ...])]`` for up to ``n`` stored chunks (vectors never leave the service)."""
+        res = self.collection.get(limit=int(n), include=["embeddings"])
+        ids = list(res.get("ids") or [])
+        embeddings = res.get("embeddings")
+        if embeddings is None:
+            embeddings = []
+        out = []
+        for rid, vec in zip(ids, list(embeddings)):
+            out.append((rid, [float(x) for x in (vec if vec is not None else [])]))
+        return out
+
+    def query_vector(self, vector: list, k: int = 1) -> list:
+        """``[(id, distance)]`` nearest to a raw vector."""
+        res = self.collection.query(query_embeddings=[list(vector)], n_results=int(k), include=["distances"])
+        return [(rid, float(d)) for rid, d in zip(_first(res, "ids"), _first(res, "distances")) if d is not None]
 
 
 def connect(host: str, port: int, collection: str, sync_safe: bool = True) -> KBStore:

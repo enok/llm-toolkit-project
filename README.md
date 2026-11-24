@@ -15,7 +15,7 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
-| Learnings | `learnings/` | 83 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
+| Learnings | `learnings/` | 91 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
 | Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export |
 | Tests and CI | `tests/`, `.github/workflows/` | Unit tests for the validators and GitHub Actions that run the full gate on `main` |
 | Knowledge base | `kb/`, `scripts/kb.py` | Local vector index of this toolkit plus a pending inbox; agents search it first and write reusable knowledge back (`rules/knowledge-base.md`) |
@@ -85,7 +85,7 @@ It links each tool's home-directory skill path to `skills/` (and, for Claude Cod
 
 ### Knowledge base (optional, per machine)
 
-A local vector knowledge base (Docker) indexes this toolkit so agents search it before reading source and save new knowledge to a pending inbox that a scheduled sync promotes through a pull request. Setup, configuration, and security: `docs/knowledge-base.md`; commands: `skills/knowledge-base/SKILL.md`.
+A local vector knowledge base (Docker) indexes this toolkit so agents search it before reading source and save new knowledge to a pending inbox that the agent sync workflow promotes through a pull request. Setup, configuration, and security: `docs/knowledge-base.md`; commands: `skills/knowledge-base/SKILL.md`.
 
 ### Use in another repo
 

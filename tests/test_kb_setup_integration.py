@@ -3,6 +3,7 @@
 import re
 import shutil
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -58,6 +59,30 @@ class UsageTextTests(unittest.TestCase):
             self.assertNotRegex(text, r"(run|&)[^\n]*hook['\", ]+install")
             self.assertIn("Docker with compose is missing or its daemon is not running", text)
 
+    def test_ps1_resolves_python_separately_from_docker(self) -> None:
+        text = read(BOOTSTRAP_PS1)
+        self.assertLess(text.index("Test-Command 'py'"), text.index("Test-Command 'python')"))
+        self.assertLess(text.index("Test-Command 'python')"), text.index("Test-Command 'python3'"))
+        self.assertIn("@('py', '-3')", text)
+        self.assertIn("Knowledge base skipped: python3 is missing", text)
+        self.assertLess(
+            text.index("-not $kbPython"),
+            text.index("Docker with compose is missing"),
+        )
+
+    def test_ps1_hint_is_one_line_with_quoted_paths_and_no_ampersands(self) -> None:
+        text = read(BOOTSTRAP_PS1)
+        self.assertIn("-join '; '", text)
+        self.assertIn("ConvertTo-QuotedArg", text)
+        self.assertNotIn("-join ' && '", text)
+        self.assertNotIn("chroma", text.lower())
+
+    def test_sh_hint_quotes_paths(self) -> None:
+        text = read(BOOTSTRAP_SH)
+        self.assertIn("printf '%q '", text)
+        self.assertNotIn('KB_LATER="${KB_INIT[*]}', text)
+        self.assertNotIn("chroma", text.lower())
+
     def test_ps1_declares_steps_in_order(self) -> None:
         text = read(BOOTSTRAP_PS1)
         order = [text.index(token) for token in ("'init'", "'up', '--build'", "'index'", "'schedule', 'install'")]
@@ -83,6 +108,19 @@ class DryRunTests(unittest.TestCase):
         lines = kb_dry_run_lines(dry_run("--kb-data-dir", "/tmp/kb-data-example").stdout)
         self.assertEqual("init --data-dir /tmp/kb-data-example", lines[0])
         self.assertEqual(list(KB_STEPS[1:]), lines[1:])
+
+    def test_dry_run_with_space_in_toolkit_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="kb setup ") as tmp:
+            scripts = Path(tmp) / "tool kit" / "scripts"
+            scripts.mkdir(parents=True)
+            copy = scripts / "bootstrap-dev.sh"
+            shutil.copy(BOOTSTRAP_SH, copy)
+            result = subprocess.run(
+                ["bash", str(copy), "--dry-run"], cwd=tmp, check=False, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120,
+            )
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(list(KB_STEPS), kb_dry_run_lines(result.stdout))
 
     def test_no_kb_skips_step(self) -> None:
         result = dry_run("--no-kb")

@@ -13,8 +13,9 @@ The runtime lives in `kb/` (Docker stack and service) and `scripts/kb.py`
 
 ```text
  corpus checkout (read-only) --+
-                               +--> service (127.0.0.1:8011) --> Chroma (127.0.0.1:8010)
- <data-folder>/inbox (read-only)+          |                          |
+                               +--> service (host 127.0.0.1:8011) --> Chroma (container port 8000;
+ <data-folder>/inbox (read-only)+          |          host 127.0.0.1:8010)
+                                           |                          |
                                            |                          +--> <data-folder>/chroma
                                            +--> <data-folder>/state, models
 ```
@@ -63,7 +64,7 @@ Without the wrappers: `python3 scripts/kb.py <command>` (POSIX) or
 `python scripts\kb.py <command>` (PowerShell).
 
 `--data-dir` is optional; the default is `~/.llm-toolkit/kb-data`. `init`
-also accepts `--corpus <path>`, `--port <n>` and `--chroma-port <n>`.
+also accepts `--toolkit-dir <path>` (re-points `LLM_KB_TOOLKIT_DIR`, for example when the stack moves from a branch worktree to the default-branch checkout; an installed scheduler entry is installed again), `--corpus <path>`, `--port <n>` and `--chroma-port <n>`.
 `up` without `--build` reuses an existing image. Check the result with
 `status` and `doctor`.
 
@@ -80,7 +81,7 @@ answered with relevant passages. It is off unless you run it.
 | `inbox/` | Pending knowledge items, one Markdown file each. |
 | `archive/` | Items moved here after their pull request merged. |
 | `models/` | Cached embedding model. |
-| `state/` | `compose.env`, `sync-state.json`, `schedule.log`. |
+| `state/` | `compose.env`, `sync-state.json`, `last-ingest.json`, `schedule.log`, `schedule.out.log`. |
 
 `inbox/` and `archive/` are the only irreplaceable content; everything
 else can be regenerated.
@@ -118,8 +119,9 @@ containers receive them unchanged.
 - Extensions: `.md .txt .sh .ps1 .py .js .json .yml .yaml .toml .cmd`.
 - Skipped: files over 512 KB, any path segment starting with `.`,
   `node_modules`, `__pycache__`, `*.lock`, `package-lock.json`,
-  `tests/fixtures/`, `TASKS_TABLE.md`, `CONTEXT_STATE.md`, `LLM-STATE.md`.
-  Symlinks are never followed.
+  `tests/fixtures/`, `TASKS_TABLE.md`, `CONTEXT_STATE.md`, `LLM-STATE.md`,
+  and a `.toml` file when a `.md` file with the same stem sits in the same
+  folder (mirrored agent definitions). Symlinks are never followed.
 - Markdown is split on headings `#` to `###`; long sections are packed
   into 1500-character pieces with 150 overlap. Each chunk starts with a
   breadcrumb line `[<path> › <H1> › <H2>]`.
@@ -138,19 +140,19 @@ Each command is `./scripts/kb.sh <command>` or `.\scripts\kb.ps1 <command>`.
 
 | Command | Purpose |
 | --- | --- |
-| `init [--data-dir P] [--corpus P] [--port N] [--chroma-port N]` | Create the data folder, write `kb.env`. |
+| `init [--data-dir P] [--toolkit-dir P] [--corpus P] [--port N] [--chroma-port N]` | Create the data folder, write `kb.env`. |
 | `up [--build]`, `down`, `status [--json]` | Start, stop, inspect the stack. |
 | `index` | Full re-index (`docker compose --profile tools run --rm -T ingest`). |
 | `search "<q>" [-k N] [--kind K] [--source S] [--max-distance D] [--json]` | Print `distance  kind  path › heading` and a 300-character excerpt per hit. |
-| `check <file\|-> [--json]` | Intake gate: secret scan, `scripts/scan-llm-surface-security.py` when present, duplicate check, suggested destination. |
+| `check <file\|-> [--source S] [--json]` | Intake gate: secret scan, `scripts/scan-llm-surface-security.py` when present, duplicate check, suggested destination. `--source S` compares only against that source. Re-check an inbox item with `--source repo`; without it the item matches itself as a duplicate. |
 | `add <file\|-> --title T [--kind K] [--origin O] [--allow-near]` | Run `check`, then write an inbox item. |
 | `inbox [--json]`, `inbox archive <name>...` | List pending items; move items to `archive/` (never deletes). |
-| `sync-status [--json] [--mark]` | One-call summary for the scheduled sync. `--mark` stores the new watermark. |
+| `sync-status [--json] [--mark] [--no-fetch]` | One-call summary for the scheduled sync. `--mark` stores the new watermark. |
 | `sessions --since ISO [--root P] [--json] [--force]` | Opt-in session digest (see Security). |
 | `schedule install\|remove\|status [--hours 8-20/2] [--days 1-5]` | Manage the OS scheduler entry. |
 | `scheduled-run` | What the scheduler runs (see Scheduler). |
 | `hook install\|remove\|status [--settings P]` | Manage the prompt hook. Default settings path `~/.claude/settings.json`. |
-| `doctor` | Check docker, compose, data folder, ports, service health. |
+| `doctor [--deep]` | Check docker, compose, data folder, ports, service health. `--deep` also restarts `chroma` and `service`, waits up to 120 s for health, calls `POST /verify`, runs one search, and exits 1 when a step fails. |
 
 Exit codes for `search`: `3` when the service is unreachable. It then
 prints a plain-text fallback (case-insensitive term match over the corpus,
@@ -166,7 +168,7 @@ Exit codes for `check` and `add`:
 | `5` | Near an existing item; needs a merge decision. |
 | `6` | Service unreachable. |
 
-`add` refuses on `3` and `4`, and on `5` unless `--allow-near` is given.
+`add` refuses on `3`, `4` and `6`, and on `5` unless `--allow-near` is given.
 
 ## HTTP API
 
@@ -178,9 +180,10 @@ and out. A request whose `Host` header is not `localhost` or `127.0.0.1`
 | --- | --- | --- |
 | `GET /health` | - | `{collection, chunks, files, last_scan, last_indexed, quarantined, errors, stats:{searches, hits, misses}}` |
 | `POST /search` | `{q, k=5, max_distance?, kind?, source?}` (`kind` is a string or a list) | `{hits:[{source, path, kind, title, heading, chunk, chunks, distance, text}]}` |
-| `POST /dedupe` | `{text, k=3}` | `{verdict: "duplicate"\|"near"\|"novel", nearest:[{source, path, heading, distance}]}` |
+| `POST /dedupe` | `{text, k=3, source?}` (`source` limits the comparison to `repo` or `inbox`) | `{verdict: "duplicate"\|"near"\|"novel", nearest:[{source, path, heading, distance}]}` |
 | `POST /hook` | agent-CLI `UserPromptSubmit` payload `{prompt, ...}` | `{}` or `{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"..."}}` |
 | `POST /reindex` | `{}` | Runs one incremental scan; `{indexed:[paths]}` |
+| `POST /verify` | `{}` | `{ok, chunks, checked, detail}`: reads back up to 3 stored embeddings, checks they are non-zero, and queries each with itself (distance below 0.001, same id). |
 
 Long text sent to `/dedupe` is compared per chunk; the verdict comes from
 the best match. `/hook` returns at most 4 hits of 500 characters each,
@@ -195,9 +198,14 @@ instructions.
 2. The item is written to `<data-folder>/inbox/<utc-date>-<slug>.md` with
    front matter `title, kind, origin, created, status: pending` and is
    searchable at once, marked pending.
-3. The scheduled sync (`workflows/knowledge-base-sync.md`) promotes each
-   item to the matching asset (skill, rule, workflow, agent or learning)
-   on a branch and opens a pull request.
+3. The agent sync workflow (`workflows/knowledge-base-sync.md`) promotes
+   each item to the matching asset (skill, rule, workflow, agent or
+   learning) on a branch and opens a pull request. An agent automation
+   that the owner schedules separately runs it. The OS scheduler does not;
+   it only refreshes the index. Before promoting, the workflow re-checks an
+   inbox item with `check <inbox file> --source repo --json`. When
+   `gh auth status` fails, the workflow pushes the branch, prints the
+   compare URL and marks the pull request `NOT POSTED`.
 4. You review and merge. After the merge, `inbox archive <name>` moves the
    inbox copy to `archive/`.
 
@@ -206,7 +214,8 @@ without a pull request.
 
 ## Scheduler
 
-`schedule install` registers an entry that runs `scheduled-run` Monday to
+`schedule install` registers only the index refresh: an entry that runs
+`scheduled-run` Monday to
 Friday every two hours from 08:00 to 20:00 (defaults `--hours 8-20/2`,
 `--days 1-5`).
 
@@ -216,10 +225,22 @@ Friday every two hours from 08:00 to 20:00 (defaults `--hours 8-20/2`,
 | Linux | marked crontab line | - |
 | Windows | `schtasks` task | `llm-toolkit-kb-sync` |
 
-`scheduled-run` starts Docker and the stack if needed, runs
-`git pull --ff-only` on the corpus only when it is on its default branch
-with a clean tree, runs a full `index`, and appends one status line to
-`<data-folder>/state/schedule.log`.
+`scheduled-run` never promotes knowledge or opens pull requests. It
+starts the stack if needed, runs `git pull --ff-only` on the corpus only
+when it is on its default branch with a clean tree, runs a full `index`,
+and appends one status line to `<data-folder>/state/schedule.log`.
+
+- When `docker info` fails, `scheduled-run` starts the Docker desktop app
+  on macOS if it is installed (`open -ga Docker`) and waits up to 180 s;
+  otherwise it logs `docker not running` and exits 1.
+- The launchd entry carries `EnvironmentVariables.PATH`: the PATH at
+  install time plus `~/.docker/bin`, `/usr/local/bin` and
+  `/opt/homebrew/bin` where they exist. The cron line and the `schtasks`
+  command get the same PATH treatment where the OS needs it. launchd
+  stdout and stderr go to `<data-folder>/state/schedule.out.log`.
+- Every external command has a timeout (git 120 s, compose `up` 600 s,
+  ingest 1800 s), and git runs with `GIT_TERMINAL_PROMPT=0`, so an
+  unattended run does not wait for input.
 
 Each run is a full index, so a missed run (machine off or asleep, Docker
 not running) leaves nothing lost: inbox items stay pending and the next
@@ -254,14 +275,16 @@ truncate Chroma's on-disk HNSW index files, so the default
 `hnsw:sync_threshold=1000000`: vectors stay in SQLite and the index is
 rebuilt in memory at start.
 
-- Run the stack on one machine at a time. Two machines writing to the
-  same `chroma/` corrupt it.
+- Run the stack on one machine at a time. Concurrent writers to the same
+  `chroma/` folder are not supported; corruption is expected but untested.
+  An index copied between machines arrived with zeroed vectors in the
+  recorded case; rebuild it from the stored texts.
 - Run `down` before resolving a sync conflict in the data folder.
 - If `chroma/` is damaged, rebuild it (see Troubleshooting).
 
 ## Troubleshooting
 
-Start with `doctor`.
+Start with `doctor`. After a bulk change or a move, run `doctor --deep`.
 
 - Service unreachable: `status`, then `up`. `search` falls back to a text
   search and exits 3; `check` and `add` exit 6.

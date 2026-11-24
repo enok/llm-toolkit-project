@@ -64,9 +64,12 @@ class StubCore:
 class FakeService:
     """Local HTTP server on an ephemeral 127.0.0.1 port."""
 
-    def __init__(self, dedupe_verdict="novel"):
+    def __init__(self, dedupe_verdict="novel", hits=None, verify_ok=True):
         self.dedupe_verdict = dedupe_verdict
+        self.verify_ok = verify_ok
+        self.hits = hits
         self.requests = []
+        self.headers = []
         outer = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -82,6 +85,7 @@ class FakeService:
                 self.wfile.write(body)
 
             def do_GET(self):
+                outer.headers.append(("GET", self.path, dict(self.headers)))
                 outer.requests.append(("GET", self.path, None))
                 self._send({"collection": "t", "chunks": 7, "files": 2, "last_scan": "x", "quarantined": {}})
 
@@ -89,7 +93,12 @@ class FakeService:
                 length = int(self.headers.get("Content-Length", 0))
                 payload = json.loads(self.rfile.read(length) or b"{}")
                 outer.requests.append(("POST", self.path, payload))
-                if self.path == "/search":
+                outer.headers.append(("POST", self.path, dict(self.headers)))
+                if self.path == "/verify":
+                    self._send({"ok": outer.verify_ok, "chunks": 7, "checked": 3, "detail": "x"})
+                elif self.path == "/search" and outer.hits is not None:
+                    self._send({"hits": outer.hits})
+                elif self.path == "/search":
                     self._send({"hits": [{"source": "repo", "path": "rules/a.md", "kind": "rule", "title": "A",
                                           "heading": "Intro", "chunk": 0, "chunks": 1, "distance": 0.2,
                                           "text": "alpha text"}]})
@@ -120,6 +129,8 @@ def free_port():
 
 
 class KBTestCase(unittest.TestCase):
+    LAYOUT = True  # create the data-folder layout like `init` would (only init creates folders)
+
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.tmp = Path(self._tmp.name).resolve()
@@ -139,6 +150,12 @@ class KBTestCase(unittest.TestCase):
         self.addCleanup(self._tmp.cleanup)
         kb.set_core(StubCore)
         self.addCleanup(kb.set_core, None)
+        if self.LAYOUT:
+            for sub in kb.DATA_SUBDIRS:
+                (self.data / sub).mkdir(parents=True)
+
+    def make_corpus(self):
+        (self.corpus / "AGENTS.md").write_text("# agents\n")
 
     def run_main(self, *argv, stdin=None):
         buf, ebuf = io.StringIO(), io.StringIO()
@@ -180,7 +197,7 @@ class EnvFileTests(KBTestCase):
         (self.tmp / "kb.env").write_text("LLM_KB_PORT=9001\nLLM_KB_COLLECTION=fromfile\n")
         cfg = kb.load_config()
         self.assertEqual(cfg["LLM_KB_PORT"], "9001")
-        self.assertEqual(cfg["LLM_KB_CHROMA_PORT"], "8010")  # default
+        self.assertEqual(cfg["LLM_KB_SCAN_SECONDS"], "30")  # default
         os.environ["LLM_KB_PORT"] = "9100"
         cfg = kb.load_config()
         self.assertEqual(cfg["LLM_KB_PORT"], "9100")  # process wins
@@ -204,6 +221,8 @@ class EnvFileTests(KBTestCase):
 
 
 class InitTests(KBTestCase):
+    LAYOUT = False
+
     def setUp(self):
         super().setUp()
         # init must read its own env file, not the process-level data dir override
@@ -234,7 +253,7 @@ class InitTests(KBTestCase):
         self.run_main("init", "--data-dir", str(self.data), "--corpus", str(self.corpus), "--port", "9011")
         text = (self.data / "state" / "compose.env").read_text()
         keys = [l.split("=", 1)[0] for l in text.splitlines() if l and not l.startswith("#")]
-        self.assertEqual(keys, ["KB_DATA_DIR", "KB_CORPUS_DIR", "KB_CHROMA_PORT", "KB_PORT", "KB_COLLECTION",
+        self.assertEqual(keys, ["KB_DATA_DIR", "KB_CORPUS_DIR", "KB_PORT", "KB_COLLECTION",
                                 "KB_MAX_DISTANCE", "KB_DUP_DISTANCE", "KB_NEAR_DISTANCE", "KB_SCAN_SECONDS",
                                 "KB_SYNC_SAFE_INDEX"])
         vals = dict(l.split("=", 1) for l in text.splitlines() if l and not l.startswith("#"))
@@ -262,6 +281,7 @@ class ComposeCommandTests(KBTestCase):
             calls.append(list(cmd))
             return subprocess.CompletedProcess(cmd, 0, "", "")
 
+        self.make_corpus()
         with mock.patch.object(kb, "run_cmd", fake):
             self.run_main("up", "--build")
             self.run_main("down")
@@ -282,7 +302,7 @@ class SearchTests(KBTestCase):
         self.assertEqual(payload["k"], 3)
         self.assertEqual(payload["kind"], "rule")
         self.assertEqual(payload["max_distance"], 0.55)
-        self.assertIn("0.200  rule  rules/a.md › Intro", text)
+        self.assertIn("0.200  rule  repo:rules/a.md › Intro", text)
         self.assertIn("alpha text", text)
 
     def test_fallback_exit_3_when_service_down(self):
@@ -409,7 +429,7 @@ class AddTests(KBTestCase):
 class InboxTests(KBTestCase):
     def test_list_and_archive_moves_not_deletes(self):
         inbox = self.data / "inbox"
-        inbox.mkdir(parents=True)
+        inbox.mkdir(parents=True, exist_ok=True)
         (inbox / "2026-01-01-a.md").write_text('---\ntitle: "A"\nkind: rule\n---\nbody\n')
         (inbox / "2026-01-01-b.md").write_text("---\ntitle: B\n---\nbody\n")
         rc, text, _ = self.run_main("inbox", "--json")
@@ -422,8 +442,8 @@ class InboxTests(KBTestCase):
 
     def test_archive_collision_keeps_both(self):
         inbox, archive = self.data / "inbox", self.data / "archive"
-        inbox.mkdir(parents=True)
-        archive.mkdir(parents=True)
+        inbox.mkdir(parents=True, exist_ok=True)
+        archive.mkdir(parents=True, exist_ok=True)
         (archive / "n.md").write_text("old")
         (inbox / "n.md").write_text("new")
         self.run_main("inbox", "archive", "n.md")
@@ -431,7 +451,7 @@ class InboxTests(KBTestCase):
         self.assertEqual((archive / "n-2.md").read_text(), "new")
 
     def test_archive_rejects_paths(self):
-        (self.data / "inbox").mkdir(parents=True)
+        (self.data / "inbox").mkdir(parents=True, exist_ok=True)
         outside = self.data / "keep.md"
         outside.write_text("x")
         rc, _, err = self.run_main("inbox", "archive", "../keep.md")
@@ -612,6 +632,10 @@ class SchedulerTests(KBTestCase):
             self.assertEqual(store["tab"], "0 1 * * * /bin/other\n")
 
 
+NEW_HOOK = 'curl -sf --max-time 2 -H "Content-Type: application/json" http://localhost:%s/hook -d @-'
+OLD_HOOK = "curl -s --max-time 2 http://localhost:%s/hook -d @-"
+
+
 class HookTests(KBTestCase):
     def settings(self):
         path = self.tmp / "claude" / "settings.json"
@@ -632,7 +656,7 @@ class HookTests(KBTestCase):
         self.assertEqual(json.loads(backups[0].read_text()), original)
         data = json.loads(path.read_text())
         cmds = [h["command"] for g in data["hooks"]["UserPromptSubmit"] for h in g["hooks"]]
-        self.assertEqual(cmds, ["echo mine", "curl -s --max-time 2 http://localhost:9011/hook -d @-"])
+        self.assertEqual(cmds, ["echo mine", NEW_HOOK % 9011])
         self.assertEqual(data["hooks"]["Stop"], original["hooks"]["Stop"])
         self.assertEqual(data["permissions"], original["permissions"])
         self.assertEqual(self.run_main("hook", "status", "--settings", str(path))[0], 0)
@@ -736,9 +760,12 @@ class ScheduledRunTests(KBTestCase):
         self.assertIn("not clean", text)
 
     def test_no_pull_outside_git_and_no_other_git_writes(self):
+        (self.corpus / "a.md").write_text("a\n")
         rc, text, calls = self.run_scheduled()
         self.assertEqual(self.pulls(calls), [])
-        self.make_repo()
+        git(self.corpus, "init", "-q", "-b", "main")
+        git(self.corpus, "add", "-A")
+        git(self.corpus, "commit", "-q", "-m", "init")
         _, _, calls = self.run_scheduled()
         allowed = {"rev-parse", "symbolic-ref", "status", "pull"}
         for c in calls:
@@ -746,6 +773,8 @@ class ScheduledRunTests(KBTestCase):
                 self.assertIn(c[3], allowed, c)
 
     def test_stack_failure_logged_and_nonzero(self):
+        self.make_corpus()
+
         def fail(cmd, **kw):
             return subprocess.CompletedProcess(cmd, 1, "", "boom")
 
@@ -797,6 +826,546 @@ class RealCoreContractTests(KBTestCase):
         rc, text, _ = self.run_main("sessions", "--since", "2000-01-01", "--root", str(self.tmp / "proj"), "--force", "--json")
         self.assertEqual(rc, 0)
         self.assertNotIn(AWS_KEY, text)
+
+
+# ---------------------------------------------------------------- iteration 2 (review + refinement contract)
+
+def ok_proc(cmd, **kw):
+    return subprocess.CompletedProcess(cmd, 0, "", "")
+
+
+class NoChromaPortTests(KBTestCase):  # S-M5
+    def test_variable_and_flag_are_gone(self):
+        self.assertNotIn("CHROMA_PORT", (REPO / "scripts" / "kb.py").read_text())
+        self.assertNotIn("LLM_KB_CHROMA_PORT", kb.DEFAULTS)
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            kb.main(["init", "--chroma-port", "1"])
+        self.assertEqual(cm.exception.code, 2)
+        kb.write_compose_env(kb.load_config())
+        self.assertNotIn("CHROMA", (self.data / "state" / "compose.env").read_text())
+
+
+class ReadinessTests(KBTestCase):  # S-M3, S-M2 (CLI side)
+    def calls_for(self, *argv):
+        calls = []
+
+        def fake(cmd, **kw):
+            calls.append(list(cmd))
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        with mock.patch.object(kb, "run_cmd", fake):
+            rc, text, err = self.run_main(*argv)
+        return rc, err, calls
+
+    def test_missing_data_folder_exit_2_and_nothing_created(self):
+        self.make_corpus()
+        import shutil
+        shutil.rmtree(self.data)
+        for argv in (("up",), ("index",), ("scheduled-run",)):
+            with self.subTest(argv=argv):
+                rc, err, calls = self.calls_for(*argv)
+                self.assertEqual(rc, 2)
+                self.assertEqual(err.strip(), "error: data folder missing, run init")
+                self.assertEqual(calls, [])
+                self.assertFalse(self.data.exists())
+
+    def test_missing_chroma_folder_only(self):
+        self.make_corpus()
+        (self.data / "chroma").rmdir()
+        rc, err, _ = self.calls_for("up")
+        self.assertEqual(rc, 2)
+        self.assertFalse((self.data / "chroma").exists())  # up does not repair it
+
+    def test_corpus_missing_or_empty_exit_2(self):
+        import shutil
+        for argv in (("up",), ("index",), ("scheduled-run",)):
+            with self.subTest(argv=argv, case="empty"):
+                rc, err, calls = self.calls_for(*argv)
+                self.assertEqual(rc, 2)
+                self.assertIn("corpus folder missing or empty", err)
+                self.assertEqual(len(err.strip().splitlines()), 1)
+                self.assertEqual(calls, [])
+        shutil.rmtree(self.corpus)
+        rc, err, _ = self.calls_for("index")
+        self.assertEqual(rc, 2)
+        self.assertIn("corpus folder missing or empty", err)
+
+    def test_indexable_file_is_enough_and_refusal_is_logged(self):
+        (self.corpus / "notes.md").write_text("x\n")
+        rc, err, calls = self.calls_for("up")
+        self.assertEqual(rc, 0)
+        self.assertTrue(calls)
+        (self.corpus / "notes.md").unlink()
+        self.calls_for("scheduled-run")
+        self.assertIn("refused", (self.data / "state" / "schedule.log").read_text())
+
+    def test_add_and_archive_do_not_create_folders(self):
+        import shutil
+        shutil.rmtree(self.data)
+        with FakeService() as svc:
+            self.use_service(svc)
+            rc, _, err = self.run_main("add", "-", "--title", "t", stdin="body\n")
+        self.assertEqual(rc, 2)
+        self.assertEqual(self.run_main("inbox", "archive", "x.md")[0], 2)
+        self.assertFalse(self.data.exists())
+
+
+class AddRenderedGateTests(KBTestCase):  # S-M1
+    def add(self, *argv, text="Harmless body.\n"):
+        with FakeService() as svc:
+            self.use_service(svc)
+            return self.run_main("add", "-", *argv, stdin=text)
+
+    def inbox_files(self):
+        return list((self.data / "inbox").iterdir())
+
+    def test_secret_shaped_title_refused_nothing_written(self):
+        rc, text, err = self.add("--title", f"key {AWS_KEY}")
+        self.assertEqual(rc, 4)
+        self.assertNotIn(AWS_KEY, text + err)
+        self.assertEqual(self.inbox_files(), [])
+
+    def test_secret_shaped_origin_refused_nothing_written(self):
+        rc, text, err = self.add("--title", "ok", "--origin", f"session {AWS_KEY}")
+        self.assertEqual(rc, 4)
+        self.assertNotIn(AWS_KEY, text + err)
+        self.assertEqual(self.inbox_files(), [])
+
+    def test_kind_with_newline_or_unknown_kind_refused(self):
+        for kind in ("learning\nstatus: merged", "bogus"):
+            with self.subTest(kind=kind):
+                rc, _, err = self.add("--title", "ok", "--kind", kind)
+                self.assertEqual(rc, 2)
+                self.assertEqual(self.inbox_files(), [])
+        rc, _, _ = self.add("--title", "ok", "--kind", "workflow")
+        self.assertEqual(rc, 0)
+
+    def test_front_matter_kind_is_validated_too(self):
+        rc, _, _ = self.add("--title", "ok", text="---\nkind: nonsense\n---\nbody\n")
+        self.assertEqual(rc, 2)
+        self.assertEqual(self.inbox_files(), [])
+
+    def test_newlines_in_title_and_origin_are_neutralised(self):
+        rc, _, _ = self.add("--title", "a\nstatus: merged", "--origin", "x\nkind: rule")
+        self.assertEqual(rc, 0)
+        content = self.inbox_files()[0].read_text()
+        head = content.split("---\n")[1]
+        self.assertEqual(sum(1 for l in head.splitlines() if l.startswith("status:")), 1)
+        self.assertIn("status: pending", head)
+        self.assertEqual(sum(1 for l in head.splitlines() if l.startswith("kind:")), 1)
+
+
+class HookFormTests(KBTestCase):  # S-L3
+    def test_exact_command(self):
+        self.assertEqual(kb.hook_command(8011),
+                         'curl -sf --max-time 2 -H "Content-Type: application/json" http://localhost:8011/hook -d @-')
+
+    def test_old_form_recognised_by_status_remove_and_upgraded_by_install(self):
+        path = self.tmp / "s.json"
+        data = {"hooks": {"UserPromptSubmit": [{"hooks": [{"type": "command", "command": OLD_HOOK % 8011}]}]}}
+        path.write_text(json.dumps(data))
+        self.assertEqual(self.run_main("hook", "status", "--settings", str(path))[0], 0)
+        self.run_main("hook", "install", "--settings", str(path))
+        cmds = [h["command"] for g in json.loads(path.read_text())["hooks"]["UserPromptSubmit"] for h in g["hooks"]]
+        self.assertEqual(cmds, [NEW_HOOK % 8011])
+        path.write_text(json.dumps(data))
+        self.run_main("hook", "remove", "--settings", str(path))
+        self.assertEqual(json.loads(path.read_text()), {})
+
+
+class HttpHeaderTests(KBTestCase):
+    def test_post_sends_json_content_type_and_no_origin(self):
+        self.make_corpus()
+        with FakeService() as svc:
+            self.use_service(svc)
+            self.run_main("search", "q")
+            self.run_main("check", "-", stdin="note\n")
+            self.run_main("status")
+            posts = [h for h in svc.headers if h[0] == "POST"]
+            self.assertTrue(posts)
+            for _, _, headers in svc.headers:
+                self.assertNotIn("Origin", headers)
+            for _, _, headers in posts:
+                self.assertEqual(headers.get("Content-Type"), "application/json")
+
+
+class SchedulerPathTests(KBTestCase):  # D1
+    CMD = ["/usr/bin/python3", "/opt/kb/scripts/kb.py", "scheduled-run"]
+
+    def test_build_path_adds_existing_dirs_and_dedupes(self):
+        home_docker = os.path.expanduser("~/.docker/bin")
+        present = {home_docker, "/usr/local/bin"}
+        got = kb.build_path("/usr/bin:/usr/local/bin:/bin", exists=lambda p: p in present)
+        self.assertEqual(got.split(os.pathsep), ["/usr/bin", "/usr/local/bin", "/bin", home_docker])
+        self.assertNotIn("/opt/homebrew/bin", got)
+
+    def test_plist_has_environment_path_and_out_log(self):
+        env = {"PATH": "/usr/bin:/opt/homebrew/bin"}
+        plist = kb.make_launchd_plist("8-20/2", "1-5", self.CMD, kb.schedule_log_path(kb.load_config()), env)
+        self.assertEqual(plist["EnvironmentVariables"]["PATH"], "/usr/bin:/opt/homebrew/bin")
+        self.assertTrue(plist["StandardOutPath"].endswith("/state/schedule.out.log"))
+        self.assertEqual(plist["StandardErrorPath"], plist["StandardOutPath"])
+
+    def test_cron_line_sets_path_inline(self):
+        line = kb.make_cron_line("8-20/2", "1-5", self.CMD, {"PATH": "/usr/bin:/opt/homebrew/bin"})
+        self.assertTrue(line.startswith("0 8-20/2 * * 1-5 PATH=/usr/bin:/opt/homebrew/bin /usr/bin/python3 "))
+        self.assertTrue(line.endswith(kb.CRON_MARKER))
+
+    def test_env_file_override_travels_with_the_entry(self):
+        env = kb.scheduler_env("/usr/bin")
+        self.assertEqual(env["LLM_KB_ENV_FILE"], str(self.tmp / "kb.env"))
+
+    def test_command_uses_configured_toolkit(self):
+        os.environ["LLM_KB_TOOLKIT_DIR"] = str(self.tmp / "other-checkout")
+        cmd = kb.scheduler_command(kb.load_config())
+        self.assertEqual(cmd[1], (self.tmp / "other-checkout" / "scripts" / "kb.py").as_posix().replace("/", os.sep)
+                         if os.sep != "/" else (self.tmp / "other-checkout" / "scripts" / "kb.py").as_posix())
+
+
+class DockerStartTests(KBTestCase):  # D2
+    def runner(self, info_ok_after):
+        state = {"info": 0, "calls": []}
+
+        def fake(cmd, **kw):
+            state["calls"].append(list(cmd))
+            if cmd[:2] == ["docker", "info"]:
+                state["info"] += 1
+                return subprocess.CompletedProcess(cmd, 0 if state["info"] > info_ok_after else 1, "", "")
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        return fake, state
+
+    def test_already_running(self):
+        fake, state = self.runner(0)
+        with mock.patch.object(kb, "run_cmd", fake):
+            self.assertEqual(kb.docker_ready(), (True, "docker ready"))
+
+    def test_macos_starts_desktop_app_and_waits_without_sleeping(self):
+        fake, state = self.runner(3)
+        slept = []
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "sleep", slept.append), \
+                mock.patch.object(kb, "detect_os", return_value="Darwin"), \
+                mock.patch.object(kb, "docker_app_present", return_value=True):
+            ok, note = kb.docker_ready()
+        self.assertTrue(ok)
+        self.assertIn(["open", "-ga", "Docker"], state["calls"])
+        self.assertEqual(len(slept), 3)
+
+    def test_macos_gives_up_after_180_seconds(self):
+        fake, _ = self.runner(10 ** 6)
+        slept = []
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "sleep", slept.append), \
+                mock.patch.object(kb, "detect_os", return_value="Darwin"), \
+                mock.patch.object(kb, "docker_app_present", return_value=True):
+            ok, note = kb.docker_ready()
+        self.assertFalse(ok)
+        self.assertEqual(sum(slept), 180)
+
+    def test_other_systems_log_docker_not_running_and_exit_1(self):
+        self.make_corpus()
+        fake, state = self.runner(10 ** 6)
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "detect_os", return_value="Linux"):
+            rc, text, _ = self.run_main("scheduled-run")
+        self.assertEqual(rc, 1)
+        self.assertIn("docker not running", text)
+        self.assertIn("docker not running", (self.data / "state" / "schedule.log").read_text())
+        self.assertNotIn(["open", "-ga", "Docker"], state["calls"])
+        self.assertFalse([c for c in state["calls"] if c[:2] == ["docker", "compose"]])
+
+
+class TimeoutTests(KBTestCase):  # D3
+    def test_run_cmd_sets_timeout_and_git_no_prompt(self):
+        seen = []
+
+        def fake_run(cmd, **kw):
+            seen.append((list(cmd), kw))
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        with mock.patch.object(kb.subprocess, "run", fake_run):
+            kb.run_cmd(["git", "status"])
+            kb.run_cmd(["docker", "info"])
+        (gcmd, gkw), (dcmd, dkw) = seen
+        self.assertEqual(gkw["env"]["GIT_TERMINAL_PROMPT"], "0")
+        self.assertEqual(gkw["timeout"], kb.TIMEOUT_DEFAULT)
+        self.assertNotIn("env", dkw)
+        self.assertEqual(dkw["timeout"], kb.TIMEOUT_DEFAULT)
+
+    def test_timeout_expiry_becomes_return_code_124(self):
+        def boom(cmd, **kw):
+            raise subprocess.TimeoutExpired(cmd, kw["timeout"])
+
+        with mock.patch.object(kb.subprocess, "run", boom):
+            proc = kb.run_cmd(["sleep", "99"], timeout=1)
+        self.assertEqual(proc.returncode, 124)
+        self.assertIn("timed out", proc.stderr)
+
+    def test_missing_binary_is_return_code_127(self):
+        self.assertEqual(kb.run_cmd(["definitely-not-a-real-binary-xyz"]).returncode, 127)
+
+    @unittest.skipUnless(subprocess.run(["git", "--version"], capture_output=True).returncode == 0, "git missing")
+    def test_scheduled_run_passes_per_command_timeouts(self):
+        git(self.tmp, "init", "-q", "-b", "main", str(self.corpus))
+        (self.corpus / "a.md").write_text("a\n")
+        git(self.corpus, "add", "-A")
+        git(self.corpus, "commit", "-q", "-m", "i")
+        seen = []
+
+        def fake(cmd, **kw):
+            seen.append((list(cmd), kw.get("timeout")))
+            if cmd[0] == "git":
+                if "pull" in cmd:
+                    return subprocess.CompletedProcess(cmd, 0, "", "")
+                return subprocess.run(cmd, capture_output=True, text=True)
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        with mock.patch.object(kb, "run_cmd", fake):
+            self.assertEqual(self.run_main("scheduled-run")[0], 0)
+        by = lambda pred: [t for c, t in seen if pred(c)]
+        self.assertEqual(by(lambda c: "up" in c and c[0] == "docker"), [600])
+        self.assertEqual(by(lambda c: "ingest" in c), [1800])
+        self.assertEqual(by(lambda c: c[0] == "git" and "pull" in c), [120])
+
+
+class InitToolkitDirTests(KBTestCase):  # D4
+    LAYOUT = False
+
+    def setUp(self):
+        super().setUp()
+        for key in ("LLM_KB_DATA_DIR", "LLM_KB_CORPUS_DIR"):
+            os.environ.pop(key)
+        self.other = self.tmp / "other-checkout"
+
+    def test_toolkit_dir_is_repointed_and_others_kept(self):
+        (self.tmp / "kb.env").write_text("LLM_KB_COLLECTION=keep\n")
+        self.run_main("init", "--data-dir", str(self.data))
+        self.run_main("init", "--toolkit-dir", str(self.other))
+        values = kb.read_env_file(self.tmp / "kb.env")
+        self.assertEqual(values["LLM_KB_TOOLKIT_DIR"], self.other.as_posix())
+        self.assertEqual(values["LLM_KB_COLLECTION"], "keep")
+        compose = (self.data / "state" / "compose.env").read_text()
+        self.assertNotIn("KB_TOOLKIT", compose)  # the toolkit dir is not a compose variable
+        self.assertIn(f"KB_CORPUS_DIR={self.other.as_posix()}", compose)  # corpus defaults to the toolkit checkout
+
+    def test_first_init_honours_toolkit_dir(self):
+        self.run_main("init", "--data-dir", str(self.data), "--toolkit-dir", str(self.other))
+        self.assertEqual(kb.read_env_file(self.tmp / "kb.env")["LLM_KB_TOOLKIT_DIR"], self.other.as_posix())
+
+    def test_installed_schedule_is_reinstalled_with_same_times_and_new_path(self):
+        old_line = kb.make_cron_line("9,13", "1-3", ["/py", "/old/scripts/kb.py", "scheduled-run"], {"PATH": "/usr/bin"})
+        store = {"tab": "0 1 * * * /bin/other\n" + old_line + "\n"}
+
+        def fake(cmd, **kw):
+            if cmd[:2] == ["crontab", "-l"]:
+                return subprocess.CompletedProcess(cmd, 0, store["tab"], "")
+            if cmd[:2] == ["crontab", "-"]:
+                store["tab"] = kw["input"]
+                return ok_proc(cmd)
+            raise AssertionError(cmd)
+
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "detect_os", return_value="Linux"):
+            self.run_main("init", "--data-dir", str(self.data), "--toolkit-dir", str(self.other))
+        lines = [l for l in store["tab"].splitlines() if kb.CRON_MARKER in l]
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].startswith("0 9,13 * * 1-3 "))
+        self.assertIn(self.other.as_posix(), lines[0])
+        self.assertNotIn("/old/", lines[0])
+        self.assertIn("/bin/other", store["tab"])
+
+    def test_no_scheduler_entry_means_nothing_is_installed(self):
+        calls = []
+
+        def fake(cmd, **kw):
+            calls.append(list(cmd))
+            return subprocess.CompletedProcess(cmd, 1 if cmd[:2] == ["crontab", "-l"] else 0, "", "")
+
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "detect_os", return_value="Linux"):
+            self.run_main("init", "--data-dir", str(self.data), "--toolkit-dir", str(self.other))
+        self.assertNotIn(["crontab", "-"], calls)
+
+
+class DoctorDeepTests(KBTestCase):  # D5
+    def run_deep(self, svc=None, compose_rc=0):
+        self.make_corpus()
+        calls = []
+        slept = []
+
+        def fake(cmd, **kw):
+            calls.append(list(cmd))
+            return subprocess.CompletedProcess(cmd, compose_rc, "", "")
+
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "sleep", slept.append), \
+                mock.patch.object(kb.shutil, "which", return_value="/x/docker"):
+            if svc:
+                self.use_service(svc)
+            else:
+                os.environ["LLM_KB_PORT"] = str(free_port())
+            rc, text, _ = self.run_main("doctor", "--deep")
+        return rc, text, calls, slept
+
+    def test_deep_success_restarts_verifies_and_searches(self):
+        with FakeService() as svc:
+            rc, text, calls, _ = self.run_deep(svc)
+            paths = [r[1] for r in svc.requests]
+        self.assertEqual(rc, 0, text)
+        self.assertTrue(any(c[-3:] == ["restart", "chroma", "service"] for c in calls))
+        self.assertIn("/verify", paths)
+        self.assertIn("/search", paths)
+        self.assertIn("stored vectors read back", text)
+
+    def test_deep_verify_failure_exit_1(self):
+        with FakeService(verify_ok=False) as svc:
+            rc, text, _, _ = self.run_deep(svc)
+        self.assertEqual(rc, 1)
+        self.assertIn("FAIL deep: stored vectors read back", text)
+
+    def test_deep_health_never_returns_exit_1_without_real_sleeping(self):
+        rc, text, _, slept = self.run_deep(None)
+        self.assertEqual(rc, 1)
+        self.assertEqual(sum(slept), 120)
+        self.assertIn("FAIL deep: service healthy after restart", text)
+
+    def test_deep_restart_failure_stops_early(self):
+        with FakeService() as svc:
+            rc, text, _, _ = self.run_deep(svc, compose_rc=1)
+            paths = [r[1] for r in svc.requests]
+        self.assertEqual(rc, 1)
+        self.assertNotIn("/verify", paths)
+
+    def test_plain_doctor_does_not_restart(self):
+        calls = []
+        with mock.patch.object(kb, "run_cmd", lambda c, **kw: calls.append(list(c)) or ok_proc(c)):
+            self.run_main("doctor")
+        self.assertFalse([c for c in calls if "restart" in c])
+
+
+class CheckSourceTests(KBTestCase):
+    def test_source_is_passed_to_dedupe(self):
+        with FakeService() as svc:
+            self.use_service(svc)
+            self.run_main("check", "-", "--source", "repo", stdin="note\n")
+            self.run_main("check", "-", stdin="note\n")
+            payloads = [r[2] for r in svc.requests if r[1] == "/dedupe"]
+        self.assertEqual(payloads[0]["source"], "repo")
+        self.assertNotIn("source", payloads[1])
+
+
+class SearchPendingTests(KBTestCase):  # S-M4 CLI side
+    def test_inbox_hits_marked_pending_with_source(self):
+        hits = [{"source": "inbox", "path": "n.md", "kind": "learning", "heading": "H", "distance": 0.3, "text": "t"},
+                {"source": "repo", "path": "rules/a.md", "kind": "rule", "heading": "", "distance": 0.1, "text": "t"}]
+        with FakeService(hits=hits) as svc:
+            self.use_service(svc)
+            rc, text, _ = self.run_main("search", "q")
+        lines = text.splitlines()
+        self.assertIn("inbox:n.md", lines[0])
+        self.assertTrue(lines[0].endswith("[pending]"))
+        repo_line = [l for l in lines if "repo:rules/a.md" in l][0]
+        self.assertNotIn("[pending]", repo_line)
+
+
+class FallbackSecretTests(KBTestCase):  # S-L1
+    def test_files_with_secrets_are_skipped_with_core(self):
+        (self.corpus / "clean.md").write_text("needle in a clean file\n")
+        (self.corpus / "dirty.md").write_text(f"needle {AWS_KEY}\n")
+        os.environ["LLM_KB_PORT"] = str(free_port())
+        rc, text, _ = self.run_main("search", "needle")
+        self.assertEqual(rc, 3)
+        self.assertIn("clean.md", text)
+        self.assertNotIn("dirty.md", text)
+        self.assertNotIn(AWS_KEY, text)
+
+    def test_files_with_secrets_are_skipped_without_core(self):
+        kb.set_core(None)
+        os.environ["LLM_KB_TOOLKIT_DIR"] = str(self.tmp / "no-toolkit")
+        (self.corpus / "clean.md").write_text("needle clean\n")
+        (self.corpus / "dirty.md").write_text(f"needle {AWS_KEY}\n")
+        (self.corpus / "pem.txt").write_text("needle\n-----BEGIN RSA PRIVATE KEY-----\n")
+        os.environ["LLM_KB_PORT"] = str(free_port())
+        rc, text, _ = self.run_main("search", "needle")
+        self.assertIn("clean.md", text)
+        self.assertNotIn("dirty.md", text)
+        self.assertNotIn("pem.txt", text)
+
+
+class MarkWatermarkTests(KBTestCase):  # S-L4
+    def test_now_is_printed_and_mark_uses_run_start_or_given_time(self):
+        rc, text, _ = self.run_main("sync-status", "--json", "--no-fetch", "--mark")
+        data = json.loads(text)
+        self.assertRegex(data["now"], r"^\d{4}-\d{2}-\d{2}T")
+        state = json.loads((self.data / "state" / "sync-state.json").read_text())
+        self.assertEqual(state["watermark"], data["now"])  # the run start, not the end of the run
+        self.assertEqual(data["marked"], data["now"])
+        rc, text, _ = self.run_main("sync-status", "--json", "--no-fetch", "--mark", "2026-01-02T03:04:05Z")
+        state = json.loads((self.data / "state" / "sync-state.json").read_text())
+        self.assertEqual(state["watermark"], "2026-01-02T03:04:05Z")
+
+    def test_no_mark_flag_writes_nothing(self):
+        self.run_main("sync-status", "--json", "--no-fetch")
+        self.assertFalse((self.data / "state" / "sync-state.json").exists())
+
+    def test_start_time_is_taken_before_reading(self):
+        times = iter([kb.parse_iso("2026-05-05T05:05:05Z"), kb.parse_iso("2030-01-01T00:00:00Z")])
+        with mock.patch.object(kb, "utcnow", lambda: next(times)):
+            rc, text, _ = self.run_main("sync-status", "--json", "--no-fetch", "--mark")
+        self.assertEqual(json.loads((self.data / "state" / "sync-state.json").read_text())["watermark"],
+                         "2026-05-05T05:05:05Z")
+
+
+class WindowsTaskTests(KBTestCase):  # S-L5
+    CSV = ('"\\llm-toolkit-kb-sync","N/A","Ready"\n"\\llm-toolkit-kb-sync-09","N/A","Ready"\n'
+           '"\\llm-toolkit-kb-synced-other","N/A","Ready"\n"\\Other Task","N/A","Ready"\n')
+
+    def test_parse_prefix_match_only(self):
+        self.assertEqual(kb.parse_win_tasks(self.CSV), ["llm-toolkit-kb-sync", "llm-toolkit-kb-sync-09"])
+        self.assertEqual(kb.parse_win_tasks(""), [])
+
+    def test_remove_and_status_use_existing_tasks_not_hours(self):
+        calls = []
+
+        def fake(cmd, **kw):
+            calls.append(list(cmd))
+            if cmd[:2] == ["schtasks", "/Query"] and "/TN" not in cmd:
+                return subprocess.CompletedProcess(cmd, 0, self.CSV, "")
+            return ok_proc(cmd)
+
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "detect_os", return_value="Windows"):
+            self.assertEqual(self.run_main("schedule", "status", "--hours", "1-2")[0], 0)
+            self.assertEqual(self.run_main("schedule", "remove", "--hours", "1-2")[0], 0)
+        deleted = sorted(c[c.index("/TN") + 1] for c in calls if c[:2] == ["schtasks", "/Delete"])
+        self.assertEqual(deleted, ["llm-toolkit-kb-sync", "llm-toolkit-kb-sync-09"])
+
+    def test_install_clears_stale_tasks_first(self):
+        calls = []
+
+        def fake(cmd, **kw):
+            calls.append(list(cmd))
+            if cmd[:2] == ["schtasks", "/Query"]:
+                return subprocess.CompletedProcess(cmd, 0, self.CSV, "")
+            return ok_proc(cmd)
+
+        with mock.patch.object(kb, "run_cmd", fake), mock.patch.object(kb, "detect_os", return_value="Windows"):
+            self.run_main("schedule", "install")
+        kinds = [c[1] for c in calls if c[0] == "schtasks"]
+        self.assertLess(kinds.index("/Delete"), kinds.index("/Create"))
+
+
+class WrapperTests(unittest.TestCase):  # S-L6 and shellcheck SC1007
+    def test_ps1_tries_py_launcher_before_python_before_python3(self):
+        text = (REPO / "scripts" / "kb.ps1").read_text()
+        order = [text.index("py -3"), text.index("& python $script"), text.index("& python3 $script")]
+        self.assertEqual(order, sorted(order))
+
+    def test_sh_has_no_empty_assignment_before_cd(self):
+        text = (REPO / "scripts" / "kb.sh").read_text()
+        self.assertNotIn("CDPATH= cd", text)
+        self.assertIn("CDPATH='' cd", text)
+        proc = subprocess.run(["sh", "-n", str(REPO / "scripts" / "kb.sh")], capture_output=True)
+        self.assertEqual(proc.returncode, 0)
+
+    def test_sh_runs_from_other_directory(self):
+        proc = subprocess.run(["sh", str(REPO / "scripts" / "kb.sh"), "--help"], capture_output=True,
+                              cwd=tempfile.gettempdir())
+        self.assertEqual(proc.returncode, 0)
 
 
 if __name__ == "__main__":

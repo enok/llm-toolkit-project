@@ -7,8 +7,9 @@ description: Scheduled knowledge-base sync - gather new knowledge, run the intak
 Use this for the scheduled agent pass that keeps the toolkit knowledge base
 (KB) and the repository in step, or when asked to "keep the knowledge base in
 sync". The OS scheduler entry (`kb.py schedule install`) only refreshes the
-index through `kb.py scheduled-run`; this workflow is the agent pass that turns
-new knowledge into reviewed toolkit assets.
+index through `kb.py scheduled-run` and never promotes knowledge or opens pull
+requests; this workflow is the agent pass that does, run by an agent automation
+the owner schedules separately.
 
 Binding duties: `rules/knowledge-base.md`. Command reference:
 `skills/knowledge-base/SKILL.md`. Commands are shown as `python3 scripts/kb.py`
@@ -38,7 +39,8 @@ else.
 2. When the service is not healthy: `python3 scripts/kb.py doctor`, then
    `python3 scripts/kb.py up`. If it is still unreachable, report the blocker
    and stop: the intake gate needs `check`.
-3. Read the state of the rolling pull request (read-only):
+3. When `gh auth status` succeeds, read the state of the rolling pull request
+   (read-only). Otherwise skip this step and treat no pull request as open:
 
    ```bash
    gh pr list --head kb/knowledge-intake --state all --limit 1 --json number,state,mergedAt,url,body
@@ -85,10 +87,11 @@ Apply `rules/knowledge-base.md` duty 3 to every candidate.
   the distilled text, then
   `python3 scripts/kb.py add - --title "<title>" --kind <kind> --origin "<source type>"`
   so they enter the inbox like any other item.
-- **Inbox items:** run `python3 scripts/kb.py check <inbox file> --json` again
-  against the current index. Ignore the item's own inbox entry in `nearest`
-  and decide from the nearest `repo` entry.
-- A duplicate becomes "already covered" in the report and is archived after
+- **Inbox items:** run
+  `python3 scripts/kb.py check <inbox file> --source repo --json` again against
+  the current index. Without `--source repo` an indexed inbox item matches
+  itself as a duplicate.
+- A repo hit at or below the duplicate distance becomes "already covered" in the report and is archived after
   the next merge; a security hit is quarantined and reported by rule name only;
   a near verdict is merged into the nearest asset unless the item is clearly
   distinct.
@@ -147,8 +150,11 @@ validator.
 1. Commit with a semantic message (`rules/git-conventions.md`), for example
    `docs(kb): promote knowledge intake items`.
 2. `git -C <scratch>/kb-intake push origin kb/knowledge-intake` (no force).
-3. No open pull request:
-   `gh pr create --base $DEFAULT --head kb/knowledge-intake --title "<title>" --body-file <scratch>/pr-body.md`.
+3. When `gh auth status` fails, skip the `gh` commands: print
+   `https://<host>/<owner>/<repo>/compare/$DEFAULT...kb/knowledge-intake?expand=1`
+   (host, owner, repo from `git -C <corpus> remote get-url origin`), label the
+   pull request `NOT POSTED` in the report, and continue at step 4 (the body text goes in the report).
+   No open pull request: `gh pr create --base $DEFAULT --head kb/knowledge-intake --title "<title>" --body-file <scratch>/pr-body.md`.
    Open pull request: the push updates it; refresh its description with
    `gh pr edit <number> --body-file <scratch>/pr-body.md`.
 4. The body holds the Phase 4 mapping table (inbox names included, so a later

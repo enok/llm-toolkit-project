@@ -216,18 +216,22 @@ if [[ "$PROFILE" != "minimal" && -z "$NO_KB" ]]; then
   KB_PY="$SCRIPT_DIR/kb.py"
   KB_INIT=(python3 "$KB_PY" init)
   [[ -n "$KB_DATA_DIR" ]] && KB_INIT+=(--data-dir "$KB_DATA_DIR")
-  KB_LATER="${KB_INIT[*]} && python3 $KB_PY up --build && python3 $KB_PY index && python3 $KB_PY schedule install"
+  KB_LATER="$(printf '%q ' "${KB_INIT[@]}")"
+  for kb_step in "up --build" "index" "schedule install"; do
+    # shellcheck disable=SC2086  # kb_step is a fixed word list
+    KB_LATER+="; $(printf '%q ' python3 "$KB_PY" $kb_step)"
+  done
   if [[ -n "$DRY_RUN" ]]; then
     run "${KB_INIT[@]}"
     run python3 "$KB_PY" up --build
     run python3 "$KB_PY" index
     run python3 "$KB_PY" schedule install
-  elif ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
-    echo "Knowledge base skipped: Docker with compose is missing or its daemon is not running. Run later: $KB_LATER"
-    MISSING_SUMMARY+=("Knowledge base (start Docker, then run the command printed above)")
   elif ! command -v python3 >/dev/null 2>&1; then
     echo "Knowledge base skipped: python3 is missing. Run later: $KB_LATER"
     MISSING_SUMMARY+=("Knowledge base (needs python3 first)")
+  elif ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+    echo "Knowledge base skipped: Docker with compose is missing or its daemon is not running. Run later: $KB_LATER"
+    MISSING_SUMMARY+=("Knowledge base (start Docker, then run the command printed above)")
   elif run "${KB_INIT[@]}" && run python3 "$KB_PY" up --build && run python3 "$KB_PY" index && run python3 "$KB_PY" schedule install; then
     INSTALLED_SUMMARY+=("Knowledge base (indexed; scheduled sync installed)")
   else

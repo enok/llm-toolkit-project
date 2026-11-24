@@ -153,8 +153,21 @@ class Scanner:
             rel = shown if source == "repo" else shown[len(source) + 1:]
             if rel not in seen:
                 self.quarantined.pop(shown, None)
+        missing = sorted(set(existing) - seen)
+        if delete_missing and missing:
+            # S-M2: an empty or half-visible root (a bind source Docker created empty, a sync folder
+            # still downloading) must never wipe the index; refuse and leave a visible error instead.
+            if not seen:
+                self._error(report, f"{source}: walk saw no files; {len(missing)} removals skipped")
+                missing = []
+            elif len(missing) * 2 > len(existing):
+                self._error(
+                    report,
+                    f"{source}: refusing to remove {len(missing)} of {len(existing)} tracked files (over 50%)",
+                )
+                missing = []
         if delete_missing:
-            for rel in sorted(set(existing) - seen):
+            for rel in missing:
                 try:
                     self.store.delete_file(source, rel)
                     tracked.discard(rel)
@@ -195,7 +208,7 @@ def write_state(state_dir: str, report: dict) -> None:
 
 
 def main() -> int:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    kb_core.configure_logging()
     cfg = kb_core.service_config()
     import store as store_mod  # vector-store adapter, loaded only when actually running
 

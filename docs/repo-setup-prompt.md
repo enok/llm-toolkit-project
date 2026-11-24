@@ -45,7 +45,7 @@ Before running this prompt, ensure the following:
 5. **Toolkit knowledge base** (per machine, shared by every project; nothing to install per repo):
    - The toolkit bootstrap (`scripts/bootstrap-dev.sh` / `.ps1`) sets it up once per machine; opt out with `--no-kb` / `-NoKb`
    - Verify: `python3 <toolkit-repo>/scripts/kb.py status`
-   - If it is not set up, print the init command for the developer and continue: `python3 <toolkit-repo>/scripts/kb.py init && python3 <toolkit-repo>/scripts/kb.py up --build && python3 <toolkit-repo>/scripts/kb.py index`
+   - If it is not set up, print the init command for the developer and continue: `python3 <toolkit-repo>/scripts/kb.py init && python3 <toolkit-repo>/scripts/kb.py up --build && python3 <toolkit-repo>/scripts/kb.py index && python3 <toolkit-repo>/scripts/kb.py schedule install`
    - The prompt hook is an explicit opt-in (`kb.py hook install`); never install it from this prompt
 
 6. **Directory links** (OS-specific — no manual action needed, the prompt handles it):

@@ -10,14 +10,14 @@ A crash was blamed on the database engine. Every test copy used to reach that co
 derived from an already damaged index, so the tests could not tell the engine from the damage.
 
 # Failed Approaches
-- Testing with copies of the existing index. Each copy carried the same damage, so the crash
-  reproduced every time and pointed at the wrong cause.
+- Testing with copies of the existing index. Each copy carried the same damage, so none of the
+  copies could tell the engine from the damage.
 
 # Solution
 Build a fresh index from empty, once inside the suspect folder and once outside it, changing one
-variable at a time. The comparison separates the folder from the engine.
+variable at a time. Inference, not observed: the comparison is meant to separate the folder from the engine.
 
 # Why
-A copy inherits the defect of its source, so a repeatable crash on copies says nothing about the
+A copy inherits the defect of its source, so a crash seen only on copies says nothing about the
 engine. Inference, not observed: starting from empty removes the inherited damage, and varying one
 factor at a time lets a difference be attributed to that factor.

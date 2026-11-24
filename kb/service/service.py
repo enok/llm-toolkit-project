@@ -6,10 +6,14 @@ with fakes. The HTTP layer only reads the body (bounded) and writes JSON.
 
 Security posture:
 - The host publishes the port on 127.0.0.1 only; in addition any request whose
-  ``Host`` header is not ``localhost`` / ``127.0.0.1`` gets 403 (DNS-rebinding guard).
+  ``Host`` header is not ``localhost`` / ``127.0.0.1`` gets 403 (DNS-rebinding guard),
+  any request carrying an ``Origin`` header gets 403 (browsers send one on
+  cross-site requests; the CLI and the hook never do), and a POST without
+  ``Content-Type: application/json`` gets 415.
 - Request bodies are never logged; only method, path and status are.
-- Indexed passages are returned as data and never interpreted; the hook output
-  starts with a header saying they are reference data, not instructions.
+- Indexed passages are returned as data and never interpreted; the hook serves
+  reviewed (``repo``) passages only, quoted under a header saying they are
+  reference data, not instructions.
 """
 
 from __future__ import annotations
@@ -28,6 +32,8 @@ MAX_BODY = 256 * 1024
 MAX_K = 20
 MAX_QUERY_CHARS = 2000
 MAX_DEDUPE_PIECES = 32
+VERIFY_SAMPLE = 3
+VERIFY_MAX_SELF_DISTANCE = 0.001
 LISTEN_PORT = 8011
 # Inside the container the server must listen on all container interfaces so the
 # published port works; compose publishes it on the host as 127.0.0.1 only.
@@ -106,6 +112,7 @@ class KBApp:
             ("POST", "/dedupe"): self.dedupe,
             ("POST", "/hook"): self.hook,
             ("POST", "/reindex"): self.reindex,
+            ("POST", "/verify"): self.verify,
         }
 
     # ---------------------------------------------------------------- dispatch
@@ -123,6 +130,8 @@ class KBApp:
     def _handle(self, method, path, headers, body, content_length):
         if not _host_allowed(_header(headers, "Host")):
             return 403, {"error": "forbidden host"}
+        if _header(headers, "Origin") is not None:
+            return 403, {"error": "cross-origin requests are not accepted"}
         size = max(len(body), content_length or 0)
         if size > MAX_BODY:
             return 413, {"error": f"request body larger than {MAX_BODY} bytes"}
@@ -131,6 +140,10 @@ class KBApp:
             if any(p == path for (_m, p) in self.routes):
                 return 405, {"error": "method not allowed"}
             return 404, {"error": "not found"}
+        if method == "POST":
+            ctype = str(_header(headers, "Content-Type") or "").split(";", 1)[0].strip().lower()
+            if ctype != "application/json":
+                return 415, {"error": "Content-Type must be application/json"}
         payload: dict = {}
         if method == "POST" and body.strip():
             try:
@@ -196,8 +209,11 @@ class KBApp:
     def dedupe(self, payload: dict) -> dict:
         text = _text_param(payload, "text")
         k = _int_param(payload, "k", 3)
+        source = payload.get("source")
+        if source is not None and not isinstance(source, str):
+            raise BadRequest("'source' must be a string")
         pieces = kb_core.split_text(text)[:MAX_DEDUPE_PIECES] or [text[: kb_core.CHUNK_SIZE]]
-        nearest = self.store.nearest(pieces, k=k)
+        nearest = self.store.nearest(pieces, k=k, source=source or None)
         best = min((n["distance"] for n in nearest if n.get("distance") is not None), default=None)
         verdict = kb_core.dedupe_verdict(best, self.config.dup_distance, self.config.near_distance)
         return {"verdict": verdict, "nearest": nearest[:k]}
@@ -207,8 +223,12 @@ class KBApp:
         if not isinstance(prompt, str) or len(prompt.strip()) < 3:
             return {}
         try:
+            # only reviewed knowledge reaches the agent unasked; pending inbox items stay out
             hits = self.store.search(
-                q=prompt[:MAX_QUERY_CHARS], k=kb_core.HOOK_MAX_HITS, max_distance=self.config.max_distance
+                q=prompt[:MAX_QUERY_CHARS],
+                k=kb_core.HOOK_MAX_HITS,
+                max_distance=self.config.max_distance,
+                source="repo",
             )
         except Exception as exc:  # noqa: BLE001 - the prompt hook must never block the user
             log.warning("hook search failed: %s", type(exc).__name__)
@@ -224,6 +244,37 @@ class KBApp:
             return {"indexed": []}
         report = self.scanner.scan(delete_missing=False)
         return {"indexed": report["indexed"]}
+
+
+    def verify(self, _payload: dict) -> dict:
+        """Read back stored vectors: non-zero, and each one finds itself. Returns no vectors or text."""
+        chunks = self.store.count()
+        if not chunks:
+            return {"ok": False, "chunks": 0, "checked": 0, "detail": "collection is empty"}
+        sample = self.store.sample_embeddings(VERIFY_SAMPLE)
+        if not sample:
+            return {"ok": False, "chunks": chunks, "checked": 0, "detail": "no stored vectors could be read back"}
+        checked = 0
+        for n, (rid, vector) in enumerate(sample, 1):
+            if not vector:
+                return {"ok": False, "chunks": chunks, "checked": checked,
+                        "detail": f"stored vector {n} has no values"}
+            if not any(abs(x) > 0.0 for x in vector):
+                return {"ok": False, "chunks": chunks, "checked": checked,
+                        "detail": f"stored vector {n} is all zeros (index damaged; rebuild with a full index)"}
+            found = self.store.query_vector(vector, k=1)
+            if not found:
+                return {"ok": False, "chunks": chunks, "checked": checked,
+                        "detail": f"self-query of stored vector {n} returned nothing"}
+            top_id, distance = found[0]
+            if top_id != rid or distance >= VERIFY_MAX_SELF_DISTANCE:
+                return {"ok": False, "chunks": chunks, "checked": checked,
+                        "detail": f"self-query of stored vector {n} did not return itself "
+                                  f"(distance {distance:.4f}, same id: {top_id == rid})"}
+            checked += 1
+        return {"ok": True, "chunks": chunks, "checked": checked,
+                "detail": f"{checked} stored vectors read back, non-zero, "
+                          f"self-query distance < {VERIFY_MAX_SELF_DISTANCE}"}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -277,7 +328,7 @@ def _background_scan(scanner, seconds: int, stop: threading.Event) -> None:
 
 
 def main() -> int:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    kb_core.configure_logging()
     cfg = kb_core.service_config()
     import ingest
     import store as store_mod  # vector-store adapter, loaded only when actually running
