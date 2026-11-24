@@ -49,7 +49,11 @@ else.
    A pull request merged since the last sync goes to Phase 9 first. An open one
    is updated, not duplicated; the inbox names listed in its body are already
    in flight and are skipped below.
-4. **Exit early** when there is nothing to do: no pending inbox items outside
+4. Probe write access before any work that ends in a push:
+   `git -C <corpus> push --dry-run origin HEAD:refs/heads/kb/write-probe`.
+   When it fails for authentication, still do the local phases, then report
+   `NOT POSTED` with the push command; never look for other credentials.
+5. **Exit early** when there is nothing to do: no pending inbox items outside
    the open pull request, no new run-log records, no merged pull request to
    finalise, and no new items from the optional sources in Phase 1. Report
    "nothing new" with the health line and write nothing.
@@ -189,3 +193,7 @@ sync.
    each item with its destination or rejection reason; items archived; the KB
    health line from `sync-status`; open items that need the owner; and the
    improvement check.
+
+## Known pitfalls
+
+- A successful fetch or remote listing of a public repository proves nothing about push credentials; use the Phase 0 push dry run and the pull-request tool's auth status before planning on a push. (sig: wrong-assumption/anonymous-read-taken-as-push-credentials)
