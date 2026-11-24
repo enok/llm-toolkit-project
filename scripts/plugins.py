@@ -56,6 +56,7 @@ MAX_JSON_BYTES = 1024 * 1024
 MAX_FILES = 5000
 MAX_PER_RULE_FILE = 5
 MAX_FINDINGS = 300
+MAX_CAPABILITIES = 500
 EVIDENCE_CHARS = 160
 MAX_HOSTS = 50
 HEADER_BYTES = 4096
@@ -198,9 +199,14 @@ def write_json_atomic(path: Path, data) -> None:
 
 # --------------------------------------------------------------------------- text helpers
 
-HIDDEN_CHARS = ("\u200b\u200c\u200d\u200e\u200f\u2060\u2061\u2062\u2063\u2064\ufeff\u180e"
-                "\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069")
-HIDDEN_RX = re.compile("[" + HIDDEN_CHARS + "\U000e0000-\U000e007f]")
+HIDDEN_CHARS = ("\u200b\u200c\u200d\u200e\u200f\u2060\u2061\u2062\u2063\u2064\ufeff\u180e\u061c"
+                "\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufe00-\ufe0f")
+TAG_CHARS = "\U000e0000-\U000e007f"
+HIDDEN_RX = re.compile("[" + HIDDEN_CHARS + TAG_CHARS + "\U000e0100-\U000e01ef]")
+TAG_RX = re.compile("[" + TAG_CHARS + "]")
+# characters that must never appear in a file or folder name: controls (newline included), bidi, invisible
+BAD_NAME_RX = re.compile("[\x00-\x1f\x7f-\x9f" + HIDDEN_CHARS + TAG_CHARS + "\u2028\u2029]")
+WINDOWS_DEVICES = {"CON", "PRN", "AUX", "NUL"} | {f"COM{i}" for i in range(1, 10)} | {f"LPT{i}" for i in range(1, 10)}
 CTRL_RX = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
 MARKUP_RX = re.compile(r"[<>`*#\[\]{}|\\]")
 SAFE_NAME_RX = re.compile(r"[^A-Za-z0-9._-]+")
@@ -208,8 +214,17 @@ NAME_ARG_RX = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
 
 
 def safe_name(value, fallback="plugin") -> str:
+    """Letters, digits, dot, dash, underscore; never empty, never a Windows device name."""
     name = SAFE_NAME_RX.sub("-", str(value or "")).strip(".-_")[:80].strip(".-_")
+    stem, dot, rest = name.partition(".")
+    if stem.upper() in WINDOWS_DEVICES:  # CON, NUL, COM1... are devices on Windows, with or without extension
+        name = f"{stem}-x{dot}{rest}"
     return name or fallback
+
+
+def clean_path(value: str) -> str:
+    """A local path for catalog.json: controls and hidden characters removed (separators kept)."""
+    return BAD_NAME_RX.sub("", str(value or ""))[:4096]
 
 
 def clean_text(value, cap: int) -> str:
@@ -473,7 +488,45 @@ _WARNED = re.compile(r"(?i)\b(?:never|avoid|don't|do not|can't|cannot|untrusted|
 DOWNLOAD_EXEC_DOC = Rule("download-exec", "medium", DOWNLOAD_EXEC.keys, DOWNLOAD_EXEC.rx.pattern,
                          check=lambda seg, _m: not _WARNED.search(seg))
 
-CODE_RULES = (DOWNLOAD_EXEC, CREDENTIAL_STORE, PERSISTENCE, DESTRUCTIVE_FS, PRIV_ESC, OBFUSCATION, BOT_EVASION)
+SHELL_EXT = {".sh", ".bash", ".zsh", ".ksh", ".fish", ".ps1", ".psm1", ".cmd", ".bat"}
+# in a shell script the pipe-to-shell line runs unless it is only printed or commented
+_PRINTED_LINE = re.compile(r"^\s*(?:#|::|rem\s|echo\b|printf\b|write-(?:host|output)\b|cat\s*<<)", re.IGNORECASE)
+# in a program the command only runs when the line hands it to a process or shell
+_EXEC_SINK = re.compile(r"\bsubprocess\.|\bos\.(?:system|popen|exec\w*)\s*\(|\bPopen\s*\(|shell\s*=\s*True"
+                        r"|\bchild_process\b|\b(?:execSync|execFileSync|spawnSync|spawn|exec|execFile)\s*\("
+                        r"|\bsystem\s*\(|\bBun\.\$|\$`|\bRuntime\.getRuntime\(\)\.exec|\bProcess\.Start\b"
+                        r"|\bStart-Process\b|\bInvoke-Expression\b|\biex\b|`[^`\n]*\|\s*(?:ba)?sh[^`\n]*`")
+DOWNLOAD_EXEC_SHELL = Rule("download-exec", "high", DOWNLOAD_EXEC.keys, DOWNLOAD_EXEC.rx.pattern,
+                           check=lambda seg, _m: "medium" if _PRINTED_LINE.match(seg) else True)
+DOWNLOAD_EXEC_PROGRAM = Rule("download-exec", "high", DOWNLOAD_EXEC.keys, DOWNLOAD_EXEC.rx.pattern,
+                             check=lambda seg, _m: True if _EXEC_SINK.search(seg) else "medium")
+_FIXTURE_HEADING = re.compile(r"(?i)adversar|injection|fixture|attack|malicious|red[- ]team|hostile|jailbreak")
+
+
+def fixture_fence_lines(text: str) -> set:
+    """Line numbers inside fenced code blocks whose heading trail names adversarial or fixture material."""
+    lines, trail, fence = set(), ["", "", "", "", "", ""], ""
+    for lineno, line in enumerate(text.split("\n"), 1):
+        stripped = line.lstrip()
+        if fence:
+            if stripped.startswith(fence):
+                fence = ""
+            elif any(_FIXTURE_HEADING.search(t) for t in trail if t):
+                lines.add(lineno)
+            continue
+        if stripped.startswith(("```", "~~~")):
+            fence = stripped[:3]
+            continue
+        m = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if m:
+            level = len(m.group(1))
+            trail[level - 1] = m.group(2)
+            for j in range(level, 6):
+                trail[j] = ""
+    return lines
+
+
+CODE_RULES = (CREDENTIAL_STORE, PERSISTENCE, DESTRUCTIVE_FS, PRIV_ESC, OBFUSCATION, BOT_EVASION)
 # an install instruction in prose is reviewed (medium); the same command in bundled code blocks (high)
 SURFACE_RULES = (INSTRUCTION_OVERRIDE, MANDATE, DOWNLOAD_EXEC_DOC, BOT_EVASION)
 
@@ -525,11 +578,13 @@ class PluginScan:
 
     @staticmethod
     def _finding(rid, severity, rel, line, evidence):
-        return {"rule": rid, "severity": severity, "file": rel, "line": line,
+        return {"rule": rid, "severity": severity, "file": " ".join(escape_hidden(str(rel)).split())[:300], "line": line,
                 "evidence": " ".join(escape_hidden(str(evidence)).split())[:EVIDENCE_CHARS]}
 
     def add_host(self, host):
-        host = host.strip("[]").lower().rstrip(".")
+        host = str(host or "").strip("[]").lower().rstrip(".")
+        if not re.fullmatch(r"[a-z0-9.:-]{1,253}", host):
+            return
         if not host or host in ("localhost", "127.0.0.1", "::1", "0.0.0.0"):
             return
         if host.endswith((".example", ".test", ".invalid", ".local")) or host.split(".")[-2:-1] == ["example"]:
@@ -565,8 +620,8 @@ class PluginScan:
         protective = self._protective()
         return {
             "plugin": name,
-            "dir": os.path.basename(self.root),
-            "path": self.root,
+            "dir": clean_text(os.path.basename(self.root), 200),
+            "path": clean_path(self.root),
             "verdict": verdict,
             "counts": counts,
             "suppressed": self.suppressed,
@@ -622,6 +677,12 @@ class PluginScan:
                     if not isinstance(data.get("name"), str) or not data.get("name").strip():
                         self.add("manifest-invalid", "medium", rel, 0, "manifest has no name")
                     self._manifest_paths(rel, data)
+                    description = data.get("description")
+                    if isinstance(description, str):
+                        # it becomes the body of the card's "## plugin" section: same checks as skill prose
+                        text = description[:20000]
+                        self.apply((INSTRUCTION_OVERRIDE, MANDATE), rel, text, text.lower())
+                        self._hidden(rel, text)
                 return
         self.add("manifest-missing", "info", "", 0, "no plugin manifest; components found by folder convention")
 
@@ -761,11 +822,11 @@ class PluginScan:
         elif command:
             target = " ".join([os.path.basename(command)] + [a for a in args if not a.startswith("-")][:1])
         entry = {"name": name, "transport": safe_name(transport, "unknown"), "target": clean_text(target, 120)}
-        if entry not in self.mcp:
+        if entry not in self.mcp and self._room():
             self.mcp.append(entry)
         self.add("mcp-server", "info", rel, 0, f"{name}: {entry['transport']} {entry['target']}")
         if command:
-            self._mcp_pin(rel, name, command, args)
+            self._mcp_pin(rel, name, command, args, conf)
         self._mcp_secrets(rel, name, conf, args, url)
 
     def _mcp_url(self, rel, name, parsed, host):
@@ -778,7 +839,7 @@ class PluginScan:
         if (parsed.scheme == "http" and not loopback) or raw_ip:
             self.add("mcp-insecure-url", "medium", rel, 0, f"{name}: {parsed.scheme}://{host}")
 
-    def _mcp_pin(self, rel, name, command, args):
+    def _mcp_pin(self, rel, name, command, args, conf=None):
         tool = os.path.basename(command).lower()
         for suffix in (".cmd", ".exe"):
             if tool.endswith(suffix):
@@ -786,6 +847,9 @@ class PluginScan:
         rest = list(args)
         if tool in ("npm", "pnpm", "yarn", "bun") and rest and rest[0] in ("exec", "dlx", "x"):
             tool, rest = "npx", rest[1:]
+        if tool in ("npm", "pnpm", "yarn", "bun"):
+            self._mcp_package_script(rel, name, tool, rest, conf or {})
+            return
         if tool not in ("npx", "bunx", "pnpx", "uvx", "pipx"):
             return
         if tool == "pipx" and rest and rest[0] == "run":
@@ -814,6 +878,59 @@ class PluginScan:
             pinned = re.search(r"^(?:@[^/@\s]+/)?[^@\s]+@v?\d+\.\d+\.\d+(?:[-+][\w.]+)?$", spec) is not None
         if not pinned:
             self.add("mcp-unpinned-package", "medium", rel, 0, f"{name}: {tool} {clean_text(spec, 100)}")
+
+    def _mcp_package_script(self, rel, name, tool, args, conf):
+        """`bun run start` and the like: read package.json scripts as data; an install step resolves
+        version ranges at start-up, and an npx-style call can fetch an unpinned package."""
+        script, cwd, skip = None, None, False
+        for i, arg in enumerate(args):
+            if skip:
+                skip = False
+                continue
+            if arg in ("--cwd", "--prefix", "-C", "--dir"):
+                cwd, skip = (args[i + 1] if i + 1 < len(args) else None), True
+            elif arg.startswith(("--cwd=", "--prefix=", "--dir=")):
+                cwd = arg.split("=", 1)[1]
+            elif arg in ("start", "test") and script is None:
+                script = arg
+            elif arg in ("run", "run-script"):
+                continue
+            elif not arg.startswith("-") and script is None:
+                script = arg
+        if not script:
+            return
+        cwd = cwd or (conf.get("cwd") if isinstance(conf.get("cwd"), str) else None) or "."
+        text = cwd.replace("${CLAUDE_PLUGIN_ROOT}", ".").replace("$CLAUDE_PLUGIN_ROOT", ".")
+        if path_escapes(text):
+            return
+        pkg_path = os.path.normpath(os.path.join(self.root, text, "package.json"))
+        pkg = self._safe_json(pkg_path) if within(self.root, pkg_path) else None
+        if not isinstance(pkg, dict) or not isinstance(pkg.get("scripts"), dict):
+            return
+        body = pkg["scripts"].get(script)
+        if not isinstance(body, str):
+            return
+        prel = self.rel(pkg_path)
+        body = body[:2000]
+        if re.search(r"\b(?:npm|pnpm|yarn|bun)\s+(?:install|i|add|ci)\b", body) and not re.search(
+                r"--frozen-lockfile|--immutable|\bnpm\s+ci\b", body):
+            ranges = []
+            for field in ("dependencies", "optionalDependencies"):
+                deps = pkg.get(field)
+                if isinstance(deps, dict):
+                    ranges += [f"{safe_name(k)}@{clean_text(str(v), 30)}" for k, v in deps.items()
+                               if not re.fullmatch(r"v?\d+\.\d+\.\d+(?:[-+][\w.]+)?", str(v).strip())]
+            if ranges:
+                self.add("mcp-unpinned-package", "medium", prel, 0,
+                         f"{name}: {tool} {script} runs an install with version ranges ({', '.join(ranges[:4])})")
+        for m in re.finditer(r"\b(?:npx|bunx|pnpx|uvx|pipx\s+run|(?:npm|pnpm|yarn|bun)\s+(?:exec|dlx|x))\s+"
+                             r"((?:-{1,2}[\w-]+\s+){0,4})([^\s;&|]+)", body):
+            spec = m.group(2)
+            pinned = (re.search(r"@v?\d+\.\d+\.\d+(?:[-+][\w.]+)?$", spec) or re.search(r"==\s*\d", spec)
+                      or spec.startswith((".", "/", "$")))
+            if not pinned:
+                self.add("mcp-unpinned-package", "medium", prel, 0,
+                         f"{name}: {tool} {script} calls {clean_text(m.group(0), 80)}")
 
     def _mcp_secrets(self, rel, name, conf, args, url):
         find = core().find_secrets
@@ -845,6 +962,7 @@ class PluginScan:
             keep = []
             for d in sorted(dirnames):
                 full = os.path.join(dirpath, d)
+                self._check_name(full, d)
                 if is_link(full):
                     self._link(full)
                 elif d not in SKIP_DIRS:
@@ -852,6 +970,7 @@ class PluginScan:
             dirnames[:] = keep
             for name in sorted(filenames):
                 full = os.path.join(dirpath, name)
+                self._check_name(full, name)
                 if is_link(full):
                     self._link(full)
                     continue
@@ -867,6 +986,13 @@ class PluginScan:
                     self.add("unreadable-file", "info", self.rel(full), 0, type(exc).__name__)
             if stop:
                 break
+
+    def _check_name(self, full, name):
+        """A newline, control, bidi or invisible character in a file or folder name can forge card text."""
+        m = BAD_NAME_RX.search(name)
+        if m:
+            self.add("hidden-unicode", "high", self.rel(full), 0,
+                     f"U+{ord(m.group(0)):04X} in a file or folder name: {make_evidence(name[:200])}")
 
     def _link(self, full):
         rel = self.rel(full)
@@ -905,15 +1031,17 @@ class PluginScan:
         low = text.lower()
         if is_code:
             self.scripts += 1
-        self._secrets(rel, text)
+        self._secrets(rel, text, is_md)
         self._hidden(rel, text, is_code)
         if is_code:
-            self.apply(CODE_RULES, rel, text, low)
+            shell = ext in SHELL_EXT or (not ext and re.match(r"#![^\n]*\b(?:ba|z|k|da)?sh\b", text) is not None)
+            self.apply(CODE_RULES + ((DOWNLOAD_EXEC_SHELL,) if shell else (DOWNLOAD_EXEC_PROGRAM,)), rel, text, low)
             self.apply((DYNAMIC_EXEC_PY,) if ext in (".py", ".pyw") else
                        (DYNAMIC_EXEC_JS,) if ext in (".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx")
                        else (), rel, text, low)
         if surface:
-            self.apply(SURFACE_RULES, rel, text, low)
+            self.apply(SURFACE_RULES, rel, text, low,
+                       downgrade={"instruction-override": fixture_fence_lines(text)})
             self._front_matter_tools(rel, text)
             if "commands" in parts[:-1]:
                 m = INLINE_SHELL_RX.search(text)
@@ -932,7 +1060,9 @@ class PluginScan:
                 if len(self.hosts) >= MAX_HOSTS:
                     break
 
-    def apply(self, rules, rel, text, low):
+    def apply(self, rules, rel, text, low, downgrade=None):
+        """Run line rules. A check may return a severity string instead of True; `downgrade` maps a rule id
+        to line numbers where a high finding is reported as medium."""
         active = [r for r in rules if any(k in low for k in r.keys)]
         if not active:
             return
@@ -942,10 +1072,17 @@ class PluginScan:
                 if not any(k in seg_low for k in rule.keys):
                     continue
                 m = rule.rx.search(seg)
-                if m and (rule.check is None or rule.check(seg, m)):
-                    self.add(rule.rid, rule.severity, rel, lineno, make_evidence(seg, m.group(0), m.start()))
+                if not m:
+                    continue
+                verdict = True if rule.check is None else rule.check(seg, m)
+                if not verdict:
+                    continue
+                severity = verdict if isinstance(verdict, str) else rule.severity
+                if severity == "high" and lineno in (downgrade or {}).get(rule.rid, ()):
+                    severity = "medium"
+                self.add(rule.rid, severity, rel, lineno, make_evidence(seg, m.group(0), m.start()))
 
-    def _secrets(self, rel, text):
+    def _secrets(self, rel, text, is_md=False):
         """Format-specific tokens are high anywhere; keyword assignments are high in shipped code and
         config, medium in tests, and info (secret-example) when the value is an obvious stand-in."""
         kb_core = core()
@@ -957,12 +1094,16 @@ class PluginScan:
             spans = kb_core.find_secret_spans(seg)
             if not spans:
                 continue
-            real = [(n, a, b) for n, a, b in spans if n in STRONG_SECRET_RULES or not example_value(seg[a:b])]
+            real = [(n, a, b) for n, a, b in spans
+                    if n in STRONG_SECRET_RULES or not example_value(seg[a:b], seg[max(0, a - 60):a])]
             names = ", ".join(dict.fromkeys(n for n, _a, _b in (real or spans)))
             if not real:
                 self.add("secret-example", "info", rel, lineno, f"{names}: {make_evidence(seg)}")
             elif in_tests:  # fixtures of a plugin's own tests: reviewed, not blocked
                 self.add("secret", "medium", rel, lineno, f"{names} (test or example file): {make_evidence(seg)}")
+            elif is_md and all(n not in STRONG_SECRET_RULES for n, _a, _b in real):
+                # a keyword assignment in documentation is usually a sample; a token format still blocks
+                self.add("secret", "medium", rel, lineno, f"{names} (documentation): {make_evidence(seg)}")
             else:
                 self.add("secret", "high", rel, lineno, f"{names}: {make_evidence(seg)}")
             found += 1
@@ -979,15 +1120,20 @@ class PluginScan:
             nxt = text[pos + 1] if pos + 1 < len(text) else ""
             if ch == "\ufeff" and is_code and (prev in "\"'" or nxt in "\"'"):
                 continue  # a byte-order mark written as test data inside a string literal
+            if "\ufe00" <= ch <= "\ufe0f" and prev and (ord(prev) >= 0x2000 or nxt == "\u20e3"):
+                continue  # variation selector after a symbol or emoji (text or emoji presentation)
             if ch == "\u200d" and (_emoji(prev) or _emoji(nxt)):
                 continue  # emoji sequence joiner
             if ch in "\u200c\u200d\u200e\u200f" and (_script_letter(prev) or _script_letter(nxt)):
                 continue  # joiners and direction marks inside non-Latin script text
             line = text.count("\n", 0, pos) + 1
             start = text.rfind("\n", 0, pos) + 1
-            # a plugin's own tests often carry hostile characters as fixtures: reviewed, not blocked
-            self.add("hidden-unicode", "medium" if is_test_path(rel) else "high", rel, line,
-                     f"U+{ord(ch):04X}: " + escape_hidden(text[start:start + 200].split("\n", 1)[0]))
+            end = text.find("\n", pos)
+            segment = text[max(start, pos - 2000):(end if end != -1 else len(text))][:4096]
+            # a plugin's own tests often carry hostile characters as fixtures: reviewed, not blocked;
+            # tag characters (invisible text) stay high everywhere
+            severity = "medium" if is_test_path(rel) and not TAG_RX.match(ch) else "high"
+            self.add("hidden-unicode", severity, rel, line, f"U+{ord(ch):04X}: " + make_evidence(segment, ch))
             reported += 1
             if reported >= MAX_PER_RULE_FILE:
                 break
@@ -1021,12 +1167,16 @@ class PluginScan:
                 full = os.path.join(base, child)
                 if not is_link(full) and os.path.isfile(os.path.join(full, "SKILL.md")):
                     skill_dirs.append(full)
+                if len(skill_dirs) > MAX_CAPABILITIES:
+                    break
         seen = set()
         for d in skill_dirs:
             key = os.path.normcase(d)
             if key in seen:
                 continue
             seen.add(key)
+            if not self._room():
+                return
             md = os.path.join(d, "SKILL.md")
             front = self._front(md)
             name = safe_name(front.get("name") or os.path.basename(d), "skill")
@@ -1040,8 +1190,18 @@ class PluginScan:
                     name = safe_name(front.get("name") if kind == "agent" and front.get("name") else stem, kind)
                     if name in names:
                         continue
+                    if not self._room():
+                        return
                     names.add(name)
                     target.append(self._cap(kind, plugin, name, front, md))
+
+    def _room(self) -> bool:
+        """Capability inventory cap (skills + commands + agents + MCP servers) with one finding when hit."""
+        if len(self.skills) + len(self.commands) + len(self.agents) + len(self.mcp) < MAX_CAPABILITIES:
+            return True
+        self.add("capability-limit-reached", "medium", "", 0,
+                 f"more than {MAX_CAPABILITIES} capabilities; the rest is not catalogued")
+        return False
 
     def _md_files(self, base):
         if os.path.isfile(base) and base.lower().endswith(".md") and not is_link(base):
@@ -1075,7 +1235,7 @@ class PluginScan:
         full = clean_text(raw, 5000)
         handle = f"/{plugin}:{name}" if kind == "command" else f"{plugin}:{name}"
         return {"type": kind, "name": name, "handle": handle, "description": clean_text(raw, self.desc_chars),
-                "path": self.rel(md), "_full": full}
+                "path": clean_text(self.rel(md), 200), "_full": full}
 
     def _protective(self) -> bool:
         guard_events = {"PreToolUse", "Stop", "SubagentStop", "PermissionRequest"}
@@ -1091,9 +1251,12 @@ STRONG_SECRET_RULES = {"aws-access-key-id", "private-key", "github-token", "slac
 _WORDY_VALUE = re.compile(r"[A-Za-z]{1,40}\d{0,6}(?:[-_:./](?:[A-Za-z]{1,40}\d{0,6}|\d{1,6})){0,10}")
 
 
-def example_value(value: str) -> bool:
-    """A keyword-assignment value that is a stand-in, not a credential: elided, templated, or plain words."""
+def example_value(value: str, context: str = "") -> bool:
+    """A keyword-assignment value that is a stand-in, not a credential: elided, templated, plain words, or
+    named (value or key just before it) fake, dummy or example."""
     value = value.rstrip(";,")
+    if re.search(r"(?i)fake|dummy|example|sample|placeholder", value + " " + context[-40:]):
+        return True
     if any(mark in value for mark in ("...", "…", "{", "}", "$", "%", "<", ">", "*")):
         return True
     return _WORDY_VALUE.fullmatch(value) is not None or len(set(value.lower())) < 8
@@ -1372,10 +1535,10 @@ def build_catalog(groups: dict, out_dir: Path, cfg, scan=True, progress=None) ->
             entry = catalog_entry(result, tool, meta, generated, scan)
             stem = entry["plugin"]
             n = 2
-            while stem in used:
+            while stem.lower() in used:  # file systems may ignore case: Demo.md and demo.md are one file
                 stem = f"{entry['plugin']}-{n}"
                 n += 1
-            used.add(stem)
+            used.add(stem.lower())
             card = folder / f"{stem}.md"
             card.write_text(card_text(entry, generated), encoding="utf-8")
             entry["card"] = f"catalog/{tool}/{stem}.md"
@@ -1385,7 +1548,7 @@ def build_catalog(groups: dict, out_dir: Path, cfg, scan=True, progress=None) ->
             if progress:
                 progress(entry)
         for old in sorted(folder.glob("*.md")):
-            if old.stem not in used and is_generated_card(old):
+            if old.stem.lower() not in used and is_generated_card(old):
                 old.unlink()
         catalog["tools"][tool] = generated
     catalog.update({"version": CATALOG_VERSION, "generated": generated, "plugins": plugins})
@@ -1522,6 +1685,17 @@ def _copy_plugin(src: Path, dest: Path) -> None:
     shutil.copytree(src, dest, symlinks=True, ignore=shutil.ignore_patterns(".git"))
 
 
+def no_link_between(base: Path, target: Path) -> bool:
+    """True when no component from `base` down to `target` is a symlink or junction and the real path of
+    `target` stays inside the real path of `base`."""
+    probe = Path(target)
+    while within(str(base), str(probe)) and os.path.normcase(str(probe)) != os.path.normcase(str(base)):
+        if is_link(probe):
+            return False
+        probe = probe.parent
+    return within(os.path.realpath(base), os.path.realpath(target))
+
+
 def check_url(url: str, allowed) -> str:
     parsed = urllib.parse.urlsplit(url)
     if parsed.scheme != "https":
@@ -1552,7 +1726,7 @@ def git_fetch(url, sha, ref, tmp: Path) -> None:
         base = ["git", "-c", f"core.hooksPath={empty.as_posix()}", "-c", "protocol.allow=never",
                 "-c", "protocol.https.allow=always", "-c", "submodule.recurse=false", "-c", "filter.lfs.smudge=",
                 "-c", "filter.lfs.process=", "-c", "filter.lfs.required=false", "-c", "core.fsmonitor=false",
-                "-c", "advice.detachedHead=false"]
+                "-c", "advice.detachedHead=false", "-c", "http.followRedirects=false"]
         env = dict(os.environ, GIT_LFS_SKIP_SMUDGE="1", GIT_TERMINAL_PROMPT="0")
         steps = [
             base + ["init", "--quiet", f"--template={empty.as_posix()}", tmp.as_posix()],
@@ -1602,11 +1776,8 @@ def cmd_fetch(args) -> int:
             src = Path(os.path.normpath(mdir / rel))
             if not within(str(mdir), str(src)) or not src.is_dir():
                 raise Refused(f"in-repo source missing or outside the marketplace: {info['path'][:120]}")
-            probe = src
-            while within(str(mdir), str(probe)) and probe != mdir:
-                if is_link(probe):
-                    raise Refused("in-repo source path goes through a symlink")
-                probe = probe.parent
+            if not no_link_between(mdir, src):
+                raise Refused("in-repo source path goes through a symlink")
             _copy_plugin(src, dest)
         elif info["type"] in ("url", "github", "git-subdir"):
             check_url(info["url"], allowed)
@@ -1628,8 +1799,8 @@ def cmd_fetch(args) -> int:
                     err(f"git failed: {exc}")
                     return EXIT_GIT
                 src = Path(os.path.normpath(tmp / sub)) if sub else tmp
-                if not within(str(tmp), str(src)) or not src.is_dir() or is_link(src):
-                    raise Refused(f"subdirectory not found in the fetched commit: {sub}")
+                if not within(str(tmp), str(src)) or not no_link_between(tmp, src) or not src.is_dir():
+                    raise Refused(f"subdirectory missing or reached through a symlink in the fetched commit: {sub}")
                 _copy_plugin(src, dest)
             finally:
                 _rmtree(tmp)
@@ -1702,9 +1873,9 @@ def cmd_plan(args) -> int:
             err(f"unknown plugin (not in the marketplace): {name}")
             return EXIT_NONE
         market = market or safe_name(data.get("name"), DEFAULT_MARKETPLACE)
-    if not market:
+    if not market:  # add never consults the catalog; remove uses the marketplace the plugin came from
         origins = [p.get("origin") for p in entries if p.get("origin") not in (None, "local", "unknown")]
-        market = origins[0] if origins else DEFAULT_MARKETPLACE
+        market = origins[0] if origins and args.action == "remove" else DEFAULT_MARKETPLACE
     tools = sorted({p["tool"] for p in entries}) if args.action == "remove" else detected_tools(cfg)
     out(f"plan: {args.action} {name}@{market} (printed only; nothing is run)")
     for tool in tools:

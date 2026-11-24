@@ -41,9 +41,11 @@ Exit codes used below: `0` ok, `2` usage, `3` refused, `4` any `block`,
 
 1. Candidate needs come from the request, from run records where no capability
    fit, and from `INTENTS.md` misses (asks with no route).
-2. Clone or update the marketplace repository read-only into a data folder,
-   then `plugins.py marketplace <marketplace-dir> --query "<need>"` (or
-   `--all`). It lists entries not yet in the catalog, with source type:
+2. Get a local copy of the marketplace repository (for example
+   `git clone --depth 1 <marketplace-url> <folder>` outside this repository;
+   this download needs the owner's go-ahead like any other external action)
+   and point `plugins.py marketplace <folder>` at it, with `--query "<need>"`
+   or `--all`. It lists entries not yet in the catalog, with source type:
    `in-repo`, or outside the repository with or without a pinned `sha`.
 3. Marketplace and directory listings are discovery inputs, not trusted
    install targets (`skills/external-skill-intake/SKILL.md`, "Plugins").
@@ -56,7 +58,7 @@ Exit codes used below: `0` ok, `2` usage, `3` refused, `4` any `block`,
 2. Exit `3`: refused (no pinned `sha`, host not allowed, unsafe path). Do not
    pass `--allow-unpinned` unless the owner approves that plugin by name after
    seeing the reason. Exit `6`: git failed; report it, do not retry with other
-   transports.
+   transports. Exit `7`: name not in the marketplace.
 3. Never execute, import, source, or install anything from quarantine.
 
 ## Phase 4 - Scan and review
@@ -66,7 +68,9 @@ Exit codes used below: `0` ok, `2` usage, `3` refused, `4` any `block`,
 2. `block`: reject. Record it in Phase 6 and stop for that plugin.
 3. `review`: a read-only reviewer other than the producer reads every finding
    in context and returns accept or reject per finding, with a reason. A
-   rejected finding makes the plugin a reject.
+   rejected finding makes the plugin a reject. Tier 3 (community or unknown
+   source) also needs the owner's approval by name
+   (`rules/plugin-governance.md` § 3).
 4. Also run the content checks in `skills/external-skill-intake/SKILL.md`
    ("Plugins") for what the scanner cannot judge: purpose of hooks, MCP
    targets, license, and author.
@@ -93,26 +97,30 @@ owner approves in Phase 7.
 
 ## Phase 7 - Install (owner-run or authorized)
 
-1. `plugins.py plan add <name>[@marketplace]` prints, never runs, the install
-   step per detected tool: CLI commands for a CLI tool, an install card or
+1. `plugins.py plan add <name>[@marketplace] --marketplace-dir <dir>` prints,
+   never runs, the install step for every tool detected: CLI commands for a CLI tool, an install card or
    account-setting note for a hosted app, a manual step for others.
 2. Show the plan with the verdict and decision. The owner runs it, or
    authorizes the agent to run the CLI commands for named tools.
-3. Exit `7`: the plugin is unknown to the catalog or marketplace; recheck the
-   name and marketplace.
+3. Exit `7`: with `--marketplace-dir`, the name is not in that marketplace
+   (for remove: not in the catalog). Without `--marketplace-dir`, add assumes
+   marketplace `claude-plugins-official` unless you write
+   `<name>@<marketplace>`; pass the real marketplace.
 
 ## Phase 8 - Re-catalog and index
 
 1. `plugins.py catalog --auto` again, so the new plugin has a card and its
    installed copy is scanned (the installed copy can differ from quarantine).
-2. Refresh the knowledge base so the `plugins` source sees the new cards
-   (`skills/knowledge-base/SKILL.md`).
+2. `catalog` already asks the knowledge base to rescan; if it printed
+   `service unreachable`, start the service (`kb.py up`) so the next scan
+   indexes the cards.
 
 ## Phase 9 - Removal proposals
 
 1. Candidates: `block` verdicts, plugins that duplicate a toolkit asset or
    another plugin, and plugins no task selected, weighed by `listing_chars`.
-2. `plugins.py plan remove <name>` prints the removal step. Exit `3`: the
+2. `plugins.py plan remove <name>` prints the removal step for each tool
+   whose catalog entry has the plugin. Exit `3`: the
    plugin is protective; stop. Pass `--i-understand` only on an explicit owner
    instruction naming that plugin.
 3. Present every removal as a proposal with its reason; the owner confirms
@@ -134,6 +142,6 @@ numbers, and reusable findings as `knowledge:` lines
 
 ## Known pitfalls
 
-- A `pass` verdict on the quarantine copy does not cover the installed copy: an install can resolve a newer revision. Re-scan after install (Phase 8) before first use. (sig: wrong-assumption/quarantine-scan-taken-as-installed-scan)
-- A marketplace entry whose source lives outside the marketplace repository is not reviewed by that marketplace's pin: without a pinned `sha` its content can change after review. Fetch refuses it by default; keep that default. (sig: security/unpinned-outside-source-trusted)
-- A hosted app shows plugin capabilities in the session, but the agent cannot install or remove them there; plan the owner's action instead of reporting success. (sig: wrong-assumption/hosted-app-install-taken-as-agent-action)
+- Re-scan the installed copy after install (Phase 8); a pass on the quarantine copy does not cover it, because an install can resolve a newer revision. (sig: wrong-assumption/quarantine-scan-taken-as-installed-scan)
+- Keep the fetch refusal for unpinned outside entries: a marketplace entry whose source lives outside the marketplace repository can change after review unless it is pinned to a `sha`. (sig: security/unpinned-outside-source-trusted)
+- Plan the owner's action; do not report an install in a hosted app as done, because the agent cannot install or remove plugins there. (sig: wrong-assumption/hosted-app-install-taken-as-agent-action)

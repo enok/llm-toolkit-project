@@ -5,7 +5,7 @@ description: Decide which capability (toolkit asset or installed plugin) serves 
 
 # Plugin Governance
 
-A plugin is a third-party bundle that an LLM tool loads: skills, commands, agents, hooks, and MCP servers. This rule decides when plugin capabilities may be used, added, or removed. The procedure is `workflows/plugin-intake.md`; the CLI is `scripts/plugins.py` (reference: `docs/plugins.md`); install-state inventory is `skills/llm-toolchain-provisioning/SKILL.md`; source and content review is `skills/external-skill-intake/SKILL.md`.
+A plugin is a third-party bundle that an LLM tool loads: skills, commands, agents, hooks, and MCP servers. This rule decides when plugin capabilities may be used, added, or removed. Owner = the user who approves external changes. The procedure is `workflows/plugin-intake.md`; the CLI is `scripts/plugins.py` (reference: `docs/plugins.md`); install-state inventory is `skills/llm-toolchain-provisioning/SKILL.md`; source and content review is `skills/external-skill-intake/SKILL.md`.
 
 ## 1. Authority order
 
@@ -60,7 +60,7 @@ Order the candidates by, in turn:
 - Downloads into quarantine, installs, removals, and account or marketplace settings are external writes under `rules/external-write-authorization.md`: each is bound to a current owner instruction naming the plugin and the tool.
 - Third-party code is never executed, imported, sourced, or installed during evaluation; quarantine copies are read as data only.
 - A removal is always a proposal: `plugins.py plan remove` prints it, the owner confirms it, and the owner (or an authorized step) runs it.
-- **Protective plugins** (catalog entry `protective: true`, whose hooks block or review unsafe actions) are never removed, disabled, or weakened on the agent's initiative, including for context economy. Only an explicit owner instruction naming the plugin does that.
+- **Protective plugins** (catalog entry `protective: true`, whose hooks block or review unsafe actions; detected by a heuristic, so check `plugins.py status` before relying on it) are never removed, disabled, or weakened on the agent's initiative, including for context economy. Only an explicit owner instruction naming the plugin does that.
 - Every add, keep, remove, or reject is recorded with `plugins.py decide`.
 
 ## 5. Context economy

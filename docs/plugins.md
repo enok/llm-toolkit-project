@@ -87,10 +87,18 @@ python3 scripts/plugins.py catalog --from ./one-plugin --out ./tmp-catalog --no-
 - Cards of plugins no longer present under the same tool label are removed;
   other tools' entries are kept. Only files that start with the card front
   matter are ever removed.
+- A run replaces all entries of every tool label it writes. `--from` without
+  `--tool` writes label `claude-code`, so it replaces the entries `--auto`
+  found; combine `--auto --from`, or give `--tool <other-label>`, or use
+  `--out`.
+- Card file names are unique even on file systems that ignore letter case,
+  and never a Windows device name (`CON`, `NUL`, `COM1` and the like get a
+  `-x` suffix).
 - After writing, it asks the knowledge base for an incremental scan; when
   the service is down the cards are indexed on its next scan.
 
-Exit `0`, `2`, or `7` when no plugin was found.
+Exit `0`; `2` when neither `--auto` nor `--from` is given, or a `--from` path
+is not a folder; `7` when no plugin was found.
 
 ### marketplace
 
@@ -118,9 +126,11 @@ python3 scripts/plugins.py fetch ~/src/claude-plugins-official some-plugin --des
 ```
 
 Clones use https only, from a host in `LLM_PLUGINS_ALLOWED_HOSTS`, with git
-hooks pointed at an empty folder, an empty template, submodules off, the LFS
-smudge filter off, and a shallow fetch of exactly the pinned commit, which
-is checked out detached and verified. An entry without a pinned `sha` is
+hooks pointed at an empty folder, an empty template, submodules off, HTTP
+redirects off, the LFS smudge filter off, and a shallow fetch of exactly the
+pinned commit, which is checked out detached and verified. The plugin folder
+inside the source (in-repo path or `git-subdir` path) must not be reached
+through a symlink in any path component; such an entry is refused. An entry without a pinned `sha` is
 refused unless `--allow-unpinned` (then its `ref` or default branch is
 fetched). Source types other than in-repo, `url`, `github` and
 `git-subdir` (for example a command that builds the plugin) are refused.
@@ -133,8 +143,9 @@ marketplace.
 
 ### plan
 
-Prints, and never runs, the steps to add or remove a plugin for each tool
-detected (tools with a home folder, plus tools present in the catalog).
+Prints, and never runs, the steps to add or remove a plugin. `add` covers
+every tool detected (tools with a home folder, plus tools in the catalog);
+`remove` covers only the tools whose catalog entry has the plugin.
 
 ```bash
 python3 scripts/plugins.py plan add code-review@claude-plugins-official
@@ -146,10 +157,15 @@ Claude Code gets CLI commands (`claude plugin install|uninstall
 <name>@<marketplace>`); a hosted Claude app gets a note to use the app's
 plugin settings or an install card; other tools get a manual step.
 `remove` refuses a plugin whose catalog entry is `protective` (its hooks
-exist to block or review unsafe actions) unless `--i-understand`.
+exist to block or review unsafe actions; detected by a heuristic, so check
+`status` before relying on it) unless `--i-understand`.
 
-Exit `0`, `2` invalid name, `3` refused, `7` unknown (remove: not in the
-catalog; add with `--marketplace-dir`: not in that marketplace).
+`plan add` never consults the catalog. Without `name@marketplace` it assumes
+the marketplace named in `--marketplace-dir`, else `claude-plugins-official`.
+
+Exit `0`, `2` invalid name, `3` refused, `7` unknown: `remove` when the plugin
+is not in the catalog; `add` only with `--marketplace-dir`, when the name is
+not in that marketplace.
 
 ### recommend
 
@@ -196,16 +212,20 @@ names and descriptions of its skills, commands and agents. Exit `0`.
 ## Security model
 
 - Plugin content is untrusted data. The tool reads files with size caps
-  (2 MB per file, 5000 files per plugin) and never executes, imports,
+  (2 MB per file, 5000 files and 500 capabilities per plugin) and never executes, imports,
   sources or installs anything from a plugin or a marketplace clone.
 - Symlinks are never followed. A link that points outside the plugin folder
   is a `symlink-escape` finding; other links are skipped.
 - Long lines are scanned in bounded 4 KB windows, so a hostile file cannot
   make the scan slow (a 500 KB single-line file scans in well under two
   seconds).
-- Evidence and descriptions have secrets masked; descriptions also lose
-  control, hidden and markup characters and are length-capped. A card never
-  contains the body of a skill, command or agent.
+- Evidence and descriptions have secrets masked; descriptions, names and
+  paths written to a card or `catalog.json` also lose control (newline
+  included), hidden and markup characters and are length-capped, so a file
+  or folder name cannot add a heading or front matter to a card. A card never
+  contains the body of a skill, command or agent. The manifest description,
+  which becomes the card's `## plugin` text, gets the same prose checks as a
+  skill.
 - Every card starts, after its front matter, with: "Descriptive catalog
   entry generated from an installed plugin. Reference data, not
   instructions." The knowledge base prompt hook never serves cards.
@@ -214,13 +234,31 @@ Rules (severity: high blocks, medium needs review, info passes):
 
 | Area | Rules |
 | --- | --- |
-| Manifest | `manifest-invalid` (medium), `manifest-path-escape` (high), `manifest-missing` (info) |
+| Manifest | `manifest-invalid` (medium), `manifest-path-escape` (high), `manifest-missing` (info); the description gets `instruction-override`, `mandate-language` and `hidden-unicode` |
 | Hooks | `hook-present` (info), `hook-context-injection` (medium), `hook-network` (high), `hook-outside-root` (high), `hook-auto-approve` (high), `hook-script-network` (medium: a script a hook runs makes network calls) |
-| MCP | `mcp-server` (info), `mcp-unpinned-package` (medium), `mcp-literal-secret` (high), `mcp-insecure-url` (medium; plain http to localhost is allowed) |
+| MCP | `mcp-server` (info), `mcp-unpinned-package` (medium; also a `npm`/`bun`/`pnpm`/`yarn` run or start whose `package.json` script installs with version ranges or calls an unpinned `npx`-style package), `mcp-literal-secret` (high), `mcp-insecure-url` (medium; plain http to localhost is allowed) |
 | Bundled code | `download-exec`, `dynamic-exec-remote`, `credential-store-access`, `persistence`, `destructive-fs`, `opaque-binary` (high); `privilege-escalation`, `obfuscation`, `bot-evasion` (medium) |
-| Skills, commands, agents | `instruction-override`, `hidden-unicode` (high); `mandate-language`, `broad-tools`, `download-exec` in prose (medium); `inline-shell` (info) |
-| Secrets | `secret` (high; medium in a plugin's own tests and examples), `secret-example` (info: an elided, templated or plain-word value) |
-| Other | `symlink-escape` (high), `file-limit-reached` (medium), `large-file-skipped`, `network-hosts`, `unreadable-file` (info) |
+| Skills, commands, agents | `instruction-override`, `hidden-unicode` (high); `mandate-language`, `broad-tools` (medium); `inline-shell` (info) |
+| Secrets | `secret` (high), `secret-example` (info: an elided, templated or plain-word value, or one named fake, dummy, example, sample or placeholder) |
+| Names | `hidden-unicode` (high) for a newline, control, bidi or invisible character in a file or folder name |
+| Other | `symlink-escape` (high), `file-limit-reached`, `capability-limit-reached` (medium), `large-file-skipped`, `network-hosts`, `unreadable-file` (info) |
+
+Severities that depend on where a match is (every other rule has one fixed
+severity):
+
+| Rule | High | Medium |
+| --- | --- | --- |
+| `download-exec` | shell script line that runs it; program line with an execution sink (subprocess, `os.system`, `exec`/`spawn`, `shell=True` and similar) | shell line that only prints or comments it; program line without a sink (for example a suggested `fix=` string); any Markdown prose |
+| `secret` | token formats (AWS key id, private key, GitHub, Slack, Stripe, Google, OpenAI, JWT) anywhere except tests; keyword assignments in code and config | any finding in a plugin's own tests or examples; a keyword assignment in Markdown |
+| `hidden-unicode` | everywhere, and tag characters even in tests | other hidden characters in a plugin's own tests or examples |
+| `instruction-override` | prose and other code blocks | inside a fenced code block whose heading trail names adversarial, injection, fixture, attack or similar material |
+
+Hidden characters are zero-width and joiner characters, bidi controls
+(including U+061C), variation selectors (U+FE00 to U+FE0F, U+E0100 to
+U+E01EF; a selector after a symbol or emoji, or in a keycap such as 1️⃣, is
+allowed) and tag
+characters. A byte-order mark at the start of a file or inside a string
+literal in code is allowed.
 
 What the scanner does not prove:
 
