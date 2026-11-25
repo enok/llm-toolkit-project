@@ -133,6 +133,7 @@ Then verify:
 - When a validator hangs or times out, reproduce and fix the validator (for example batch large file lists with `find -print0 | xargs -0`) and prove the fix on a large synthetic input; do not skip it or call the hang environmental. See `learnings/hanging-validator-trains-agents-to-skip-validation.md`.
 - When a Cowork session cannot read `skills/` or `tool-subagents/` through the device bridge ("Permission denied"), read the toolkit from a shallow cloud clone and push from a fresh `origin/main` worktree on the PC via Desktop Commander; never touch the user's own dirty clone, and still present learnings before commit and merge only with explicit approval. See `learnings/cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md`.
 - When you edit a `tool-subagents/<name>.md` prompt, copy its body into `developer_instructions` in `tool-subagents/<name>.toml` by hand (no command regenerates it), then re-run `npm run subagents:check` and treat a "developer_instructions diverge" warning as a defect to fix. See `learnings/agent-manifest-body-has-no-generator.md`.
+- When a skill, rule or document says a script checks, refuses, verifies or guards something, point to the lines or test that implement it before shipping; if none exist, implement the guard or rewrite the sentence as a manual step. See `learnings/documented-guard-must-exist-in-code.md`. (sig: quality-defect/doc-claimed-guard-code-lacks)
 
 ---
 
