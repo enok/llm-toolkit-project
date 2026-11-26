@@ -143,6 +143,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Which plugins are installed" / "reproduce my assistant setup" | **llm-toolchain-provisioning** skill |
 | "Split this across agents" / "which model per task" / "LOA mode" | **agent-orchestrator** skill, **model-selector** skill, **agent-orchestrator-validation** workflow |
 | "Save tokens" / "compact command output" | **token-efficiency** skill |
+| "Be terse" / "caveman" / "short answers" / "less tokens" | **terse-output** skill |
 | "Create a specialist agent" / "improve the specialist" | **specialist-agent-factory** / **specialist-agent-evolution** workflows + skill |
 | "Compact this chat" / "mine chat history into assets" | **context-compaction** / **chat-knowledge-curation** workflows |
 | "What do we know about X" / "save this knowledge" / "keep the knowledge base in sync" | **knowledge-base** skill, **knowledge-base-sync** workflow, under `rules/knowledge-base.md` |
@@ -225,6 +226,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **model-selector** | Assign every task a complexity tier, concrete model, effort, and token band before it runs; audit finished task tables for overspend |
 | **specialist-agent-factory** | Create or update reusable specialist agents (subagent prompt, validation/evolution workflows, skill entrypoint, routing, provider overlays) |
 | **token-efficiency** | Reduce token consumption: command-output compaction (RTK), `gh --json`/`jq` field selection, ripgrep budgeting, ast-grep, repomix packing |
+| **terse-output** | Terse reply style that keeps every technical fact (vendored Apache-2.0 derivative): answer first, no filler; code, commands, errors, security warnings, irreversible-action confirmations and owner reports stay exact and in full sentences |
 | **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |

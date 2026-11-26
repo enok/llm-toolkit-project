@@ -119,6 +119,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | validate the orchestration / LOA mode / long-running autonomous work | `agent-orchestrator-validation` | workflow | `agent-orchestrator`, `agent-orchestrator-evolution` |
 | judge subagent results / produce-validate-refine loop | `task-quality-loop` | workflow | `task-quality-judge`, `verifier` |
 | save tokens / reduce context usage / compact command output | `token-efficiency` | skill | `context-compaction` |
+| be terse / caveman mode / short answers / fewer words | `terse-output` | skill | `token-efficiency` |
 | compact this chat / preserve context / create a handoff | `context-compaction` | workflow | `chat-knowledge-curation`, `capture-learning` |
 | mine chat history / memory / automation runs into durable assets | `chat-knowledge-curation` | workflow + skill | `toolkit-maintenance`, `self-improvement` |
 | create a specialist agent / specialist factory | `specialist-agent-factory` | workflow + skill | `llm-context-engineering`, `tool-subagents/README.md` |
