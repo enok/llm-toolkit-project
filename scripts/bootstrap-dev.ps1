@@ -7,7 +7,18 @@
 # POSIX/Git Bash: scripts/bootstrap-dev.sh - same behavior via brew/apt/dnf.
 #
 # Usage: ./scripts/bootstrap-dev.ps1 [-Minimal] [-Full] [-Agent claude|codex|gemini|all]
-#                                    [-Consumer <path>] [-NoKb] [-KbDataDir <path>] [-DryRun]
+#                                    [-Consumer <path>] [-NoKb] [-KbDataDir <path>]
+#                                    [-SecurityTools] [-Rtk] [-DryRun]
+#
+# Opt-in switches (both off by default):
+#   -SecurityTools  Installs the security-check toolchain: winget shellcheck, actionlint,
+#                   hadolint, syft, grype, trivy, gitleaks, osv-scanner; pip (user scope)
+#                   semgrep, yamllint, pip-audit, checkov, skillspector==2.13.7;
+#                   PSScriptAnalyzer via Install-Module. trufflehog has no winget package
+#                   and is listed under manual actions.
+#   -Rtk            Installs only the reviewed RTK 1.2.1 (winget --exact, then winget pin
+#                   add). See skills/token-efficiency/references/rtk-reviewed-deployment.md.
+#                   Without -Rtk, an existing rtk is only given the privacy environment.
 #
 # The knowledge-base step (scripts/kb.py init, up --build, index, schedule install)
 # runs after the tool installs unless -Minimal or -NoKb is given; -KbDataDir sets
@@ -27,6 +38,8 @@ param(
     [string]$Consumer,
     [switch]$NoKb,
     [string]$KbDataDir,
+    [switch]$SecurityTools,
+    [switch]$Rtk,
     [switch]$DryRun
 )
 
@@ -94,6 +107,31 @@ function Install-NpmGlobal([string]$check, [string]$label, [string]$package) {
     if ($npmExit -eq 0) { $installed.Add($label) } else { $manual.Add("$label (npm exit $npmExit)") }
 }
 
+function Install-PipTool([string]$check, [string]$label, [string]$spec) {
+    if (Test-Command $check) {
+        $skipped.Add("$label (already installed)")
+        return
+    }
+    $pipCmd = if (Test-Command 'pip') { 'pip' } elseif (Test-Command 'pip3') { 'pip3' } else { $null }
+    if (-not $pipCmd) {
+        $manual.Add("$label (needs pip first: pip install --user $spec)")
+        return
+    }
+    if ($DryRun) {
+        Write-Host "[dry-run] $pipCmd install --user $spec"
+        return
+    }
+    Write-Host "+ $pipCmd install --user $spec"
+    $eap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & $pipCmd install --user $spec
+    $pipExit = $LASTEXITCODE
+    $ErrorActionPreference = $eap
+    if ($pipExit -eq 0) { $installed.Add($label) } else { $manual.Add("$label (pip exit $pipExit)") }
+}
+
+$rtkReviewedVersion = '1.2.1'
+
 Write-Host "== LLM toolkit bootstrap (profile: $profileName) =="
 
 # ---------- core tools (every profile) ----------
@@ -109,7 +147,11 @@ Install-WingetTool 'gh' 'GitHub CLI' 'GitHub.cli'
 
 if ($profileName -ne 'minimal') {
     Install-WingetTool 'aws' 'AWS CLI v2' 'Amazon.AWSCLI'
-    Install-WingetTool 'mvn' 'Maven' 'Apache.Maven'
+    if (Test-Command 'mvn') {
+        $skipped.Add('Maven (already installed)')
+    } else {
+        $manual.Add('Maven — no winget package; download from https://maven.apache.org/download.cgi and add bin to PATH')
+    }
     # Token-efficiency tools (see skills/token-efficiency/SKILL.md)
     Install-WingetTool 'sg' 'ast-grep' 'ast-grep.ast-grep'
     Install-NpmGlobal 'repomix' 'repomix' 'repomix@1.18.0'
@@ -128,7 +170,7 @@ if ($profileName -ne 'minimal') {
     if (Test-Command 'rtk') {
         $skipped.Add('rtk (already installed)')
     } else {
-        $manual.Add('rtk — optional token optimizer; use the security-reviewed RTK deployment per rules/command-safety.md and skills/token-efficiency/SKILL.md')
+        $manual.Add('rtk — optional token optimizer; run with -Rtk or follow skills/token-efficiency/references/rtk-reviewed-deployment.md')
     }
 }
 
@@ -156,10 +198,84 @@ switch ($Agent) {
     }
 }
 
+# ---------- security-check toolchain (opt-in: -SecurityTools) ----------
+
+if ($SecurityTools) {
+    Write-Host '== Security tools =='
+    Install-WingetTool 'shellcheck' 'shellcheck' 'koalaman.shellcheck'
+    Install-WingetTool 'actionlint' 'actionlint' 'rhysd.actionlint'
+    Install-WingetTool 'hadolint' 'hadolint' 'hadolint.hadolint'
+    Install-WingetTool 'syft' 'Syft' 'Anchore.Syft'
+    Install-WingetTool 'grype' 'Grype' 'Anchore.Grype'
+    Install-WingetTool 'trivy' 'Trivy' 'AquaSecurity.Trivy'
+    Install-WingetTool 'gitleaks' 'Gitleaks' 'Gitleaks.Gitleaks'
+    Install-WingetTool 'osv-scanner' 'OSV-Scanner' 'Google.OSVScanner'
+    Install-PipTool 'semgrep' 'semgrep' 'semgrep'
+    Install-PipTool 'yamllint' 'yamllint' 'yamllint'
+    Install-PipTool 'pip-audit' 'pip-audit' 'pip-audit'
+    Install-PipTool 'checkov' 'checkov' 'checkov'
+    Install-PipTool 'skillspector' 'skillspector' 'skillspector==2.13.7'
+    if (Get-Module -ListAvailable -Name PSScriptAnalyzer) {
+        $skipped.Add('PSScriptAnalyzer (already installed)')
+    } elseif ($DryRun) {
+        Write-Host '[dry-run] Install-Module PSScriptAnalyzer -Scope CurrentUser'
+    } else {
+        Write-Host '+ Install-Module PSScriptAnalyzer -Scope CurrentUser'
+        try {
+            Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -ErrorAction Stop
+            $installed.Add('PSScriptAnalyzer')
+        } catch {
+            $manual.Add('PSScriptAnalyzer (Install-Module failed; install manually)')
+        }
+    }
+    $manual.Add('trufflehog — no winget package; install from its GitHub release if needed')
+}
+
+# ---------- reviewed RTK (opt-in: -Rtk) ----------
+
+if ($Rtk) {
+    Write-Host '== RTK (reviewed version only) =='
+    $rtkVersionOk = $false
+    if (Test-Command 'rtk') {
+        $rtkOut = (& rtk --version 2>&1 | Out-String)
+        if ($rtkOut -match [regex]::Escape($rtkReviewedVersion)) {
+            $rtkVersionOk = $true
+            $skipped.Add("rtk $rtkReviewedVersion (already installed)")
+        } else {
+            $manual.Add("rtk is installed but is not the reviewed $rtkReviewedVersion ($($rtkOut.Trim())); replace it with the reviewed version before use")
+        }
+    }
+    if (-not $rtkVersionOk -and -not (Test-Command 'rtk')) {
+        if (-not (Test-Command 'winget')) {
+            $manual.Add("rtk $rtkReviewedVersion — winget unavailable; install the reviewed version manually")
+        } elseif ($DryRun) {
+            Write-Host "[dry-run] winget install --id rtk-ai.rtk --version $rtkReviewedVersion --exact"
+            Write-Host "[dry-run] winget pin add --id rtk-ai.rtk --version $rtkReviewedVersion"
+        } else {
+            Write-Host "+ winget install --id rtk-ai.rtk --version $rtkReviewedVersion --exact"
+            $eap = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            winget install --id rtk-ai.rtk --version $rtkReviewedVersion --exact --silent --accept-package-agreements --accept-source-agreements
+            $rtkExit = $LASTEXITCODE
+            if ($rtkExit -eq 0) {
+                winget pin add --id rtk-ai.rtk --version $rtkReviewedVersion
+                $installed.Add("rtk $rtkReviewedVersion (pinned)")
+                $manual.Add('rtk: open a new shell, verify the installer SHA-256 against the release checksums.txt, then run the smoke test in skills/token-efficiency/references/rtk-reviewed-deployment.md')
+            } else {
+                $manual.Add("rtk $rtkReviewedVersion (winget exit $rtkExit; install manually)")
+            }
+            $ErrorActionPreference = $eap
+        }
+    }
+}
+
 # ---------- RTK privacy environment (approved Windows controls) ----------
 
-if ((Test-Command 'rtk') -and -not $DryRun) {
-    $rtkVars = @{ 'RTK_DB_PATH' = 'NUL'; 'RTK_TELEMETRY_DISABLED' = '1'; 'RTK_TEE' = '0' }
+if (((Test-Command 'rtk') -or $Rtk) -and -not $DryRun) {
+    $rtkVars = [ordered]@{
+        'RTK_DB_PATH' = 'NUL'; 'RTK_TELEMETRY_DISABLED' = '1'; 'RTK_TEE' = '0'
+        'RTK_RECALL' = '0'; 'RTK_SUPPRESS_HOOK_WARNING' = '1'
+    }
     foreach ($name in $rtkVars.Keys) {
         $current = [Environment]::GetEnvironmentVariable($name, 'User')
         if ($current -ne $rtkVars[$name]) {
