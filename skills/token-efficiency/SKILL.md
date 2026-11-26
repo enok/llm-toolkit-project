@@ -4,7 +4,7 @@ description: "Reduce LLM token consumption during agent work: command-output com
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Token Efficiency
@@ -26,8 +26,8 @@ Practical, security-reviewed techniques to cut token consumption without losing 
 Prefix high-output, non-interactive read/build/test commands with `rtk` (e.g. `rtk git status`, `rtk mvn test`). 60-90% output reduction with preserved exit codes.
 
 - Follow `rules/command-safety.md` for the full constraint set: never route repository/history, remote-service, infrastructure, privilege, approval, release, or deployment mutations through RTK; keep byte-exact/security/production evidence raw; preserve and check exit status.
-- Never run `rtk init`, enable hooks, telemetry, tee, or persistent tracking. On Windows keep `RTK_DB_PATH=NUL`, `RTK_TELEMETRY_DISABLED=1`, `RTK_TEE=0`.
-- Only a deployment you have security-reviewed is approved; a new version or a new platform needs its own review before use.
+- Never run `rtk init`, `rtk trust`, `rtk telemetry enable`, `rtk llm-proxy`, `rtk claude`, `rtk pipeline add` or `rtk plugins`; no hooks, telemetry, tee, recall store or persistent tracking. Keep `RTK_DB_PATH=NUL` (the only effective tracking control; `[tracking] enabled = false` is not honoured), `RTK_TELEMETRY_DISABLED=1`, `RTK_TEE=0`, `RTK_RECALL=0`, `RTK_SUPPRESS_HOOK_WARNING=1`.
+- Only the reviewed deployment (RTK 1.2.1, Windows) is approved; a new version or platform needs its own review. Install, pin, config, smoke test, licence note (BUSL-1.1 engine in 1.x) and the `rtk mvn` caveat: `references/rtk-reviewed-deployment.md`.
 
 ### `gh --json` + `jq` field selection
 
@@ -83,10 +83,16 @@ When a task genuinely needs many files as context (cross-file refactor brief, ex
 - `code2prompt`, `gitingest` CLI — redundant with repomix; gitingest's hosted URL variant exfiltrates repo identity/tokens.
 - `RepoMapper`, `llm-context` — unvetted third-party code; would need `external-skill-intake` review first.
 - `universal-ctags` — stale-index risk misleads evidence; marginal benefit over ripgrep for agents.
+- **Context Mode** — rejected. Two permission-prompt problems: (1) its Codex plugin route and `setup --agents codex` switch off Codex's approval prompt for every tool, including arbitrary code execution, and run commands outside the Codex shell sandbox; (2) in Claude Code its subagent commands reach Bash as `node ... <base64>`, so allow/ask rules and the prompt cannot show the real command (a `Bash(node:*)` allow gives no prompt at all), and one "don't ask again" click on `ctx_execute` is a blanket allow for arbitrary code. It also stores every prompt and tool output in a local SQLite database.
+- **Caveman** — only the text-only skill is accepted, vendored as `skills/terse-output/` (pinned commit, licence and provenance kept beside it). The plugin, installer, CLI, proxy and hooks are rejected: the CLI sends usage telemetry by default.
+- **Ponytail** — Claude Code plugin only, installed by the owner from a local clone checked out at the reviewed commit (`ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10`), never `marketplace add` of the upstream repo (it tracks the default branch). Ledger off, webhook URL and token empty, `PONYTAIL_MAP=0` on client repos. The scanner's three high findings (`hook-outside-root`, `hooks/claude-codex-hooks.json`) are judged false positives: each hook command is a `node -e "require(...)"` that normalises Windows backslashes and stays inside the plugin root. Re-review before moving the commit.
+- **Headroom** — avoid: it puts a proxy in the model API path (sees all prompts, responses and credentials in transit) and sends a usage beacon by default.
 
 ## Related
 
 - `rules/command-safety.md` — RTK constraint set and command-review discipline
+- `references/rtk-reviewed-deployment.md` — the approved RTK install, settings and smoke test
+- `learnings/external-tool-intake-verdicts-pin-and-opt-in.md` — the four intake verdicts and their conditions
 - `rules/multi-agent-orchestration.md` — parallel fanout and reduction
 - `skills/llm-context-engineering/SKILL.md` — keeping prompt surfaces lean
 - `skills/model-selector/SKILL.md` — choosing the cheapest capable model per task
