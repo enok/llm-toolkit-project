@@ -130,6 +130,8 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | Rule | File | Scope |
 | --- | --- | --- |
 | **API Contract Surface** | `rules/api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
+| **Application Truthfulness** | `rules/application-truthfulness.md` | Truthful applications, profiles and screening answers (employment status, work authorization, credentials, metrics); every submission behind explicit owner approval |
+| **Capability Check Before Limitation** | `rules/capability-check-before-limitation.md` | Check the session's real tool, connector, and skill surface before declaring a task impossible or handing it to the user |
 | **Changed-Code Quality Gate Required** | `rules/changed-code-quality-gate-required.md` | Blocking static-analysis gate scoped to added or modified lines |
 | **CI Feedback Loop** | `rules/ci-feedback-loop.md` | Turn CI failures into rule and workflow updates |
 | **CLI over MCP** | `rules/cli-over-mcp.md` | Prefer capable authenticated CLIs; record why MCP was chosen when it is |
@@ -138,6 +140,7 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Cross-Platform Scripts** | `rules/cross-platform-scripts.md` | Scripts must run on Windows, Linux, and macOS |
 | **Documentation Review Required** | `rules/documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` |
 | **Error-Driven Learning** | `rules/error-driven-learning.md` | Capture trial-and-error wins as indexed learnings |
+| **Evidence Before Verdict** | `rules/evidence-before-verdict.md` | Read the exact variant from the artifact and check a primary source before any compatibility or support verdict; lead with a correction when new evidence overturns a claim |
 | **External Write Authorization** | `rules/external-write-authorization.md` | Bind every external mutation (tickets, PRs, wiki, chat, email) to an explicit instruction |
 | **Git Conventions** | `rules/git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, rebase, duplicate-file gate |
 | **Human Comment Reply Gate** | `rules/human-comment-reply-gate.md` | Draft-and-approve gate for human-facing replies |
@@ -151,6 +154,7 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Repository Context Layers** | `rules/repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md` and provider pointers |
 | **Request Orchestration** | `rules/request-orchestration.md` | Routing into specialists, model-selection contract, quality loops, safety boundaries |
 | **Security Check Required** | `rules/security-check-required.md` | Mandatory security gate incl. LLM-surface prompt-injection scan and skill scanners |
+| **UI Automation Lane Safety** | `rules/ui-automation-lane-safety.md` | Browser and desktop UI lanes: owned tabs only, stable-ID allow-lists, live re-read before acting, named concurrent lanes, no sign-in for the user |
 | **Workflow Authoring** | `rules/workflow-authoring.md` | 12K size limit, splits, single responsibility, composition |
 | **Workflow Self-Improvement** | `rules/workflow-self-improvement.md` | Every non-trivial workflow or agent run: preflight, capture, run record, promotion, measured trend; metrics are diagnostic only |
 
@@ -158,7 +162,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 101 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 115 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -179,13 +183,13 @@ See `workflows/README.md` for the categorized catalog of all 101 workflows. High
 
 All workflows by area:
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
-- **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`
-- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`, `workflows/study-publication-medium-linkedin.md`
+- **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
+- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`, `workflows/study-publication-medium-linkedin.md`, `workflows/technical-content-publishing.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
-- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`
+- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-posting-analyst-validation.md`, `workflows/job-posting-analyst-evolution.md`, `workflows/job-search-apply.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
 
 ## Skills at a Glance
 
@@ -213,6 +217,10 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
 | **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
 | **knowledge-base** | Search the toolkit knowledge base before reading source, run the intake gate, save to the pending inbox, set up and check the local vector KB via `scripts/kb.py` |
+| **assistant-workspace-cleanup** | Inventory, classify, and safely clean up an AI-assistant workspace (chats, agent sessions, projects, scheduled tasks, artifacts, ledgers) behind a reversibility-grouped approval gate, ID allow-listed lanes, and live-state verification |
+| **workspace-hygiene-auditor** | Read-only specialist that turns a workspace inventory into a classified cleanup plan (one action, confidence, and reason per item) and flags stale-state, coverage-gap, and run-duration risks |
+| **repeat-work-discovery** | Scan mail, calendar, and files for repeated work, return a ranked top-5 list of proposed skills with trigger, time saved, and tool recommendations, and build the approved ones |
+| **productivity-impact-estimate** | Estimate weekly, monthly, and yearly engineering time saved by the toolkit with a transparent, reproducible model, labelled as an estimate and not a measurement |
 
 #### Engineering Practices And Languages
 
@@ -230,6 +238,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
 | **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
+| **web-form-submit-debugging** | Diagnose a web form whose Next or Submit button does nothing: read validation, capture network and console, instrument the page, rule out extensions, then pick a workaround or report a site defect |
 
 #### Review, Validation, And Quality Gates
 
@@ -315,6 +324,8 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
 | **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
 | **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
+| **technical-content-publishing** | Turn a software project into evidence-grounded Medium-style article, LinkedIn post and carousel, cover image, and architecture diagram as reviewed drafts, never posted |
+| **current-events-briefing** | Brief the user on a live or just-finished public event with symmetric coverage, independent analysis, fact-checker findings, same-pollster comparisons, and an honest "no consolidated verdict yet" |
 
 #### Data Science, Notebooks, And Pipelines
 
@@ -336,6 +347,10 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
 | **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
 | **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
+| **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
+| **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
+| **job-posting-analyst** | Route job-posting reading and fit analysis through the read-only analyst: normalize pay, stack, seniority, contract form and work authorization, score fit, flag duplicates, and tier apply-now / apply-next / bridge / skip |
+| **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
 #### Thesis And Academic Formatting
 
@@ -347,8 +362,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 
 ## Tool Subagents
 
-`tool-subagents/README.md` lists all 26 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, and CV/profile truthfulness.
-`tool-subagents/README.md` lists all 26 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, and cross-repo impact.
+`tool-subagents/README.md` lists all 29 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, CV/profile truthfulness, job postings, and workspace hygiene.
 
 ## Integrations
 

@@ -33,6 +33,10 @@ slash-prefixed argument (log groups, SSM parameter names, ARN-like paths;
 slash (`//aws/lambda/...`), but that leading slash leaks into the actual value
 on some tools — the environment variable is the reliable form.
 
+A script that sets `MSYS_NO_PATHCONV=1` can in turn break the stock cloud-CLI wrapper under
+Git Bash, because the wrapper hands a POSIX path to the bundled Windows Python. Use a small shim
+that calls the bundled Python with a Windows path instead of the wrapper.
+
 # Why
 
 MSYS2 (the layer under Git Bash) heuristically rewrites arguments that look like

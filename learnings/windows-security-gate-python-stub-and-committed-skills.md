@@ -41,6 +41,15 @@ skill scans printed "SKIP: no new or modified skill files detected".
 - Without `SNYK_TOKEN`, `check-new-skill-security.sh` printed "SNYK_TOKEN is not set; skipping Snyk Agent
   Scan" and still exited 0.
 - Follow-up, not done: teach `has_changed_skill_files` to honour `SECURITY_NEW_SKILL_BASE`.
+- When no external scanner is installed at all, the gates cannot pass. Decide with the owner:
+  install one (SkillSpector via pip, or provide `SNYK_TOKEN`), or use a documented local-only
+  override (`SECURITY_ALLOW_NO_SCANNER_SIGNAL=1`) that the owner approves. Never self-approve
+  the override.
+- A patch applied with `git am` has already created a commit before the security gate runs. If
+  the gate then fails, soft-reset (`git reset --soft <base>`) so the changes stay staged until
+  the gate passes or an exception is approved.
+- Windows test failures can also occur on `origin/main`; run the same tests there and compare
+  before blaming the branch.
 
 # Why
 The gate scripts skip any WindowsApps candidate by design, so a shim that `exec`s the real executable from a

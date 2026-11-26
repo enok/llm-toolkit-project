@@ -1,6 +1,6 @@
 # Workflows
 
-Step-by-step instructions for repeatable work. Use a workflow when the user asks for a process or outcome that benefits from a sequenced checklist; use a skill when the agent should auto-select an on-demand capability from metadata; keep rules as always-on constraints. Every workflow stays under 12,000 characters (`rules/workflow-authoring.md`); larger procedures are split into companion workflows referenced by path.
+Step-by-step instructions for repeatable work. Use a workflow when the user asks for a process or outcome that benefits from a sequenced checklist; use a skill when the agent should auto-select an on-demand capability from metadata; keep rules as always-on constraints. Every workflow file stays under 12,000 characters (`rules/workflow-authoring.md`); this catalog is an index, not a workflow, and the limit does not apply to it; larger procedures are split into companion workflows referenced by path.
 
 Specialist agents ship as a **validation** workflow (run the specialist) plus an **evolution** workflow (improve it from validated misses, noise, or routing gaps). `INTENTS.md` maps plain-English asks to the right entry point; `rules/request-orchestration.md` routes non-trivial requests through `tool-subagents/agent-orchestrator.md`.
 
@@ -26,6 +26,10 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
 | `knowledge-base-sync.md` | Scheduled knowledge-base sync: gather new knowledge, run the intake gate, promote it on one rolling pull request, archive inbox items after the merge |
 | `plugin-intake.md` | Add, audit, or prune plugins: inventory, marketplace discovery, quarantine fetch, scan and review, overlap check, decision, owner-run install or removal plans (`scripts/plugins.py`) |
+| `assistant-workspace-cleanup.md` | Inventory, classify, approve, execute, and verify a cleanup of an AI-assistant workspace (chats, agent sessions, projects, scheduled tasks, artifacts, orchestration ledgers) with a reversibility-grouped approval gate, ID allow-listed lanes, and live-state verification |
+| `conversation-monitoring.md` | Watch named conversations (inbox, chat, messaging threads) on a fixed interval until a stop time, alert the user only on new external messages, never reply, and pause or stop safely |
+| `workspace-hygiene-auditor-validation.md` | Run the Workspace Hygiene Auditor specialist validation workflow |
+| `workspace-hygiene-auditor-evolution.md` | Improve the Workspace Hygiene Auditor specialist from validated misses, noisy findings, and routing gaps |
 
 ### Core Engineering
 
@@ -84,6 +88,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `aws-data-pipeline-ops.md` | Inspect AWS-backed data pipelines with read-first S3, MWAA, Airflow, CloudWatch, and Secrets Manager operations |
 | `aws-data-platform-ops.md` | Inspect or operate AWS-backed data pipelines with explicit scope, verification, and evidence |
 | `folder-reorganization.md` | Reorganize a folder tree without breaking automations, scripts, documents, or cloud-sync links: inspect, propose, approve, pause automations, execute with rollback, verify, resume, report |
+| `third-party-installer-vetting.md` | Vet a desktop app a third party asks the user to install (interview, proctoring, client, or vendor tool) with read-only signature, hash, antivirus, and hash-lookup checks, weigh privacy risk, ask for alternatives, and leave the decision to the user |
 
 ### Documentation, Diagrams, And Wiki
 
@@ -108,6 +113,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `translation-sync.md` | Keep English and translated docs, labels, and examples synchronized after changes |
 | `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a short profile-positioned Medium article and a LinkedIn teaser post validated by `check_publication.py` and `publication-reviewer`, all linked both ways behind separate approval gates |
 | `study-publication-medium-linkedin.md` | Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post in AIDA order per the consumer's positioning profile, with a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replacement path for live pieces, behind separate approval gates (Phases 7-10 of `study-repo-to-publication.md`) |
+| `technical-content-publishing.md` | Turn a software project into an evidence-grounded article, social post, carousel, and visuals - drafted and validated, never posted |
 
 ### Data Science, Thesis, And Notebooks
 
@@ -146,6 +152,14 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `job-search-pipeline.md` | Run one job scan for a candidate profile: inbox and board reconciliation, owner-approved applications, new-posting discovery and screening, guarded tracker update, skill gaps, digest |
 | `job-search-setup.md` | Onboard a candidate: build the profile from CV and criteria, create or adopt the tracker, wire connectors, dry run, schedule the recurring scan |
 | `career-profile-sync.md` | Keep employment facts, skills, and certifications consistent across a public profile, the CV and its master, and job-search files: ledger first, one-pass update list with intentional snapshots, profile edits, CV re-render and visual check, truthfulness review, hash-checked device writes |
+| `job-portal-profile-sync.md` | Complete or fix the owner's profile on a job board or candidate portal in the owner's own signed-in browser session - survey read-only, compare with the profile and master CV, fix unambiguous errors, propose the rest, apply approved edits, verify after reload, optionally apply to named openings, and report what stays owner-only |
+| `job-posting-analyst-validation.md` | Validate a batch of job-posting analyses - re-check sampled rows against the source postings, the pay math, duplicates, and the tier recommendations before they go into a plan or tracker |
+| `job-posting-analyst-evolution.md` | Improve the Job Posting Analyst specialist from validated misses - unreadable pages, wrong pay normalization, missed duplicates, noisy tiers, and routing gaps |
+| `job-search-apply.md` | Apply to owner-approved job-search rows - re-read approvals, move rejects, check duplicates, build kits, inspect every apply form, send the owner one batch message with the exact answers, submit only forms the owner OKs in chat, move submits to Applied in one guarded batch, and verify |
+| `job-search-attack-plan.md` | Run an urgent, runway-limited job-search sprint for a candidate - two-track intake (bridge income plus target roles), posting analysis, ranked tiers, owner-approved applications with a tracker, a day-by-day plan with templates, interview prep and a resumable context file, delivered as a PDF with clickable links |
+| `recruiter-legitimacy-check.md` | Check whether a recruiter, job offer, or contract is legitimate - read every channel in full, map the vendor chain, verify headers and firms, check process, money and terms, give an evidence-backed verdict, draft replies only |
+| `screening-interview-quick-prep.md` | Prepare a candidate fast for a screening interview or short technical test - map must-haves to CV evidence with honest gap labels, write CV-grounded answers, verify study videos, add rapid-fire concepts and coding warm-ups, and deliver one keepable cheat sheet |
+| `technical-interview-prep.md` | Prepare a candidate for one technical interview (human or AI interviewer) - intake, fact-checked narrative and printable two-block cheat sheet, concept gaps, intro rehearsal, coding-pattern drills, full mock with scoring, final reminders, and a debrief that turns the problem actually asked into the next drill |
 
 Many workflows fan out independent read-only lanes; follow `rules/multi-agent-orchestration.md` and the per-task quality loop in `workflows/task-quality-loop.md` when doing so. Project-local companions (`*-project.md`, `documentation-sync-project.md`, thesis workflows) carry this toolkit's data-science/thesis context and are safe to ignore in other consumers.
 

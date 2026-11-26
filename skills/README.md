@@ -36,6 +36,10 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
 | **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
 | **knowledge-base** | Search the toolkit knowledge base before reading source, run the intake gate, save to the pending inbox, set up and check the local vector KB via `scripts/kb.py` |
+| **assistant-workspace-cleanup** | Inventory, classify, and safely clean up an AI-assistant workspace (chats, agent sessions, projects, scheduled tasks, artifacts, ledgers) behind a reversibility-grouped approval gate, ID allow-listed lanes, and live-state verification |
+| **workspace-hygiene-auditor** | Read-only specialist that turns a workspace inventory into a classified cleanup plan (one action, confidence, and reason per item) and flags stale-state, coverage-gap, and run-duration risks |
+| **repeat-work-discovery** | Scan mail, calendar, and files for repeated work, return a ranked top-5 list of proposed skills with trigger, time saved, and tool recommendations, and build the approved ones |
+| **productivity-impact-estimate** | Estimate weekly, monthly, and yearly engineering time saved by the toolkit with a transparent, reproducible model, labelled as an estimate and not a measurement |
 
 ### Engineering Practices And Languages
 
@@ -53,6 +57,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
 | **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
+| **web-form-submit-debugging** | Diagnose a web form whose Next or Submit button does nothing: read validation, capture network and console, instrument the page, rule out extensions, then pick a workaround or report a site defect |
 
 ### Review, Validation, And Quality Gates
 
@@ -138,6 +143,8 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
 | **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
 | **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
+| **technical-content-publishing** | Turn a software project into evidence-grounded Medium-style article, LinkedIn post and carousel, cover image, and architecture diagram as reviewed drafts, never posted |
+| **current-events-briefing** | Brief the user on a live or just-finished public event with symmetric coverage, independent analysis, fact-checker findings, same-pollster comparisons, and an honest "no consolidated verdict yet" |
 
 ### Data Science, Notebooks, And Pipelines
 
@@ -159,6 +166,10 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
 | **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
 | **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
+| **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
+| **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
+| **job-posting-analyst** | Route job-posting reading and fit analysis through the read-only analyst: normalize pay, stack, seniority, contract form and work authorization, score fit, flag duplicates, and tier apply-now / apply-next / bridge / skip |
+| **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
 ### Thesis And Academic Formatting
 

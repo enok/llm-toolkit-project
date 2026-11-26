@@ -50,6 +50,11 @@ def validate_metric_math(expr):
 Run this over every widget expression in the contract test suite before
 every dashboard apply, not just once during initial authoring.
 
+The same gap appears in data checks: reconciled totals prove sums, not line classification. A
+set of ledger lines can reconcile to the statement total while a line's type and sign are
+wrong, so assert per-line type and sign as well as the total, and let an independent
+validator run both.
+
 # Why
 
 CloudWatch metric math has syntax rules beyond JSON structure: `IF()`
