@@ -68,6 +68,7 @@ metadata:
 - Renderers drift between versions (the same file laid out differently in 11.16 and 11.17). Render publication PNGs in one environment, the one the visual validator inspected, and commit those PNGs.
 - `mmdc` shrinks a wide flowchart (natural width above its 800 px page, `-w`) together with its text; pass `-w 2400` and compute legibility from the natural width.
 - For the publication look (init line, role palette, per-type grammar, GitHub compatibility, hexagonal SVG, pilot-first rule), follow `references/publication-diagram-style.md`; check the PNG at its destination width with `skills/image-quality-inspection/references/destination-legibility.md`.
+- For carousel pages (HTML to PDF and PNG, with the overflow-checking renderer), follow section 9 of `references/publication-diagram-style.md`.
 
 ## PlantUML guardrails
 

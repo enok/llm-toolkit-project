@@ -39,6 +39,7 @@ If an image is blurry, cropped, distorted, unreadable, low-resolution, stale, in
 
 - Use `references/image-quality-gate.md` for the detailed pass/fail gate.
 - Use `references/destination-legibility.md` for images published at a known width (effective text size, aspect ratio, margins, defect checklist, independent validator). For the diagram style that passes it, see `skills/diagram-authoring/references/publication-diagram-style.md`.
+- For a PDF that is the deliverable (page size within tolerance, text selectable, optional `pdfinfo` with a stdlib fallback), use the PDF section of `references/image-quality-gate.md`.
 - For diagram-specific export rules, use `skills/diagram-authoring/references/diagram-export-quality.md`.
 - For Markdown-to-PDF image intermediates and final PDF checks, use `workflows/markdown-pdf-export.md`.
 

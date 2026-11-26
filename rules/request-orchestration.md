@@ -14,6 +14,7 @@ Apply this rule at the start of every non-trivial chat request. The user does no
 3. For multi-lane work, use `agent-orchestrator` from `tool-subagents/` to split the request into independent tasks. The orchestrator enforces a mandatory 30-minute cap per task, parallel-by-default splitting, and pre-execution evaluation (see `tool-subagents/agent-orchestrator.md` "SLA accounting and maximal decomposition"). When a task's elapsed time exceeds its SLA, the orchestrator terminates it, diagnoses the cause, fixes the defect, and restarts as a fresh lane.
 4. Dispatch the maximum safe parallel read-only or disjoint-write slices.
 5. Reduce the findings locally before editing, validating, or answering.
+6. Treat a free-text reply that re-sends the brief as a re-scope: diff it against the ledger objective, record each new requirement and each repeated constraint (for example "wait before starting") in the ledger, then continue from the ledger state instead of restarting from the brief; re-plan only the rows the new requirements change, and treat a repeated wait/hold constraint under `agent-orchestrator` "User hold".
 
 ## Capability routing
 

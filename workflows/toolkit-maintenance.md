@@ -55,6 +55,7 @@ Every maintenance report must summarize learning processing:
 5. For skills, scripts, and CLI helpers, require a Windows, Linux, and macOS run path by default. Prefer portable primary scripts or binaries with OS-specific wrappers only as conveniences.
 6. When changing shared scripts, keep flag names, defaults, exit semantics, dry-run behavior, and examples aligned across the canonical implementation and all shell wrappers.
 7. When changing setup or sync repair logic, preserve healthy symlinks, junctions, and generated surfaces until a verified replacement is ready.
+8. Before creating a skill, workflow, rule, or agent, run `git fetch` and scan main, every open remote branch (`git branch -r`, then `git grep -n -i <term> <ref> -- skills workflows rules tool-subagents`), open pull requests, and in-progress run ledgers for overlapping names or descriptions. If one overlaps, extend that asset instead of creating a parallel one, and record the scan result in the run record.
 
 ## Phase 4 — Index and client sync
 

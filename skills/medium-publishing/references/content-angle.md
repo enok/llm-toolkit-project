@@ -131,6 +131,41 @@ the legibility check of `skills/image-quality-inspection/references/destination-
   quote needs a primary-source citation or is left out; never attribute from
   memory.
 
+## Claims other than framework appearances
+
+Every other claim that reaches the article or the post is a row in the same
+fact table (extra rows, or a second table beside it) with a `Status` of
+`verified`, `author-confirmed` or `cut`. Only the first two ship. Re-verify all
+of them just before the approval gate.
+
+- **Counts and dates**: run a command at the pinned commit and print the scope
+  and the ref beside the number. Never recall, round or reuse a number an agent
+  reported.
+- **Quotes**: verbatim, with `path:line`. A paraphrase gets no quotation marks.
+- **Anecdotes and first-person statements** (an experience or effort claim, the
+  note on how the text was made): an artifact that holds it (commit, log, run
+  output) or the author's confirmation, recorded as `author-confirmed`. Until
+  then the statement is blocked; an anecdote nobody confirms is cut.
+- **Testimonials, user counts, stars, benchmarks**: a dated public source or a
+  command that can be re-run.
+- **"First", "only", "faster than"**: your own comparison or three dated
+  sources; otherwise drop the superlative or restate it as what you observed.
+- **Claims about the text itself** ("every quote below is verbatim", "all
+  numbers come from one run"): run the check that proves it, or cut the
+  sentence. A wrapper claim needs evidence like any other.
+
+## Hooks must be checkable
+
+Test: can a skeptical reader verify the opening claim in the repo or the cited
+source within five minutes? Good hooks: a real failure from history or logs, a
+computed number with its command and scope, a real before/after diff, a design
+decision with its cost. With no failure or number to show, use a reproducible
+demo (command plus real output), never an invented one.
+
+Refuse: invented scale or urgency, fake dialogue, unnamed-expert authority,
+outrage or engagement bait ("comment YES", tag-a-friend), tagging people or
+companies without approval, and any hook the body does not pay off.
+
 ## Before the approval gate
 
 - The opening promises the non-obvious angle; the standard material follows.

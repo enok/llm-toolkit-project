@@ -15,6 +15,7 @@ Scripts created or modified by agents should run on Windows, Linux, and macOS.
 - Avoid hardcoded absolute user paths, drive letters, `/tmp`-only assumptions, GNU-only flags, or shell features that break on another supported OS. Use `pathlib`, environment variables, `mktemp`, or documented OS-specific fallbacks.
 - Document prerequisites and example commands for Windows, Linux, and macOS when quoting or path syntax differs.
 - Validate on the current platform and structure the script so the other platforms are easy to validate. Verify at least syntax and a dry-run path for the portable entrypoint; when possible, test from a different working directory so scripts do not depend on the repo root.
+- A command run through a remote device bridge can hit the bridge's per-call timeout while the process keeps running; redirect its output to a log file and poll the log (see `learnings/cloud-session-device-bridge-file-io.md`).
 
 ## Content hashes and byte pins
 
@@ -26,7 +27,8 @@ Checksums used as contract pins (SHA256 of a shipped file, fixture, or template)
 
 ## Windows notes
 
-- Use PowerShell-safe quoting for Maven, Git, AWS CLI, and path arguments.
+- Use PowerShell-safe quoting for Maven, Git, AWS CLI, and path arguments. Windows PowerShell 5 strips embedded double quotes from arguments passed to native executables (for example `bash.exe`); pass them after `--%` or through a script file.
+- Git Bash can resolve `python` to the WindowsApps store stub; put the real interpreter directory first on `PATH`.
 - Avoid destructive filesystem operations composed across shells.
 - Do not assume symlink privileges; Windows may require Developer Mode, elevation, or NTFS junction fallbacks.
 

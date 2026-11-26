@@ -74,7 +74,8 @@ Do not save:
 Create a compact handoff that future agents can use directly. Include:
 
 1. Objective and current status.
-2. Source-of-truth locations and IDs.
+2. Source-of-truth locations and IDs, plus the pinned commit (when facts were
+   counted from a repo) and the saved-patch path (when edits are uncommitted).
 3. What is already applied, live, published, or validated.
 4. What is only planned or pending.
 5. What must remain untouched.
@@ -106,6 +107,18 @@ dropping the narrative — never by summarizing narrative into narrative.
 5. If the user asks to update clients, regenerate the provider/client surfaces
    from the canonical toolkit selection and verify the generated diff.
 6. If validation cannot run, state exactly what was not checked and why.
+
+When resuming from a handoff, re-verify what it pinned before reusing it:
+
+- Run `git fetch` and confirm the pinned commit still exists. If it is gone
+  (history rewritten, repo moved), make a fresh clone at the new HEAD and apply
+  the saved patch with a 3-way merge (`git apply --3way`; it merges only if the
+  patch's base blobs are in the clone, so keep the pinned versions of the changed
+  files, or a bundle of the pinned commit, with the patch); redo by hand any hunk
+  that cannot apply.
+- Leave generated files out of the patch and regenerate them after applying.
+- Re-check every pinned fact (counts, quotes, line numbers) against the new
+  commit; a number carried over from the old pin is not evidence.
 
 ## Phase 5 - Portable Prompt
 
