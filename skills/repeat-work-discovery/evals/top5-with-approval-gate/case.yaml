@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: top5-with-approval-gate
+expected_outcome: |
+  Scans read-only, returns at most five proposals in the template (pattern, skill, trigger, safety, saving, tools), and stops to ask which to build without creating anything.

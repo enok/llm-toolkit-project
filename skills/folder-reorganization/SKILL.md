@@ -4,7 +4,7 @@ description: Use when reorganizing a folder tree (renames, moves, archiving old 
 license: MIT
 metadata:
   author: llm-toolkit-project
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Folder reorganization
@@ -166,6 +166,9 @@ and read only their output files (see the pitfalls below).
 - A scheduled run that ended FAILED on a usage limit may resume later and overlap
   a catch-up (overlap observed, cause inferred from timing). Check the run history before firing, fire at most once, and audit
   shared files afterwards. See `learnings/scheduled-run-resumes-after-usage-limit.md`.
+- When moving a folder that tools or agents reference, search references read-only first, back up the tool's config file next to the moved data, and update only live pointers, including symlinks for agent and skill directories. Leave dated backups and web URLs as they are, and report stored memory paths that belong to another machine instead of editing them. See `learnings/relocate-repo-update-claude-config-paths.md`.
+- When the user suspects files were deleted, list the folder from the device first, compare with the last saved listing or ledger and hash the files, then report facts only (nothing deleted, N files renamed at time T, content byte-identical, actor unknown) without speculating. Flag when a new name now collides with a different file that must not be sent and say which copy to attach. See `learnings/folder-reported-deleted-check-listing-and-hashes-before-restoring.md`.
+- Keep separate spreadsheet ledgers separate and link by cell reference; write a new version and keep the old as a backup. For a bulk rename, derive the new period from the data (month to quarter), apply it to the whole set, and list the gaps found (missing documents). See `learnings/spreadsheet-backup-version-and-bulk-rename-gap-report.md`.
 - `rollback` restores edited files from their backups, so it overwrites any
   change made to those files after the edit. Check them first. If automations
   were already resumed, pause them again and revert their prompts before rolling

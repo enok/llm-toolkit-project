@@ -61,6 +61,10 @@ If a wrong chip appeared, remove it with its close control and retry. If no
 exact suggestion exists, do not accept the first one; tell the user and ask
 for a replacement topic.
 
+A planned topic may exist only as a brand-new empty topic (for example a plural
+where the established topic is singular). Pick the established topic, which has
+followers and stories, and record the substitution in the report to the owner.
+
 In the Change topics popover of a published story the working method differs: section 7.
 
 ## 3. Preview image
@@ -162,3 +166,11 @@ publishes the topics was not checked. When the intended name is not offered as s
 (typing "SOLID" offered "Solidity", "Solid" and "Solid Principles"; "Solid" is a different
 topic), ask the user before substituting, unless the approved draft already names the
 substitute.
+
+## 8. After publishing (observed 2026)
+
+- The published story keeps the link that the draft had (the draft id stays in the URL); record
+  the URL read back from the page, not one composed by hand.
+- Repeat the block-hash validation and the reader-view checks from
+  [paste-recipe.md](paste-recipe.md), section 4, on the published story, since smart typography
+  can alter text on a re-save.

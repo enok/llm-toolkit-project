@@ -1,10 +1,10 @@
 ---
 name: youtube-video-curation
-description: Use when the user asks to pick, find, or add the best YouTube explainer video per programming language or topic for documentation, a study-repo README, or an article; to rank candidate videos; or to check that recorded YouTube video IDs are real. Covers running the search on the user's machine when YouTube is blocked in the sandbox, ranking by a fixed rubric, oEmbed verification of every ID, and recording title, channel, URL, backups, and the pull date.
+description: Find, rank, and verify the best YouTube explainer video per programming language or topic for a README, study repo, documentation page, or article, without ever trusting a remembered video ID. Use when the user says "add a video for each language", "find the best YouTube tutorial for X", "which video should I link", "check that these YouTube links still work", "replace the dead video link", or "audit all the links in this plan". Runs the search on the user's machine when YouTube is blocked in the sandbox, ranks candidates by a fixed rubric, proves every ID with oEmbed (also when the watch page answers HTTP 429), and records title, channel, URL, backups, and the pull date. Not for downloading, transcribing, or summarizing videos.
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # YouTube Video Curation
@@ -13,14 +13,6 @@ Choose one explainer video per language (or topic) for a document, with a
 reproducible search, a deterministic ranking, and proof that every linked video
 exists. The failure this skill prevents is a doc that links a video ID someone
 guessed or remembered.
-
-## When to Use
-
-- A repo, README, or article needs "the best video for `<language>`" about `<topic>`.
-- Several languages need one link each and the choice should be defensible.
-- Existing video links must be re-checked (removed, private, or non-embeddable videos).
-
-Not for downloading, transcribing, or summarizing video content.
 
 ## Where to Run
 
@@ -77,6 +69,14 @@ or a Windows Store stub for `python3`), substitute `python3`, or `py -3` on Wind
    wrong ID. Compare the oEmbed title with the search title; a mismatch means the ID
    was mistyped. An ID that starts with `-` is accepted as given; after a `--`
    separator every argument is an ID (`verify --json -- -<id> <id>`).
+   When the watch page answers HTTP 429, use oEmbed (noembed is the fallback endpoint)
+   from the start: the watch page rate-limits automated clients, while oEmbed still
+   proves the ID. oEmbed returns no duration, so mark durations unverified. A 401 or 403
+   auth wall means the video exists, so it does not count as broken. Run link reviews at
+   scale on the user's machine, because sandbox egress blocks them. Replace a dead link
+   with the same-length edit in every copy (annotation, spreadsheet, generator source,
+   JSON) so offsets and layouts stay intact. See `learnings/youtube-watch-page-429-use-oembed.md`.
+   For a document with many links (extraction by class, login-gated links, semantic match, typo'd ids), follow [link-audit.md](references/link-audit.md).
 6. **Record the result** where the document keeps its links, one row per slot:
 
    | Language | Title | Channel | URL | Backups | Pulled |
@@ -88,10 +88,11 @@ or a Windows Store stub for `python3`), substitute `python3`, or `py -3` on Wind
 
 ## Hard Rules
 
-- Never invent, guess, or recall video IDs. An ID enters a document only after
-  `verify` printed OK for it in this run.
-- Never report a video as verified when `verify` exited 2 (network): that is
-  "not checked", not "failed" and not "passed".
+- Take video IDs only from `search` output and add one to a document only after `verify`
+  printed OK for it in this run: remembered or guessed IDs often point at a different or
+  removed video.
+- Report a video as "not checked" when `verify` exited 2 (network); it is neither failed
+  nor passed, and calling it passed hides a blocked check.
 - English audio unless the user asks for another language. The non-English filter in
   `rank` is a title heuristic (override with `--allow-non-english` when the user asked
   for another language); confirm audio by eye.
@@ -127,12 +128,17 @@ fixture together.
 
 ## Reporting
 
-Report the slots, the queries used, the `pulled_at` date, the ranked shortlist,
-which candidates were rejected by eye and why, the verified primary and backups
-per slot (with the oEmbed title and channel), and any slot left pending with its
-blocker.
+Report in this form:
+
+```
+Slots: <language/topic list>    Queries: <query per slot>    Pulled: <YYYY-MM-DD>
+<slot>: primary <title> / <channel> / <URL> (oEmbed OK); backups <URL>, <URL>
+Rejected by eye: <video> - <reason>
+Pending: <slot> - <blocker> or none
+```
 
 ## Related
 
-- [ranking-rubric.md](references/ranking-rubric.md): the ranking criteria in full
+- [link-audit.md](references/link-audit.md): audit procedure for a plan or document with many links; read it when asked to check or review links at scale
+- [ranking-rubric.md](references/ranking-rubric.md): the ranking criteria in full; read it before ranking candidates or when two videos tie
 - `skills/chat-knowledge-curation/SKILL.md`: turning findings like these into durable toolkit assets

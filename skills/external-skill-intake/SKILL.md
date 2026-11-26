@@ -4,7 +4,7 @@ description: Safely evaluate, download, adapt, and index skills or workflow patt
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # External Skill Intake
@@ -110,6 +110,8 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 - [ ] `scripts/security-check-toolkit.sh` passed (PowerShell: `scripts/security-check-toolkit.ps1`) or findings were fixed.
 
 ## Related
+
+- `learnings/generalize-private-repo-into-public-toolkit-checklist.md` — when the source is a private repository being mined into this public toolkit, run its generalisation checklist (deny-list of names, hosts, ids) before copying anything
 
 - `rules/plugin-governance.md`
 - `workflows/plugin-intake.md`

@@ -259,7 +259,7 @@ def check_html(text: str, repo_raw_prefixes: Sequence[str] = ()) -> List[Issue]:
             Issue(
                 line_of(masked, match.start()),
                 "inline-code",
-                "<code> outside <pre> (Medium has no inline code); convert to plain text",
+                "<code> outside <pre> is dropped on paste; convert to plain text, then apply code styling in the editor (backtick shortcut) if needed",
             )
         )
     for match in PRE_OPEN_RE.finditer(text):

@@ -1,10 +1,10 @@
 ---
 name: security
-description: Application security best practices for any project handling user data. This skill should be used when writing, reviewing, or refactoring code that handles authentication, authorization, user input, secrets, or PII. Triggers on tasks involving injection prevention, auth checks, XSS/CSRF/SSRF, secrets management, dependency security, or security review.
+description: Application security baseline for code that handles user data - injection, authn/authz, secrets, web (XSS/CSRF/SSRF), PII, dependencies, trust boundaries - plus a static, read-only triage for suspicious unsolicited PDFs, invitations, or offers from unknown senders. Use whenever writing, reviewing, or refactoring endpoints, auth, input handling, secrets, logging of identifiers, or dependency changes, and for "is this safe", "is this document or recruiter/offer genuine", "security review", or "check for vulnerabilities", even when the user does not say "security".
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Application Security Best Practices
@@ -102,7 +102,9 @@ rules/logging-debug-redaction.md
 rules/secrets-no-hardcoded.md
 ```
 
-[references/rules.md](references/rules.md) is a compact always-on summary of this baseline for consumer repos that want the whole thing in one short file; [references/security-check-required.md](references/security-check-required.md) mirrors the toolkit's `rules/security-check-required.md` gate.
+Read [references/rules.md](references/rules.md) when you need the whole baseline in one short always-on file for a consumer repo. Read [references/security-check-required.md](references/security-check-required.md) when deciding whether a change needs the security check gate (it mirrors the toolkit's `rules/security-check-required.md`).
+
+Read [references/suspicious-document-triage.md](references/suspicious-document-triage.md) when an unsolicited PDF, invitation, or offer arrives from an unknown sender and the user asks whether it is safe or genuine. It is a static, read-only procedure, because opening the file or following its links is exactly how such documents do harm.
 
 Each rule file contains:
 - Brief explanation of why it matters
@@ -123,4 +125,4 @@ This skill provides **cross-cutting security rules**. Pair it with technology-sp
 
 ## Full Compiled Document
 
-For the complete guide with all rules expanded: `AGENTS.md`
+For the complete guide with all rules expanded (read it when a checklist slug needs its full code examples): `AGENTS.md`. `metadata.json` holds the version and OWASP/CWE source links of the compiled guide; it is build metadata, not instructions.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: rank-two-postings-and-rate
+expected_outcome: |
+  Ranks A first and enters about 110/h, refuses B because of the paid assessment (fails the no-fee check), caps hours at 10-20 per week, and gives a monthly estimate using 60-80% realization.

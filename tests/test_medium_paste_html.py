@@ -228,6 +228,11 @@ class CheckTests(unittest.TestCase):
         self.assertEqual(codes("<p>use <code>x</code></p>"), ["inline-code"])
         self.assertEqual(codes('<pre data-code-block-mode="0"><code>x</code></pre>'), [])
 
+    def test_inline_code_message_does_not_claim_no_inline_code(self) -> None:
+        issue = paste.check_html("<p>use <code>x</code></p>", ())[0]
+        self.assertNotIn("has no inline code", issue.message)
+        self.assertIn("dropped on paste", issue.message)
+
     def test_pre_attribute_problems(self) -> None:
         self.assertEqual(codes("<pre>x</pre>"), ["pre-attrs"])
         self.assertEqual(codes('<pre data-code-block-mode="2">x</pre>'), ["pre-attrs"])

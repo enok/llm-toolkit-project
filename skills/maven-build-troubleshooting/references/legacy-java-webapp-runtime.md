@@ -290,3 +290,16 @@ Log4j, or Quartz fixes:
   upgrade evidence, and a removal condition.
 - Final validation must include compilation, tests, security scan, and runtime
   startup; skip flags are local triage tools, not proof.
+
+## Practice Apps and Local Container Runtime
+
+- A deliberately legacy practice application (old Java, Spring XML, JSP or SOAP)
+  should contain at least **two clearly separate domains**, so the exercise of
+  splitting it later is realistic.
+- When the local container runtime will not start, verify the build on GitHub
+  Actions and report the CI run as evidence; "it should build" is a claim, a CI
+  result is evidence.
+- Container build defects found only by running the image (directory
+  permissions from `COPY --chmod`, parallel builds sharing a cache, registry
+  rate limits):
+  `learnings/docker-build-pitfalls-copy-chmod-dirs-parallel-cache-lock.md`.

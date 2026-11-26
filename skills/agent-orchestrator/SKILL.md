@@ -1,10 +1,10 @@
 ---
 name: agent-orchestrator
-description: Use when a non-trivial request needs capability-first routing, safe parallel delegation, per-task model tiering, bounded independent validation, durable resume state, or explicit LOA long-running autonomous orchestration.
+description: Use when a non-trivial request needs capability-first routing, safe parallel delegation, per-task model tiering, bounded independent validation, durable resume state, or explicit LOA long-running autonomous orchestration; also when a fan-out lane died on a usage limit, a fact-heavy deliverable needs ground-truth validation, or the user asks to "show the tasks table" or "how much is done".
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Agent Orchestrator
@@ -149,25 +149,31 @@ Any LLM tool loading only this skill still owes all of these duty sets from
    their exact listed names, and choose among them per "Capability
    selection" above. Use the most specific capability with progressive
    disclosure, reuse evidence, and forbid duplicate exploration.
-3. Use independent producers and read-only validators with the bounded loop in
+3. Context isolation per task is a mandatory step (`rules/request-orchestration.md`
+   "Context isolation per task"; `tool-subagents/agent-orchestrator.md` "Context
+   economy and parallel dispatch", item 5): separate lane, slim brief by path,
+   leanest agent type, slim return. Check every brief before dispatching a wave.
+4. Use independent producers and read-only validators with the bounded loop in
    `workflows/task-quality-loop.md`; do not assign overlapping writes.
-4. Enforce the mandatory CSCI/UID lifecycle from
+5. Enforce the mandatory CSCI/UID lifecycle from
    `tool-subagents/agent-orchestrator.md`: every created or updated
    code/script/configuration/infrastructure artifact gets explicit unit-test,
    integration-test, and documentation tasks (page text and diagrams in the
    project's wiki or docs site); the target `README.md` links the
    application's documentation page (ask for the location if absent, never
    invent one); documentation tasks run last, after validation.
-5. In explicit LOA mode, keep the parent as final-results reconciler only;
+6. In explicit LOA mode, keep the parent as final-results reconciler only;
    separate asynchronous workers perform user-authorized execution and LOA owns
    the excluded target-project `LLM-STATE.md` checkpoint as its sole writer.
    Sending a notification still requires the human-facing gate in
    `rules/human-comment-reply-gate.md` or an exact standing approval;
    capability alone is not authorization.
-6. If the coordinator misses a reusable routing, SLA, state, or efficiency
+7. If the coordinator misses a reusable routing, SLA, state, or efficiency
    pattern, run `workflows/agent-orchestrator-evolution.md`.
 
 ## Known pitfalls
+
+- Large fan-outs, a lane that died on a usage limit, fact-heavy deliverables, and "show the tasks table / how much is done" questions: `references/fan-out-and-recovery.md`.
 
 - Anchor every ledger edit (`TASKS_TABLE.md`, `CONTEXT_STATE.md`) to the current run's own section or unique row text, never to a bare row number, and assert the neighbouring rows before writing. (sig: coordination/ledger-row-edit-not-scoped-to-session)
 - Re-derive any count that gates a decision with a deterministic command instead of accepting a lane's summary. See `learnings/agent-self-reported-counts-are-not-evidence.md`.

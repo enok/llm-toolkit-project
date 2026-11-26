@@ -1,10 +1,10 @@
 ---
 name: project-discovery
-description: "Help engineers understand the destination project—structure, architecture, flows, how-tos, and related projects. Use when the user wants to 'understand this project,' 'architecture diagram,' 'flow diagram,' 'onboard me to this repo,' 'how do I do X here,' or document how to do things in the codebase."
+description: "Explain or document the repo the engineer is working in: what it does, its structure, architecture and flow diagrams, how-tos (run, test, build, deploy), related projects, and README gaps. Has a read-only explain mode for plain questions. Use whenever the user says 'understand this project,' 'what does this project do,' 'explain this repo,' 'architecture diagram,' 'flow diagram,' 'onboard me,' or 'how do I do X here,' even if they never say 'discovery'."
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.1"
 ---
 
 # Project Discovery
@@ -13,11 +13,23 @@ Help engineers understand the **destination project** (the repo they are working
 
 ## When to Apply
 
-- User says "understand this project," "how does this codebase work," or "explain this repo"
+- User says "understand this project," "how does this codebase work," "explain this repo," or "what does this project do?"
 - User asks for an "architecture diagram," "flow diagram," or "system overview" for this project
 - User wants to "onboard me to this project," "what do I need to run this," or "what other repos or services do I need"
 - User asks "how do I do X in this project?" (e.g. run tests, deploy, add a feature)
 - User wants to "document how to …" for this codebase
+
+---
+
+## Explain-only mode
+
+Use when the ask is a read-only question ("what does this project do?", "explain this repo") and no docs or diagrams were requested. The deliverable is a chat answer and no files are written, because the user asked a question, not for repo changes.
+
+- **Read cheapest-first:** README, the repo instruction file (`AGENTS.md`/`CLAUDE.md`) for conventions only, the docs index (headings of `docs/*.md`), the build file, the core source of the main flow or example, tests, CI config, and `git log --oneline -15`.
+- **Separate subject from plumbing** (so the answer describes the project, not the tooling around it): a generated shared-rules block in `AGENTS.md`, provider link folders (`.claude/`, `.cursor/`, `.windsurf/`, `.agents/`), config-sync scripts, and exported assistant instructions are LLM-tool wiring, not the project. Mention them in one closing line.
+- **Answer shape:** (1) what it is and why, in one paragraph; (2) the core domain or example, with roles mapped to concrete classes/modules and rules or numbers quoted from source; (3) a short map of docs and code; (4) how correctness is enforced (tests, CI jobs, docs drift guards, branch protection); (5) how to run it, with commands copied from README or CI.
+- **Fidelity:** state only numbers, versions, and rules you read from source in this run, since README claims drift from code. When README and code disagree, say which and where.
+- **Lane sizing:** a small repo needs one `light` read lane, not the full-discovery split in `workflows/project-discovery.md`, which costs more than the question is worth. Offer a doc delta (step 4 below) only if you found a real gap.
 
 ---
 
@@ -59,6 +71,6 @@ Produce or update:
 
 ## Reference
 
-- Diagram type selection: `skills/diagram-authoring/references/diagram-type-standards.md`
-- Diagram format and placement: [diagram-conventions.md](references/diagram-conventions.md)
-- Merging toolkit rules with repo-local instruction files: [repository-context-layers.md](references/repository-context-layers.md) (mirrors `rules/repository-context-layers.md`)
+- Diagram type selection (read when choosing which diagram to create): `skills/diagram-authoring/references/diagram-type-standards.md`
+- Diagram format and placement (read before writing or placing a Mermaid diagram): [diagram-conventions.md](references/diagram-conventions.md)
+- Merging toolkit rules with repo-local instruction files (read when the repo has its own `AGENTS.md`/`CLAUDE.md` that may conflict with toolkit rules): [repository-context-layers.md](references/repository-context-layers.md) (mirrors `rules/repository-context-layers.md`)

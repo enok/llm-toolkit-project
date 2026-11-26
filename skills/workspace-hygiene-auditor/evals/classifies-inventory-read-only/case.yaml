@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: classifies-inventory-read-only
+expected_outcome: |
+  The plan classifies each of the 5 items exactly once with an action, confidence and short reason.
+  The pinned chat is KEEP; the empty untitled chat and the fired one-shot are delete candidates; the daily digest task is flagged for its 4-second "succeeded" run.
+  The specialist stays read-only: no archive, delete or pause is performed.
+context:
+  scaffold_script: place-files.sh

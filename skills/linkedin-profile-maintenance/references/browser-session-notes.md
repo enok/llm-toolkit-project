@@ -19,6 +19,11 @@ directly.
 - Or render the data into a `<pre>` element and read the page text with the
   page-text tool.
 - Read the count first, then the slices, so you know when you have everything.
+- Returned text that looks like a query string or cookie (`?`, `=`, `&`) is
+  replaced by a BLOCKED notice. Chunk output to about 900 characters or read it
+  from a `<pre>`; never strip or encode characters to pass the filter. If auto mode refuses a cookie
+  read for a private API call, fall back to the page UI. Details:
+  [browser-tool-blocks-urls-with-query-strings-in-returned-text](../../../learnings/browser-tool-blocks-urls-with-query-strings-in-returned-text.md).
 
 ## 2. Bot checks are never passed
 
@@ -48,3 +53,14 @@ needed, use the Chrome extension attached to the owner's own browser.
   were the cause of a mis-targeted confirm (`SKILL.md`, delete safety).
 - One mutation at a time, each followed by its read-back. A batch that fails
   half-way is easier to reconcile when the last verified item is known.
+
+## 5. Related limits and lane safety
+
+- Result-size, wait and screenshot limits of the browser tools:
+  `learnings/browser-tool-operational-limits.md`.
+- Working with several browsers connected (which one is signed in, switching
+  safely): the multi-browser section of `learnings/browser-tool-operational-limits.md`
+  and section 3 above.
+- When several lanes or agents could touch the same tab or page, apply
+  `rules/ui-automation-lane-safety.md`: one writer per page, read-only lanes
+  elsewhere.

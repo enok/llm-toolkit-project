@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: poll-compare-same-pollster
+expected_outcome: |
+  The agent searches first, lists pollster, fieldwork dates, sample, and margin of error, and compares only against the same pollster's previous wave.
+  It does not present a cross-pollster difference as movement and states what is still pending.

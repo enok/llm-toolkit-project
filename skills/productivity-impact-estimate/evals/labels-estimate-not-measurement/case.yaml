@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: labels-estimate-not-measurement
+expected_outcome: |
+  Runs the estimate script with the default week, reports a low-to-high range labelled as an estimate with its assumptions, and does not present any study as verified proof.

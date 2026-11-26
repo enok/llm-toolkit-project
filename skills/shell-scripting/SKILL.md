@@ -4,7 +4,7 @@ description: Bash, POSIX sh, and PowerShell scripting best practices for writing
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Shell Scripting Best Practices
@@ -135,6 +135,7 @@ References:
 - When a PowerShell 5.1 step writes a file that another tool will read, do not rely on the PowerShell redirect (the recorded redirect wrote a script as UTF-16 and Python could not read it); redirect through `cmd /c` or use `Out-File` with an explicit encoding, and use the BOM-less writer in `skills/shell-scripting/rules/ps-utf8-no-bom.md` when the consumer rejects a BOM. See `learnings/powershell-redirect-writes-utf16.md`. (sig: tool-misuse/powershell-redirect-writes-utf16)
 - Do not compare a `[datetime]'...Z'` literal with `LastWriteTimeUtc`: the cast yields a Local-kind value (on a UTC-3 machine 16:38Z became 13:38, so files from 14:58Z passed the filter). Build the cutoff with `[datetime]::Parse($s).ToUniversalTime()` or `([DateTimeOffset]$s).UtcDateTime` and compare UTC to UTC. To find a process by its command line, use `Get-CimInstance Win32_Process -Filter "Name='x.exe'" | Select-Object ProcessId,CommandLine`. See `learnings/powershell-datetime-literal-local-kind.md`.
 - When a remote shell is backed by PowerShell, do not pass multi-line Python through `python -c` (the quoting broke); write it with a single-quoted here-string (`@'` ... `'@`, closing marker at line start) to a temp `.py` file with `Set-Content -Encoding UTF8`, run it, and remove it. See `learnings/cloud-session-device-bridge-file-io.md`.
+- A script variable named like an OS environment variable (for example `PATH`, `HOME`, `USERNAME`) collides with it and changes the behaviour of every child process; use a prefixed name. See `learnings/script-variable-names-collide-with-os-environment.md`.
 - Name PowerShell variables so that no two differ only by case: variable names are case-insensitive, and two variables that differed only by case overwrote each other. (sig: tool-misuse/powershell-case-insensitive-variables)
 - Under `$ErrorActionPreference = 'Stop'`, do not let a native command's stderr abort the script: wrap the native command with `cmd /c` or relax the preference for that call, and decide success from `$LASTEXITCODE` (`skills/shell-scripting/rules/ps-native-command-exit-codes.md`). (sig: tool-misuse/powershell-stop-aborts-on-native-stderr)
 

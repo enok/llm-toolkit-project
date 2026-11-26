@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: who-lied-more-uses-published-tallies
+expected_outcome: |
+  The answer reframes the question as false or misleading claims per published ratings, uses only tallies published by independent fact-checkers with each checker named, adds that counts depend on claim selection and speaking time, and does not build its own tally.
+  If no roundup exists yet it says so and offers to wait or check a specific claim.

@@ -1,0 +1,6 @@
+{"snapshot_at":"2026-11-20T10:00:00Z","items":[
+{"id":"c1","kind":"chat","title":"Untitled","updated_at":"2026-09-01T00:00:00Z","message_count":0},
+{"id":"c2","kind":"chat","title":"Trip ideas","updated_at":"2026-11-19T09:00:00Z","message_count":14,"pinned":true},
+{"id":"t1","kind":"scheduled_task","title":"Remind: poll build","enabled":false,"run_once_at":"2026-10-02T08:00:00Z","ended_reason":"run_once_fired"},
+{"id":"t2","kind":"scheduled_task","title":"Daily digest","enabled":true,"cron":"0 7 * * *","last_run":{"status":"succeeded","duration_s":4}},
+{"id":"a1","kind":"artifact","title":"Old dashboard","updated_at":"2026-05-01T00:00:00Z"}]}
