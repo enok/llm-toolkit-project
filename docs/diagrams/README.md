@@ -1,13 +1,13 @@
 # Architecture diagrams
 
-Diagrams of the agent orchestrator and of the toolkit around it. Each figure ships as Mermaid source (`.mmd`, diffable), a vector `.svg` and a high-resolution `.png`; the `.svg` and `.png` are rendered from the `.mmd`, so edit the source and re-render.
+Diagrams of the agent orchestrator and of the toolkit around it. Each figure ships as Mermaid source (`.mmd.txt`, diffable), a vector `.svg` and a high-resolution `.png`; the `.svg` and `.png` are rendered from the `.mmd.txt`, so edit the source and re-render. The source carries a `.txt` suffix because the changed-code quality gate blocks file types it cannot classify (`learnings/quality-gate-blocks-unclassified-suffixes.md`).
 
 | Figure | Files | What it shows | Used in |
 | --- | --- | --- | --- |
-| Fig 1, full | `fig1-orchestrator-architecture.{mmd,svg,png}` | The whole orchestrator: rules and router, thin root, three model tiers, validator loop, ledger, write gate, retrospective | Root `README.md`, long-form articles |
-| Fig 1, hero | `fig1-orchestrator-hero.{mmd,svg,png}` | Nine-node summary of Fig 1 for small frames | Social and preview images |
-| Fig 2 | `fig2-daily-job-scan.{mmd,svg,png}` | A scheduled job-search scan: lanes search and check, the root writes the tracker, rows are submitted only after the owner approves them | Long-form articles |
-| Fig 3 | `fig3-one-source-many-tools.{mmd,svg,png}` | One canonical source linked or exported to the paths of eight tools | Long-form articles |
+| Fig 1, full | `fig1-orchestrator-architecture.{mmd.txt,svg,png}` | The whole orchestrator: rules and router, thin root, three model tiers, validator loop, ledger, write gate, retrospective | Root `README.md`, long-form articles |
+| Fig 1, hero | `fig1-orchestrator-hero.{mmd.txt,svg,png}` | Nine-node summary of Fig 1 for small frames | Social and preview images |
+| Fig 2 | `fig2-daily-job-scan.{mmd.txt,svg,png}` | A scheduled job-search scan: lanes search and check, the root writes the tracker, rows are submitted only after the owner approves them | Long-form articles |
+| Fig 3 | `fig3-one-source-many-tools.{mmd.txt,svg,png}` | One canonical source linked or exported to the paths of eight tools | Long-form articles |
 
 ## Fig 1, full
 
@@ -38,11 +38,11 @@ Caption: Figure 3. One source, many tools: shared assets (blue) are linked or ex
 Needs mermaid-cli (`mmdc`); the border step needs ImageMagick. Run from this folder, with `<name>` the file stem:
 
 ```bash
-mmdc -i <name>.mmd -o <name>.svg -b white -w 2400
-mmdc -i <name>.mmd -o <name>.png -b white -w 2400 -s 3    # hero: -s 4
+mmdc -i <name>.mmd.txt -o <name>.svg -b white -w 2400
+mmdc -i <name>.mmd.txt -o <name>.png -b white -w 2400 -s 3    # hero: -s 4
 magick <name>.png -bordercolor white -border 72 <name>.png    # optional; hero: 96
 ```
 
-- The `.mmd` sources follow `skills/diagram-authoring/references/publication-diagram-style.md` plus two keys: `htmlLabels: false` at the top level and `flowchart.wrappingWidth`. Together they make SVG labels real `<text>` (no `foreignObject`) and keep long names such as `CONTEXT_STATE.md` on one line.
+- The `.mmd.txt` sources follow `skills/diagram-authoring/references/publication-diagram-style.md` plus two keys: `htmlLabels: false` at the top level and `flowchart.wrappingWidth`. Together they make SVG labels real `<text>` (no `foreignObject`) and keep long names such as `CONTEXT_STATE.md` on one line.
 - The committed files were rendered with mermaid-cli 11.16.0. Path coordinates in the committed SVGs are rounded to two decimals; a fresh render keeps the full-precision fractions.
 - PNG anti-aliasing is not byte-deterministic between renders: review a re-render by eye, not by hash.
