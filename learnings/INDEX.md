@@ -27,6 +27,7 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`email-automation-sender-auth-and-link-allowlist.md`](./email-automation-sender-auth-and-link-allowlist.md) — Email-driven automation must authenticate senders and allow-list links before filing anything. (`email`, `automation`, `spoofing`, `dmarc`, `dkim`, `authentication-results`, `allowlist`, `untrusted-input`, `gmail`).
 - [`generalize-private-repo-into-public-toolkit-checklist.md`](./generalize-private-repo-into-public-toolkit-checklist.md) — Mining a private work repo into the public toolkit - generalize, deny-list, scan. (`generalize`, `private-repo`, `deny-list`, `identifier-scan`, `public-toolkit`, `sanitization`, `intake`).
 - [`history-scrub-force-push-checklist.md`](./history-scrub-force-push-checklist.md) — Scrubbing terms from git history and force-pushing - checklist. (`git`, `filter-repo`, `force-push`, `history-rewrite`, `tags`, `mirror-scan`, `backup`).
+- [`external-tool-intake-verdicts-pin-and-opt-in.md`](./external-tool-intake-verdicts-pin-and-opt-in.md) — Four token-saving tools reviewed: adopt only a pinned, switched-off slice (RTK, Caveman skill text, Ponytail from a pinned clone); reject Context Mode (`intake`, `rtk`, `caveman`, `ponytail`, `context-mode`, `telemetry`, `pinning`, `permission-prompt`).
 
 ### Notebooks / Toolchain
 
