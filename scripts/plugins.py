@@ -203,7 +203,10 @@ def write_json_atomic(path: Path, data) -> None:
 
 HIDDEN_CHARS = ("\u200b\u200c\u200d\u200e\u200f\u2060\u2061\u2062\u2063\u2064\ufeff\u180e\u061c"
                 "\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069\ufe00-\ufe0f"
-                "\u2800\u3164\u115f\u1160\uffa0\u303f\U0001d159")  # blank-rendering: Braille blank, Hangul fillers, half fill space, null notehead
+                "\u2800\u3164\u115f\u1160\uffa0\u303f\U0001d159"  # blank-rendering: Braille blank, Hangul fillers, half fill space, null notehead
+                # the rest of the Unicode default-ignorable set and the interlinear annotation characters
+                "\u00ad\u034f\u17b4\u17b5\u180b-\u180f\u2065-\u206f\ufff0-\ufffc"
+                "\U0001bca0-\U0001bca3\U0001d173-\U0001d17a\U000e0080-\U000e0fff")
 TAG_CHARS = "\U000e0000-\U000e007f"
 HIDDEN_RX = re.compile("[" + HIDDEN_CHARS + TAG_CHARS + "\U000e0100-\U000e01ef]")
 TAG_RX = re.compile("[" + TAG_CHARS + "]")
@@ -1345,19 +1348,28 @@ def is_test_path(rel: str) -> bool:
 
 MAX_EXEMPT_SELECTORS = 3
 # emoji with a standardized variation sequence whose general category is not a symbol (So/Sk/Sm/Sc)
-EMOJI_NON_SYMBOL_BASES = frozenset("\u2139\u203c\u2049\u3030\u303d")
+# bases that have an emoji or text presentation sequence; a selector is exempt only after one of these
+EMOJI_BASE_RANGES = ((0xA9, 0xA9), (0xAE, 0xAE), (0x203C, 0x203C), (0x2049, 0x2049), (0x2122, 0x2122),
+                     (0x2139, 0x2139), (0x2194, 0x21AA), (0x231A, 0x23FA), (0x24C2, 0x24C2), (0x25AA, 0x25FE),
+                     (0x2600, 0x27BF), (0x2934, 0x2935), (0x2B05, 0x2B55), (0x3030, 0x3030), (0x303D, 0x303D),
+                     (0x3297, 0x3297), (0x3299, 0x3299), (0x1F000, 0x1FAFF))
+
+
+def _emoji_base(ch: str) -> bool:
+    cp = ord(ch)
+    return any(lo <= cp <= hi for lo, hi in EMOJI_BASE_RANGES)
 
 
 def _presentation_base(prev: str, nxt: str) -> bool:
-    """Allow-list for a presentation selector: a visible symbol (So, Sk, Sm, Sc), one of the few emoji that are
-    not symbols, or a keycap base (digit, #, *) followed by U+20E3. Never spaces, controls, marks or letters."""
+    """Allow-list for a presentation selector: a base listed in EMOJI_BASE_RANGES (characters that have an emoji
+    or text presentation sequence), or a keycap base (digit, #, *) followed by U+20E3. Nothing else."""
     if not prev:
         return False
     if prev in "0123456789#*":
         return nxt == "\u20e3"
     if HIDDEN_RX.match(prev):
         return False
-    return unicodedata.category(prev) in ("So", "Sk", "Sm", "Sc") or prev in EMOJI_NON_SYMBOL_BASES
+    return _emoji_base(prev)
 
 
 def _selector(ch: str) -> bool:

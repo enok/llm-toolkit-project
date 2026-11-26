@@ -257,9 +257,11 @@ severity):
 Hidden characters are zero-width and joiner characters, bidi controls
 (including U+061C), variation selectors (U+FE00 to U+FE0F, U+E0100 to
 U+E01EF), tag characters, and characters that render blank (U+2800, U+3164,
-U+115F, U+1160, U+FFA0). A presentation selector is allowed only directly after a
-visible symbol (Unicode category So, Sk, Sm or Sc), one of the few emoji that are
-not symbols (ℹ ‼ ⁉ 〰 〽), or a keycap base (digit, `#`, `*`) followed by U+20E3:
+U+115F, U+1160, U+FFA0, U+303F, U+1D159), and the rest of the Unicode
+default-ignorable set (soft hyphen, combining grapheme joiner, invisible format
+and annotation characters). A presentation selector is allowed only directly
+after a character that has an emoji or text presentation sequence (an embedded
+table of emoji ranges), or a keycap base (digit, `#`, `*`) followed by U+20E3:
 U+FE0F (emoji presentation) there without limit, U+FE0E (text presentation) up
 to three times per line. Every other selector, including one after a space,
 letter, mark, control, blank or hidden character, is a finding. A byte-order mark at the start of a file or
@@ -267,11 +269,11 @@ inside a string literal in code is allowed.
 
 What the scanner does not prove:
 
-- Hidden-text detection works from a list of known invisible and blank-rendering
-  characters plus an allow-list of symbol categories for emoji presentation
-  selectors. A blank-looking symbol that is on neither list could still carry
-  text one bit at a time; treat unexplained runs of odd symbols in a `pass`
-  plugin as a reason to read the file.
+- Hidden-text detection works from the Unicode default-ignorable set, a short
+  list of blank-rendering characters and a table of emoji bases for presentation
+  selectors. A character outside those lists that a particular font draws as
+  blank could still carry text; treat unexplained runs of odd symbols in a
+  `pass` plugin as a reason to read the file.
 - A `pass` means no rule matched. It does not prove the plugin is safe: code
   can fetch and run instructions at run time, an MCP server can change what
   it does after install, and a rule can miss a reworded pattern.

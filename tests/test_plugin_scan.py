@@ -600,6 +600,24 @@ class RefinementTests(ScanCase):
         self.assertEqual(found, {"notes/vs.md": "high", "notes/alm.md": "high", "tests/test_tags.py": "high",
                                  "tests/test_zw.py": "medium"})
 
+    def test_n1e_default_ignorable_characters_are_hidden_everywhere(self):
+        bits = "0110100101110010"
+        pairs = (("\u206a", "\u206b"), ("\u00ad", "\u034f"), ("\U0001d173", "\U0001d174"), ("\ufff9", "\ufffa"))
+        for zero, one in pairs:
+            with self.subTest(pair=hex(ord(zero))):
+                payload = "".join(one if b == "1" else zero for b in bits)
+                root = self.plugin(name="q" + format(ord(zero), "x"))
+                write(root, "skills/a/SKILL.md", f"---\nname: a\ndescription: d{payload}\n---\nNice{payload}\n")
+                self.assertIn("hidden-unicode", self.rules(self.scan(root), "high"))
+                self.assertEqual(plugins.clean_text("d" + payload, 300), "d")
+        root = self.plugin(name="objrep")
+        text = "".join("\ufffc" + ("\ufe0f" if b == "1" else "") for b in bits)
+        write(root, "skills/a/SKILL.md", f"---\nname: a\ndescription: d\n---\nNice{text}\n")
+        self.assertIn("hidden-unicode", self.rules(self.scan(root), "high"))
+        named = self.plugin(name="named")
+        write(named, "skills/x\u206ay/SKILL.md", "---\nname: x\ndescription: d\n---\nok\n")
+        self.assertIn("hidden-unicode", self.rules(self.scan(named), "high"))
+
     def test_n1d_blank_rendering_symbols_are_not_carriers(self):
         for carrier in ("\u303f", "\U0001d159"):
             with self.subTest(carrier=hex(ord(carrier))):
