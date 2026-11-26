@@ -771,9 +771,14 @@ def record_time(rec: dict):
     for key in ("ts", "timestamp", "time", "created", "date"):
         if rec.get(key):
             try:
-                return parse_iso(rec[key])
+                when = parse_iso(rec[key])
             except (ValueError, TypeError):
                 return None
+            if len(str(rec[key]).strip()) == 10:
+                # date-only value: count it as the end of that day so same-day
+                # records still count after a same-day watermark
+                when = when.replace(hour=23, minute=59, second=59, microsecond=999999)
+            return when
     return None
 
 
