@@ -8,9 +8,10 @@ This repository is the shared source of truth for local LLM-assisted development
 
 Apply these to every task.
 
-### 1. Read Learnings First
+### 1. Knowledge Base First, Then Learnings
 
-- Read `learnings/INDEX.md` before non-trivial work and follow any relevant happy path (`rules/error-driven-learning.md`).
+- Query the toolkit knowledge base (`python3 scripts/kb.py search`) before reading catalog or source files, open only what the hits point to, and write reusable knowledge back through the intake gate (`rules/knowledge-base.md`); when it is unreachable, say so and read directly.
+- Then read `learnings/INDEX.md` before non-trivial work and follow any relevant happy path (`rules/error-driven-learning.md`).
 - Every non-trivial workflow or agent run also closes the self-improvement loop: preflight known pitfalls, capture mistakes with stable signatures, record the run, promote recurring mistakes, and read the trend (`rules/workflow-self-improvement.md`, `workflows/run-retrospective.md`).
 
 ### 2. Think Before Coding
@@ -75,8 +76,9 @@ llm-toolkit-project/
 ├── integrations/              # Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit
 ├── clients/                   # Provider overlay guidance and sync commands
 ├── learnings/                 # Indexed trial-and-error discoveries (INDEX.md first)
+├── kb/                        # Local vector knowledge-base runtime (Docker); CLI scripts/kb.py, guide docs/knowledge-base.md
 ├── docs/                      # tool-compatibility-paths, repo-setup-prompt, jira-setup, docs/llm/
-├── scripts/                   # Setup, sync, validation, security gate, quality gate, PDF export
+├── scripts/                   # Setup, sync, validation, security gate, quality gate, PDF export, plugin catalog (plugins.py, guide docs/plugins.md)
 ├── tests/                     # Unit tests for the validators and bootstrap contracts
 ├── .github/workflows/         # CI: validate.yml, changed-code-quality-gate.yml
 └── .agents .claude .codex .cursor .windsurf (.agent .gemini .opencode)   # Thin provider links
@@ -97,7 +99,8 @@ For every non-trivial request the root agent routes through `rules/request-orche
 5. **The orchestrator stays thin; the ledger carries the state.** The root holds only the durable state ledger (`CONTEXT_STATE.md` + `TASKS_TABLE.md`), open decisions, and lanes in flight. Dispatches carry the task, acceptance criteria, breachable constraints, and the ledger path; lanes return four blocks (outcome / evidence / blockers / decisions) capped at 40 lines.
 6. **Tasks tables record what actually ran.** The 13-column table (`#`, `Wave`, `Task`, `Assets`, `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run link(s)`, `Tokens`, `% Complete`, `SLA`, `Remaining SLA`, plus three footer rows and an assets manifest) is defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints". It shows the real model and token spend per task and is reprinted in full after every task completion; a uniform expensive column means tiering was skipped. The ledger is checkpointed before each dispatch so a run that dies resumes instead of restarting.
 7. **The root owns writes.** Specialists are read-only; the root performs edits, validation, commits, pushes, PR actions, and user communication. Explicit `LOA mode` (long-running autonomous orchestration) is opt-in only and keeps the parent as reconciliation/final checker with an `LLM-STATE.md` checkpoint.
-8. **Notifications are configuration.** Mirroring the tasks table to a chat channel is opt-in per consumer (a configured route plus standing authorization) and never assumed.
+8. **Knowledge base first, root writes back.** The KB lookup is the preflight step before splitting; lanes get hit paths, report `knowledge:` candidates, and the root alone runs `kb.py add` and promotions (`rules/knowledge-base.md`).
+9. **Notifications are configuration.** Mirroring the tasks table to a chat channel is opt-in per consumer (a configured route plus standing authorization) and never assumed.
 
 ---
 
@@ -142,9 +145,11 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Save tokens" / "compact command output" | **token-efficiency** skill |
 | "Create a specialist agent" / "improve the specialist" | **specialist-agent-factory** / **specialist-agent-evolution** workflows + skill |
 | "Compact this chat" / "mine chat history into assets" | **context-compaction** / **chat-knowledge-curation** workflows |
+| "What do we know about X" / "save this knowledge" / "keep the knowledge base in sync" | **knowledge-base** skill, **knowledge-base-sync** workflow, under `rules/knowledge-base.md` |
 | "Save this as a learning" / "improve the toolkit" | **capture-learning**, **self-improvement**, **toolkit-maintenance** workflows; **llm-context-engineering** skill |
 | "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under the always-on `rules/workflow-self-improvement.md` |
 | "Import external skills" | **external-skill-intake** skill |
+| "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | **plugin-intake** workflow, `scripts/plugins.py`, under `rules/plugin-governance.md` |
 | "Java / Python / JavaScript / shell patterns" | **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **shell-scripting** skills |
 | "RAG" / "agent memory" / "LLM app architecture" | **llm-application-architecture** skill |
 | "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows + skills |
@@ -173,10 +178,12 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/external-write-authorization.md`
 - `rules/git-conventions.md`
 - `rules/human-comment-reply-gate.md`
+- `rules/knowledge-base.md`
 - `rules/log-analysis-safety.md`
 - `rules/multi-agent-orchestration.md`
 - `rules/operational-doc-required.md`
 - `rules/publication-positioning.md`
+- `rules/plugin-governance.md`
 - `rules/release-safety.md`
 - `rules/repository-context-layers.md`
 - `rules/request-orchestration.md`
@@ -192,7 +199,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 `workflows/README.md` describes every workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair.
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`
@@ -227,6 +234,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **second-opinion** | Dual-model side-by-side sanity check of plans, designs, or code |
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
 | **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
+| **knowledge-base** | Search the toolkit knowledge base before reading source, run the intake gate, save to the pending inbox, set up and check the local vector KB via `scripts/kb.py` |
 
 ### Engineering Practices And Languages
 

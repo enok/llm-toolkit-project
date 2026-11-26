@@ -48,6 +48,13 @@ Together they require you to:
 Use `{{TOOLKIT_ROOT}}/INTENTS.md` to route each ask to its primary skill,
 workflow, or rule before fanning out to specialists.
 
+## Knowledge base first, write back
+
+Per `{{TOOLKIT_ROOT}}/rules/knowledge-base.md`, before planning run
+`python3 {{TOOLKIT_ROOT}}/scripts/kb.py search "<topic>"`; after you learn something
+reusable, record it with `python3 {{TOOLKIT_ROOT}}/scripts/kb.py add`. If the
+knowledge base is unreachable, fall back to `learnings/INDEX.md` and say so.
+
 ## Layering with repo-local instructions
 
 Skills and subagents are installed once at the user level and apply

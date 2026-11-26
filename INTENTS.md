@@ -123,11 +123,19 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | create, rename, pause, or delete an automation | `automation-maintenance` | workflow | `rules/external-write-authorization.md` |
 | edit AGENTS / rules / workflows / skills | `llm-context-engineering` | skill | `toolkit-maintenance`, `rules/workflow-authoring.md` |
 | improve this toolkit / maintain the toolkit | `toolkit-maintenance` | workflow | `self-improvement`, `validate-toolkit-indexes`, `learnings/INDEX.md` |
+| search what we know about X / which asset covers X / how do we do X here | `knowledge-base` | skill | `rules/knowledge-base.md`, `learnings/INDEX.md` |
+| save this knowledge / remember this for every agent | `knowledge-base` | skill | `rules/knowledge-base.md` (intake gate), `chat-knowledge-curation`, `capture-learning` |
+| set up the knowledge base on this machine / the knowledge base is down | `knowledge-base` | skill | `docs/knowledge-base.md`, `environment-diagnose` |
+| keep the knowledge base in sync / promote the knowledge inbox | `knowledge-base-sync` | workflow | `knowledge-base`, `rules/external-write-authorization.md`, `toolkit-maintenance` |
 | capture a lesson / save this as a learning | `capture-learning` | workflow | `error-driven-learning` |
 | improve the toolkit from this work / capture mistakes | `self-improvement` | workflow | `capture-learning`, `external-skill-intake` |
 | run a retrospective / learn from this run's mistakes / what keeps going wrong in `<workflow>` / show the quality trend of a workflow | `run-retrospective` | workflow + skill | `rules/workflow-self-improvement.md`, `self-improvement`, `capture-learning`, `task-quality-loop` |
 | make every workflow learn from its mistakes / measure workflow accuracy over time | `rules/workflow-self-improvement.md` | rule | `run-retrospective`, `error-driven-learning`, `rules/request-orchestration.md` |
 | import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement`, `security` |
+| add or install a plugin / find a plugin in the marketplace | `plugin-intake` | workflow | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
+| remove unnecessary plugins / prune plugins | `plugin-intake` | workflow | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
+| audit installed plugins / are my plugins safe | `plugin-intake` | workflow | `llm-toolchain-provisioning`, `scripts/plugins.py`, `docs/plugins.md` |
+| which plugin, skill or agent is best for this task | `rules/plugin-governance.md` | rule | `agent-orchestrator`, `knowledge-base`, `scripts/plugins.py` |
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
 | set up dev-tools in this repo / get started | `onboarding` | skill | `scripts/setup-repo.sh`, `docs/repo-setup-prompt.md` |

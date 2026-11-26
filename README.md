@@ -8,16 +8,17 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 
 | Area | Path | Purpose |
 | --- | --- | --- |
-| Rules | `rules/` | 21 short always-on constraints: code, git, security gates, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
-| Workflows | `workflows/` | 98 sequenced procedures: review and fix loops, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
+| Rules | `rules/` | 24 short always-on constraints: code, git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
+| Workflows | `workflows/` | 101 sequenced procedures: review and fix loops, knowledge-base sync, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
 | Skills | `skills/` | 101 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
 | Tool subagents | `tool-subagents/` | 26 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
-| Learnings | `learnings/` | 83 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
-| Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export |
+| Learnings | `learnings/` | 91 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing, diagrams) |
+| Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export, plugin catalog and scan (`scripts/plugins.py`, guide `docs/plugins.md`) |
 | Tests and CI | `tests/`, `.github/workflows/` | Unit tests for the validators and GitHub Actions that run the full gate on `main` |
+| Knowledge base | `kb/`, `scripts/kb.py` | Local vector index of this toolkit plus a pending inbox; agents search it first and write reusable knowledge back (`rules/knowledge-base.md`) |
 | Docs | `docs/` | Provider path map, repo setup prompt, Jira setup |
 
 ## Architecture
@@ -88,6 +89,10 @@ To make this toolkit the default source of skills, subagents, rules, and workflo
 
 It links each tool's home-directory skill path to `skills/` (and, for Claude Code, Codex, and Cursor, the agent path to `tool-subagents/`), and writes a managed block into each tool's global instruction file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`, Windsurf `global_rules.md`) that routes every non-trivial prompt through `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md`. Re-run after `git pull`; see `docs/global-install.md` for the per-tool table, the Cursor manual step, and uninstall.
 
+### Knowledge base (optional, per machine)
+
+A local vector knowledge base (Docker) indexes this toolkit so agents search it before reading source and save new knowledge to a pending inbox that the agent sync workflow promotes through a pull request. Setup, configuration, and security: `docs/knowledge-base.md`; commands: `skills/knowledge-base/SKILL.md`.
+
 ### Use in another repo
 
 Clone this toolkit next to a consumer project, then run the setup script from the consumer repo:
@@ -136,10 +141,12 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **External Write Authorization** | `rules/external-write-authorization.md` | Bind every external mutation (tickets, PRs, wiki, chat, email) to an explicit instruction |
 | **Git Conventions** | `rules/git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, rebase, duplicate-file gate |
 | **Human Comment Reply Gate** | `rules/human-comment-reply-gate.md` | Draft-and-approve gate for human-facing replies |
+| **Knowledge Base** | `rules/knowledge-base.md` | Query the KB before reading source; write-back through an intake gate (dedupe, security, classification, indexes); improvement check |
 | **Log Analysis Safety** | `rules/log-analysis-safety.md` | Read-only, bounded, redacted log analysis |
 | **Multi-Agent Orchestration** | `rules/multi-agent-orchestration.md` | Parallel fanout, tier and validator handoff, when to serialize |
 | **Operational Doc Required** | `rules/operational-doc-required.md` | Recurring operations become runbooks; metric catalogs and wiki backup gates |
 | **Publication Positioning** | `rules/publication-positioning.md` | Read the consumer's publication profile first; AIDA order, budgets, sourced claims, `NOT POSTED` drafts, and a `publication-reviewer` pass before any draft is shown as ready |
+| **Plugin Governance** | `rules/plugin-governance.md` | Capability selection across toolkit assets and plugins; trust tiers, scanner verdicts, owner-gated adds and removals, protective plugins |
 | **Release Safety** | `rules/release-safety.md` | Deploy order, verification, rollback, completion evidence |
 | **Repository Context Layers** | `rules/repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md` and provider pointers |
 | **Request Orchestration** | `rules/request-orchestration.md` | Routing into specialists, model-selection contract, quality loops, safety boundaries |
@@ -151,7 +158,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 98 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 101 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -167,10 +174,12 @@ See `workflows/README.md` for the categorized catalog of all 98 workflows. Highl
 | `workflows/study-repo-to-publication.md` | Study topic to a protected repo (one or more languages), a short profile-positioned Medium article, and a LinkedIn teaser post, validated by `check_publication.py` and `publication-reviewer`, with bidirectional links, a drafts-only mode, and approval gates |
 | `workflows/study-publication-medium-linkedin.md` | Phases 7-10 of the study flow: short system-design-first Medium article and LinkedIn teaser in AIDA order, a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replace-published-story path behind separate approval gates |
 | `workflows/run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes, append the run record, promote recurring mistakes, report trend metrics |
+| `workflows/knowledge-base-sync.md` | Scheduled sync: intake-gate new knowledge, promote it on one rolling pull request, archive inbox items after the merge |
+| `workflows/plugin-intake.md` | Add, audit, or prune plugins: inventory, marketplace discovery, quarantine fetch, scan and review, overlap check, decision, owner-run install or removal plans |
 
 All workflows by area:
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`
@@ -203,6 +212,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **second-opinion** | Dual-model side-by-side sanity check of plans, designs, or code |
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
 | **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
+| **knowledge-base** | Search the toolkit knowledge base before reading source, run the intake gate, save to the pending inbox, set up and check the local vector KB via `scripts/kb.py` |
 
 #### Engineering Practices And Languages
 
@@ -388,5 +398,7 @@ The gate checks skill frontmatter, referenced paths, the 12,000-character workfl
 - `INTENTS.md` - phrase-to-capability map
 - `workflows/README.md`, `skills/README.md`, `rules/README.md`, `tool-subagents/README.md` - catalogs
 - `learnings/INDEX.md` - one-line index of every captured learning
+- `docs/knowledge-base.md` - local vector knowledge base: setup, CLI, scheduled sync
+- `docs/plugins.md` - plugin catalog, security scan, recommend, and decision register (`scripts/plugins.py`)
 - `docs/tool-compatibility-paths.md` - provider path map
 - `docs/repo-setup-prompt.md` - LLM-guided consumer setup

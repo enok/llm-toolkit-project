@@ -24,6 +24,8 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `self-improvement.md` | Capture mistakes as happy-path learnings, identify reusable skills/workflows, and safely harvest external LLM-tool skills |
 | `toolkit-maintenance.md` | Maintain the shared LLM toolkit — mine feedback, de-duplicate guidance, add generic skills/workflows, validate indexes, and sync clients |
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
+| `knowledge-base-sync.md` | Scheduled knowledge-base sync: gather new knowledge, run the intake gate, promote it on one rolling pull request, archive inbox items after the merge |
+| `plugin-intake.md` | Add, audit, or prune plugins: inventory, marketplace discovery, quarantine fetch, scan and review, overlap check, decision, owner-run install or removal plans (`scripts/plugins.py`) |
 
 ### Core Engineering
 

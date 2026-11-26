@@ -7,7 +7,13 @@
 # POSIX/Git Bash: scripts/bootstrap-dev.sh - same behavior via brew/apt/dnf.
 #
 # Usage: ./scripts/bootstrap-dev.ps1 [-Minimal] [-Full] [-Agent claude|codex|gemini|all]
-#                                    [-Consumer <path>] [-DryRun]
+#                                    [-Consumer <path>] [-NoKb] [-KbDataDir <path>] [-DryRun]
+#
+# The knowledge-base step (scripts/kb.py init, up --build, index, schedule install)
+# runs after the tool installs unless -Minimal or -NoKb is given; -KbDataDir sets
+# the data folder. It needs Docker with compose; without it the step prints the
+# command to run later and the bootstrap still succeeds. The prompt hook is never
+# installed here (opt-in: kb.py hook install).
 #
 # Idempotent: existing tools are detected and skipped. Interactive auth steps
 # (gh auth login, acli auth, aws configure) are printed, never run silently.
@@ -19,6 +25,8 @@ param(
     [ValidateSet('claude', 'codex', 'gemini', 'all')]
     [string]$Agent,
     [string]$Consumer,
+    [switch]$NoKb,
+    [string]$KbDataDir,
     [switch]$DryRun
 )
 
@@ -161,6 +169,69 @@ if ((Test-Command 'rtk') -and -not $DryRun) {
     }
 }
 
+# ---------- knowledge base (default + full; skipped by -Minimal or -NoKb) ----------
+
+if ($profileName -ne 'minimal' -and -not $NoKb) {
+    Write-Host '== Knowledge base =='
+    $kbPy = Join-Path $scriptDir 'kb.py'
+    $kbInit = @('init')
+    if ($KbDataDir) { $kbInit += @('--data-dir', $KbDataDir) }
+    $kbSteps = @(
+        $kbInit,
+        @('up', '--build'),
+        @('index'),
+        @('schedule', 'install')
+    )
+    # Interpreter: py -3, then python, then python3 (first one found).
+    $kbPython = $null
+    if (Test-Command 'py') { $kbPython = @('py', '-3') }
+    elseif (Test-Command 'python') { $kbPython = @('python') }
+    elseif (Test-Command 'python3') { $kbPython = @('python3') }
+    function ConvertTo-QuotedArg([string]$text) { return "'" + $text.Replace("'", "''") + "'" }
+    $kbPyShown = if ($kbPython) { $kbPython -join ' ' } else { 'python' }
+    # One PowerShell-5.1-safe line: commands joined with '; ', paths single-quoted.
+    $kbLater = ($kbSteps | ForEach-Object {
+        "$kbPyShown $(ConvertTo-QuotedArg $kbPy) " + (($_ | ForEach-Object { ConvertTo-QuotedArg $_ }) -join ' ')
+    }) -join '; '
+    $dockerReady = $false
+    if (-not $DryRun -and $kbPython -and (Test-Command 'docker')) {
+        $eap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        docker compose version *> $null
+        $composeExit = $LASTEXITCODE
+        docker info *> $null
+        $infoExit = $LASTEXITCODE
+        $ErrorActionPreference = $eap
+        $dockerReady = ($composeExit -eq 0 -and $infoExit -eq 0)
+    }
+    if ($DryRun) {
+        foreach ($step in $kbSteps) { Write-Host "[dry-run] $kbPyShown $kbPy $($step -join ' ')" }
+    } elseif (-not $kbPython) {
+        Write-Host "Knowledge base skipped: python3 is missing. Run later: $kbLater"
+        $manual.Add('Knowledge base (needs python3 first)')
+    } elseif (-not $dockerReady) {
+        Write-Host "Knowledge base skipped: Docker with compose is missing or its daemon is not running. Run later: $kbLater"
+        $manual.Add('Knowledge base (start Docker, then run the command printed above)')
+    } else {
+        $kbOk = $true
+        foreach ($step in $kbSteps) {
+            Write-Host "+ $kbPyShown $kbPy $($step -join ' ')"
+            $eap = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            & $kbPython[0] @($kbPython | Select-Object -Skip 1) $kbPy @step
+            $stepExit = $LASTEXITCODE
+            $ErrorActionPreference = $eap
+            if ($stepExit -ne 0) { $kbOk = $false; break }
+        }
+        if ($kbOk) {
+            $installed.Add('Knowledge base (indexed; scheduled sync installed)')
+        } else {
+            Write-Host "Knowledge base step failed. Run later: $kbLater"
+            $manual.Add('Knowledge base (a kb.py step failed; see output above)')
+        }
+    }
+}
+
 # ---------- toolkit wiring ----------
 
 if ($Consumer) {
@@ -195,6 +266,9 @@ Next steps (interactive, run yourself):
      - VS Code Copilot: .github/copilot-instructions.md is generated on sync
   6. Link your project repo (if not done): ./scripts/setup-repo.ps1 C:\path\to\repo
   7. Validate the toolkit:               npm run validate; ./scripts/security-check-toolkit.ps1
+  8. Knowledge base status:              python scripts/kb.py status
+     Optional prompt hook (explicit opt-in, never installed by this script):
+                                         python scripts/kb.py hook install
 
 Windows symlink note: directory links may require Developer Mode or an elevated
 shell; setup-repo.ps1 falls back to junctions where possible.
