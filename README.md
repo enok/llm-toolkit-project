@@ -49,6 +49,12 @@ learnings/         indexed gotchas (read learnings/INDEX.md first)
 .\scripts\sync-tool-configs.ps1 . -SkipAgentsMd -SkipGithub
 ```
 
+### Orchestration architecture
+
+![Agent-orchestrator flow: a prompt passes AGENTS.md rules and the INTENTS.md router to a thin root, which tiers tasks to haiku, sonnet or opus lanes, validates returns, keeps TASKS_TABLE.md and CONTEXT_STATE.md, and gates external writes.](docs/diagrams/fig1-orchestrator-architecture.png)
+
+A thin root routes each non-trivial request and assigns every task a tier (light -> haiku, standard -> sonnet, deep -> opus); a validator that is never the producer checks each return before the root accepts it. The root alone writes the ledger (`TASKS_TABLE.md` + `CONTEXT_STATE.md`) and performs external writes, which stay behind the write gate. The other figures and how to regenerate them are in [`docs/diagrams/README.md`](docs/diagrams/README.md).
+
 ### How agents use it
 
 1. **Rules** travel with every request (`rules/request-orchestration.md` routes non-trivial work; `rules/security-check-required.md`, `rules/human-comment-reply-gate.md`, and `rules/external-write-authorization.md` gate side effects).

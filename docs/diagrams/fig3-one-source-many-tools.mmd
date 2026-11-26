@@ -1,0 +1,37 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, Helvetica, sans-serif", "fontSize": "20px", "background": "#FFFFFF", "primaryColor": "#FFFFFF", "primaryBorderColor": "#1B1F23", "primaryTextColor": "#1B1F23", "secondaryColor": "#FDDCB5", "tertiaryColor": "#F5F7FA", "lineColor": "#3D4650", "textColor": "#1B1F23", "mainBkg": "#FFFFFF", "nodeBorder": "#1B1F23", "clusterBkg": "#F5F7FA", "clusterBorder": "#9AA5B1", "edgeLabelBackground": "#FFFFFF", "noteBkgColor": "#FFF6D6", "noteBorderColor": "#B8860B", "noteTextColor": "#1B1F23", "actorBkg": "#B8E2B4", "actorBorder": "#2F6B35", "actorTextColor": "#1B1F23", "actorLineColor": "#7A8794", "signalColor": "#3D4650", "signalTextColor": "#1B1F23", "labelBoxBkgColor": "#F5F7FA", "labelBoxBorderColor": "#7A8794", "labelTextColor": "#1B1F23", "loopTextColor": "#1B1F23", "activationBkgColor": "#DDEFDB", "activationBorderColor": "#2F6B35", "sequenceNumberColor": "#FFFFFF", "classText": "#1B1F23"}, "htmlLabels": false, "flowchart": {"wrappingWidth": 320, "curve": "linear", "nodeSpacing": 50, "rankSpacing": 60, "padding": 16, "htmlLabels": false}, "sequence": {"actorMargin": 50, "messageMargin": 38, "boxMargin": 10, "noteMargin": 10, "mirrorActors": false, "useMaxWidth": false}, "class": {"padding": 12, "htmlLabels": false}, "fontFamily": "Arial, Helvetica, sans-serif"}}%%
+flowchart TB
+    A["Canonical assets<br/>rules/, workflows/<br/>skills/, learnings/<br/>tool-subagents/"]
+    SR["Per repo<br/>setup-repo.*<br/>ensure-symlinks.*<br/>sync-tool-configs.*<br/>links or thin exports"]
+    SH["Per machine<br/>install-global-<br/>surfaces.*<br/>skills and agents<br/>only: links plus<br/>managed block"]
+    subgraph OUT["Tool surfaces (~/ = home)"]
+        direction TB
+        T1["Claude Code<br/>CLAUDE.md pointer<br/>.claude/skills, agents<br/>~/.claude/skills,<br/>agents, CLAUDE.md"]
+        T2["Codex<br/>AGENTS.md<br/>.agents/skills<br/>.codex/skills, agents<br/>~/.codex/skills/*,<br/>agents, AGENTS.md"]
+        T3["Cursor<br/>.cursor/skills, rules,<br/>workflows, agents<br/>~/.cursor/skills,<br/>agents"]
+        T4["Windsurf<br/>.windsurf/skills,<br/>rules, workflows<br/>~/.codeium/windsurf/<br/>skills, memories/<br/>global_rules.md"]
+        T5["GitHub Copilot<br/>.github/copilot-<br/>instructions.md<br/>generated export"]
+        T6["Gemini CLI<br/>.gemini/skills<br/>~/.gemini/skills,<br/>GEMINI.md"]
+        T7["OpenCode<br/>.opencode/skills<br/>~/.config/opencode/<br/>skills"]
+        T8["Antigravity<br/>.agent/skills<br/>~/.gemini/antigravity/<br/>skills"]
+        T9["Rules and workflows<br/>are linked for Cursor<br/>and Windsurf; Copilot<br/>gets them in one file"]
+        T1 ~~~ T4 ~~~ T7
+        T2 ~~~ T5 ~~~ T9
+        T3 ~~~ T6 ~~~ T8
+    end
+    A ==> SR
+    A -.-> SH
+    SR ==> OUT
+    SH -.-> OUT
+
+    classDef concrete fill:#F7B267,stroke:#B35C0F,stroke-width:2.5px,color:#1B1F23
+    classDef data fill:#BBDDF7,stroke:#1F5FA8,stroke-width:2.5px,color:#1B1F23
+    classDef external fill:#FFFFFF,stroke:#3D4650,stroke-width:2px,stroke-dasharray:6 4,color:#1B1F23
+    classDef note fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#1B1F23
+    class A data
+    class SR,SH concrete
+    class T1,T2,T3,T4,T5,T6,T7,T8 external
+    class T9 note
+    classDef panel color:#1B1F23
+    class OUT panel
+    style OUT fill:#FFFFFF,stroke:#7A8794,stroke-width:2px,stroke-dasharray:8 5,color:#1B1F23
+    linkStyle 7,9 stroke-width:2.5px,stroke-dasharray:8 5
