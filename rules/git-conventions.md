@@ -45,6 +45,10 @@ checkouts, deployments, and audit history depend on them.
   target is protected or shared, confirm explicit authorization for this
   specific push/merge; if authorization is missing or unclear, stop and ask.
 
+## Dirty Working Trees
+
+- **Never reset, checkout, or clean a dirty working tree.** Run `git status --porcelain=v1 --untracked-files=all` first: any output is uncommitted work that `git reset --hard <ref>`, `git checkout -f`, or `git clean` discards silently, including edits earlier lanes or runs left in a shared clone. To sync a clone to a ref use `python3 scripts/git_safe_sync.py --repo <clone> --to <ref>` (`--dry-run` to preview, `--wip-commit` or `--stash` to keep dirty work); it refuses with exit 3 on a dirty tree. See `learnings/git-reset-hard-discards-uncommitted-work.md`. (sig: coordination/reset-hard-discards-uncommitted-work)
+
 ## Commit Messages
 
 - Write clear, concise commit messages describing what changed.

@@ -1,0 +1,31 @@
+# Example publication profile
+
+A consumer project keeps its publishing limits in a Markdown file like this one and passes
+it with `check_publication.py post|article --profile PATH`. Only the first fenced block
+tagged `json` is read; everything else in the file is prose for people.
+
+A fenced block of another language comes first and is skipped, even when it shows a
+`json` fence of its own:
+
+````text
+```json
+{"post": {"max_chars": 1}}
+```
+````
+
+## Machine-readable settings
+
+```json
+{
+  "post": {"max_chars": 1300, "max_hashtags": 5, "hook_chars": 200},
+  "article": {"max_words": 1300, "max_code_blocks": 1, "max_code_lines": 15,
+              "min_images": 2, "max_images": 3},
+  "forbid_title_terms_from": "unknown keys are ignored (pass the terms with --forbid-title)"
+}
+```
+
+A later block is ignored, so the settings above stay in force:
+
+```json
+{"post": {"max_chars": 1}, "article": {"max_words": 1}}
+```

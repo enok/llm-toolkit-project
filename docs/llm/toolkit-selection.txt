@@ -21,6 +21,7 @@ rules/human-comment-reply-gate.md
 rules/log-analysis-safety.md
 rules/multi-agent-orchestration.md
 rules/operational-doc-required.md
+rules/publication-positioning.md
 rules/release-safety.md
 rules/repository-context-layers.md
 rules/request-orchestration.md
