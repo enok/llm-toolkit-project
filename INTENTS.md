@@ -67,6 +67,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | which plugins or extensions are installed / reproduce my assistant setup | `llm-toolchain-provisioning` | skill | `local-env-bootstrap` |
 | reorganize / restructure / clean up a folder tree | `folder-reorganization` | workflow + skill | `agent-orchestrator`, `automation-maintenance` |
 | shell script / Bash / PowerShell work | `shell-scripting` | skill | `rules/command-safety.md`, `rules/cross-platform-scripts.md`, `security` |
+| is this installer safe / a third party wants me to install an app | `third-party-installer-vetting` | workflow | `recruiter-legitimacy-check`, `rules/command-safety.md`, `rules/external-write-authorization.md` |
 
 ## Documentation, Diagrams, And Wiki
 
@@ -93,6 +94,8 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `medium-publishing`, `linkedin-publishing`, `diagram-authoring`, `rules/external-write-authorization.md` |
 | write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `medium-publishing`, `linkedin-publishing`, `publication-reviewer` |
 | review this article or post before I approve it / check a draft against my publication profile | `publication-reviewer` | subagent | `rules/publication-positioning.md`, `skills/medium-publishing/scripts/check_publication.py`, `documentation-reviewer` |
+| write a technical article / LinkedIn post or carousel about my project (draft only) | `technical-content-publishing` | workflow + skill | `publication-reviewer`, `rules/publication-positioning.md`, `diagram-authoring`, `medium-publishing`, `linkedin-publishing` |
+| what is the analysis of last night's debate / hearing / ruling / what do the polls and fact-checkers say | `current-events-briefing` | skill | `rules/evidence-before-verdict.md` |
 
 ## Security
 
@@ -140,6 +143,12 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
 | set up dev-tools in this repo / get started | `onboarding` | skill | `scripts/setup-repo.sh`, `docs/repo-setup-prompt.md` |
 | use the toolkit in every session / install it globally for my user | `docs/global-install.md` | script | `scripts/install-global-surfaces.sh`, `scripts/install-global-surfaces.ps1`, `tool-subagents/agent-orchestrator.md` |
+| clean up / tidy my chats, sessions, projects, scheduled tasks, or artifacts / delete the fired one-shots | `assistant-workspace-cleanup` | workflow + skill | `workspace-hygiene-auditor`, `rules/external-write-authorization.md`, `rules/ui-automation-lane-safety.md` |
+| which of my chats, sessions, or scheduled tasks can go / classify this workspace inventory | `workspace-hygiene-auditor-validation` | workflow + skill | `workspace-hygiene-auditor`, `workspace-hygiene-auditor-evolution`, `assistant-workspace-cleanup` |
+| keep watching this inbox / chat / thread and tell me when they reply | `conversation-monitoring` | workflow | `rules/external-write-authorization.md`, `rules/human-comment-reply-gate.md` |
+| what should I automate / what work do I keep repeating / find my repetitive tasks | `repeat-work-discovery` | skill | `skills/repeat-work-discovery/references/proposal-shapes.md`, `automation-maintenance` |
+| how much time does the toolkit save / what is the productivity impact or ROI | `productivity-impact-estimate` | skill | `skills/productivity-impact-estimate/scripts/productivity_estimate.py`, `rules/evidence-before-verdict.md` |
+| I cannot do that / is this really impossible in this session | `rules/capability-check-before-limitation.md` | rule | `automation-maintenance`, `rules/evidence-before-verdict.md` |
 
 ## Languages And Engineering Practices
 
@@ -154,6 +163,8 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | git conventions / branch naming / semantic commits | `git-conventions` | skill + rule | `commit-and-push` |
 | should I use the CLI or the MCP server | `rules/cli-over-mcp.md` | rule | `rules/command-safety.md` |
 | can you post this comment / update the ticket | `rules/human-comment-reply-gate.md` | rule | `rules/external-write-authorization.md` |
+| the Next / Submit button does nothing on this web form | `web-form-submit-debugging` | skill | `skills/web-form-submit-debugging/references/instrumentation-snippets.md`, `rules/ui-automation-lane-safety.md` |
+| will X work with Y / does this version or part support Z | `rules/evidence-before-verdict.md` | rule | `current-events-briefing`, `second-opinion` |
 
 ## Data Science, Thesis, And Public Data
 
@@ -186,6 +197,16 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | remove these from my LinkedIn profile / update my LinkedIn skills/certifications/experience / delete old skills, courses, certifications / set my end date on a role / add a skill or project | `linkedin-profile-maintenance` | skill | `agent-orchestrator`, `career-profile-sync`, `skills/linkedin-profile-maintenance/references/details-pages.md` |
 | sync my CV with LinkedIn / keep my profile, CV and job-search files consistent / I left my employer, update everything / re-render my CV | `career-profile-sync` | workflow | `linkedin-profile-maintenance`, `cv-truthfulness-reviewer`, `task-quality-loop` |
 | check my CV for unsupported claims / is every claim in my CV or profile true / check my CV against my repos and master CV | `cv-truthfulness-reviewer` | subagent | `career-profile-sync`, `task-quality-loop` |
+| I need results fast / urgent job search / attack plan / find me more positions | `job-search-attack-plan` | workflow | `job-posting-analyst`, `contract-platform-vetting`, `job-search-pipeline`, `technical-interview-prep` |
+| apply to my approved rows / submit the jobs I approved | `job-search-apply` | workflow | `job-search-pipeline`, `skills/job-search-pipeline/references/apply-playbook.md`, `rules/application-truthfulness.md` |
+| I am signed in to a job board, finish or fix my profile there | `job-portal-profile-sync` | workflow | `job-search-pipeline`, `career-profile-sync`, `rules/application-truthfulness.md` |
+| read these job postings / which fit me and pay what / rank these jobs | `job-posting-analyst-validation` | workflow + skill | `job-posting-analyst`, `job-posting-analyst-evolution`, `contract-platform-vetting` |
+| is this recruiter / offer / contract legit or a scam | `recruiter-legitimacy-check` | workflow | `third-party-installer-vetting`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
+| is this AI-training / expert-contractor gig platform legit / what rate should I enter | `contract-platform-vetting` | skill | `recruiter-legitimacy-check`, `job-posting-analyst` |
+| help me prepare for this interview / mock interview / debrief my interview | `technical-interview-prep` | workflow + skill | `interview-prep-planner`, `rules/application-truthfulness.md` |
+| build my interview study plan / what should I study for these roles | `interview-prep-planner` | skill | `technical-interview-prep`, `screening-interview-quick-prep` |
+| prepare me fast for a screening interview or short test / tomorrow's call | `screening-interview-quick-prep` | workflow | `technical-interview-prep`, `interview-prep-planner` |
+| improve the job-posting analyst / it misread pay or missed a duplicate | `job-posting-analyst-evolution` | workflow | `job-posting-analyst-validation`, `specialist-agent-evolution` |
 
 ## Provider Surfaces
 
