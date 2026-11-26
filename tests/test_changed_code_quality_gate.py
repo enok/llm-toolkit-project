@@ -226,6 +226,11 @@ class ScopeTests(unittest.TestCase):
         scope = gate.build_scope(self.root, self.args(), self.config())
         self.assertEqual("non-code file", scope.skipped["module.pyc"])
 
+    def test_mermaid_diagram_source_is_non_code(self) -> None:
+        (self.root / "flow.mmd").write_text("flowchart TD\n  A --> B\n", encoding="utf-8")
+        scope = gate.build_scope(self.root, self.args(), self.config())
+        self.assertEqual("non-code file", scope.skipped["flow.mmd"])
+
     def test_cursor_ignore_metadata_is_non_code(self) -> None:
         for name in (".cursorignore", ".cursorindexingignore"):
             (self.root / name).write_text("generated selection metadata\n", encoding="utf-8")
