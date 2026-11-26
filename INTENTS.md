@@ -65,6 +65,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | bootstrap or repair local setup / set up my machine | `local-env-bootstrap` | skill | `INFRA.sh` / `INFRA.ps1`, `environment-diagnose` |
 | diagnose my environment / cannot build locally | `environment-diagnose` | workflow + skill | `local-env-bootstrap`, `onboarding` |
 | which plugins or extensions are installed / reproduce my assistant setup | `llm-toolchain-provisioning` | skill | `local-env-bootstrap` |
+| reorganize / restructure / clean up a folder tree | `folder-reorganization` | workflow + skill | `agent-orchestrator`, `automation-maintenance` |
 | shell script / Bash / PowerShell work | `shell-scripting` | skill | `rules/command-safety.md`, `rules/cross-platform-scripts.md`, `security` |
 
 ## Documentation, Diagrams, And Wiki
