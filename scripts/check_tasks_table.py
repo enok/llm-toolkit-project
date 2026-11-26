@@ -3,7 +3,7 @@
 
 The contract lives in tool-subagents/agent-orchestrator.md, section "Tasks table
 contract: columns, assets, tokens, prints, checkpoints (MANDATORY)". This script
-is the mechanical guard for it: 13 exact columns, per-row cell rules, the three
+is the mechanical guard for it: 15 exact columns, per-row cell rules, the three
 footer rows with their arithmetic, and the assets manifest above the table.
 
 Usage:
@@ -25,8 +25,8 @@ import sys
 from pathlib import Path
 
 COLUMNS = (
-    "#", "Wave", "Task", "Assets", "Model/Effort", "Status", "Evidence",
-    "PR link(s)", "CI/CD run link(s)", "Tokens", "% Complete", "SLA", "Remaining SLA",
+    "#", "Wave", "Task", "Assets", "Vector DB used", "Complexity", "Model/Effort", "Status",
+    "Evidence", "PR link(s)", "CI/CD run link(s)", "Tokens", "% Complete", "SLA", "Remaining SLA",
 )
 LEGACY_PREFIX = ("#", "task", "model/effort")
 STATUSES = frozenset({
@@ -42,8 +42,18 @@ FOOTERS = (
 FOOTER_KEYS = tuple(f.casefold() for f in FOOTERS)
 MAX_SLA_MINUTES = 30
 
-C_NUM, C_WAVE, C_TASK, C_ASSETS, C_MODEL, C_STATUS = 0, 1, 2, 3, 4, 5
-C_TOKENS, C_SLA, C_REMAINING = 9, 11, 12
+C_NUM, C_WAVE, C_TASK, C_ASSETS, C_KB, C_COMPLEXITY, C_MODEL, C_STATUS = 0, 1, 2, 3, 4, 5, 6, 7
+C_TOKENS, C_SLA, C_REMAINING = 11, 13, 14
+
+COMPLEXITY_TIERS = ("light", "standard", "deep")
+# Model/Effort names the exact model that ran and its effort: "<model name with version> / <effort>".
+# A tier word, a bare family alias or a role ("root") is not a model.
+EFFORTS = ("minimal", "low", "medium", "high", "xhigh", "max", "default", "unknown", "none")
+MODEL_EFFORT_RE = re.compile(r"^(?P<model>[^/]*?\d[^/]*?)\s+/\s+(?P<effort>[A-Za-z][A-Za-z -]*?)\s*$")
+NOT_A_MODEL = frozenset({
+    "root", "inline", "haiku", "sonnet", "opus", "light", "standard", "deep",
+    "small model", "mid model", "large model", "session model", "default model",
+})
 
 SESSION_RE = re.compile(r"^##\s+Session:")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
@@ -249,8 +259,26 @@ def mentioned(manifest: str, name: str) -> bool:
     return bool(name) and re.search(r"(?<![\w-])" + re.escape(name) + r"(?![\w-])", manifest) is not None
 
 
+def check_model_effort(cell: str, label: str, add) -> None:
+    """Model/Effort must be the exact model that ran plus its effort, e.g. 'Claude Opus 5.5 / medium'."""
+    value = bare(cell)
+    match = MODEL_EFFORT_RE.match(value)
+    if not match:
+        add("FAIL", label, f"Model/Effort '{short(cell)}' must be '<exact model name and version> / <effort>', "
+            "for example 'Claude Opus 5.5 / medium' or 'GPT-5.5 / high'")
+        return
+    model = match.group("model").strip().casefold()
+    effort = match.group("effort").strip().casefold()
+    words = set(re.split(r"[\s:()-]+", model))
+    if model in NOT_A_MODEL or words & {"light", "standard", "deep", "root", "inline"}:
+        add("FAIL", label, f"Model/Effort '{short(cell)}' names a tier or role, not the model that ran; "
+            "put the tier in Complexity and the exact model here (root rows too)")
+    if effort.replace("effort ", "") not in EFFORTS:
+        add("FAIL", label, f"Model/Effort effort '{match.group('effort').strip()}' is not one of: " + ", ".join(EFFORTS))
+
+
 def check_task_row(cells: list, label: str, manifest: str, add):
-    """Check one 13-cell task row; return its parsed facts for the footer arithmetic."""
+    """Check one 15-cell task row; return its parsed facts for the footer arithmetic."""
     facts = {"status": None, "tokens": None, "sla": None, "rem": None}
     if not WAVE_RE.match(cells[C_WAVE]):
         add("FAIL", label, f"Wave '{short(cells[C_WAVE])}' does not match W<number>")
@@ -260,6 +288,14 @@ def check_task_row(cells: list, label: str, manifest: str, add):
         for item, base, stem in asset_items(cells[C_ASSETS]):
             if not any(mentioned(manifest, name) for name in {base, stem}):
                 add("FAIL", label, f"Assets item '{short(item)}' is not mentioned in the manifest above the table")
+
+    kb = norm(cells[C_KB])
+    if not (kb.startswith("yes") or kb.startswith("no")):
+        add("FAIL", label, f"Vector DB used '{short(cells[C_KB])}' must start with 'yes' (what was used) or 'no'")
+    tier = norm(cells[C_COMPLEXITY]).split(" ", 1)[0].rstrip(":,;")
+    if tier not in COMPLEXITY_TIERS:
+        add("FAIL", label, f"Complexity '{short(cells[C_COMPLEXITY])}' must start with one of: " + ", ".join(COMPLEXITY_TIERS))
+    check_model_effort(cells[C_MODEL], label, add)
 
     status = parse_status(cells[C_STATUS])
     facts["status"] = status
@@ -385,7 +421,7 @@ def check_section(section: Section, strict: bool) -> list:
 
     if tuple(header_norm[:3]) == LEGACY_PREFIX:
         add("FAIL" if strict else "WARN", "header",
-            "legacy schema (| # | Task | Model/Effort |); migrate to the 13-column Tasks table contract")
+            "legacy schema (| # | Task | Model/Effort |); migrate to the 15-column Tasks table contract")
         return findings
     if header_norm[:2] != ["#", "wave"]:
         add("FAIL", "header", "unrecognised table header (expected '| # | Wave | Task | ...')")

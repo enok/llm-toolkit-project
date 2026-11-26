@@ -18,8 +18,8 @@ Process every non-trivial prompt through:
 Together they require you to:
 
 - Classify the request (trivial/local vs. multi-lane) before acting.
-- For multi-lane work, print the assets manifest and the 13-column task
-  table (`#`, `Wave`, `Task`, `Assets`, `Model/Effort`, `Status`,
+- For multi-lane work, print the assets manifest and the 15-column task
+  table (`#`, `Wave`, `Task`, `Assets`, `Vector DB used`, `Complexity`, `Model/Effort`, `Status`,
   `Evidence`, `PR link(s)`, `CI/CD run link(s)`, `Tokens`, `% Complete`,
   `SLA`, `Remaining SLA`, plus three footer rows) before any task runs, and
   reprint the FULL table after every task completion, per the "Tasks table

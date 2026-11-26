@@ -23,8 +23,8 @@ or explicit LOA-mode results before they are presented as final.
    per-task mechanism.
 3. Check the tasks table against "Tasks table contract: columns, assets,
    tokens, prints, checkpoints" in `tool-subagents/agent-orchestrator.md`:
-   - Every normal-mode chat print (and `TASKS_TABLE.md`) carries all 13 columns in order (`#`, `Wave`, `Task`,
-     `Assets`, `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run
+   - Every normal-mode chat print (and `TASKS_TABLE.md`) carries all 15 columns in order (`#`, `Wave`, `Task`,
+     `Assets`, `Vector DB used`, `Complexity`, `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run
      link(s)`, `Tokens`, `% Complete`, `SLA`, `Remaining SLA`) and the three
      footer rows (`Total (all tasks)`, `Total (remaining/not completed)`,
      `Remaining SLA to complete all tasks (critical path)`); a dropped or

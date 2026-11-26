@@ -87,8 +87,8 @@ Any LLM tool loading only this skill still owes all of these duty sets from
   blockers early.
 - **Tasks table contract** — per "Tasks table contract: columns, assets,
   tokens, prints, checkpoints" in `tool-subagents/agent-orchestrator.md`: the
-  table has exactly 13 columns in order (`#`, `Wave`, `Task`, `Assets`,
-  `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run link(s)`,
+  table has exactly 15 columns in order (`#`, `Wave`, `Task`, `Assets`,
+  `Vector DB used`, `Complexity`, `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run link(s)`,
   `Tokens`, `% Complete`, `SLA`, `Remaining SLA`), never dropped or merged;
   three footer rows (`Total (all tasks)`, `Total (remaining/not completed)`,
   `Remaining SLA to complete all tasks (critical path)`); an assets manifest

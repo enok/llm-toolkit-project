@@ -72,8 +72,9 @@ must decide. The prints being mirrored are the full-table prints defined in
 `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets,
 tokens, prints, checkpoints": after planning, after every completion, failure,
 or escalation, on a block or SLA breach, and as the final table. The chat
-print is always the full table; each mirrored message carries the format
-approved with the route (see the last bullet below).
+print and every mirrored message carry the same full table: manifest, every
+column (including `Vector DB used`, `Complexity` and the exact
+`Model/Effort`), every row, the footer rows and the closing line.
 
 - **The route and its authorization are configuration, not defaults.** They live
   with the consumer as a consumer-configured notification route (for example
@@ -93,11 +94,10 @@ approved with the route (see the last bullet below).
 - **A skipped send is reported, never assumed delivered.** Treat the mirror as
   part of the table's completion: if the table was printed and the send did not
   happen, that is an open item, not a detail.
-- **The pre-approved format is narrow.** Each mirrored message carries only the
-  format approved with the route: by default the status line (agent, one-line
-  result, complexity tier) of each row that changed; the full table only when
-  the route's approval names it. Anything else returns to the draft-and-approve
-  flow in `rules/human-comment-reply-gate.md`.
+- **The pre-approved content is the table.** Each mirrored message carries the
+  requester header and the full table, never a shortened version or a status
+  line. Anything beyond the table returns to the draft-and-approve flow in
+  `rules/human-comment-reply-gate.md`.
 
 ## Per-task quality loop
 
@@ -114,8 +114,11 @@ scored. A violation of this contract is a routing defect that must be corrected
 before the affected task can be marked done.
 
 1. **Assign before executing.** At split time — before any task runs — every
-   task in the plan gets a complexity tier AND a concrete model plus effort,
-   printed in the tasks table's `Model/Effort` column. No task starts without
+   task in the plan gets a complexity tier, printed in the tasks table's
+   `Complexity` column, AND the exact model plus effort, printed in its
+   `Model/Effort` column as `<model name and version> / <effort>` (for
+   example `Claude Opus 5.5 / medium`; root rows and non-Claude agents
+   included, each with its own model name and effort scale). No task starts without
    its assignment. The column is never filled retroactively from what happened;
    it is the dispatch decision, written first and then verified against what
    actually ran. Use `model-selector` from `tool-subagents/` to produce the
@@ -221,7 +224,7 @@ before the affected task can be marked done.
 - In normal mode the root stays on the strongest available model. In explicit
   LOA mode the parent remains a reconciliation/final checker while each async
   task uses the coordinator's economical, platform-confirmed tier mapping.
-- Present the delegation plan as the 13-column tasks table defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints" (wave, assets, model/effort, status, evidence, tokens, baseline and remaining SLA), so the user can see the fanout before it runs and track it while it runs. Do not restate or trim the columns here.
+- Present the delegation plan as the 15-column tasks table defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints" (wave, assets, model/effort, status, evidence, tokens, baseline and remaining SLA), so the user can see the fanout before it runs and track it while it runs. Do not restate or trim the columns here.
 - Inside a quality loop, escalate the producer one tier after 2 consecutive `reasoning`-classed failures; `mechanical` failures refine at the same tier.
 
 ## Result judgment and learning

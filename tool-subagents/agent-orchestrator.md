@@ -13,8 +13,9 @@ You route work before implementation starts. The user should not need to ask for
 every mode. The operative duties:
 
 - **Assign at split time, before execution.** Every task in the plan gets a
-  complexity tier AND a concrete model plus effort, printed in the tasks table's
-  `Model/Effort` column before anything runs. Never fill that column
+  complexity tier, printed in the tasks table's `Complexity` column, AND the
+  exact model plus effort, printed in its `Model/Effort` column as
+  `<model name and version> / <effort>`, before anything runs. Never fill that column
   retroactively from what happened. Delegate the assignment to `model-selector`
   when the list is long or the tiers are contested — it is designed to run at
   `light`/`standard` so the audit costs less than the overspend it prevents.
@@ -382,10 +383,9 @@ against one shared task state. This is mandatory in every mode, not optional:
   Read-modify-write the whole file: update the rows your run owns, keep every
   other chat's rows intact — merge, never clobber, and never renumber or drop
   rows another session wrote. Refresh the last-updated stamp on every write.
-- **Exact schema** — the 13-column table, assets manifest, and three footer
+- **Exact schema** — the 15-column table, assets manifest, and three footer
   rows defined in "Tasks table contract" below; the same table serves chat
-  prints and this file, while notification mirrors carry the format their
-  route approved. `SLA` and `Remaining SLA` are time allotments (HH:MM), not
+  prints, this file, and every notification mirror. `SLA` and `Remaining SLA` are time allotments (HH:MM), not
   deadlines.
 - **The file stays untracked and uncommitted — never commit or push it.**
   Verify exclusion before any commit/push; if the repo does not ignore it,
@@ -464,13 +464,12 @@ and ends with the same three footer rows.
 
 ### Columns: all of them, every print
 
-The table has exactly these 13 columns, in this order, in every normal-mode
-chat print and in `TASKS_TABLE.md`. The only exceptions are the LOA chat print
-(above) and a notification mirror, which carries the format its route
-approved (see "Print cadence" below):
+The table has exactly these 15 columns, in this order, in every normal-mode
+chat print, in every notification mirror, and in `TASKS_TABLE.md`. The only
+exception is the LOA chat print (above):
 
-| # | Wave | Task | Assets | Model/Effort | Status | Evidence | PR link(s) | CI/CD run link(s) | Tokens | % Complete | SLA | Remaining SLA |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| # | Wave | Task | Assets | Vector DB used | Complexity | Model/Effort | Status | Evidence | PR link(s) | CI/CD run link(s) | Tokens | % Complete | SLA | Remaining SLA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 - **No column is dropped, merged, or renamed to save width.** A print missing a
   column is a defect even when every cell in it is empty; empty cells read `—`.
@@ -482,8 +481,26 @@ approved (see "Print cadence" below):
   ` · `: `skill:<name>`, `rule:<name>`, `workflow:<name>`, `agent:<name>`,
   `script:<path>`, `INTENTS`. A row that genuinely uses none says
   `none (inline)`.
-- `Model/Effort`: tier, concrete model, effort, and justification, per the
-  Model selection contract above.
+- `Vector DB used`: whether the task read the project's vector knowledge base
+  and that reading fed the work: `yes - N searches; <what was used>`,
+  `yes - via row N` when it relies on another row's findings, or `no`. A search
+  made only to verify the knowledge base is `no (test searches only)`; indexing
+  or adding to it is `no (writes to it)`. The closing line under the footer rows
+  adds the total: tasks that used it out of all tasks, and the searches made.
+- `Complexity`: the tier assigned at split time (`light`, `standard`, `deep`),
+  followed by any escalation trigger or root-inline exemption, for example
+  `light (root inline: root-only tool)`.
+- `Model/Effort`: the exact model that runs the row and its effort, written
+  `<model name and version> / <effort>`, for example `Claude Opus 5.5 / medium`,
+  `Claude Fable 5.2 / high`, `Claude Haiku 5.5 / low`. Every row, the root
+  agent's own rows included. Use the vendor's product name of the model that
+  actually runs; an agent that is not Claude shows its own model and effort
+  (`GPT-5.5 / high`, `Gemini 3 Pro / high`). Never a tier word, a family alias
+  (`sonnet`), or a role (`root`). Effort is `minimal`, `low`, `medium`,
+  `high`, `xhigh`, or `max`; write `default` when the host chose it and
+  `unknown` when the agent cannot read it, never a guess. The tier and the
+  reason go in `Complexity`. `scripts/check_tasks_table.py` enforces the
+  format.
 - `Status`: `pending`, `running`, `validating`, `refining`, `blocked`,
   `paused`, `completed`, `failed`, or `escalated`. Older wording elsewhere maps
   onto these: `in progress` means `running`, `done` means `completed`.
@@ -550,7 +567,7 @@ exercised.
 
 ### Print cadence: the whole table, every time
 
-Print the full table (the manifest, all 13 columns, every row this run owns,
+Print the full table (the manifest, all 15 columns, every row this run owns,
 and the three footer rows):
 
 1. after planning, before the first dispatch;
@@ -569,9 +586,9 @@ between tool calls is summarised rather than shown to the user word for word,
 send each print through a tool the host shows verbatim (for example a
 send-message tool). A configured notification mirror (see "Tasks-table
 notification cadence" in `rules/request-orchestration.md`) sends one message
-per print, in the format approved with its route: by default the one-line
-status of each row that changed; the full table only when the route's
-approval names that format.
+per print, and each message carries the same full table as the chat print:
+the manifest, every column, every row, the footer rows and the closing line.
+A mirror is never a shortened table or a status line.
 
 ### Durable checkpoints and resume
 
@@ -926,7 +943,7 @@ Safety notes:
 ```
 
 Include the tasks table in the same response, in the exact shape defined in
-"Tasks table contract" (manifest, 13 columns, three footer rows), ordered to
+"Tasks table contract" (manifest, 15 columns, three footer rows), ordered to
 maximize safe parallelism (independent tasks in the same wave; a task with no
 unmet dependency starts in the earliest possible wave). What the columns carry
 for each row:
@@ -937,11 +954,12 @@ for each row:
   assigned by the selection map in `workflows/task-quality-loop.md`, never the
   producer itself. `Evidence` carries the loop count as `iter used/budget`
   (budget 5 by default, 1 for deterministic `light` tasks).
-- `Model/Effort` holds the requested model and effort from the client model map
-  on every row, and the dispatch must actually pass that model parameter. Once
-  the platform confirms it, append the confirmed model as
-  `requested -> confirmed`, taken only from platform/tool evidence (the
-  accepted tool-call parameter). Only when the platform exposes no per-task
+- `Model/Effort` holds the exact model and effort from the client model map
+  on every row (`<model name and version> / <effort>`), and the dispatch must
+  actually pass that model parameter. Once the platform confirms it, record
+  the confirmation in `Evidence` (`model confirmed: <tool evidence>`), taken
+  only from platform/tool evidence (the accepted tool-call parameter); when the
+  confirmed model differs, `Model/Effort` shows the model that actually ran. Only when the platform exposes no per-task
   mechanism, write `platform default / unconfirmed`. A row whose confirmed
   model is the session default without a recorded task-specific escalation
   justification is a routing defect: the validator must flag it and the

@@ -40,9 +40,10 @@ def table_row(cells):
     return "| " + " | ".join(cells) + " |"
 
 
-def row(num, wave, status, tokens, sla, remaining, assets="skill:example-skill · script:scripts/example_check.py"):
+def row(num, wave, status, tokens, sla, remaining, assets="skill:example-skill · script:scripts/example_check.py",
+        kb="no", complexity="standard", model="Claude Sonnet 5.5 / medium"):
     return table_row([
-        str(num), wave, f"Task {num}", assets, "standard: sonnet / medium", status,
+        str(num), wave, f"Task {num}", assets, kb, complexity, model, status,
         "first-pass; notes/out.md", "—", "—", tokens, "0", sla, remaining,
     ])
 
@@ -52,7 +53,7 @@ def footer(
     path="3 → 4", path_sla="00:12",
 ):
     def line(label, third, tok="", sla_cell="", rem=""):
-        return table_row([label, "", str(third), "", "", "", "", "", "", tok, "", sla_cell, rem])
+        return table_row([label, "", str(third), "", "", "", "", "", "", "", "", tok, "", sla_cell, rem])
 
     return [
         line("Total (all tasks)", count, tokens, sla),
@@ -208,7 +209,7 @@ class CheckTasksTableTests(unittest.TestCase):
     def test_row_with_missing_cell_fails(self) -> None:
         rows = default_rows()
         rows[1] = table_row(rows[1].strip("| ").split(" | ")[:-1])
-        self.assert_fails(ledger(rows=rows), "row 2: has 12 cells, expected 13")
+        self.assert_fails(ledger(rows=rows), "row 2: has 14 cells, expected 15")
 
     def test_bad_wave_empty_assets_and_status_fail(self) -> None:
         rows = default_rows()
@@ -337,6 +338,31 @@ class CheckTasksTableTests(unittest.TestCase):
                 rows = default_rows()
                 rows[3] = row(4, "W3", "pending", "—", sla, "00:05")
                 self.assert_fails(ledger(rows=rows), "row 4: SLA", "exceeds the 00:30 cap")
+
+    def test_exact_models_for_root_and_non_claude_agents_pass(self) -> None:
+        rows = default_rows()
+        rows[0] = row(1, "W0", "completed", "10.0K", "00:05", "00:00", complexity="light (root inline: root-only tool)", model="Claude Opus 5.5 / high")
+        rows[1] = row(2, "W1", "completed", "20.5K", "00:20", "00:00", kb="yes - 3 searches; schema notes", model="GPT-5.5 / medium")
+        rows[2] = row(3, "W2", "running (dispatched 20:06)", "~4.0K", "00:10", "00:07", complexity="deep", model="Gemini 3 Pro / effort unknown")
+        code, out = self.run_check(ledger(rows=rows))
+        self.assertEqual(code, 0, out)
+
+    def test_tier_or_role_in_model_effort_fails(self) -> None:
+        for model in ("standard: sonnet / medium", "root / low", "sonnet / medium", "light -> root / low", "Claude Opus 5.5", "Claude Opus 5.5 / fast"):
+            with self.subTest(model=model):
+                rows = default_rows()
+                rows[0] = row(1, "W0", "completed", "10.0K", "00:05", "00:00", model=model)
+                self.assert_fails(ledger(rows=rows), "Model/Effort")
+
+    def test_complexity_must_be_a_tier(self) -> None:
+        rows = default_rows()
+        rows[0] = row(1, "W0", "completed", "10.0K", "00:05", "00:00", complexity="easy")
+        self.assert_fails(ledger(rows=rows), "Complexity")
+
+    def test_vector_db_used_must_say_yes_or_no(self) -> None:
+        rows = default_rows()
+        rows[0] = row(1, "W0", "completed", "10.0K", "00:05", "00:00", kb="—")
+        self.assert_fails(ledger(rows=rows), "Vector DB used")
 
     def test_sla_at_cap_passes(self) -> None:
         rows = default_rows()
