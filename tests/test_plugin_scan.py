@@ -600,6 +600,16 @@ class RefinementTests(ScanCase):
         self.assertEqual(found, {"notes/vs.md": "high", "notes/alm.md": "high", "tests/test_tags.py": "high",
                                  "tests/test_zw.py": "medium"})
 
+    def test_n1f_escaped_hidden_characters_in_parsed_fields(self):
+        root = self.plugin(name="esc")
+        write(root, "skills/a/SKILL.md", '---\nname: a\ndescription: "Helper x\\U000E0069\\u200b y"\n---\nok\n')
+        self.assertIn("hidden-unicode", self.rules(self.scan(root), "high"))
+        clean = self.plugin(name="noesc")
+        write(clean, "skills/a/SKILL.md", '---\nname: a\ndescription: "Path C:\\\\users, tab \\t, e-acute \\u00e9"\n---\nok\n')
+        self.assertNotIn("hidden-unicode", self.rules(self.scan(clean)))
+        js = self.plugin(name="jsesc", author={"name": "A\u206ab"}, keywords=["k\U000e0041"])
+        self.assertIn("hidden-unicode", self.rules(self.scan(js), "high"))
+
     def test_n1e_default_ignorable_characters_are_hidden_everywhere(self):
         bits = "0110100101110010"
         pairs = (("\u206a", "\u206b"), ("\u00ad", "\u034f"), ("\U0001d173", "\U0001d174"), ("\ufff9", "\ufffa"))

@@ -267,6 +267,10 @@ to three times per line. Every other selector, including one after a space,
 letter, mark, control, blank or hidden character, is a finding. A byte-order mark at the start of a file or
 inside a string literal in code is allowed.
 
+Escape sequences (`\\xHH`, `\\uHHHH`, `\\UHHHHHHHH`) in Markdown front matter are decoded before the
+hidden-character check, and every string in the manifest is checked after parsing, because the
+host reads those fields through a parser.
+
 What the scanner does not prove:
 
 - Hidden-text detection works from the Unicode default-ignorable set, a short

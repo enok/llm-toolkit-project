@@ -733,6 +733,10 @@ class PluginScan:
                         text = description[:20000]
                         self.apply((INSTRUCTION_OVERRIDE, MANDATE), rel, text, text.lower())
                         self._hidden(rel, text)
+                    # every other string value, parsed: JSON escapes can spell hidden characters in ASCII
+                    for value in _json_strings(data, 2000):
+                        if value is not description:
+                            self._hidden(rel, value[:20000])
                 return
         self.add("manifest-missing", "info", "", 0, "no plugin manifest; components found by folder convention")
 
@@ -1083,6 +1087,12 @@ class PluginScan:
             self.scripts += 1
         self._secrets(rel, text, is_md)
         self._hidden(rel, text, is_code)
+        if is_md and text.startswith("---"):
+            # front matter is parsed by the host: escape sequences there become the characters they name
+            end = text.find("\n---", 3)
+            decoded = _decode_escapes(text[:end if end != -1 else 65536][:65536])
+            if decoded is not None:
+                self._hidden(rel, decoded)
         if is_code:
             shell = ext in SHELL_EXT or (not ext and re.match(r"#![^\n]*\b(?:ba|z|k|da)?sh\b", text) is not None)
             if shell:
@@ -1370,6 +1380,35 @@ def _presentation_base(prev: str, nxt: str) -> bool:
     if HIDDEN_RX.match(prev):
         return False
     return _emoji_base(prev)
+
+
+ESCAPE_RX = re.compile(r"\\(?:x([0-9a-fA-F]{2})|u([0-9a-fA-F]{4})|U([0-9a-fA-F]{8}))")
+
+
+def _decode_escapes(text: str):
+    """Text with \\xHH, \\uHHHH and \\UHHHHHHHH escapes replaced by their characters, or None when it has none."""
+    if not ESCAPE_RX.search(text):
+        return None
+
+    def repl(m):
+        cp = int(m.group(1) or m.group(2) or m.group(3), 16)
+        return chr(cp) if cp < 0x110000 and not 0xD800 <= cp <= 0xDFFF else m.group(0)
+    return ESCAPE_RX.sub(repl, text)
+
+
+def _json_strings(node, limit: int):
+    """Up to `limit` string values and keys found anywhere in a parsed JSON value."""
+    out, stack = [], [node]
+    while stack and len(out) < limit:
+        item = stack.pop()
+        if isinstance(item, str):
+            out.append(item)
+        elif isinstance(item, dict):
+            stack.extend(item.keys())
+            stack.extend(item.values())
+        elif isinstance(item, list):
+            stack.extend(item)
+    return out
 
 
 def _selector(ch: str) -> bool:
