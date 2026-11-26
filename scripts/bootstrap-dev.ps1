@@ -64,7 +64,7 @@ function Install-WingetTool([string]$check, [string]$label, [string]$wingetId) {
         return
     }
     if (-not (Test-Command 'winget')) {
-        $manual.Add("$label — winget unavailable; install manually")
+        $manual.Add("$label - winget unavailable; install manually")
         return
     }
     if ($DryRun) {
@@ -150,7 +150,7 @@ if ($profileName -ne 'minimal') {
     if (Test-Command 'mvn') {
         $skipped.Add('Maven (already installed)')
     } else {
-        $manual.Add('Maven — no winget package; download from https://maven.apache.org/download.cgi and add bin to PATH')
+        $manual.Add('Maven - no winget package; download from https://maven.apache.org/download.cgi and add bin to PATH')
     }
     # Token-efficiency tools (see skills/token-efficiency/SKILL.md)
     Install-WingetTool 'sg' 'ast-grep' 'ast-grep.ast-grep'
@@ -158,19 +158,19 @@ if ($profileName -ne 'minimal') {
     if (Test-Command 'acli') {
         $skipped.Add('Atlassian CLI (already installed)')
     } else {
-        $manual.Add('Atlassian CLI (acli) — install per https://developer.atlassian.com/cloud/acli/guides/install-acli/')
+        $manual.Add('Atlassian CLI (acli) - install per https://developer.atlassian.com/cloud/acli/guides/install-acli/')
     }
     if (Test-Command 'slack') {
         $skipped.Add('Slack CLI (already installed)')
     } else {
-        $manual.Add('Slack CLI — install manually if your workflow needs it (authentication remains interactive)')
+        $manual.Add('Slack CLI - install manually if your workflow needs it (authentication remains interactive)')
     }
     # RTK: only the security-reviewed deployment is approved (rules/command-safety.md).
     # Never auto-install from public registries; never run 'rtk init'.
     if (Test-Command 'rtk') {
         $skipped.Add('rtk (already installed)')
     } else {
-        $manual.Add('rtk — optional token optimizer; run with -Rtk or follow skills/token-efficiency/references/rtk-reviewed-deployment.md')
+        $manual.Add('rtk - optional token optimizer; run with -Rtk or follow skills/token-efficiency/references/rtk-reviewed-deployment.md')
     }
 }
 
@@ -181,7 +181,7 @@ if ($profileName -eq 'full') {
     Install-WingetTool 'pandoc' 'Pandoc' 'JohnMacFarlane.Pandoc'
     Install-WingetTool 'typst' 'Typst' 'Typst.Typst'
     if (-not (Test-Command 'plantuml')) {
-        $manual.Add('PlantUML — needs Java; download plantuml.jar from https://plantuml.com/download')
+        $manual.Add('PlantUML - needs Java; download plantuml.jar from https://plantuml.com/download')
     }
 }
 
@@ -228,7 +228,7 @@ if ($SecurityTools) {
             $manual.Add('PSScriptAnalyzer (Install-Module failed; install manually)')
         }
     }
-    $manual.Add('trufflehog — no winget package; install from its GitHub release if needed')
+    $manual.Add('trufflehog - no winget package; install from its GitHub release if needed')
 }
 
 # ---------- reviewed RTK (opt-in: -Rtk) ----------
@@ -247,7 +247,7 @@ if ($Rtk) {
     }
     if (-not $rtkVersionOk -and -not (Test-Command 'rtk')) {
         if (-not (Test-Command 'winget')) {
-            $manual.Add("rtk $rtkReviewedVersion — winget unavailable; install the reviewed version manually")
+            $manual.Add("rtk $rtkReviewedVersion - winget unavailable; install the reviewed version manually")
         } elseif ($DryRun) {
             Write-Host "[dry-run] winget install --id rtk-ai.rtk --version $rtkReviewedVersion --exact"
             Write-Host "[dry-run] winget pin add --id rtk-ai.rtk --version $rtkReviewedVersion"

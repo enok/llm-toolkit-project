@@ -325,7 +325,7 @@ function Ensure-ToolkitDirectoryLink {
     <#
     .SYNOPSIS
       Create a directory symlink (mklink /d) or verify an existing reparse point points at TargetPath.
-      Replaces a plain directory or a link pointing elsewhere (e.g. Drive sync copy, old layout) — never keeps a duplicate tree.
+      Replaces a plain directory or a link pointing elsewhere (e.g. Drive sync copy, old layout) - never keeps a duplicate tree.
     #>
     param(
         [Parameter(Mandatory)][string]$LinkPath,

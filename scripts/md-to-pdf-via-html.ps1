@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Markdown → standalone HTML (Pandoc, embedded CSS) → headless Chrome (or Edge) → PDF.
+  Markdown -> standalone HTML (Pandoc, embedded CSS) -> headless Chrome (or Edge) -> PDF.
   Use for wide pipe tables where Pandoc+Typst column layout overlaps.
 
   Chrome is preferred for --print-to-pdf (Edge headless print is unreliable on some builds).
@@ -104,7 +104,7 @@ $pdfTemp = Join-Path $env:TEMP ("mdout-" + [Guid]::NewGuid().ToString("n") + ".p
 
 $py = Get-Command python -ErrorAction SilentlyContinue
 if (-not $py) {
-    throw "Python is required on PATH for localhost HTML → PDF (http.server + headless browser)."
+    throw "Python is required on PATH for localhost HTML -> PDF (http.server + headless browser)."
 }
 
 try {

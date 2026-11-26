@@ -34,7 +34,7 @@ if (-not (Test-Path -LiteralPath $ConsumerPath -PathType Container)) {
 
 $Consumer = Resolve-ToolkitAbsolutePath $ConsumerPath
 
-# ── Interactive tool selection ────────────────────────────────────────────────
+# -- Interactive tool selection ------------------------------------------------
 $USE_WINDSURF = $false; $USE_CURSOR = $false; $USE_CLAUDE = $false; $USE_CODEX = $false; $USE_ANTIGRAVITY = $false; $USE_GEMINI = $false; $USE_OPENCODE = $false
 
 Write-Host ''
@@ -306,7 +306,7 @@ else {
 
 # 6. Update .gitignore.
 $gitignoreLines = @(
-    '# LLM integration — local output and symlinked/generated toolkit paths'
+    '# LLM integration - local output and symlinked/generated toolkit paths'
     'docs/jira/'
     'node_modules/'
     '.DS_Store'
