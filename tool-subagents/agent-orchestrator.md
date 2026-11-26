@@ -204,14 +204,18 @@ minutes:
    wall-clock must be stated alongside the remaining-SLA sum, and
    parallel-by-default must be visible in the Wave column. If the evaluation
    fails, re-split before continuing.
-5. **SLA = realistic remaining allotment, recalculated on every table
-   refresh.** A row at 90% must not keep its full baseline SLA; shrink it to
-   the genuinely remaining work. Never report a total that sums stale or
-   padded baselines.
+5. **Remaining SLA = realistic remaining allotment, recalculated on every
+   print.** The `SLA` column keeps the baseline set at split time (the breach
+   budget); the `Remaining SLA` column carries the genuinely remaining work. A
+   row at 90% must not keep its full baseline as its remaining SLA. Never
+   report a remaining total that sums stale or padded baselines
+   (`Total (all tasks)` sums the baselines by design; the two remaining
+   footer rows never do).
 6. **Report BOTH totals**: the remaining-SLA sum (schema requirement,
    computed from current remaining values) AND the critical-path wall-clock
    (longest dependent chain across the parallel lanes) — the wall-clock is
    what answers "when will this be done" and must be stated next to the sum.
+   Both are footer rows of the table ("Tasks table contract").
 7. **Re-split when critical path is long.** If critical-path wall-clock
    exceeds 1 hour (not approximate — that is the threshold for mandatory
    re-examination), re-examine the plan and split further before continuing;
@@ -311,15 +315,11 @@ against one shared task state. This is mandatory in every mode, not optional:
   Read-modify-write the whole file: update the rows your run owns, keep every
   other chat's rows intact — merge, never clobber, and never renumber or drop
   rows another session wrote. Refresh the last-updated stamp on every write.
-- **Exact schema** — the same 9-column table used for chat and notification
-  reporting, plus its two total rows:
-
-  | # | Task | Model/Effort | Status | Evidence | PR link(s) | CI/CD run link(s) | % Complete | SLA |
-  | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-
-  ending with `Total (all tasks)` (row count) and
-  `Total (remaining/not completed)` (count of non-completed rows plus the sum
-  of their SLA column). `SLA` is a time allotment (HH:MM), not a deadline.
+- **Exact schema** — the 13-column table, assets manifest, and three footer
+  rows defined in "Tasks table contract" below; the same table serves chat
+  prints and this file, while notification mirrors carry the format their
+  route approved. `SLA` and `Remaining SLA` are time allotments (HH:MM), not
+  deadlines.
 - **The file stays untracked and uncommitted — never commit or push it.**
   Verify exclusion before any commit/push; if the repo does not ignore it,
   add it to local `.git/info/exclude` (never to the tracked `.gitignore`
@@ -346,7 +346,7 @@ against one shared task state. This is mandatory in every mode, not optional:
   as an unapproved external write under `rules/external-write-authorization.md`.
   A reachable messaging tool is capability, not authorization; an authorized
   route with no working transport is a skip you report, not a step you drop.
-  Carry a "Requested by" header on every mirrored table (shared destinations
+  Carry a "Requested by" header on every mirrored message (shared destinations
   serve several people), and treat a print without its due send as an open
   item.
 
@@ -358,9 +358,11 @@ told to "load CONTEXT_STATE.md" must be able to resume all processing from
 exactly where it stands, with no access to the prior conversation.
 
 - **Update cadence (both files)**: write/refresh `CONTEXT_STATE.md` and
-  `TASKS_TABLE.md` after the initial analysis — before task processing
-  starts — and again after each task completion. (`TASKS_TABLE.md`
-  additionally re-persists on every table change, per the section above.)
+  `TASKS_TABLE.md` at every checkpoint point in "Durable checkpoints and
+  resume" below: after the initial analysis and before task processing
+  starts, at each dispatch, at each completion, block, or breach, and before
+  long root operations. (`TASKS_TABLE.md` additionally re-persists on every
+  table change, per the section above.)
 - **Content** — everything a cold-start session needs, in detail:
   timestamp + timezone; objective(s) and success criteria; decisions taken
   and their rationale; per-task processing detail (what was done, exact
@@ -378,6 +380,175 @@ exactly where it stands, with no access to the prior conversation.
   `CONTEXT_STATE.md` is the detailed narrative/resume state, and
   `LLM-STATE.md` stays the LOA-internal checkpoint — three files, three
   purposes; do not merge them.
+
+## Tasks table contract: columns, assets, tokens, prints, checkpoints (MANDATORY)
+
+This section is the single owner of the tasks table's shape, of when the table
+is printed, and of when the ledger is checkpointed. The rule, the skill, the
+templates, and the validation workflow point here instead of restating it. It
+applies in normal mode and to the `TASKS_TABLE.md` an explicit-LOA coordinator
+writes. In explicit LOA mode the chat print is the LOA milestone table (see
+"LOA progress and SLA accounting"), which carries `Assets` and `Tokens` columns
+and ends with the same three footer rows.
+
+### Columns: all of them, every print
+
+The table has exactly these 13 columns, in this order, in every normal-mode
+chat print and in `TASKS_TABLE.md`. The only exceptions are the LOA chat print
+(above) and a notification mirror, which carries the format its route
+approved (see "Print cadence" below):
+
+| # | Wave | Task | Assets | Model/Effort | Status | Evidence | PR link(s) | CI/CD run link(s) | Tokens | % Complete | SLA | Remaining SLA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+- **No column is dropped, merged, or renamed to save width.** A print missing a
+  column is a defect even when every cell in it is empty; empty cells read `—`.
+  Narrow hosts may abbreviate cell content (`wf:` for `workflow:`), never the
+  column set.
+- `Wave`: `W0`, `W1`, and so on. Rows that share a wave run in parallel; this
+  column is where parallel-by-default is visible.
+- `Assets`: the toolkit assets the row uses, each prefixed by kind and joined by
+  ` · `: `skill:<name>`, `rule:<name>`, `workflow:<name>`, `agent:<name>`,
+  `script:<path>`, `INTENTS`. A row that genuinely uses none says
+  `none (inline)`.
+- `Model/Effort`: tier, concrete model, effort, and justification, per the
+  Model selection contract above.
+- `Status`: `pending`, `running`, `validating`, `refining`, `blocked`,
+  `paused`, `completed`, `failed`, or `escalated`. Older wording elsewhere maps
+  onto these: `in progress` means `running`, `done` means `completed`.
+- `Tokens`: tokens the task actually spent (see "Tokens per task" below).
+- `SLA`: the baseline allotment (HH:MM) fixed at split time, at most 00:30. It
+  is the budget the SLA-breach rule measures elapsed time against, so it is not
+  edited after dispatch. A re-split after dispatch adds new rows with their own
+  baselines; the original row stays, set to `failed` with `re-split` in
+  Evidence and `Remaining SLA` 00:00. Rows are never dropped or renumbered.
+- `Remaining SLA`: the realistic remaining work (HH:MM), recalculated on every
+  print; `00:00` once the row is completed, failed, or escalated.
+
+The table always ends with these three footer rows, in this order:
+
+| Footer row (first cell) | Third cell | `Tokens` cell | `SLA` cell | `Remaining SLA` cell |
+| --- | --- | --- | --- | --- |
+| `Total (all tasks)` | row count | sum of all rows | sum of baselines | — |
+| `Total (remaining/not completed)` | count of non-completed rows | — | — | sum of `Remaining SLA` |
+| `Remaining SLA to complete all tasks (critical path)` | the chain of row numbers | — | — | critical-path wall-clock |
+
+The sum says how much work is left; the critical path says when the run will
+be done. Both are mandatory (item 6 of "SLA accounting and maximal
+decomposition").
+
+### Assets manifest
+
+Print one manifest above the table on every print, and keep the same text in
+the run's session header in `TASKS_TABLE.md`:
+
+- `Route`: the `INTENTS.md` row and the primary skill or workflow it selected;
+- `Rules in force`: the rules this run is applying;
+- `Agents`: each agent or lane type dispatched, with the model it runs on;
+- `Helpers`: scripts and validators the run calls.
+
+Update the manifest when the plan adds an asset. The `Assets` column never
+names anything the manifest lacks. The manifest tells the human which toolkit
+assets shaped the run, and tells the closing retrospective which assets were
+exercised.
+
+### Tokens per task
+
+- **Delegated rows** record the token usage the host reports for that lane
+  (for example the usage total an agent-dispatch tool returns), summed over
+  every produce and refine iteration the row ran. When the host reports no
+  per-lane usage, read it from the lane's own transcript if the host keeps
+  one; otherwise record a `~` estimate from the `model-selector` token band. A
+  validator with its own row records its own usage.
+- **Root-inline rows** record the change in the host's session token counter
+  between the row's start and end when the host exposes one; otherwise the
+  host's usage report for those turns; otherwise an estimate from the
+  `model-selector` token band, marked with a leading `~`.
+- A pending row shows `—`, or the planned band as `est. <band>`. A
+  `completed`, `failed`, or `escalated` row never shows a blank, `—`, a band,
+  or an unmarked guess.
+- Write counts as `K` or `M` with at most one decimal (`12.4K`, `1.2M`).
+  `Total (all tasks)` is the exact sum of the numeric values in the column
+  (rounding allowance: the larger of 0.2K and 1%); planned bands
+  (`est. <band>`) and `—` are not summed, and the total is `—` while nothing
+  has been spent. The total carries a
+  leading `~` exactly when at least one summed value does. State once in the
+  run's notes which measure each kind of row used.
+- The column is evidence for the `model-selector` overspend audit: a `light`
+  row that spent more than a `deep` row is a finding to explain.
+
+### Print cadence: the whole table, every time
+
+Print the full table (the manifest, all 13 columns, every row this run owns,
+and the three footer rows):
+
+1. after planning, before the first dispatch;
+2. after every task completion, failure, or escalation; when several lanes
+   finish in the same reduce step, one print covers them;
+3. immediately when a task becomes blocked or breaches its SLA, naming what is
+   blocked and what the human must decide;
+4. at the end, as the final table with the real model per row.
+
+A delta ("row 4 done"), a summary sentence, or a partial table does not count
+as a print. Persist first, then print: write the values to `TASKS_TABLE.md`,
+then render the print from the persisted text (copy it, or let a script
+render it). Never recompute or retype a number between the write and the
+print; that is how the chat and the file drift apart. On hosts where text
+between tool calls is summarised rather than shown to the user word for word,
+send each print through a tool the host shows verbatim (for example a
+send-message tool). A configured notification mirror (see "Tasks-table
+notification cadence" in `rules/request-orchestration.md`) sends one message
+per print, in the format approved with its route: by default the one-line
+status of each row that changed; the full table only when the route's
+approval names that format.
+
+### Durable checkpoints and resume
+
+A run can stop at any moment (exhausted credit or tokens, a rate limit, a
+crash, a closed chat, a sleeping machine) with no chance to write a closing
+note. So the ledger is written ahead of the work, never only after it.
+
+1. **Checkpoint points.** Write `TASKS_TABLE.md` and `CONTEXT_STATE.md`:
+   (a) after planning, before the first dispatch; (b) at each dispatch, with
+   the row set to `running`, the dispatch time, and the expected output path
+   in Evidence; (c) at each completion, failure, block, or breach, before the
+   print; (d) before any long operation the root runs itself, such as a build,
+   a bulk write, or a push.
+2. **Durable artifacts.** Anything a resumed session needs (drafts, patches,
+   generated files, intermediate results) must survive the session. Durable
+   means the project tree, a pushed or bundled git branch, or a run folder in
+   the user's workspace (a run folder outside the repository's working tree
+   counts). A cloud sandbox, a chat scratchpad, or `/tmp` holds working
+   copies only: at every completion checkpoint, and when the user pauses the
+   run, copy or patch the run's work in progress out to the durable location
+   and record its path in the row's Evidence and in `CONTEXT_STATE.md`. A
+   resume action that reads "re-derive from the transcript" is a ledger
+   defect. If the host offers no durable location at all, say so in the first
+   print and keep the ledger in the chat: every print then also carries the
+   resume action of each open row.
+3. **Resumable evidence.** A completed row's Evidence is enough to skip it on
+   resume: a path, SHA, branch, PR link, or command plus exit code. "Done" is
+   not evidence.
+4. **Resume protocol, on every invocation.** Before planning, read both ledger
+   files. If a section for the same objective is still open, resume it rather
+   than starting over:
+   - keep its `completed` rows and do not redo them, after checking that each
+     one's evidence still exists;
+   - for each in-flight row (`running`, `validating`, `refining`), in this
+     order: (1) read the output path recorded at dispatch; if it holds a
+     complete four-block return, judge it like any return and continue the
+     row from there; (2) otherwise, if the platform still lists the lane as
+     alive, re-attach to it; (3) otherwise the lane died with the root's
+     context: set the row to `failed` with
+     `breached (cause: root context lost)` in Evidence and keep it, diff the
+     files the lane owned against its last checkpoint, and add a fresh row
+     for the remaining work with its own baseline;
+   - leave `paused` rows paused until the user lifts the hold, and `blocked`
+     rows blocked until their blocker is resolved;
+   - continue from the first wave that is not complete.
+   The first print after a resume is headed `resumed from <timestamp>`. Start
+   a fresh section only when the user asks to restart; archive the old one
+   first.
 
 ## CSCI delivery lifecycle — tests + documentation (MANDATORY)
 
@@ -471,15 +642,16 @@ For a sequential chain, critical-path remaining SLA is the sum of remaining
 task SLAs; for a parallel wave, use its longest remaining lane. Where external
 systems vary, show a bounded range rather than a false point estimate.
 
-Every refreshed LOA table must include task, agent, requested and confirmed
-model/reasoning, validator, loop, wave/status, individual milestone %, baseline
-SLA in hours/minutes, and remaining SLA in hours/minutes. After a
+Every refreshed LOA table must include task, agent, assets, requested and
+confirmed model/reasoning, validator, loop, wave/status, tokens, individual
+milestone %, baseline SLA in hours/minutes, and remaining SLA in hours/minutes,
+followed by the three footer rows of "Tasks table contract". After a
 validator-passed task, refresh the parent-facing table and rollup with the
 weighted overall % and critical-path remaining SLA.
 
-| Wave/status | Task | Agent | Requested model/reasoning | Confirmed model/reasoning | Validator | Loop | Progress % | Baseline SLA (h/min) | Remaining SLA (h/min) | Notification mirror |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 / queued | scoped task | assigned producer | tier mapping | pending confirmation | separate validator | 0/budget | 0 | auditable range | auditable range | truthful gate status |
+| Wave/status | Task | Agent | Assets | Requested model/reasoning | Confirmed model/reasoning | Validator | Loop | Tokens | Progress % | Baseline SLA (h/min) | Remaining SLA (h/min) | Notification mirror |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 / queued | scoped task | assigned producer | skills/rules/workflows used | tier mapping | pending confirmation | separate validator | 0/budget | — | 0 | auditable range | auditable range | truthful gate status |
 
 ### LOA state and notification checkpoint
 
@@ -679,26 +851,31 @@ Evolution opportunities:
 Safety notes:
 ```
 
-Include a task table in the same response, ordered to maximize safe parallelism (independent tasks in the same wave; a task with no unmet dependency starts in the earliest possible wave):
+Include the tasks table in the same response, in the exact shape defined in
+"Tasks table contract" (manifest, 13 columns, three footer rows), ordered to
+maximize safe parallelism (independent tasks in the same wave; a task with no
+unmet dependency starts in the earliest possible wave). What the columns carry
+for each row:
 
-| Wave | Agent | Task | Complexity tier | Requested model / effort | Confirmed model / effort | Validator | Loop | Est. time | Parallel with | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `parallel-explorer` | map affected modules | light | `haiku` / medium (Claude Code) | pending confirmation | `task-quality-judge` | 0/1 | ~1-2 min | (task in same wave, if any) | pending |
-| 1 | `code-reviewer` | review auth diff | standard | `sonnet` / medium (Claude Code) | pending confirmation | `test-runner` | 0/5 | ~3-5 min | row above | pending |
-
-- "Est. time" is a rough judgment call (e.g. "~1-2 min", "~5-10 min"), not a measured guarantee; say so if asked.
-- "Wave" groups tasks that run concurrently; a later wave may depend on an earlier wave's output.
-- "Validator" is the read-only agent assigned by the selection map in `workflows/task-quality-loop.md`; it is never the producer itself.
-- "Loop" shows iterations used vs budget (`used/budget`); budget is 5 by default and 1 for deterministic `light` tasks.
-- Fill "Requested model / effort" from the client model map on every row; the
-  dispatch must actually pass that model parameter. Fill "Confirmed model /
-  effort" only from platform/tool evidence (the accepted tool-call parameter).
-  Only when the platform exposes no per-task mechanism, write
-  `platform default / unconfirmed`. A row whose confirmed model is the session
-  default without a recorded task-specific escalation justification is a
-  routing defect: the validator must flag it and the dispatch must be corrected
-  before the row can be marked done.
-- Update the table's status column (pending / running / validating / refining / done / escalated / failed) as each task actually moves; do not mark a row done before its validator returns `pass` and the result is judged.
+- `Wave` groups tasks that run concurrently; a later wave may depend on an
+  earlier wave's output.
+- `Assets` names the validator as `agent:<validator>`: the read-only agent
+  assigned by the selection map in `workflows/task-quality-loop.md`, never the
+  producer itself. `Evidence` carries the loop count as `iter used/budget`
+  (budget 5 by default, 1 for deterministic `light` tasks).
+- `Model/Effort` holds the requested model and effort from the client model map
+  on every row, and the dispatch must actually pass that model parameter. Once
+  the platform confirms it, append the confirmed model as
+  `requested -> confirmed`, taken only from platform/tool evidence (the
+  accepted tool-call parameter). Only when the platform exposes no per-task
+  mechanism, write `platform default / unconfirmed`. A row whose confirmed
+  model is the session default without a recorded task-specific escalation
+  justification is a routing defect: the validator must flag it and the
+  dispatch must be corrected before the row can be marked `completed`.
+- `SLA` is a rough judgment made at split time, not a measured guarantee; say
+  so if asked.
+- Update `Status` as each task actually moves; do not mark a row `completed`
+  before its validator returns `pass` and the result is judged.
 
 Progress notification (opt-in, gated):
 

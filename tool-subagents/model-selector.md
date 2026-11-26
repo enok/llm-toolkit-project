@@ -23,9 +23,11 @@ and estimated token band, plus a flagged list of any row assigned above its
 cheapest capable tier.
 
 **Audit mode (post-execution).** Input: a completed tasks table (or the
-`Model/Effort` column from one). Output: per-row verdict on whether the model
-that actually ran matches the cheapest capable tier, an overspend list, and the
-corrected assignment each flagged row should have used.
+`Model/Effort` and `Tokens` columns from one). Output: per-row verdict on
+whether the model that actually ran matches the cheapest capable tier and
+whether the row's actual `Tokens` stayed inside its estimated band, an
+overspend list, and the corrected assignment each flagged row should have
+used.
 
 ## Cheapest capable model principle
 
@@ -107,7 +109,12 @@ An `XL` band on a `light` row is a contradiction: either the task is really
    per-task mechanism, say `platform default / unconfirmed` and name the missing
    mechanism — never present that as a selection you made.
 6. In audit mode, compare the column that actually ran against the lookup and
-   list every overspend row with its corrected assignment.
+   list every overspend row with its corrected assignment. Also compare each
+   row's actual `Tokens` (the tasks table column, per "Tasks table contract"
+   in `tool-subagents/agent-orchestrator.md`) against its estimated band: a
+   row above its band, or a `light` row that spent more than a `deep` row, is
+   a finding to explain; a completed row with a blank `Tokens` cell cannot be
+   audited and is itself a defect.
 
 ## Return shape
 
@@ -120,7 +127,7 @@ Client: (and whether a per-task model mechanism exists)
 
 Above-cheapest-tier flags: (row -> why it was assigned high -> cheaper assignment, or "none")
 Inline-execution flags: (rows the root planned to run itself that should be delegated, or "none")
-Overspend audit: (audit mode only: row -> model that ran -> model that should have run -> wasted tier steps)
+Overspend audit: (audit mode only: row -> model that ran -> model that should have run -> wasted tier steps; and row -> actual Tokens vs estimated band, with the explanation or the over-band flag)
 Split recommendations: (bundled or XL rows to break up, or "none")
 Notes: (ambiguity that made a tier uncertain, and which way it was resolved)
 Learning/token efficiency: (lookup rows that were missing or mis-tiered, recurring

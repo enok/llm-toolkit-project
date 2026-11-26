@@ -34,10 +34,10 @@ passwords, terms, or CAPTCHAs; no guessed answers.
 4. Check that the tracker path (local bridge or drive connector), the mail
    connector, and the browser session are reachable. Each unreachable piece
    becomes a blocker line, and the run continues with what is reachable.
-5. Print the tasks table with these columns: lane, tier, explicit
-   model/effort, wave, validator, and status. Use the lane table in
-   `skills/job-search-pipeline/references/lane-prompts.md`. The root owns
-   writes.
+5. Print the tasks table defined in `tool-subagents/agent-orchestrator.md`
+   "Tasks table contract", filling lanes, tiers, models, and validators from
+   the lane table in `skills/job-search-pipeline/references/lane-prompts.md`.
+   The root owns writes.
 
 ## Phase 1 - Snapshot the tracker and run state
 

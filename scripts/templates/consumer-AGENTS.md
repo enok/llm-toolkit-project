@@ -73,6 +73,13 @@ the shared toolkit rules (`rules/request-orchestration.md`) and does not replace
    time so every delegated task gets a complexity tier, a concrete model,
    and a reasoning-effort tier. Cheapest capable tier wins; the session
    model is NOT the default for delegated work.
-3. **Tasks tables record what actually ran.** The Model/Effort column must
-   show the real model + effort per task; a table showing one uniform
-   expensive model is the signal that this step was skipped.
+3. **Tasks tables record what actually ran.** The table has the 13 columns
+   (`#`, `Wave`, `Task`, `Assets`, `Model/Effort`, `Status`, `Evidence`,
+   `PR link(s)`, `CI/CD run link(s)`, `Tokens`, `% Complete`, `SLA`,
+   `Remaining SLA`), three footer rows, and an assets manifest, and the
+   FULL table is reprinted after every task completion (contract: "Tasks
+   table contract" in the orchestrator prompt). The Model/Effort column must
+   show the real model + effort per task, and `Tokens` the real spend; a
+   table showing one uniform expensive model is the signal that this step
+   was skipped. The ledger is checkpointed before each dispatch so a run
+   that dies resumes instead of restarting.
