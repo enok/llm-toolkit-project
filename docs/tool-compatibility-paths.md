@@ -30,7 +30,7 @@ verified against this toolkit's own `setup-repo.*`, `ensure-symlinks.*`, and
 | Cursor | `.cursor/skills/`, `.cursor/rules/`, `.cursor/workflows/`, `.cursor/agents/` | Symlinked compatibility surfaces that point to the canonical shared files |
 | Claude Code | `CLAUDE.md`, `.claude/skills/`, `.claude/agents/` | `CLAUDE.md` is a thin pointer to `AGENTS.md`; shared skills and agents are links |
 | Gemini CLI | `.gemini/skills/` | Thin skill compatibility link to `.agents/skills/` |
-| GitHub Copilot | `.github/copilot-instructions.md` | Concatenated repo-local export from the shared selection plus resolved LLM config docs - not a skills directory |
+| GitHub Copilot | `.github/copilot-instructions.md` | Concatenated repo-local export from the shared selection plus resolved LLM config docs - not a skills directory; the toolkit creates no Copilot skills link (see below) |
 | OpenCode | `.opencode/skills/` | Thin skill compatibility link to `.agents/skills/` |
 | Windsurf | `.windsurf/skills/`, `.windsurf/rules/`, `.windsurf/workflows/` | Thin skill link plus shared rule/workflow links |
 
@@ -38,8 +38,12 @@ verified against this toolkit's own `setup-repo.*`, `ensure-symlinks.*`, and
 project roots above. `ensure-symlinks.*` repairs the `.agents/`, `.agent/`,
 `.claude/`, `.codex/`, `.cursor/`, `.gemini/`, `.opencode/`, and `.windsurf/`
 links so new skills become visible after a clone; it does not create or
-modify `.github/skills/` - GitHub Copilot has no supported per-skill
-directory in this toolkit, only the generated instructions file above.
+modify `.github/skills/` - the toolkit generates no Copilot skills link,
+only the instructions file above. Vendor documentation read on 2026-11-24
+says the Copilot agent also discovers project skills in `.github/skills/`,
+`.claude/skills/`, and `.agents/skills/`, so the `.claude/skills/` and
+`.agents/skills/` links above may already be visible to it. Which editor
+versions honour each path is untested.
 
 ### Global (home-directory) skill paths
 
@@ -64,8 +68,17 @@ Codex-only mirror script and remains available.
 | OpenCode | `~/.config/opencode/skills/` |
 | Windsurf | `~/.codeium/windsurf/skills/` |
 
-GitHub Copilot has no analogous global skill path; it only reads
-`.github/copilot-instructions.md` per repo.
+GitHub Copilot is not in this table because the installer does not target it
+(it has no Copilot installer and creates no `~/.copilot/skills` link). Vendor
+documentation read on 2026-11-24 says the Copilot command-line tool loads
+personal skills from `~/.copilot/skills` and `~/.agents/skills`, and the
+editor's agent mode loads them from `~/.copilot/skills`, `~/.claude/skills`,
+and `~/.agents/skills`, so the `~/.claude/skills` link above may already
+serve the editor agent. The command-line tool page does not list
+`~/.claude/skills`. Observed once, on one machine (surface not recorded):
+the toolkit skills were visible to the Copilot agent through the existing
+Claude link with no installer step. Which editor versions honour each path
+is untested.
 
 ## Rules, Workflows, And Agents
 
