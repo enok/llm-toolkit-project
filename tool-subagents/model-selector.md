@@ -63,6 +63,7 @@ escalation trigger is the only thing that moves a task up from it.
 | Running a validation script or test command and reporting pass/fail with the failing lines | `light` | `haiku` / low |
 | Path/name synchronization, formatting, lint fixes, mechanical find-and-replace | `light` | `haiku` / low |
 | Retrieval, file/symbol mapping, log or output scanning for a known pattern, single deterministic check | `light` | `haiku` / medium |
+| Browser/desktop UI automation executing a pre-approved, explicit ID list (open-ended UI exploration stays `standard`) | `light` | `haiku` / medium |
 | Doc drafting and doc updates, release notes, PR bodies, runbook sections; authoring learnings or skill references from a recorded facts ledger | `standard` | `sonnet` / medium |
 | Config/overlay sync review, generated-surface drift check, dependency bump review | `standard` | `sonnet` / medium |
 | Standard code edits and ordinary bug fixes inside a known surface; ordinary code review | `standard` | `sonnet` / medium |
