@@ -28,6 +28,7 @@ KNOWN_CODE_SUFFIXES = SUPPORTED_SUFFIXES | {
     ".kt", ".kts", ".lua", ".m", ".mm", ".php", ".pl", ".ps1", ".r", ".rb",
     ".rs", ".scala", ".sh", ".sol", ".sql", ".svelte", ".swift", ".vb", ".vbs",
     ".vue", ".zsh",
+    ".bash", ".bat", ".cmd", ".csh", ".fish", ".ksh", ".psd1", ".psm1", ".pyw", ".tcsh",
 }
 NON_CODE_SUFFIXES = {
     ".bmp", ".cfg", ".conf", ".csv", ".gif", ".ico", ".ini", ".jpeg", ".jpg",
@@ -251,6 +252,10 @@ def build_scope(root: Path, args: argparse.Namespace, config: dict[str, Any]) ->
             skipped[relative] = reason
             continue
         file_ranges = added_ranges(root, relative, base, head)
+        if not file_ranges and is_dockerfile(relative):
+            # Whole-file rule: a deletion- or mode-only Dockerfile change is
+            # still judged (removing a line can create a finding elsewhere).
+            file_ranges = ((1, 1),)
         if not file_ranges:
             skipped[relative] = "no added or modified lines"
             continue
@@ -427,7 +432,8 @@ def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
 
     hadolint reports one line per instruction, and an instruction's extent
     (continuations, heredocs, escape directives) is easy to misjudge, so any
-    error/warning anywhere in a Dockerfile with a changed line blocks.
+    error/warning anywhere in a changed Dockerfile blocks, even when the
+    change only deletes lines.
     """
     covered: dict[str, dict[str, int]] = {}
 

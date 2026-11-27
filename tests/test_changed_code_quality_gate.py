@@ -246,6 +246,15 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual("non-code file", scope.skipped["Dockerfile.md"])
         self.assertEqual("unsupported code language", scope.skipped["Dockerfile.go"])
 
+    def test_dockerfile_named_shell_scripts_are_not_routed_to_hadolint(self) -> None:
+        names = ("Dockerfile.bash", "Dockerfile.bat", "Dockerfile.cmd", "Dockerfile.fish", "Dockerfile.ksh", "Dockerfile.psm1", "Dockerfile.pyw", "run.bash")
+        for name in names:
+            (self.root / name).write_text("from scratch\n", encoding="utf-8")
+        scope = gate.build_scope(self.root, self.args(), self.config())
+        self.assertEqual((), gate.dockerfile_subscope(scope).files)
+        for name in names:
+            self.assertIn(scope.skipped[name], gate.BLOCKING_SKIP_REASONS)
+
     def test_python_bytecode_is_non_code_build_output(self) -> None:
         (self.root / "module.pyc").write_bytes(b"compiled")
         scope = gate.build_scope(self.root, self.args(), self.config())
@@ -492,6 +501,21 @@ class DockerfileGateTests(unittest.TestCase):
         code, report = self.gate({"findings": [{"code": "DL3007", "level": "warning", "line": 1}]})
         self.assertEqual((1, "fail"), (code, report["status"]))
         self.assertEqual(["DL3007"], [item["ruleId"] for item in self.hadolint_report(report)["findings"]])
+
+    def test_deletion_only_dockerfile_change_is_judged_whole_file(self) -> None:
+        # Removing the last USER makes an earlier USER root the effective user.
+        (self.root / "Dockerfile").write_text("\n".join(DOCKERFILE.splitlines()[:4]) + "\n", encoding="utf-8")
+        code, report = self.gate({"findings": [{"code": "DL3002", "level": "warning", "line": 1}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+        self.assertEqual(["DL3002"], [item["ruleId"] for item in self.hadolint_report(report)["findings"]])
+
+    def test_mode_only_dockerfile_change_is_judged_whole_file(self) -> None:
+        if os.name == "nt":
+            self.skipTest("file mode bits are not tracked on Windows")
+        (self.root / "Dockerfile").chmod(0o755)
+        code, report = self.gate({"findings": []})
+        self.assertEqual((0, "pass"), (code, report["status"]))
+        self.assertEqual({"Dockerfile"}, set(self.hadolint_report(report)["covered"]))
 
     def test_unchanged_dockerfile_is_not_analysed(self) -> None:
         (self.root / "other.Dockerfile").write_text("FROM alpine:latest\n", encoding="utf-8")
