@@ -139,6 +139,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | add or install a plugin / find a plugin in the marketplace | `plugin-intake` | workflow | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
 | remove unnecessary plugins / prune plugins | `plugin-intake` | workflow | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
 | audit installed plugins / are my plugins safe | `plugin-intake` | workflow | `llm-toolchain-provisioning`, `scripts/plugins.py`, `docs/plugins.md` |
+| add a new skill, workflow, agent or rule / does this resource beat the plain model / value-check a toolkit resource | `resource-value-check` | workflow | `docs/llm/value-checks.csv`, `scripts/check_value_checks.py` |
 | which plugin, skill or agent is best for this task | `rules/plugin-governance.md` | rule | `agent-orchestrator`, `knowledge-base`, `scripts/plugins.py` |
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
