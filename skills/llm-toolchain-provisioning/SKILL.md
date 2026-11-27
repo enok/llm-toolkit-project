@@ -91,12 +91,12 @@ This skill answers what is installed and enabled; deciding which plugins should 
 
 1. **Inventory**: the export above (installed and enabled state, pins, sources).
 2. **Catalog**: `python3 scripts/plugins.py catalog --auto` reuses this skill's install-location discovery (`scripts/toolchain_lib.py`) to build one capability card per plugin, with a scan verdict and its context cost (`listing_chars`); `plugins.py status` summarises it.
-3. **Decisions**: adds, keeps, removals, and rejects go through `workflows/plugin-intake.md` and are recorded with `plugins.py decide`, under `rules/plugin-governance.md`. A restore here reinstalls only what the manifest records and prints the commands for the operator to inspect; it does not check the plugin decision register, so review `plugins.py decisions` before restoring. CLI reference: `docs/plugins.md`.
+3. **Decisions**: adds, keeps, removals, and rejects go through the intake procedure in `docs/plugins.md` and are recorded with `plugins.py decide`, under `rules/plugin-governance.md`. A restore here reinstalls only what the manifest records and prints the commands for the operator to inspect; it does not check the plugin decision register, so review `plugins.py decisions` before restoring. CLI reference: `docs/plugins.md`.
 
 ## Related
 
 - `rules/cross-platform-scripts.md` — portability requirements these scripts follow.
 - `rules/external-write-authorization.md` — authorization gate for mutating an operator's environment.
 - `skills/local-env-bootstrap/SKILL.md` — repository and runtime setup, the project-side counterpart to this workstation-side skill.
-- `rules/plugin-governance.md`, `workflows/plugin-intake.md` — plugin selection, intake, and removal gates.
+- `rules/plugin-governance.md`, `docs/plugins.md` — plugin selection, intake, and removal gates.
 - `skills/external-skill-intake/SKILL.md` — evaluating and adapting a capability sourced from a public registry.

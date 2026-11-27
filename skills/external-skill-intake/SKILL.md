@@ -71,7 +71,7 @@ When a listed repository points to another upstream skill, review the upstream r
 
 ## Plugins
 
-Plugin intake (installing a bundle into an LLM tool, not copying content into this repository) follows `workflows/plugin-intake.md` under `rules/plugin-governance.md`; `python3 scripts/plugins.py scan` runs the static checks. Apply the gate above, plus these plugin-specific checks the scanner cannot judge alone:
+Plugin intake (installing a bundle into an LLM tool, not copying content into this repository) follows the intake procedure in `docs/plugins.md` under `rules/plugin-governance.md`; `python3 scripts/plugins.py scan` runs the static checks. Apply the gate above, plus these plugin-specific checks the scanner cannot judge alone:
 
 - **Hooks:** for each hook event, confirm its purpose matches the plugin's stated purpose. Reject a hook that sends data over the network, reaches outside the plugin root, approves permissions on its own, or injects session context the plugin does not need.
 - **MCP servers:** record each server's transport and target host or command; require pinned package versions, https targets, and no literal secrets in the config.
@@ -112,7 +112,7 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 ## Related
 
 - `rules/plugin-governance.md`
-- `workflows/plugin-intake.md`
+- `docs/plugins.md`
 - `workflows/self-improvement.md`
 - `workflows/toolkit-maintenance.md`
 - `skills/llm-context-engineering/SKILL.md`

@@ -58,8 +58,11 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
   `<framework>`" claim carries an official-source citation checked on the day
   ([content-angle.md](references/content-angle.md)).
 - Run `skills/medium-publishing/scripts/check_publication.py article` (with `--profile`,
-  `--title`, `--subtitle` and `--forbid-title`) and the `tool-subagents/publication-reviewer.md`
-  agent before the draft is shown; a non-zero exit or a failed verdict means the draft is not ready.
+  `--title`, `--subtitle` and `--forbid-title`) and a profile check
+  (the drafting assistant, or a read-only validator lane the orchestrator dispatches, checks the draft
+  against the consumer's publication profile and `rubrics/technical-content.md` if that file exists)
+  before the draft is shown; a non-zero exit or an open defect means the draft is not ready, and the
+  draft stays `NOT POSTED` until the owner approves.
 - Every article follows the AIDA narrative (Attention, Interest, Desire, Action) and its
   title names the highest-level concept the body supports, never more:
   [aida-narrative.md](references/aida-narrative.md).
@@ -199,7 +202,7 @@ LinkedIn (see `skills/linkedin-publishing/SKILL.md`).
 ## Related
 
 - `rules/external-write-authorization.md` — approval boundary for every publish and edit
-- `rules/publication-positioning.md` and `tool-subagents/publication-reviewer.md` - the always-on
-  positioning rule and the read-only validator of article and post drafts
+- `rules/publication-positioning.md` - the always-on positioning rule and the profile check of
+  article and post drafts
 - `skills/linkedin-publishing/SKILL.md` — the follow-up post that links back to the story
 - `workflows/study-repo-to-publication.md` and `workflows/study-publication-medium-linkedin.md` — where this skill sits in the repo-to-Medium-to-LinkedIn flow

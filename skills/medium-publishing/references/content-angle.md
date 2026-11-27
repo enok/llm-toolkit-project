@@ -208,7 +208,7 @@ companies without approval, and any hook the body does not pay off.
 ## Before the approval gate
 
 - The profile is named in the draft message; `check_publication.py` exits 0 on the article and on
-  the post, and the `publication-reviewer` verdict is `pass`.
+  the post, and the profile check (`rules/publication-positioning.md` rule 6) has no open defect.
 - The opening matches the profile: the system design problem (default) or the non-obvious angle
   (full tutorial). The standard material follows only in a full tutorial; otherwise it stays in the repo.
 - Every framework claim has a fact-table row with an official source and a

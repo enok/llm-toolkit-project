@@ -1,5 +1,5 @@
 ---
-description: End-to-end study topic to protected GitHub repo (one or more languages), a short profile-positioned Medium article and a LinkedIn teaser post, validated by check_publication.py and publication-reviewer, with bidirectional links, drafts-only mode, a replacement path, and separate approval gates
+description: End-to-end study topic to protected GitHub repo (one or more languages), a short profile-positioned Medium article and a LinkedIn teaser post, validated by check_publication.py and a profile check, with bidirectional links, drafts-only mode, a replacement path, and separate approval gates
 ---
 
 # Study Repo To Publication
@@ -26,7 +26,7 @@ Ask only what is missing, in one batch:
 4. Approval gates, each asked separately when reached, none implied by "do it all": repo creation plus protection; repo topics; every PR merge (Phase 6 rule); Medium draft creation; Medium publish; the Medium back-link edit; LinkedIn post; editing, unlisting, or deleting an earlier story or post. `drafts-only` mode pre-approves only the Medium draft and the LinkedIn draft; every other gate stays. Phase 0 only confirms they will be asked.
 5. Environment readiness: device bridge, `gh` auth, browser signed in to Medium and LinkedIn, toolchains installable user-locally (no admin).
 
-Print the wave-ordered task table with tier and model per task (Phase 3 lanes `standard`; transcription and script runs `light`); the profile's budgets are acceptance criteria of the article and post tasks, validated by `check_publication.py` and `tool-subagents/publication-reviewer.md` (`standard`).
+Print the wave-ordered task table with tier and model per task (Phase 3 lanes `standard`; transcription and script runs `light`); the profile's budgets are acceptance criteria of the article and post tasks, validated by `check_publication.py` and a profile check against the consumer's publication profile and `rubrics/technical-content.md` if that file exists (`standard`).
 
 ## Phase 1 - Example Spec And Golden Table
 
@@ -67,7 +67,7 @@ Merge rule (here and in Phases 8 and 10): merge only after the user names the sp
 
 ## Phases 7-10 - Medium, README Links, LinkedIn, Back-Links
 
-Run the **study-publication-medium-linkedin** workflow (workflows/study-publication-medium-linkedin.md) in full: Medium draft, approval and publish (7), README link PR (8), LinkedIn teaser post with diagram (9), back-links (10). Its Validation Gate (`check_publication.py` plus `publication-reviewer`) runs before every draft is shown, its `drafts-only` branch stops after the two drafts, and its Replacement Path (new story, pointer, unlist, "More..." pointer) covers a live publication that misses the profile. Its Known pitfalls apply to this run; the merge rule of Phase 6 binds Phases 8 and 10.
+Run the **study-publication-medium-linkedin** workflow (workflows/study-publication-medium-linkedin.md) in full: Medium draft, approval and publish (7), README link PR (8), LinkedIn teaser post with diagram (9), back-links (10). Its Validation Gate (`check_publication.py` plus the profile check) runs before every draft is shown, its `drafts-only` branch stops after the two drafts, and its Replacement Path (new story, pointer, unlist, "More..." pointer) covers a live publication that misses the profile. Its Known pitfalls apply to this run; the merge rule of Phase 6 binds Phases 8 and 10.
 
 ## Known pitfalls
 

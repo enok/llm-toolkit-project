@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: Apply whenever an agent drafts, reviews, edits, or replaces a public article or social post for the user; profile-first positioning, AIDA, budgets, sourced claims, NOT POSTED drafts, publication-reviewer gate
+description: Apply whenever an agent drafts, reviews, edits, or replaces a public article or social post for the user; profile-first positioning, AIDA, budgets, sourced claims, NOT POSTED drafts, profile check, owner approval
 ---
 
 # Publication Positioning
@@ -39,14 +39,17 @@ check.
    by the source repo or its fact table. An interpretation the source does not
    state is labelled as the author's reading. A claim that fails the check is
    dropped, not softened.
-6. **Reviewer gate.** Every draft goes through the read-only
-   `tool-subagents/publication-reviewer.md` and is shown as ready only after a
-   `pass`. On `fail`, fix the listed defects; on `blocked` (it cannot judge:
-   the profile, the sources, or a draft is missing), supply the missing input.
-   Then run it again; neither outcome is shown as ready.
+6. **Profile check.** Before a draft is shown as ready, the drafting assistant
+   (or a separate read-only validator lane, when the orchestrator dispatches
+   one) checks it against the consumer's publication profile and
+   `rubrics/technical-content.md` if that file exists: budgets, AIDA stage map,
+   title and hook positioning, sourced claims, hashtags, article-post
+   agreement. Fix every defect found; if the profile, the sources or a draft is
+   missing, supply the missing input first. A draft with an open defect is not
+   shown as ready, and it stays `NOT POSTED` until the owner approves.
 7. **Drafts are shown NOT POSTED.** Show the exact text labelled `NOT POSTED`
    with the profile used (path and budgets), an AIDA stage map (one line per
-   stage naming what carries it), the checker output, and the reviewer verdict.
+   stage naming what carries it), the checker output, and the profile-check result.
 8. **Approval mode from the profile**, exactly one of two. `gated` (the
    default): every external write, including creating a platform draft, needs
    explicit approval of that action. `drafts-only`: creating the article draft

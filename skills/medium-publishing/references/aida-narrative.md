@@ -127,8 +127,8 @@ post where a teaser is wanted), replace the piece instead:
 - The title follows the positioning rule and the body delivers everything it promises.
 - Article and post agree on the claim, the principles, and the links.
 - The profile used is named (path and budgets, or the toolkit defaults); `check_publication.py`
-  exits 0 on each draft and the `publication-reviewer` verdict is `pass`
-  (`tool-subagents/publication-reviewer.md`).
+  exits 0 on each draft and the profile check
+  (`rules/publication-positioning.md` rule 6) has no open defect.
 
 Stage map shape (generic):
 

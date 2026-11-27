@@ -7,13 +7,54 @@ removes or runs a plugin: it reads plugin folders as data, prints the
 steps to add or remove one, and records the decisions you make.
 
 The governance rules (who decides, trust tiers, what each verdict allows)
-are in `rules/plugin-governance.md`; the step-by-step intake procedure is
-`workflows/plugin-intake.md`. This page is the operational reference.
+are in `rules/plugin-governance.md`. This page is the operational reference
+and the intake procedure.
 
 Run it as `./scripts/plugins.sh <command>` (Linux, macOS),
 `.\scripts\plugins.ps1 <command>` (Windows) or
 `python3 scripts/plugins.py <command>`. It needs Python 3.9 or later and
 nothing else; the knowledge base service is optional.
+
+## Intake procedure
+
+Adding, auditing or pruning a plugin uses the commands below in this order.
+Downloads to quarantine, installs, removals and account or marketplace
+settings need an owner instruction naming the plugin and the tool
+(`rules/external-write-authorization.md`); without it, do the read-only steps
+and report each action as `NOT RUN` with its exact command. In a hosted app the
+agent only prepares the plan; the owner acts in the app.
+
+1. `catalog --auto`, then `status`: inventory and baseline (plugin count,
+   verdicts, `listing_chars`).
+2. `marketplace <clone> --query "<need>"`: discovery. Listings are inputs, not
+   trusted install targets.
+3. `fetch <clone> <name>`: quarantine copy plus scan. Never execute, import or
+   install from quarantine. Do not pass `--allow-unpinned` unless the owner
+   approves that plugin by name.
+4. Verdict: `block` is a reject. `review` needs a read-only reviewer other than
+   the producer to accept or reject each finding with a reason; tier 3
+   (community or unknown source) also needs the owner's approval by name.
+   `pass` is allowed after the intake gates. Also check what the scanner
+   cannot judge (purpose of hooks, MCP targets, license, author;
+   `skills/external-skill-intake/SKILL.md`, "Plugins").
+5. `recommend "<need>"`: if a toolkit asset or installed plugin already covers
+   the need, the candidate is a reject or a removal proposal.
+6. `decide <plugin> --decision add|keep|remove|reject --reason "<why>" --tool <label>`:
+   record every outcome, including rejects and keeps. The register is
+   `plugins/decisions.json` (see below); `decisions` prints it.
+7. `plan add <name>[@marketplace]` or `plan remove <name>`: prints the steps;
+   the owner runs them or authorizes named CLI commands. A protective plugin
+   is never removed without `--i-understand` on an explicit owner instruction.
+8. `catalog --auto` again, so the installed copy (which can differ from
+   quarantine) is scanned, then `status` to compare with the baseline. Start
+   the service (`kb.py up`) if `catalog` printed `service unreachable`.
+
+Report plugins added, kept, removed and rejected (with verdicts), actions left
+`NOT RUN`, and the before and after `status` numbers.
+
+Exit codes across the commands: `0` ok, `2` usage, `3` refused, `4` any
+`block`, `5` any `review`, `6` git failure or knowledge base unreachable
+without a catalog, `7` nothing found.
 
 ## Data folder
 
