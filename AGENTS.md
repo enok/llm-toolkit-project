@@ -29,7 +29,7 @@ Apply these to every task.
 
 ### 5. Verify Your Changes
 
-- Always check work after you change it; never assert success from the edit alone. Run the narrowest meaningful verification (tests, linters, the script you touched, filesystem or API output).
+- Always check work after you change it; never assert success from the edit alone. Run the narrowest meaningful verification (tests, linters, the script you touched, filesystem or API output). Evidence is fresh (re-run for the current change) and matches the changed surface; a non-code change still runs its artifact's checks.
 - Generated or exported images require an image quality check before completion: open each one in its real render path and fix and re-render until it is sharp, uncropped, legible at its destination size and current.
 - Documentation created or changed by agents, chats, automations, scripts, or humans requires `documentation-reviewer` before completion (`rules/documentation-review-required.md`).
 - Workflow files must stay under 12,000 characters (`rules/workflow-authoring.md`); split reusable phases instead of deleting detail.

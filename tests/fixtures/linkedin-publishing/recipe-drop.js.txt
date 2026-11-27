@@ -1,0 +1,12 @@
+(() => {
+  const file = document.getElementById('tmp-upload-proxy').files[0];
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  const target = composerEditor; // the .ql-editor proven to be in the Create post dialog (editors[0] in composer-automation.md)
+  for (const type of ['dragenter', 'dragover', 'drop']) {
+    target.dispatchEvent(new DragEvent(type, {
+      bubbles: true, cancelable: true, composed: true, dataTransfer: dt
+    }));
+  }
+  return 'drop dispatched';
+})()

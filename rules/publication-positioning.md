@@ -32,9 +32,9 @@ check.
    unless the profile allows it. Every noun in the title and hook is
    delivered by the body.
 4. **Budgets from the profile.** Length, hook length, code blocks and lines,
-   images, and hashtags follow the profile and are enforced by the shape
-   check in `workflows/study-publication-medium-linkedin.md`. A failed check
-   means the draft is not ready. Detail beyond the budget stays in the source
+   images, and hashtags follow the profile and are enforced by
+   `scripts/check_publication.py` (exit 0 required; upload snippets also pass
+   `scripts/check_upload_target.py`). A non-zero exit means the draft is not ready. Detail beyond the budget stays in the source
    repo and is linked.
 5. **Sourced claims.** Every fact, number, result, and hashtag topic is backed
    by the source repo or its fact table. An interpretation the source does not

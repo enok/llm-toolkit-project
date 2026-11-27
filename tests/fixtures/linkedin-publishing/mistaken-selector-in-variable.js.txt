@@ -1,0 +1,5 @@
+(() => {
+  const selector = "input[type='file']";
+  const inputs = document.querySelectorAll(selector);
+  return inputs.length;
+})()

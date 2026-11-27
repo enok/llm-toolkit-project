@@ -366,26 +366,16 @@ function removedLedgerPaths() {
   return cachedRemoved;
 }
 
-// A removed companion is `workflows/<agent>-<kind>.md`, or a removed
-// `workflows/<name>-<kind>.md` whose remaining name tokens all belong to the
-// agent name (for example `java-validator-evolution.md` for
-// `java-change-validator`).
+// Companion workflows whose file name does not follow `<agent>-<kind>.md`.
+const COMPANION_ALIASES = {
+  "java-change-validator/evolution": "workflows/java-validator-evolution.md",
+};
+
+// A missing companion passes only when the ledger has a `remove` row for its
+// exact path: `workflows/<agent>-<kind>.md`, or the alias listed above.
 function companionRemoved(agent, kind, removed) {
-  if (removed.has(`workflows/${agent}-${kind}.md`)) {
-    return true;
-  }
-  const agentTokens = new Set(agent.split("-"));
-  const suffix = `-${kind}.md`;
-  for (const entry of removed) {
-    if (!entry.startsWith("workflows/") || !entry.endsWith(suffix) || entry.includes("/", 10)) {
-      continue;
-    }
-    const tokens = entry.slice(10, -suffix.length).split("-");
-    if (tokens.length > 0 && tokens.every((token) => agentTokens.has(token)) && !exists(entry)) {
-      return true;
-    }
-  }
-  return false;
+  const target = COMPANION_ALIASES[`${agent}/${kind}`] || `workflows/${agent}-${kind}.md`;
+  return removed.has(target) && !exists(target);
 }
 
 function findCompanionWorkflow(agent, kind) {

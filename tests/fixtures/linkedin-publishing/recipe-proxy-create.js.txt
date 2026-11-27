@@ -1,0 +1,9 @@
+(() => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/png';
+  input.id = 'tmp-upload-proxy';
+  input.style.cssText = 'position:fixed;top:0;left:0;z-index:2147483647;';
+  document.body.appendChild(input);
+  return 'proxy added';
+})()

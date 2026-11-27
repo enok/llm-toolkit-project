@@ -1,0 +1,11 @@
+(() => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.id = 'tmp-upload-proxy';
+  document.body.appendChild(input);
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  input.files = dt.files;
+  document.getElementById('tmp-upload-proxy').files = dt.files;
+  return input.files.length;
+})()

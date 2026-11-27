@@ -1,0 +1,7 @@
+(() => {
+  const existing = document.getElementById('image-upload');
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  existing.files = dt.files;
+  return existing.files.length;
+})()

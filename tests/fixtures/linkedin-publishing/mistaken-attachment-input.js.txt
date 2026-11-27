@@ -1,0 +1,11 @@
+// Reconstruction of the mistaken snippet: the image was forwarded to a
+// pre-existing input that belongs to the messaging overlay, so it attached
+// to an open chat draft instead of the post.
+(() => {
+  const target = document.querySelector('input[id^="attachment-input"]');
+  const dt = new DataTransfer();
+  dt.items.add(new File([stagedBytes], 'diagram.png', { type: 'image/png' }));
+  target.files = dt.files;
+  target.dispatchEvent(new Event('change', { bubbles: true }));
+  return target.id;
+})()
