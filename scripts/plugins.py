@@ -787,21 +787,43 @@ class PluginScan:
             events = data.get("hooks", data) if isinstance(data.get("hooks"), dict) else {}
             for event, groups in events.items():
                 if not isinstance(groups, list):
+                    if groups:
+                        self._hook_unparsed(rel, event)
                     continue
                 found = False
+                unreadable = False
                 for group in groups:
-                    for hook in (group.get("hooks") if isinstance(group, dict) else None) or []:
+                    candidates = list((group.get("hooks") if isinstance(group, dict) else None) or [])
+                    if isinstance(group, dict) and isinstance(group.get("command"), str):
+                        candidates.append(group)
+                    # Every entry must yield at least one hook this scanner understands:
+                    # a string command, or a prompt hook (no command to inspect).
+                    understood = False
+                    for hook in candidates:
                         if not isinstance(hook, dict):
                             continue
                         found = True
+                        is_prompt = hook.get("type") == "prompt" and isinstance(hook.get("prompt"), str)
+                        if isinstance(hook.get("command"), str) or is_prompt:
+                            understood = True
+                        else:
+                            unreadable = True
                         command = hook.get("command") if isinstance(hook.get("command"), str) else ""
                         self.hooks.append((str(event), command, rel))
                         if command:
                             self._hook_command(str(event), command, rel)
+                    if not understood:
+                        unreadable = True
                 if found and str(event) not in self.hook_events:
                     self.hook_events.append(safe_name(event, "event"))
+                if unreadable:
+                    self._hook_unparsed(rel, event)
         if self.hook_events:
             self.add("hook-present", "info", "hooks/hooks.json", 0, "events: " + ", ".join(self.hook_events))
+
+    def _hook_unparsed(self, rel, event):
+        # Fail closed: a hooks file this scanner could not read must not end in a clean pass.
+        self.add("hook-unparsed", "medium", rel, 0, f"{rel}: event {make_evidence(str(event))} has an entry this scanner could not read")
 
     def _hook_command(self, event, command, rel):
         text = command[:4000]
