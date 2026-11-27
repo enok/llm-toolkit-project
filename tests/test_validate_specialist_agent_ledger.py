@@ -38,7 +38,7 @@ class CompanionLedgerTests(unittest.TestCase):
             write(root, f"skills/{agent}/SKILL.md", f"---\nname: {agent}\n---\n")
             write(root, f"workflows/{agent}-validation.md", "validation\n")
             write(root, "workflows/README.md", f"{agent}-validation.md\n")
-            for index in ("AGENTS.md", "README.md", "INTENTS.md"):
+            for index in ("skills/README.md", "README.md", "INTENTS.md"):
                 write(root, index, f"**{agent}**\n")
             write(root, "docs/llm/value-checks.csv", HEADER + "".join(ledger_row(p) for p in ledger_paths))
             return subprocess.run(["node", str(root / "scripts" / SCRIPT.name), agent],

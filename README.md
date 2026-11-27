@@ -105,7 +105,7 @@ Clone this toolkit next to a consumer project, then run the setup script from th
 ..\llm-toolkit-project\scripts\setup-repo.ps1 .
 ```
 
-The setup scripts create or repair toolkit links for every supported provider, scaffold `docs/llm/` (README, `toolkit-selection.txt`, rules and workflows folders), generate local `scripts/sync-llm-configs.*` wrappers, `.cursorignore`/`.cursorindexingignore`, a `CLAUDE.md` pointer, Copilot instructions, and the managed `AGENTS.md` toolkit block, and update `.gitignore`. Windows directory links need Developer Mode or an elevated shell (`setup-repo.cmd` requires an Administrator prompt). If scripted setup is blocked, use `docs/repo-setup-prompt.md` as an LLM-guided repair prompt.
+The setup scripts create or repair toolkit links for every supported provider, scaffold `docs/llm/` (README, `toolkit-selection.txt`, rules and workflows folders), generate local `scripts/sync-llm-configs.*` wrappers, `.cursorignore`/`.cursorindexingignore`, a `CLAUDE.md` that imports `AGENTS.md`, Copilot instructions, and the managed `AGENTS.md` toolkit block, and update `.gitignore`. Windows directory links need Developer Mode or an elevated shell (`setup-repo.cmd` requires an Administrator prompt). If scripted setup is blocked, use `docs/repo-setup-prompt.md` as an LLM-guided repair prompt.
 
 After setup, hand this prompt to the agent inside the consumer repo:
 
@@ -320,7 +320,7 @@ Before committing toolkit changes, run the gate (Bash / Git Bash):
 ./scripts/validate-toolkit-indexes.sh          # indexes, frontmatter, path references, workflow sizes, genericity
 ./scripts/security-check-toolkit.sh            # secrets, static analysis, LLM-surface scan, skill scanners, lint
 ./scripts/validate-skills-with-skillspector.sh --changed
-npm run validate                               # node validators (skills index, rules redirects, sizes, subagents) + python tests
+npm run validate                               # node validators (skills index, rules redirects, sizes, subagents) + always-on size check + python tests
 ```
 
 PowerShell:

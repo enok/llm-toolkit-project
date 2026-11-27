@@ -14,7 +14,7 @@ This directory mirrors how other tools consume the same knowledge:
 
 **`.cursor` should stay thin.** The tool-facing folders are symlinks to the canonical sources. Do not hand-edit through `.cursor/`; edit `skills/`, `rules/`, `workflows/`, or `tool-subagents/` instead.
 
-**Cursor Agent Skills** load from `.cursor/skills/` (and `.agents/skills/`); see root `AGENTS.md` for the skill index.
+**Cursor Agent Skills** load from `.cursor/skills/` (and `.agents/skills/`); see `skills/README.md` for the skill catalog.
 
 ## Repair `.cursor/` and `.claude/agents`
 

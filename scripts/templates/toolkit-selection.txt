@@ -19,4 +19,4 @@
 # - When `.cursor/` is linked to the shared toolkit, this file does not rewrite shared `.cursor/rules/`.
 # - `sync-tool-configs.sh` uses this selection to curate `AGENTS.md`,
 #   `.github/copilot-instructions.md`, and local Cursor ignore blocks.
-#   `CLAUDE.md` stays a thin pointer to `AGENTS.md`.
+#   `CLAUDE.md` imports `AGENTS.md` (`@AGENTS.md`).

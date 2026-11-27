@@ -42,7 +42,7 @@ The factory creates or updates the standard asset set:
 Update:
 
 - `INTENTS.md`
-- `AGENTS.md`
+- `AGENTS.md` only when the agent adds a mandatory route or gate (it points to the catalogs)
 - `README.md`
 - `skills/README.md`
 - `workflows/README.md`

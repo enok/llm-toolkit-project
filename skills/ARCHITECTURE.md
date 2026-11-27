@@ -98,7 +98,7 @@ Check no duplicates exist:
 find skills/ -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l   # current skill count
 find workflows/ -name "*.md" | wc -l                         # workflows plus README.md
 find rules/ -maxdepth 1 -name "*.md" | wc -l                 # rules plus README.md
-npm run skills:index:check                                   # every skill indexed in AGENTS.md and README.md
+npm run skills:index:check                                   # every skill indexed in skills/README.md and README.md
 
 # Agent dirs must be junctions
 ls -la .agents/skills .claude/skills .codex/skills .windsurf/rules .windsurf/workflows .cursor/rules .cursor/workflows

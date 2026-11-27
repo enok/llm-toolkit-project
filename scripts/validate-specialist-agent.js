@@ -166,7 +166,7 @@ function checkSkillsIndex() {
     if (meta.name !== skill) {
       fail(`${skillFile} frontmatter name '${meta.name || ""}' does not match folder`);
     }
-    assertContains("AGENTS.md", `**${skill}**`, `skill index entry ${skill}`);
+    assertContains("skills/README.md", `**${skill}**`, `skill index entry ${skill}`);
     assertContains("README.md", `**${skill}**`, `skill index entry ${skill}`);
   }
   pass("skill index check completed");
@@ -328,7 +328,7 @@ function checkSpecialist(agent) {
   }
   assertContains("INTENTS.md", agent, `routing for ${agent}`);
   if (!twinRemoved) {
-    assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
+    assertContains("skills/README.md", `**${agent}**`, `skills catalog index for ${agent}`);
     assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
   }
   if (validationWorkflow) {
