@@ -95,6 +95,9 @@ Prefer the smallest existing asset that future agents will naturally load.
    `learnings/INDEX.md` in sync.
 5. If a candidate cannot be safely converted, leave it in place and report the
    exact blocker.
+6. A candidate that becomes a new skill, workflow, rule, or agent must first
+   pass the mandatory **resource-value-check** workflow
+   (`workflows/resource-value-check.md`); learnings are exempt.
 
 ## Phase 5 - Validate
 

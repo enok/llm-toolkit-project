@@ -104,6 +104,7 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 - [ ] New or modified local skill files scanned by Snyk Agent Scan through `scripts/check-new-skill-security.sh` when scanner prerequisites are available.
 - [ ] Prompt-injection and malicious-instruction scan passed through `scripts/security-check-toolkit.sh` and `scripts/scan-llm-surface-security.py`.
 - [ ] Imported content adapted to generic toolkit format.
+- [ ] A new skill, workflow, rule, or agent passed the mandatory value gate in `workflows/resource-value-check.md` (blind race against the plain model) before it is added.
 - [ ] Any imported executable path is cross-platform or has documented OS-specific limits.
 - [ ] Related knowledge linked and indexed in `AGENTS.md`, `README.md`, `INTENTS.md`, or `workflows/README.md` as applicable.
 - [ ] `scripts/validate-toolkit-indexes.sh` passed (PowerShell: `scripts/validate-toolkit-indexes.ps1`).

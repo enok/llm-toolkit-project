@@ -49,6 +49,8 @@ Every specialist should have:
 
 ## Design Rules
 
+- Before adding a new specialist, pass the mandatory value gate in
+  `workflows/resource-value-check.md`.
 - Keep the subagent prompt single-purpose and provider-neutral.
 - State read/write authority explicitly. Prefer read-only specialists unless
   the user specifically needs a worker.

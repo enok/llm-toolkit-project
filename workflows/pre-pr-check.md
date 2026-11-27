@@ -28,7 +28,12 @@ Use when the user is ready for a PR, wants a full branch check, or wants a revie
    `git diff --name-status --find-renames origin/<base>...HEAD`. Require exact
    path coverage and file-specific purposes as defined by
    `rules/git-conventions.md § PR File Change Table`.
-8. Produce one summary with blockers, warnings, follow-up fixes, and readiness status.
+8. If the branch adds a skill, workflow, rule, or agent, run the value gate
+   (blocking; see `workflows/resource-value-check.md`):
+   ```bash
+   python3 scripts/check_value_checks.py --base origin/<base>
+   ```
+9. Produce one summary with blockers, warnings, follow-up fixes, and readiness status.
 
 See `rules/multi-agent-orchestration.md`.
 
