@@ -36,7 +36,7 @@ agent only prepares the plan; the owner acts in the app.
    (community or unknown source) also needs the owner's approval by name.
    `pass` is allowed after the intake gates. Also check what the scanner
    cannot judge (purpose of hooks, MCP targets, license, author;
-   `skills/external-skill-intake/SKILL.md`, "Plugins"). A rejected finding makes the plugin a reject.
+   `skills/external-skill-intake/SKILL.md`, "Plugins"). A finding the reviewer upholds makes the plugin a reject.
 
 5. `recommend "<need>"`: if a toolkit asset or installed plugin already covers
    the need, the candidate is a reject or a removal proposal.
