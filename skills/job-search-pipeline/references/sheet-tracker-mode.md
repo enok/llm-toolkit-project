@@ -60,6 +60,10 @@ Status vocabulary:
   (`tracker_ops known`). Match before opening a posting.
 - **Apply only** to rows that are ticked AND whose status is New, blank or
   Retry. A tick on any other status is a note for the digest, not a task.
+- **A tick selects a row; it is not the approval to submit.** The rules of
+  `SKILL.md` still hold: the owner confirms each named form in chat before it is
+  submitted, consent and terms boxes are ticked only by the owner, and an
+  unattended run fills and submits nothing (it marks the row "Needs you").
 - **Before any submit**, re-read the row (the tick must still be there) and run
   the duplicate check (job page shows no applied note, the board's applied list
   and the mailbox show nothing). The owner can change the sheet mid-run.
@@ -84,7 +88,7 @@ Print the tasks table first (wave, task, tier, explicit model, validator, SLA).
 | W1 | Search collect, all queries and pages, with dedup marks | light | root count check |
 | W1 | Board status read for rows Applied or Interviewing | light | root cross-check |
 | W1 | Mail evidence since the last run | standard | root reduce |
-| W1 | Approvals: apply to ticked rows (browser writes stay with the root) | root | confirmation page + re-read |
+| W1 | Approvals: for ticked rows, ask the owner in chat per named form, then apply (browser writes stay with the root; unattended runs only mark "Needs you") | root | confirmation page + re-read |
 | W2 | Screen new postings, at most ~35 per lane, lanes in parallel | standard | V1 |
 | W3 | V1 re-check of every kept row ([lane-prompts.md](lane-prompts.md)) | light | none |
 | W4 | Root writes: new rows, status updates, step log, then read back | root | read-back |
