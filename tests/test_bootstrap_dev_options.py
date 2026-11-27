@@ -32,7 +32,13 @@ class ShellOptionTests(unittest.TestCase):
         result = dry_run("--security-tools")
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("== Security tools ==", result.stdout)
-        self.assertIn("skillspector==2.13.7", result.stdout)
+        # The pin lives in the script; the dry run prints it only when skillspector is missing
+        # (CI runners install skillspector before the tests run).
+        self.assertIn("skillspector==2.13.7", BOOTSTRAP_SH.read_text(encoding="utf-8"))
+        self.assertTrue(
+            "skillspector==2.13.7" in result.stdout or "skillspector (already installed)" in result.stdout,
+            result.stdout[-2000:],
+        )
         self.assertNotIn("\n+ ", "\n" + result.stdout)
 
     def test_rtk_is_off_by_default(self) -> None:
