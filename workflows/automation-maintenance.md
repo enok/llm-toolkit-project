@@ -137,7 +137,7 @@ Use when inventorying, consolidating, or tidying scheduled tasks.
 ## Deferred follow-ups ("send me X when it is ready")
 
 A request to do something later and deliver it is a one-shot scheduled task,
-not a limitation (`rules/capability-check-before-limitation.md`).
+not a limitation (see `learnings/deferred-follow-up-declared-impossible.md`).
 
 1. Check for an existing follow-up on the same subject first (Phases 1-3);
    update it instead of creating a duplicate.

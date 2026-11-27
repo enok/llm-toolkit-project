@@ -22,8 +22,7 @@ be read from the page the search had surfaced.
 - Fetch the manufacturer's manual or datasheet PDF directly; it is the primary source for
   ports, dimensions and supported modes.
 - Confirm that the variant in the fetched page matches the one the user owns or plans to buy
-  before using any value (see `rules/evidence-before-verdict.md` when it is present in the
-  checkout).
+  before using any value.
 - Say in the answer which source each value came from.
 
 # Why
