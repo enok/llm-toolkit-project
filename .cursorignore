@@ -1,7 +1,7 @@
 # Hide shared setup examples after local repo rules are in place.
-.setup/examples/
-.setup/integrations/jira.md
-.setup/integrations/confluence.md
+rules/examples/
+integrations/jira.md
+integrations/confluence.md
 
 # BEGIN TOOLKIT SELECTION FILTERS
 # Auto-generated from docs/llm/toolkit-selection.txt by sync-tool-configs.sh.

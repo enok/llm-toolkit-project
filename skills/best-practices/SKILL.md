@@ -82,13 +82,13 @@ Reference these guidelines when:
 - `anti-premature-optimization` - Measure first, optimize proven bottlenecks.
 - `anti-premature-abstraction` - Don't abstract until 3+ concrete cases.
 - `anti-distributed-monolith` - If services share DB or need synchronized deploy, they're a monolith.
-- Also watch for stringly-typed code, feature envy, shotgun surgery, primitive obsession, and anemic domain models (catalogue in `AGENTS.md`).
+- Also watch for stringly-typed code, feature envy, shotgun surgery, primitive obsession, and anemic domain models (catalogue in `references/guide.md`).
 
 ## How to Use
 
 1. Use the quick reference above as the language-agnostic checklist during generation and review.
 2. Pair it with the relevant language-specific best-practices skill and its local `rules/` files for implementation detail and stack idioms.
-3. Load the compiled `AGENTS.md` when you need every rule expanded (with code examples) in one place.
+3. Load the compiled `references/guide.md` when you need every rule expanded (with code examples) in one place.
 4. Read the fine-grained rule files in `rules/` for the rules that need deeper treatment:
 
 ```text
@@ -115,4 +115,4 @@ This skill provides **language-agnostic foundations**. Pair it with language-spe
 
 ## Full Compiled Document
 
-For the complete guide with all rules expanded: `AGENTS.md`
+For the complete guide with all rules expanded: `references/guide.md`

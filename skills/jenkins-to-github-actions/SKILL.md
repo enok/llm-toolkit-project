@@ -68,5 +68,6 @@ Collect only what is needed for the current migration slice:
 ## Source Notes
 
 This skill adapts patterns from official GitHub migration and Actions security
-documentation (see `metadata.json` for the reference list). No external
-executable code is vendored.
+documentation (migrate-from-jenkins and automated-migrations guides, secure-use and
+secrets concepts pages on docs.github.com, and the anthropics/skills repository).
+No external executable code is vendored.

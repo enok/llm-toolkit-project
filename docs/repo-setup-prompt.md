@@ -60,16 +60,16 @@ Before running this prompt, ensure the following:
 
 Clean up and re-setup all LLM tool configurations for this project:
 
-1. **Remove** all existing LLM junctions/symlinks: `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`, `.setup`
+1. **Remove** all existing LLM junctions/symlinks: `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`, and the retired legacy `.setup` link if present
 
-2. **Recreate** all 6 directory links pointing to the sibling toolkit repo in the same parent directory:
-   - `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`, `.setup`
+2. **Recreate** all 5 directory links pointing to the sibling toolkit repo in the same parent directory:
+   - `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`
    - Resolve the toolkit path relative to this repo: `<this-repo>/../<toolkit-repo>/<dir>`
    - **Windows**: use `New-Item -ItemType Junction` (not symlinks — avoids admin/Developer Mode)
    - **macOS / Linux**: use `ln -s`
 
 3. **Scaffold missing workspace artifacts** (all gitignored):
-   - `docs/llm/` with `README.md`, `toolkit-selection.txt`, `rules/README.md`, `workflows/README.md`
+   - `docs/llm/` with `README.md`, `toolkit-selection.txt`, `rules/README.md`, `docs/catalog/workflows.md`
    - `scripts/sync-llm-configs.sh` and `scripts/sync-llm-configs.ps1`
    - `.cursorignore` and `.cursorindexingignore`
 

@@ -51,7 +51,7 @@ provider overlays:
 3. `workflows/<agent>-validation.md`
 4. `workflows/<agent>-evolution.md`
 5. `skills/<agent>/SKILL.md`
-6. `INTENTS.md`, `AGENTS.md`, `README.md`, and `workflows/README.md`
+6. `INTENTS.md`, `AGENTS.md`, `README.md`, and `docs/catalog/workflows.md`
 7. `npm run tool-configs:sync`
 8. `npm run subagents:apply -- codex .`
 

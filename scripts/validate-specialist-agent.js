@@ -332,10 +332,10 @@ function checkSpecialist(agent) {
     assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
   }
   if (validationWorkflow) {
-    assertContains("workflows/README.md", path.basename(validationWorkflow), `workflow index for ${agent}`);
+    assertContains("docs/catalog/workflows.md", path.basename(validationWorkflow), `workflow index for ${agent}`);
   }
   if (evolutionWorkflow) {
-    assertContains("workflows/README.md", path.basename(evolutionWorkflow), `evolution workflow index for ${agent}`);
+    assertContains("docs/catalog/workflows.md", path.basename(evolutionWorkflow), `evolution workflow index for ${agent}`);
     assertContains(`tool-subagents/${agent}.md`, evolutionWorkflow, `evolution workflow link for ${agent}`);
   }
   assertContains("tool-subagents/README.md", `\`${agent}\``, `subagent index for ${agent}`);

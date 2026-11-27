@@ -5,7 +5,7 @@ description: Python language patterns, logging, testing, concurrency
 
 # Python Best Practices
 
-Compact always-on summary of the Python baseline. The full guide with expanded examples is `AGENTS.md` in this skill; individual `rules/*.md` files cover the highest-impact rules in depth.
+Compact always-on summary of the Python baseline. The full guide with expanded examples is `guide.md` in this skill's `references/`; individual `rules/*.md` files cover the highest-impact rules in depth.
 
 ## Language Fundamentals
 

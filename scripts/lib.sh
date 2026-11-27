@@ -135,20 +135,6 @@ ensure_toolkit_windsurf_layout() {
   ensure_dir_link "$root/.windsurf/workflows" "$root/workflows" "$allow_repair" || return 1
 }
 
-# Toolkit-only: `.setup/` is a curated entry surface that links the shared
-# integration guides and rule examples so consumers get a single stable path.
-ensure_toolkit_setup_layout() {
-  local root="$1"
-  local allow_repair="${2:-}"
-  mkdir -p "$root/.setup"
-  if [[ -d "$root/integrations" ]]; then
-    ensure_dir_link "$root/.setup/integrations" "$root/integrations" "$allow_repair" || return 1
-  fi
-  if [[ -d "$root/rules/examples" ]]; then
-    ensure_dir_link "$root/.setup/examples" "$root/rules/examples" "$allow_repair" || return 1
-  fi
-}
-
 resolve_absolute_path() {
   local path="$1"
   if [[ "$path" != /* ]] && [[ ! "$path" =~ ^[A-Za-z]: ]]; then

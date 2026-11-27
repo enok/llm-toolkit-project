@@ -112,14 +112,14 @@
       "id": "AE1",
       "file": "SKILL.md",
       "pattern": "Incomplete referenced artifact analysis",
-      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
+      "reason": "False positive: the lines point to this skill's own compiled references/guide.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
     },
     {
       "skill": "python-best-practices",
       "id": "AE1",
       "file": "SKILL.md",
       "pattern": "Incomplete referenced artifact analysis",
-      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
+      "reason": "False positive: the lines point to this skill's own compiled references/guide.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
     },
     {
       "skill": "jupyter-notebook",

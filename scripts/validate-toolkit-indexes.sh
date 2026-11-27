@@ -106,10 +106,10 @@ check_workflow_indexes() {
   expected="$(find workflows -maxdepth 1 -type f -name '*.md' ! -name 'README.md' -exec basename {} \; | LC_ALL=C sort)"
 
   # README.md lists every workflow; AGENTS.md is an index that points to
-  # workflows/README.md (checked in full below), so for AGENTS.md only the
+  # docs/catalog/workflows.md (checked in full below), so for AGENTS.md only the
   # pointer and the existence of each workflow it names are enforced.
-  if ! grep -qF '`workflows/README.md`' AGENTS.md; then
-    fail "AGENTS.md must point to the workflow catalog: \`workflows/README.md\`"
+  if ! grep -qF '`docs/catalog/workflows.md`' AGENTS.md; then
+    fail "AGENTS.md must point to the workflow catalog: \`docs/catalog/workflows.md\`"
   fi
   for index_file in AGENTS.md README.md; do
     actual="$(grep -hEo '`workflows/[^`]+\.md`' "$index_file" 2>/dev/null | sed 's#`workflows/##; s#`##' | grep -v '^README\.md$' | LC_ALL=C sort -u || true)"
@@ -130,18 +130,18 @@ check_workflow_indexes() {
     done <<< "$actual"
   done
 
-  actual_readme="$(awk '/^## Available workflows$/,/^Many workflows/' workflows/README.md | grep -Eo '`[a-z0-9-]+\.md`' | tr -d '`' | LC_ALL=C sort -u || true)"
+  actual_readme="$(awk '/^## Available workflows$/,/^Many workflows/' docs/catalog/workflows.md | grep -Eo '`[a-z0-9-]+\.md`' | tr -d '`' | LC_ALL=C sort -u || true)"
   while IFS= read -r f; do
     [ -n "$f" ] || continue
     if ! list_contains "$f" "$actual_readme"; then
-      fail "workflow missing from workflows/README.md index: $f"
+      fail "workflow missing from docs/catalog/workflows.md index: $f"
     fi
   done <<< "$expected"
 
   while IFS= read -r f; do
     [ -n "$f" ] || continue
     if ! list_contains "$f" "$expected"; then
-      fail "workflows/README.md references non-existent workflow: $f"
+      fail "docs/catalog/workflows.md references non-existent workflow: $f"
     fi
   done <<< "$actual_readme"
 }
@@ -425,7 +425,7 @@ check_skill_local_references() {
   done < <(find skills -mindepth 2 -maxdepth 2 -name SKILL.md -print0 | LC_ALL=C sort -z)
 }
 
-reference_files=(AGENTS.md README.md INTENTS.md workflows/README.md rules/*.md workflows/*.md skills/*/SKILL.md tool-subagents/*.md)
+reference_files=(AGENTS.md README.md INTENTS.md docs/catalog/workflows.md rules/*.md workflows/*.md skills/*/SKILL.md tool-subagents/*.md)
 check_referenced_paths_exist "${reference_files[@]}"
 check_workflow_indexes
 check_intents_workflow_coverage

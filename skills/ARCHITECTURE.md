@@ -9,18 +9,17 @@ llm-toolkit-project/
 ├── skills/                   # CANONICAL skills (source of truth)
 │   ├── best-practices/
 │   │   ├── SKILL.md          # Summary (loaded when skill activates, ~5K tokens)
-│   │   ├── AGENTS.md         # Full compiled doc (optional, legacy)
-│   │   ├── metadata.json     # Version, abstract
 │   │   ├── rules/            # Fine-grained rules (on-demand, ~500 tokens each)
 │   │   │   ├── solid-single-responsibility.md
 │   │   │   └── arch-layered.md
 │   │   └── references/       # Deep reference material (on-demand)
-│   │       └── rules.md
+│   │       ├── rules.md
+│   │       └── guide.md      # Full compiled doc (optional)
 │   └── ... (60+ skills; see skills/README.md)
 ├── workflows/                # CANONICAL workflows (source of truth)
 │   ├── pre-pr-check.md
 │   ├── ticket-implementation.md
-│   └── ... (70+ workflows; see workflows/README.md)
+│   └── ... (70+ workflows; see docs/catalog/workflows.md)
 ├── rules/                    # CANONICAL broad rules (source of truth)
 ```
 

@@ -391,30 +391,6 @@ function Ensure-ToolkitWindsurfLayout {
     $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $ws 'workflows') -TargetPath $wf -AllowRepair:$AllowRepair
 }
 
-function Ensure-ToolkitSetupLayout {
-    <#
-    .SYNOPSIS
-      Toolkit-only: links .setup/integrations and .setup/examples to the canonical
-      integrations/ and rules/examples/ directories so consumers get one stable entry path.
-    #>
-    param(
-        [Parameter(Mandatory)][string]$ToolkitRoot,
-        [switch]$AllowRepair
-    )
-    $setup = Join-Path $ToolkitRoot '.setup'
-    if (-not (Test-Path -LiteralPath $setup)) {
-        New-Item -ItemType Directory -Path $setup -Force | Out-Null
-    }
-    $integrations = Join-Path $ToolkitRoot 'integrations'
-    if (Test-Path -LiteralPath $integrations -PathType Container) {
-        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $setup 'integrations') -TargetPath $integrations -AllowRepair:$AllowRepair
-    }
-    $examples = Join-Path $ToolkitRoot 'rules\examples'
-    if (Test-Path -LiteralPath $examples -PathType Container) {
-        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $setup 'examples') -TargetPath $examples -AllowRepair:$AllowRepair
-    }
-}
-
 function Get-GitBashExe {
     foreach ($p in @(
             "${env:ProgramFiles}\Git\bin\bash.exe",

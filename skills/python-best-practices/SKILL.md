@@ -37,7 +37,7 @@ Reference these guidelines when:
 
 ## Quick Reference
 
-The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `AGENTS.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
+The slugs below are checklist IDs, not file paths: every slug's expanded guidance lives in this skill's compiled `references/guide.md`, and only the rule files explicitly listed under "How to Use" exist as standalone `rules/` files.
 
 ### 1. Dependency Injection (CRITICAL)
 
@@ -100,7 +100,7 @@ The slugs below are checklist IDs, not file paths: every slug's expanded guidanc
 
 - Use [references/source-backed-python-tooling.md](references/source-backed-python-tooling.md) for current tooling, async, typing, and notebook choices.
 - [references/rules.md](references/rules.md) is a compact always-on summary of this baseline for consumer repos that want the whole thing in one short file.
-- Read the standalone rule files below for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `AGENTS.md`:
+- Read the standalone rule files below for detailed explanations and code examples. These are the only rule files that exist on disk — every other quick-reference slug is expanded in `references/guide.md`:
 
 ```
 rules/concurrency-gil-myth.md
@@ -135,4 +135,4 @@ Each rule file contains:
 
 ## Full Compiled Document
 
-For the complete guide with all rules expanded: `AGENTS.md`
+For the complete guide with all rules expanded: `references/guide.md`
