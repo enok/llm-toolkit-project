@@ -23,7 +23,7 @@ never in this skill or in the toolkit.
 - Read `references/lane-prompts.md` when dispatching a lane; it holds
   copy-ready prompts with tier, acceptance criteria, and return contract.
 - Read-only classifier specialist: `tool-subagents/workspace-hygiene-auditor.md`.
-- Browser-lane safety: `rules/ui-automation-lane-safety.md`.
+- Browser-lane safety: `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md` (read when dispatching any lane that drives a browser or desktop UI).
 - Ledger compaction: `scripts/ledger_compact.py`.
 - Learnings behind the rules: `learnings/scheduled-task-listing-hides-fired-one-shots.md`, `learnings/scheduled-task-create-cannot-set-model.md`, `learnings/short-succeeded-run-is-not-evidence-of-work.md`, `learnings/inventory-snapshot-goes-stale-before-destructive-steps.md`, `learnings/chat-history-tools-exclude-agent-sessions.md`, `learnings/many-daily-automations-exhaust-usage-limits.md`, `learnings/dirty-shared-checkout-use-a-worktree.md`, `learnings/cloud-session-device-bridge-file-io.md`.
 - Related, not duplicated: `workflows/automation-maintenance.md` (edit one

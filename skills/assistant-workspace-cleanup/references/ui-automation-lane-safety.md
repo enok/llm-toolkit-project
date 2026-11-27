@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Constraints for any agent or lane that drives a browser or desktop UI - owned tabs only, stable-ID allow-lists, live re-read before acting, named concurrent lanes, no sign-in for the user
+trigger: model_decision
+description: Load when dispatching any agent or lane that drives a browser or desktop UI (owned tabs only, stable-ID allow-lists, live re-read before acting, named concurrent lanes, no sign-in for the user)
 ---
 
 # UI automation lane safety

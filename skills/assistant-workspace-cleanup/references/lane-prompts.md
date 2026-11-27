@@ -55,7 +55,7 @@ expected; anything else is a blocker to report, not to fix.
 and close only those at the end. Never close or reuse a tab you did not open.
 Never sign in, type credentials, accept terms, or solve CAPTCHAs; if you reach
 a login page, stop and report. Reject non-essential cookies. Click only the
-controls named in this prompt. Follow `rules/ui-automation-lane-safety.md`.
+controls named in this prompt. Follow `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md`.
 
 ## L1 - inventory chats, projects, artifacts (light)
 

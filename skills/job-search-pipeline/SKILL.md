@@ -33,6 +33,7 @@ notification channel) lives in the candidate's **profile**, never in this skill.
   apply-form inspection): `references/lane-prompts.md` (read when dispatching lanes).
 - Master CV format, target roles and ATS keywords, ATS match %, tailoring and
   apply kits: `references/cv-tailoring.md` (read when tailoring a CV or computing ATS match).
+- Truthfulness of applications, profiles and screening answers: `references/application-truthfulness.md` (read before drafting, editing or submitting any application or profile text).
 - Tracker writes: `scripts/tracker_ops.py` (`init`, `known`, `approvals`, `append`, `exclude`, `move`, `set`, `repair`, `gaps`, `sidegig`, `shortlist`, `expire`).
 - Chained tracker writes: `scripts/tracker_batch.py` (`move` and `set` ops from a
   JSON list, one log line per op, resumable).

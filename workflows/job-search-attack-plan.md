@@ -13,7 +13,7 @@ recurring scan is `workflows/job-search-pipeline.md`; first-time profile setup i
 below instead of repeating them.
 
 Rules in force: `rules/request-orchestration.md`,
-`rules/application-truthfulness.md`, `rules/external-write-authorization.md`,
+`skills/job-search-pipeline/references/application-truthfulness.md`, `rules/external-write-authorization.md`,
 `rules/human-comment-reply-gate.md`.
 
 ---
@@ -62,7 +62,7 @@ what to skip. Never claim a stack fit the profile does not support.
    For ad-hoc chat requests, only apply or submit when the candidate asks or
    confirms. Answer form
    questions from facts (work authorization and sponsorship per
-   `rules/application-truthfulness.md`); add one clarifying line where free text
+   `skills/job-search-pipeline/references/application-truthfulness.md`); add one clarifying line where free text
    exists.
 2. Use the CV file the owner named; on portals that store a résumé, confirm the
    stored file is the intended one. Enter rates per the vetting skill.

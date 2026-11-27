@@ -26,27 +26,17 @@ Tools: file reads, `rg`, and `jq` or `node` one-liners over the inventory. Read-
 1. Profile first with a deterministic command, not by reading the whole JSON: count items by kind, find duplicate ids, list duplicate titles, find items without timestamps, compute snapshot age. Do not reuse counts from the caller's narrative.
 2. Check coverage against known source blind spots and record each gap in `risks`: chat-history tools list regular chats only (agent and task sessions need a signed-in listing); scheduled-task lists hide fired one-shots and tasks moved into a project unless completed ones are requested; project pages may summarize fired one-shots as a count; artifacts need their own list call. A kind with zero records is a gap, not an empty set.
 3. Build the keep-set from the facts: current session, live processes, pinned items, source-of-truth chats, owner-protected items, and anything touched inside the activity window.
-4. Classify every remaining item exactly once with the rubric in `skills/assistant-workspace-cleanup/references/classification-rubric.md`. That file is canonical; if this prompt and the rubric differ, follow the rubric and flag the drift. Summary:
-
-   | Action | Typical items | Reversibility |
-   | --- | --- | --- |
-   | KEEP | keep-set members; anything of uncertain value | none needed |
-   | ARCHIVE | agent sessions whose work is finished or superseded | reversible |
-   | DELETE | empty or trivial one-off chats; chats superseded by a newer chat or saved memory; duplicate or obsolete artifacts; fired one-shot scheduled tasks | permanent |
-   | DELETE-OPTIONAL | personal Q and A the owner may still want; flag it, do not push it | permanent |
-   | PAUSE | scheduled tasks that are superseded, failing, or being replaced | reversible |
-   | CONSOLIDATE | overlapping scheduled tasks to merge into one new task; members are paused, not deleted, until the new task proves itself | config change |
-
-5. Apply the evidence rule: title-only evidence means `confidence: unsure`, and you prefer the reversible action (KEEP over ARCHIVE, ARCHIVE over DELETE). `high` needs a second signal: empty content, a newer superseding item, fired and disabled, or an explicit caller fact. An untitled or empty-looking chat is `unsure` with the flag `verify_empty` until its content has been read.
+4. Classify every remaining item exactly once with `skills/assistant-workspace-cleanup/references/classification-rubric.md`. That file is canonical for actions, keep-rules, per-type defaults, the confidence scale, and approval groups; if this prompt and the rubric differ, follow the rubric and flag the drift.
+5. Use the rubric's confidence scale (`high`, `medium`, `low`). Title-only evidence is `low`: prefer the reversible action (KEEP over ARCHIVE, ARCHIVE over DELETE) and never DELETE; add the flag `unsure`. `high` needs a second signal beyond the title: empty content, a newer superseding item, fired and disabled, or an explicit caller fact. An untitled or empty-looking chat is `low` with the flag `verify_empty` until its content has been read.
 6. Run the scheduled-task checks below.
 7. Self-check with a command before returning: every inventory id appears exactly once, ids are unique, each action is allowed for its kind, reasons are 12 words or fewer, per-action counts sum to the total, and no keep-set member carries ARCHIVE, DELETE, PAUSE, or CONSOLIDATE.
 
 ## Scheduled-task checks
 
 - Stale state. Every mutable field a decision relies on (enabled or paused, archived, `last_run`, `updated_at`, message count) is a snapshot at `observed_at`. Classify by the intended end state, never by the observed state: do not emit "PAUSE (already paused)" or "KEEP (already archived)". Record `observed`, `observed_at`, and `recheck: true`, and write the precondition for execution (for example, "disabled at observation; if enabled now, find who re-enabled it before pausing"). A task another session or lane can toggle is a `stale_state` risk. The plan header carries `snapshot_age_min` so the root re-reads live state when it presents the plan and again immediately before every destructive or config step.
-- Run-duration anomalies. A SUCCEEDED status is not evidence. Compare `last_run.duration_s` with the work the prompt requires (browser steps, file work, or many sources mean minutes; a bare notification means seconds), using the caller's expected-duration hint when given. Flag `duration_anomaly` for: SUCCEEDED far too fast for the required work, the same short duration on repeated nights, a FAILED or limit-reached run right after a stack of long back-to-back runs, and runs near the platform timeout. Only `last_run` is exposed, with no per-run history, so each flag is an `unsure` hypothesis whose next step is to open the run session or read its log (route to `log-analyst`), never a verdict.
+- Run-duration anomalies. A SUCCEEDED status is not evidence. Compare `last_run.duration_s` with the work the prompt requires (browser steps, file work, or many sources mean minutes; a bare notification means seconds), using the caller's expected-duration hint when given. Flag `duration_anomaly` for: SUCCEEDED far too fast for the required work, the same short duration on repeated nights, a FAILED or limit-reached run right after a stack of long back-to-back runs, and runs near the platform timeout. Only `last_run` is exposed, with no per-run history, so each flag is a `low`-confidence hypothesis whose next step is to open the run session or read its log (route to `log-analyst`), never a verdict.
 - Polling residue. Many fired, disabled one-shots with one name pattern are the leftovers of a chained-reminder polling loop (one per poll). Group them as DELETE. If one of the same pattern is still enabled with a future `run_once_at`, the loop is live: KEEP it, flag it, and defer that group until the loop ends.
-- Overlap and cost. Independent recurring tasks with the same cadence and purpose (for example several daily digests) running back to back are CONSOLIDATE candidates: propose one task with per-section item caps, and mark the members PAUSE, not DELETE. A higher-priority task failing with a usage or limit reason in the same window as a stack of lower-priority runs is supporting evidence.
+- Overlap and cost. Overlapping recurring tasks may be proposed for CONSOLIDATE at low confidence: the replacement is created first and the originals are paused, never deleted, until it has run well; otherwise the keep-rule applies. Independent recurring tasks with the same cadence and purpose (for example several daily digests) running back to back are the candidates: propose one task with per-section item caps; members stay KEEP in the plan with `consolidate_into` set, never DELETE. A higher-priority task failing with a usage or limit reason in the same window as a stack of lower-priority runs is supporting evidence.
 - Model default. A task created through some scheduling tools cannot set a model and runs on the server default, often the most expensive one. Set `model_question: true` on each consolidation so the root puts "keep the default or change the model" inside the approval gate. Changing an existing task's model needs the owner's explicit request; never propose it silently.
 - Look-alikes. For every group emit `deny_lookalikes`: ids of items whose title matches or nearly matches a group member but are not in the group. Executor lanes must match by stable id, never by title.
 
@@ -60,21 +50,21 @@ Write the plan (or return it in a fenced block) in this shape:
   "snapshot_at": "ISO-8601",
   "audited_at": "ISO-8601",
   "snapshot_age_min": 0,
-  "counts": {"total": 0, "by_action": {"KEEP": 0}, "by_kind": {"chat": 0}, "unsure": 0, "recheck": 0},
+  "counts": {"total": 0, "by_action": {"KEEP": 0}, "by_kind": {"chat": 0}, "by_confidence": {"high": 0, "medium": 0, "low": 0}, "recheck": 0},
   "items": [
     {
       "id": "stable id from the inventory",
       "kind": "chat|agent_session|project|scheduled_task|artifact",
       "action": "KEEP|ARCHIVE|DELETE|DELETE-OPTIONAL|PAUSE|CONSOLIDATE",
       "reason": "12 words or fewer",
-      "confidence": "high|unsure",
+      "confidence": "high|medium|low",
       "group": "keep|archive|delete|delete-optional|pause|consolidate",
       "recheck": false,
       "observed": {"enabled": true},
       "observed_at": "ISO-8601",
       "precondition": "what must still be true at execution, or null",
       "consolidate_into": "consolidation key or null",
-      "flags": ["stale_state", "duration_anomaly", "verify_empty", "model_question", "title_only"]
+      "flags": ["unsure", "stale_state", "duration_anomaly", "verify_empty", "model_question", "title_only"]
     }
   ],
   "consolidations": [{"key": "string", "members": ["id"], "proposal": "one line", "model_question": true}],
@@ -83,13 +73,13 @@ Write the plan (or return it in a fenced block) in this shape:
 }
 ```
 
-Approval groups follow reversibility so the root can ask in this order: archive (reversible), pause and consolidate (config change), delete (permanent), delete-optional (permanent, optional).
+Approval groups and their order follow the rubric's "Approval groups" table (reversible first, deletes last).
 
 Return to the caller in at most 40 lines and 400 words (fenced evidence excluded). Do not paste the plan or list every item:
 
 ```text
 Outcome: done | blocked | partial - one line with the number of items classified
-Evidence: plan path; counts by action and kind with the command that produced them; unsure and recheck counts; coverage gaps
+Evidence: plan path; counts by action and kind with the command that produced them; low-confidence and recheck counts; coverage gaps
 Blockers: exact error text, or "none"
 Decisions: approval groups with sizes; risks needing the root (stale state, duration anomalies, model question, optional deletes); what the root must re-read live before acting
 ```

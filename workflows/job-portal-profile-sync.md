@@ -104,7 +104,7 @@ Rules:
 - If the latest role has ended but the portal still shows it as "current",
   propose the real end date as a class (c) row and remind the owner that
   employment verification compares profile dates with records
-  (`rules/application-truthfulness.md`). Never set or keep a "current" flag on
+  (`skills/job-search-pipeline/references/application-truthfulness.md`). Never set or keep a "current" flag on
   the owner's behalf.
 - Never add a skill, employer, title, date or metric that the master CV lacks.
 

@@ -42,7 +42,7 @@ to use, what to enter, and how much time to give them.
    hours and the pay date. Report what could not be verified.
 5. **Owner approves every application and every rate.** A rate and a résumé on a
    marketplace are statements made in the candidate's name, so the candidate
-   enters them or gives an explicit OK first (`rules/application-truthfulness.md`).
+   enters them or gives an explicit OK first (`skills/job-search-pipeline/references/application-truthfulness.md`).
 
 ## Choosing the rate inside a band
 
