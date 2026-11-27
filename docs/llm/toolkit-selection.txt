@@ -17,15 +17,18 @@ rules/error-driven-learning.md
 rules/external-write-authorization.md
 rules/git-conventions.md
 rules/human-comment-reply-gate.md
+rules/knowledge-base.md
 rules/log-analysis-safety.md
 rules/multi-agent-orchestration.md
 rules/operational-doc-required.md
+rules/plugin-governance.md
 rules/publication-positioning.md
 rules/release-safety.md
 rules/repository-context-layers.md
 rules/request-orchestration.md
 rules/security-check-required.md
 rules/workflow-authoring.md
+rules/workflow-self-improvement.md
 
 # Orchestration and toolkit evolution
 workflows/task-quality-loop.md
