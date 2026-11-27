@@ -44,8 +44,8 @@ Run three independent inspections. Tag every finding with its signal source.
 ### S3: Inspect Against Rules and Skills
 
 **6. Load applicable rules and skills:**
-- Generic rules: `rules/code-rules.md`, `skills/security/SKILL.md`, `skills/testing/SKILL.md`, `skills/best-practices/SKILL.md`
-- Language-specific rules: detect primary language from changed files and load the matching rule (e.g., `skills/java-best-practices/SKILL.md`, `skills/python-best-practices/SKILL.md`, `skills/js-ts-best-practices/SKILL.md`)
+- Generic rules: `rules/code-rules.md`, `skills/testing/SKILL.md`, `skills/best-practices/SKILL.md`
+- Language-specific rules: detect primary language from changed files and load the matching rule (e.g., `skills/python-best-practices/SKILL.md`, `skills/js-ts-best-practices/SKILL.md`)
 - Rubrics: `rubrics/code-review-checklist.md`, `rubrics/security.md`, `rubrics/architecture.md`
 - Project-specific rules: any rules in the project's `.windsurf/rules/`, `.cursor/rules/`, or similar
 
@@ -204,4 +204,3 @@ git push origin HEAD:<env-branch> --force-with-lease
 ### Multi-agent runs
 
 - After **each phase** (1–10), print a concise **Phase N — result** summary before starting the next phase.
-- See **`skills/review-and-fix/references/ticket-review-and-fix-multi-agent.md`** for agent splits (S1/S2/S3), Windows shell pitfalls, exception-handling gotchas, datetime mocking limits, and Phase 9 safety.

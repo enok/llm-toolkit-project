@@ -45,139 +45,6 @@
       "reason": "Documents rollback cleanup commands with context; not an autonomous instruction."
     },
     {
-      "skill": "powerpoint-slides",
-      "id": "OH1",
-      "file": "scripts/inject_omml.py",
-      "pattern": "Unvalidated Output Injection",
-      "reason": "Reviewed trusted local PPTX post-processing helper; inputs are local files and subprocesses use argument arrays."
-    },
-    {
-      "skill": "powerpoint-slides",
-      "id": "OH1",
-      "file": "scripts/render_diagrams.py",
-      "pattern": "Unvalidated Output Injection",
-      "reason": "Reviewed trusted local diagram renderer; Graphviz engines are allowlisted and subprocesses use argument arrays/timeouts."
-    },
-    {
-      "skill": "powerpoint-slides",
-      "id": "OH1",
-      "file": "scripts/render_latex.py",
-      "pattern": "Unvalidated Output Injection",
-      "reason": "Reviewed trusted local LaTeX renderer; skill docs require trusted/reviewed inputs and subprocesses use argument arrays/timeouts."
-    },
-    {
-      "skill": "powerpoint-slides",
-      "id": "OH1",
-      "file": "scripts/soffice.py",
-      "pattern": "Unvalidated Output Injection",
-      "reason": "Reviewed local LibreOffice conversion wrapper; subprocess invocation uses fixed executable and argument arrays."
-    },
-    {
-      "skill": "security",
-      "id": "E2",
-      "file": "AGENTS.md",
-      "pattern": "Env Variable Harvesting",
-      "reason": "Security training material showing what not to do with credentials."
-    },
-    {
-      "skill": "security",
-      "id": "E2",
-      "file": "rules/secrets-no-hardcoded.md",
-      "pattern": "Env Variable Harvesting",
-      "reason": "Security training material describing secret-handling anti-patterns."
-    },
-    {
-      "skill": "security",
-      "id": "OH1",
-      "file": "AGENTS.md",
-      "pattern": "Unvalidated Output Injection",
-      "reason": "Security training material includes unsafe and corrected examples."
-    },
-    {
-      "skill": "security",
-      "id": "TM1",
-      "file": "AGENTS.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "Security training material includes unsafe command examples as negative examples."
-    },
-    {
-      "skill": "security",
-      "id": "YR1",
-      "file": "AGENTS.md",
-      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
-      "reason": "Security training material includes destructive payload examples only to teach prevention."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "TM1",
-      "file": "AGENTS.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "Shell scripting skill documents unsafe shell patterns as negative examples and safer replacements."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "TM2",
-      "file": "AGENTS.md",
-      "pattern": "Chaining Abuse",
-      "reason": "Shell scripting skill documents command chaining hazards and safe handling."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "TM2",
-      "file": "rules/error-trap-cleanup.md",
-      "pattern": "Chaining Abuse",
-      "reason": "Rule demonstrates cleanup traps and error handling patterns for shell scripts."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "TM1",
-      "file": "rules/safety-strict-mode.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "Rule documents strict-mode and dangerous-command caveats as safety guidance."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "YR1",
-      "file": "AGENTS.md",
-      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
-      "reason": "Shell scripting skill includes destructive examples only as hazards to avoid."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "YR1",
-      "file": "rules/safety-strict-mode.md",
-      "pattern": "YARA rule 'agent_skill_destructive_autonomous_actions': Autonomous destructive filesystem, shell history, or repository actions in AI agent skills [agent_skills]",
-      "reason": "Rule includes destructive examples only as hazards to avoid."
-    },
-    {
-      "skill": "terraform",
-      "id": "RA1",
-      "file": ".github/workflows/automated-release.yml",
-      "pattern": "Self-Modification",
-      "reason": "Reference workflow documents version-tag release automation; not executed by the skill itself."
-    },
-    {
-      "skill": "terraform",
-      "id": "RA1",
-      "file": "CLAUDE.md",
-      "pattern": "Self-Modification",
-      "reason": "Terraform skill documentation describes generated release outputs in an example workflow."
-    },
-    {
-      "skill": "terraform",
-      "id": "TM1",
-      "file": ".github/workflows/automated-release.yml",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "Reference release workflow uses git commands in an explicitly scoped CI example."
-    },
-    {
-      "skill": "terraform",
-      "id": "TM1",
-      "file": "references/security-compliance.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "Security compliance reference includes scanning commands as operator-run examples."
-    },
-    {
       "skill": "cli-creator",
       "id": "AS1",
       "file": "SKILL.md",
@@ -199,39 +66,11 @@
       "reason": "Reference table about evaluating third-party 'self-evolving agent' material and a rejected-source record; it describes review criteria, not self-modifying behaviour."
     },
     {
-      "skill": "java-best-practices",
-      "id": "P2",
-      "file": "AGENTS.md",
-      "pattern": "Hidden Instructions",
-      "reason": "False positive on XML comments inside Log4j2 configuration examples."
-    },
-    {
       "skill": "jenkins-to-github-actions",
       "id": "PE3",
       "file": "references/security.md",
       "pattern": "Credential Access",
       "reason": "Secure-migration guidance naming credential files (.npmrc, kubeconfig) that must be removed from CI images and replaced by scoped tokens; no credential is read."
-    },
-    {
-      "skill": "jmeter-performance-testing",
-      "id": "E2",
-      "file": "scripts/run_jmeter.py",
-      "pattern": "Env Variable Harvesting",
-      "reason": "The runner reads exactly one user-named environment variable (--auth-token-env) to inject a load-test auth token as a JMeter property; the value is redacted from manifests and logs."
-    },
-    {
-      "skill": "security",
-      "id": "P1",
-      "file": "references/security-check-required.md",
-      "pattern": "Instruction Override",
-      "reason": "Describes the patterns the toolkit's own LLM-surface prompt-injection scanner blocks; it is detection guidance, not an override instruction."
-    },
-    {
-      "skill": "security",
-      "id": "SC2",
-      "file": "references/security-check-required.md",
-      "pattern": "External Script Fetching",
-      "reason": "Lists curl|sh / wget|bash as patterns the LLM-surface scanner flags; no fetch-and-execute is performed."
     },
     {
       "skill": "ui-verify",
@@ -246,13 +85,6 @@
       "file": "references/browser-workflow.md",
       "pattern": "MCP Config Access",
       "reason": "Discovers which configured browser MCP server offers navigate/snapshot/click/screenshot tools; it reads tool capabilities, not MCP configuration files or secrets."
-    },
-    {
-      "skill": "zoom-meeting-sdk",
-      "id": "PE3",
-      "file": "metadata.json",
-      "pattern": "Credential Access",
-      "reason": "Skill abstract mentions keeping SDK credentials in .env files server-side; guidance only, no file access."
     },
     {
       "skill": "diagram-authoring",
@@ -290,48 +122,6 @@
       "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
     },
     {
-      "skill": "security",
-      "id": "AE1",
-      "file": "SKILL.md",
-      "pattern": "Incomplete referenced artifact analysis",
-      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
-    },
-    {
-      "skill": "shell-scripting",
-      "id": "AE1",
-      "file": "SKILL.md",
-      "pattern": "Incomplete referenced artifact analysis",
-      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
-    },
-    {
-      "skill": "medium-publishing",
-      "id": "AE1",
-      "file": "SKILL.md",
-      "pattern": "Incomplete referenced artifact analysis",
-      "reason": "False positive: the line is a file-index table row for scripts/medium_paste_html.py, a stdlib-only local helper that ships in this skill and is covered by tests/test_medium_paste_html.py."
-    },
-    {
-      "skill": "security",
-      "id": "PE3",
-      "file": "AGENTS.md",
-      "pattern": "Credential Access",
-      "reason": "Documented vulnerable-code example: the path-traversal sample (../../../etc/passwd) is labelled as the pattern to avoid and is followed by the safe version."
-    },
-    {
-      "skill": "security",
-      "id": "SSRF1",
-      "file": "AGENTS.md",
-      "pattern": "Cloud Metadata Access",
-      "reason": "Documented vulnerable-code example: the SSRF sample naming the cloud metadata address is labelled as the pattern to avoid and is followed by the safe version."
-    },
-    {
-      "skill": "terraform",
-      "id": "PE3",
-      "file": "references/security-compliance.md",
-      "pattern": "Credential Access",
-      "reason": "False positive: '.env' is an entry in a recommended .gitignore listing that keeps secret files out of version control; nothing reads the file."
-    },
-    {
       "skill": "jupyter-notebook",
       "id": "AR2",
       "file": "SKILL.md",
@@ -351,20 +141,6 @@
       "file": "SKILL.md",
       "pattern": "Anti-Refusal Statement",
       "reason": "False positive: the line tells the agent to verify a resource name is unused before a rename; it adds a check and removes none."
-    },
-    {
-      "skill": "terraform-specialist",
-      "id": "AR2",
-      "file": "references/validation-checklist.md",
-      "pattern": "Anti-Refusal Statement",
-      "reason": "False positive: 'never warning-only check blocks' asks for stricter checksum validation; it adds a check and removes none."
-    },
-    {
-      "skill": "image-quality-inspection",
-      "id": "AE1",
-      "file": "SKILL.md",
-      "pattern": "Incomplete referenced artifact analysis",
-      "reason": "False positive: the line points to scripts/check_carousel.py, a local helper that ships in this skill and is scanned with it; it opens only the local slides file in headless Chromium and reads a local PDF with pdftotext (argument list, no shell)."
     },
     {
       "skill": "technical-content-publishing",

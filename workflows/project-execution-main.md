@@ -44,7 +44,7 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 **Read required context based on task type:**
 
 **For data/pipeline tasks:**
-- [ ] `data-pipeline` skill — Pipeline conventions
+- [ ] `workflows/data-pipeline-change.md` — Pipeline conventions
 - [ ] `config/<source>_metadata.json` — Source contracts
 - [ ] `config/silver_schemas.json` — Silver expectations
 
@@ -60,7 +60,7 @@ This phase is non-negotiable — it is the agent's auto-improvement loop. See `s
 
 **Check cross-cutting concerns:**
 
-- [ ] Does this affect Bronze/Silver/Gold boundaries? → See `data-pipeline-boundaries` skill
+- [ ] Does this affect Bronze/Silver/Gold boundaries?
 - [ ] Does this require bilingual sync? → See `bilingual-notebook-sync.md`
 - [ ] Does this change data contracts? → See `data-pipeline-contracts` rule
 - [ ] Does this affect thesis evidence? → See `workflows/research-analysis-cycle.md`
@@ -286,7 +286,6 @@ cat docs/<findings-summary>.md | head -50
 9. `workflows/research-analysis-cycle.md` — Thesis alignment
 
 ### Skills (for context)
-- `data-pipeline-boundaries` skill — Layer boundaries
 - `aws-airflow-terraform-project` skill — AWS guidance
 - `data-pipeline-contracts` rule — Contract governance
 - `analytics-discipline` rule — Analysis hygiene

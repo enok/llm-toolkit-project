@@ -235,7 +235,6 @@ Write the slice manifest to the same directory as the design doc, named `SLICES.
 
 ## Related Skills
 
-- **task-starter** — turns a ticket into a scoped plan; Pathfinder sequences it
 - **design-driven-dev** — investigation-first design; Pathfinder decomposes the result
 - **project-discovery** — understand the codebase before slicing
-- **ticket-review** (or **review**) — review each slice's PR
+- **ticket-review** — review each slice's PR

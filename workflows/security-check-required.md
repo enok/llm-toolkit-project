@@ -163,6 +163,6 @@ After any security check, document:
 - `workflows/security-report.md` — Full security report generation
 - `workflows/review.md` — Code review with security focus
 - `workflows/pre-pr-check.md` — Pre-PR validation
-- `skills/security/SKILL.md` — Security principles and rules
+- `rubrics/security.md` — Security review criteria
 - `rules/security-check-required.md` — Mandatory check rule
 

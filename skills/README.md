@@ -22,9 +22,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **model-selector** | Assign every task a complexity tier, concrete model, effort, and token band before it runs; audit finished task tables for overspend |
 | **specialist-agent-factory** | Create or update reusable specialist agents (subagent prompt, validation/evolution workflows, skill entrypoint, routing, provider overlays) |
 | **token-efficiency** | Reduce token consumption: command-output compaction (RTK), `gh --json`/`jq` field selection, ripgrep budgeting, ast-grep, repomix packing |
-| **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
-| **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
 | **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest; plugin catalog via `scripts/plugins.py` |
 | **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories; plugin-specific checks for the intake procedure in `docs/plugins.md` |
 | **error-driven-learning** | Always-on discipline: read `learnings/INDEX.md` before work and capture trial-and-error discoveries after it |
@@ -46,54 +44,33 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | Skill | Purpose |
 | --- | --- |
 | **best-practices** | SOLID, clean code, layered architecture, resilience, anti-patterns |
-| **java-best-practices** | Java patterns: DI, concurrency, logging, metrics wiring, testing, modern JDK/Spring choices |
 | **js-ts-best-practices** | JavaScript/TypeScript patterns: async, type safety, DI, Node/TS toolchain choices |
 | **python-best-practices** | Python patterns: typing, DI, concurrency, packaging, testing |
-| **shell-scripting** | Bash, POSIX sh, and PowerShell best practices: strict mode, error handling, portability, UTF-8 without BOM |
 | **testing** | AC traceability, test pyramid, mocking, coverage, and test patterns |
-| **test-plan** | Generate a test plan from a staged diff or branch |
 | **run-tests** | Pick and run the smallest meaningful validation for a change set |
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
-| **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
 | **web-form-submit-debugging** | Diagnose a web form whose Next or Submit button does nothing: read validation, capture network and console, instrument the page, rule out extensions, then pick a workaround or report a site defect |
 
 ### Review, Validation, And Quality Gates
 
 | Skill | Purpose |
 | --- | --- |
-| **code-review** | Structured code review for bugs, correctness, security, and test coverage |
-| **review** | In-agent diff review of staged changes or current branch (report only) |
 | **ticket-review** | In-agent diff review scoped to a ticket, PR, or branch (report only) |
-| **review-and-fix** | Review, split investigation and fixes across subagents, apply scoped fixes, converge on a verified result |
-| **fix** | Apply fixes from a prior review report (`docs/jira/<TICKET>/review-report.json`) |
 | **pre-pr-check** | Full pre-PR gate: repo validations, changed-code quality gate, UI-verify check, in-agent review |
-| **changed-code-quality-gate** | Mandatory static-analysis gate limited to code added or modified in the current Git change set |
 | **pr-validator** | Read-only PR/ticket readiness validation on the live head with approve-ready, blocked, or monitor reporting |
 | **java-change-validator** | Read-only Java diff, test, framework wiring, migration, and build-evidence validation before merge or reply |
 | **documentation-reviewer** | Read-only review of docs, runbooks, PR bodies, release notes, and generated surfaces for source-grounded accuracy |
 | **ui-verify** | Verify front-end changes in a real browser through any configured browser MCP before declaring work done |
-| **figma-compare** | Compare implemented UI against a Figma frame and report severity-ranked mismatches |
-| **image-quality-inspection** | Blocking quality gate and fix-and-rerender loop for every generated or exported image |
-| **task-starter** | Turn a ticket or task description into a scoped implementation plan |
-| **ticket-research** | Research a ticket across code, docs, Jira, Confluence, and GitHub context |
 
 ### CI, Releases, And Delivery
 
 | Skill | Purpose |
 | --- | --- |
-| **ci-watcher** | Background CI monitoring after push with failure triage |
-| **ci-migration-and-parity** | Keep parity while moving or comparing CI pipelines across systems |
 | **jenkins-to-github-actions** | Migrate Jenkins pipelines to GitHub Actions safely |
-| **cross-repo-impact** | Map downstream impact of a shared change across sibling repos |
-| **e2e-release-verification** | Pick and run the smallest relevant E2E or regression verification for a release |
-| **release-manager** | Cut, verify, and manage releases with rollout and rollback planning |
 | **maven-release** | Maven release: prepare, perform, Nexus deployment, downstream updates |
 | **maven-build-troubleshooting** | Diagnose Maven build, OWASP dependency-check, Java runtime, and local webapp startup failures |
-| **jmeter-performance-testing** | Plan, run, analyze, and report Apache JMeter load and performance tests against any HTTP service |
-| **cross-env-data-copy** | Copy a single record between environments with read-only fetch, MERGE preview, and human confirmation before any write |
-| **zoom-meeting-sdk** | Secure defaults for embedding Zoom meetings (server-side SDK JWT signatures, credentials, web embed rules) |
 
 ### Operations, Infrastructure, And Cloud
 
@@ -103,11 +80,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **incident-ops** | Incident triage, mitigation, communication, and observability-gap recovery |
 | **log-analysis** | Read-only CloudWatch, server, access, Log4j, Lambda, Glue, and Firehose log investigation with redaction |
 | **aws-alarm-investigator** | Read-only CloudWatch alarm root-cause investigation with confidence-rated hypotheses and email-ready fixes |
-| **dag-glue-specialist** | Read-only Airflow DAG, MWAA/Astro, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation |
-| **terraform** | Terraform/OpenTofu modules, tests, CI/CD, and security/compliance patterns |
-| **terraform-specialist** | Read-only Terraform specialist: module/root review, plan safety, state and import lifecycle, multi-env roots, drift codification |
 | **terraform-change-safety** | Terraform change-safety patterns: `terraform_data` lifecycle, module variable wiring, alarm first-datapoint planning, alias-qualified permissions |
-| **infra-adoption** | Adopt or import existing infrastructure into managed IaC |
 | **folder-reorganization** | Reorganize a folder tree (renames, moves, archive) without breaking automations, scripts, documents, or cloud-sync links: approval-first proposal, path map, resumable scripted run with rollback, verification against live consumers |
 | **aws-airflow-terraform-project** | Repository-specific AWS Airflow Terraform guidance for the data-science project (toolkit-local context) |
 
@@ -115,12 +88,8 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 
 | Skill | Purpose |
 | --- | --- |
-| **security** | Injection prevention, auth, secrets, XSS/CSRF/SSRF, PII, threat modeling |
 | **security-best-practices** | Language- and framework-specific secure-by-default reviews |
-| **security-threat-model** | Repository-grounded threat modeling with trust boundaries, abuse paths, and mitigations |
 | **security-ownership-map** | Git-based security ownership topology, bus factor, and sensitive-code ownership |
-| **owasp-security-review** | OWASP-style application security audit for Java, JS/TS, Python, and React projects |
-| **security-checkpoint** | Repository-specific minimum security gate for the data-science thesis repository (toolkit-local context) |
 
 ### Documentation, Diagrams, And Wiki
 
@@ -128,21 +97,13 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | --- | --- |
 | **doc-delta** | Suggest or apply documentation updates from staged changes |
 | **update-docs** | Keep docs aligned with code changes |
-| **document-creation** | Create or update architecture docs, diagrams, and wiki pages |
 | **document-conversion** | Convert between PDF, DOCX, PPTX, XLSX, and Markdown (thesis exports, reports) |
-| **documentation-governance** | Repository-specific documentation and governance constraints for the data-science thesis repository (toolkit-local context) |
 | **diagram-authoring** | Create, validate, and export deterministic high-resolution C4, AWS, sequence, and flow diagrams with mandatory image QA |
 | **diagram-creation-specialist** | Read-only source-grounded diagram planning, notation, export, and image-quality validation |
 | **system-architecture-specialist** | Read-only application architecture, boundary, data-flow, integration, and quality-attribute review |
 | **confluence-documentation** | Safe Confluence CRUD, hierarchy, labels, comments, attachments, and rollback-state backups |
-| **confluence-documentation-specialist** | Read-only Confluence page, hierarchy, attachment, comment, rendered-page, and source-to-wiki validation |
 | **prod-doc-promoter** | Read-only promotion planning for deployed-ticket documentation from a wiki intake folder to canonical homes |
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
-| **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
-| **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
-| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
-| **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
-| **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 | **technical-content-publishing** | Turn a software project into evidence-grounded Medium-style article, LinkedIn post and carousel, cover image, and architecture diagram as reviewed drafts, never posted |
 | **current-events-briefing** | Brief the user on a live or just-finished public event with symmetric coverage, independent analysis, fact-checker findings, same-pollster comparisons, and an honest "no consolidated verdict yet" |
 
@@ -151,13 +112,6 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | Skill | Purpose |
 | --- | --- |
 | **jupyter-notebook** | Notebook hygiene: kernel state, cell order, outputs, review, promotion to scripts |
-| **latex-notebooks** | LaTeX math inside notebooks and technical docs |
-| **notebook-analysis** | EDA, statistical analysis, plots, notebook cleanup, and narrative reporting with reproducibility |
-| **ml-engineering** | Feature engineering, model training, evaluation, and experiment reporting in end-to-end projects |
-| **ml-experiment** | Run or update ML experiments with baselines, leakage checks, and reproducible evaluation |
-| **data-pipeline** | Ingestion, transformation, schema, storage, and backfill changes across Bronze/Silver/Gold layers |
-| **data-pipeline-boundaries** | Repository-specific data pipeline boundaries for the data-science project (toolkit-local context) |
-| **data-governance** | Dataset provenance, privacy, licensing, and evidence integrity in analytics projects |
 
 ### Career And Job Search
 
@@ -165,16 +119,9 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | --- | --- |
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
 | **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
-| **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 | **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
-
-### Thesis And Academic Formatting
-
-| Skill | Purpose |
-| --- | --- |
-| **abnt-formatting** | ABNT academic formatting for thesis documents |
 
 ## Validation
 

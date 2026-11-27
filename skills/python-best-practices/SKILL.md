@@ -131,7 +131,6 @@ Each rule file contains:
 ## Related Skills
 
 - **best-practices** — SOLID principles, architecture patterns, resilience (language-agnostic foundations that Python implements)
-- **security** — Injection prevention, auth, secrets management (applies to all Python endpoints handling user data)
 - **testing** — AC traceability, test pyramid, coverage checklist (universal testing discipline beyond Python-specific patterns)
 
 ## Full Compiled Document

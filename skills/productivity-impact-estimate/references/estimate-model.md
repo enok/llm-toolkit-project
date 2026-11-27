@@ -28,16 +28,16 @@ repository; re-check them with `ls` before quoting, because assets move.
 
 | Activity | Manual h/week | Conservative % | Likely % | Assets behind it |
 |---|---|---|---|---|
-| Ticket research and context gathering | 3.5 | 10 | 25 | skills/task-starter, ticket-research, design-driven-dev, cross-repo-impact |
-| Coding + tests | 9.0 | 8 | 20 | workflows/ticket-implementation.md, new-backend-feature.md; best-practices skills; skills/test-plan |
-| Pre-PR self-checks | 1.5 | 10 | 30 | skills/pre-pr-check, changed-code-quality-gate, run-tests |
+| Ticket research and context gathering | 3.5 | 10 | 25 | workflows/ticket-research.md, cross-repo-impact.md; skills/design-driven-dev |
+| Coding + tests | 9.0 | 8 | 20 | workflows/ticket-implementation.md, new-backend-feature.md; best-practices skills |
+| Pre-PR self-checks | 1.5 | 10 | 30 | skills/pre-pr-check, run-tests; workflows/changed-code-quality-gate.md |
 | Reviewing teammates' PRs | 3.0 | 0 | 15 | skills/ticket-review, pr-validator, java-change-validator |
-| Addressing review comments | 2.0 | 10 | 25 | workflows/gh-address-comments.md, pr-automation-review.md; skills/fix |
-| CI failure triage and fix | 1.5 | 5 | 20 | workflows/gh-fix-ci.md; skills/ci-watcher; tool-subagents/ci-triage.md |
+| Addressing review comments | 2.0 | 10 | 25 | workflows/gh-address-comments.md, pr-automation-review.md |
+| CI failure triage and fix | 1.5 | 5 | 20 | workflows/gh-fix-ci.md; tool-subagents/ci-triage.md |
 | Ops: logs, alarms, incidents | 4.0 | 3 | 15 | workflows/log-investigation.md; skills/aws-alarm-investigator, incident-ops |
 | Documentation | 1.5 | 20 | 40 | skills/update-docs, doc-delta, confluence-documentation, runbook-authoring, diagram-authoring |
-| Infra and data-pipeline changes | 2.0 | 3 | 12 | skills/terraform-specialist, terraform-change-safety, dag-glue-specialist |
-| Releases and verification | 1.0 | 3 | 10 | skills/release-manager; tool-subagents/release-coordinator.md; skills/e2e-release-verification |
+| Infra and data-pipeline changes | 2.0 | 3 | 12 | skills/terraform-change-safety; tool-subagents/terraform-specialist.md, dag-glue-specialist.md |
+| Releases and verification | 1.0 | 3 | 10 | tool-subagents/release-coordinator.md |
 | Env setup and onboarding | 1.0 | 15 | 30 | scripts/bootstrap-dev.sh; skills/local-env-bootstrap, environment-diagnose, project-discovery |
 | Meetings and other | 10.0 | 0 | 2 | little toolkit effect |
 

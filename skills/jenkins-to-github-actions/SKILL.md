@@ -59,15 +59,10 @@ Collect only what is needed for the current migration slice:
 
 ## Related Toolkit Capabilities
 
-- `skills/ci-migration-and-parity/SKILL.md` for the CI-system-agnostic parity
-  method when the migration is not Jenkins-to-Actions specific.
 - `workflows/gh-fix-ci.md` for debugging failing GitHub Actions checks after
   migration.
-- `skills/ci-watcher/SKILL.md` for post-push CI monitoring on an open PR.
 - `rules/ci-feedback-loop.md` for converting CI failures into future review
   guidance.
-- `skills/shell-scripting/SKILL.md` for portable shell steps embedded in
-  workflows.
 - `skills/external-skill-intake/SKILL.md` for future external skill harvesting.
 
 ## Source Notes

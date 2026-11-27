@@ -19,8 +19,7 @@ documentation, validation, and user-facing communication.
 - Constraints: latency, throughput, consistency, availability, security,
   privacy, tenant boundaries, rollback, compatibility, cost, and rollout flags.
 - Existing architecture guidance: `AGENTS.md`, repo docs, ADRs, rubrics,
-  `skills/best-practices`, language skills, security/testing skills,
-  `skills/llm-application-architecture` for LLM systems, and project facts in
+  `skills/best-practices`, language skills, security/testing skills, and project facts in
   the consumer repo's `docs/llm/`.
 
 ## Procedure

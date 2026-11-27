@@ -28,7 +28,7 @@ Open the generated PNG/SVG/PDF and verify:
 - Labels are readable at the size used by the target documentation page.
 - Measured values shown in the diagram (timings, counts, comparison results) were generated from the run's data artifact and match it; no measurement literal is hardcoded in the diagram source or render script.
 - Generated output is vector format or a high-resolution raster export from current source.
-- Every generated/exported image artifact passed `skills/image-quality-inspection/references/image-quality-gate.md`.
+- Every generated/exported image artifact passed the image quality check (opened as rendered; sharp, uncropped, legible at the destination size, current).
 - Arrows do not cross enough to obscure ownership or ordering.
 - Diagram content fits a normal documentation viewport; if not, split by flow, endpoint, or abstraction level.
 - Sequence diagrams show important success, branch, retry, and failure paths with `alt`, `else`, or `par` blocks where applicable.

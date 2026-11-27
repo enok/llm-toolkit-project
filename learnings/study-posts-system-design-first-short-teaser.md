@@ -28,8 +28,7 @@ budgets were written nowhere the flow could read. Signature:
 
 # Solution
 
-Follow `skills/medium-publishing/references/positioning-profile.md`, `system-design-article.md`,
-`aida-narrative.md`, and `rules/publication-positioning.md`. The numbers below are toolkit
+Follow `rules/publication-positioning.md`. The numbers below are toolkit
 defaults; a consumer's profile overrides them.
 
 1. Write the positioning down once, in the consumer's `PUBLICATION-PROFILE.md`: target role,
@@ -46,12 +45,12 @@ defaults; a consumer's profile overrides them.
    hashtags each backed by text in the post, the hero diagram as the image. Medium topics stay
    five and system-design-led.
 5. Validate every draft before it is shown: check it against the consumer's publication profile (and `rubrics/technical-content.md` if that file exists) and run
-   `skills/medium-publishing/scripts/check_publication.py`, results shown with the AIDA stage
+   the shape check, results shown with the AIDA stage
    map (`workflows/study-publication-medium-linkedin.md`). Honour the profile's approval mode
    (`gated` or `drafts-only`): `drafts-only` pre-approves creating the two drafts only; publish,
    post, edit, pointer, and unlist still need explicit approval.
 6. A live publication that misses the profile is replaced, not retitled: a new story and a new
-   post, a pointer on the old ones (`skills/medium-publishing/references/replace-published-story.md`).
+   post, a pointer on the old ones (Replacement Path of `workflows/study-publication-medium-linkedin.md`).
 
 # Why
 

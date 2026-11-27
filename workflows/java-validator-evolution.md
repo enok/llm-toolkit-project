@@ -28,7 +28,7 @@ repo-local docs.
 | Missing Java validation behavior | `tool-subagents/java-change-validator.md` |
 | Repeatable validation process | `workflows/java-change-validation.md` |
 | Skill trigger or usage gap | `skills/java-change-validator/SKILL.md` |
-| Generic Java rule | `skills/java-best-practices/` or a shared rule |
+| Generic Java rule | a shared rule |
 | Routing gap | `INTENTS.md` and `rules/request-orchestration.md` |
 | Specialist pattern | `workflows/specialist-agent-evolution.md` |
 

@@ -182,6 +182,4 @@ family) if any.
 
 - `workflows/technical-interview-prep.md` - the route into this skill
 - `skills/job-search-pipeline/SKILL.md` - where the interviewing stage is tracked
-- `skills/java-best-practices/SKILL.md` - production Java idioms
-- `skills/youtube-video-curation/SKILL.md` - oEmbed verification of video IDs
 - `skills/interview-prep-planner/SKILL.md` - plan versus drill: the planner sequences stages, gap analysis, and the weekly rotation; this skill runs the drills for one interview

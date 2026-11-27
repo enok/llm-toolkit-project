@@ -104,7 +104,6 @@ If neither CLI nor MCP is available, the agent will ask the user to paste the ti
 ## After Setup
 
 In chat, say:
-- **"Start this ticket: ABC-1234"** — triggers task-starter with Jira context
 - **"Get details for ABC-1234"** — fetches and displays the issue
 - **"Research ABC-1234"** — triggers ticket-research workflow
 

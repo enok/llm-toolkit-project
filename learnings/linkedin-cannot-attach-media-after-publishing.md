@@ -34,8 +34,6 @@ Prevent it first, repost only if it already happened.
 4. Repoint every back-link from the old URL to the new one, each as its own approved write:
    edit the published Medium story (use "Save and publish") and open a README link PR.
 
-Durable guidance: skills/linkedin-publishing/references/repost-and-delete.md
-
 # Why
 
 The session recorded the limitation, not the product reason behind it, so treat it as a

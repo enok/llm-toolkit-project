@@ -68,4 +68,4 @@ Compact always-on summary of the Python baseline. The full guide with expanded e
 - Preserve the destination repository's toolchain (Ruff, mypy, Pyright, uv, Black, Poetry); introduce new tools only when adopted or requested.
 - Keep formatting/lint changes separate from behavioral fixes.
 
-See `references/source-backed-python-tooling.md` for primary sources and the **best-practices**, **security**, and **testing** skills for the language-agnostic baseline.
+See `references/source-backed-python-tooling.md` for primary sources and the **best-practices** and **testing** skills for the language-agnostic baseline.

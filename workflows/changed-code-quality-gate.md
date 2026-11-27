@@ -77,8 +77,5 @@ secret-handling policy.
 
 ## Related
 
-- `skills/changed-code-quality-gate/SKILL.md` for the contract and configuration.
-- `skills/changed-code-quality-gate/references/analyzer-selection.md` for
-  normalizing project-native Sonar or SpotBugs results back to this scope.
 - `.github/workflows/changed-code-quality-gate.yml` for the CI wiring that runs
   the gate implementation, configuration, and rules from a protected revision.

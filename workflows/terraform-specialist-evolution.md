@@ -27,11 +27,9 @@ reported noise, or spent context inefficiently.
 1. Reconstruct the miss: what evidence existed at review time, which
    procedure step should have caught it, and why it did not.
 2. Classify the fix target:
-   - detection rule -> `skills/terraform-specialist/references/validation-checklist.md`
-   - inventory question the specialist should have asked ->
-     `skills/terraform-specialist/references/stack-inventory.md`
    - change-safety pattern -> `skills/terraform-change-safety/SKILL.md`
-   - procedure/output gap -> `tool-subagents/terraform-specialist.md`
+   - detection rule, inventory question the specialist should have asked, or
+     procedure/output gap -> `tool-subagents/terraform-specialist.md`
      (mirror the body into the `.toml`)
    - scoping/loading waste -> `workflows/terraform-specialist-validation.md`
    - cross-specialist routing -> `INTENTS.md`, `rules/request-orchestration.md`

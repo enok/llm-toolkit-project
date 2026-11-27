@@ -1,8 +1,8 @@
 # Code Review Checklist Rubric
 
 Use this checklist when performing a holistic, evidence-based AI diff review
-(the **code-review**, **review**, **ticket-review**, or **pre-pr-check**
-skill). Evaluate the staged diff (or branch diff) against the categories
+(the **ticket-review** or **pre-pr-check** skill, or the **review**
+workflow). Evaluate the staged diff (or branch diff) against the categories
 below; apply only where the changed code is relevant. Base every finding on
 concrete evidence in the diff or the source it touches.
 
@@ -212,7 +212,7 @@ If no high-confidence issues are found, post a concise "no high-confidence
 issues found" comment (optionally with a few Green suggestions or praise).
 
 Do not push changes or open fix PRs from this workflow - report findings and
-let the developer, or the **fix** skill on request, apply them.
+let the developer, or a fix step on request, apply them.
 
 ### Check Run Status
 
@@ -235,5 +235,5 @@ When writing `docs/jira/<TICKET>/review-report.json` (or
 - **suggestion**: concrete remediation (optional)
 
 Include a **summary** (for example, counts of blockers/suggestions and the
-overall pass/fail/neutral verdict). This lets the **fix** skill prioritize
+overall pass/fail/neutral verdict). This lets a fix step prioritize
 and act on findings.

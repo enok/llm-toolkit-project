@@ -20,13 +20,12 @@ PR/ticket readiness call.
    pinning convention, environment root topology, backend/state layout,
    provider pins, alarm/dashboard couplings). Read it from the consumer repo's
    `docs/llm/` when it exists; otherwise build it from the repo itself using
-   `skills/terraform-specialist/references/stack-inventory.md`. Findings that
+   the Consumer Stack Inventory checklist in `tool-subagents/terraform-specialist.md`. Findings that
    depend on a convention nobody has recorded are reported as
    "inventory unknown", not guessed.
 4. Load only relevant context: the changed roots and every root that
    instantiates a changed module, tfvars, `.terraform.lock.hcl`, phase
-   ordering files, contract tests, and
-   `skills/terraform-specialist/references/validation-checklist.md`.
+   ordering files, and contract tests.
 
 ## Phase 2 - Specialist Pass
 
@@ -92,4 +91,4 @@ wiring gap, coupling smell, or burns tokens on irrelevant roots, run
 - On Windows, when `terraform init` of git-sourced modules fails with git errors such as "$GIT_DIR too big", run `terraform init -backend=false` and `terraform validate` in a short-path copy of the roots plus local modules, and keep one short-path copy initialized against the real backend for plan/apply; the repo checkout stays the source of truth. See learnings/terraform-init-git-modules-fail-on-deep-windows-paths.md.
 - When `terraform plan` cannot refresh the SSO token (`InvalidGrantException`) while `aws sts get-caller-identity` works, run `eval "$(aws configure export-credentials --format env)"` and the Terraform command in the same shell invocation.
 - When the SSO token is expired, ask the user to run `aws sso login --profile <profile>`; never complete the browser approval yourself, continue the work that needs no AWS access, and park AWS verifications in a named resume list.
-- For alarms, dashboards, and metrics, also apply the `## Known pitfalls` of `skills/terraform-specialist/references/validation-checklist.md`.
+- For alarms, dashboards, and metrics, also check: every metric-math expression is valid beyond JSON syntax before each apply, missing-data handling matches what the metric means, the notification path of every alarm is proven end to end, and metric dimensions come from the emitter, alarm block or dashboard template, never from naming.

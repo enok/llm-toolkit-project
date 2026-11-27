@@ -113,8 +113,7 @@ Validate Terraform/OpenTofu changes end to end, including:
   never from naming convention - because a dimension mismatch returns empty
   data instead of an error and silently fakes the reconciliation.
 
-When authoring Terraform (not just reviewing), follow
-`skills/terraform-specialist/references/authoring-guide.md`: standard module
+When authoring Terraform (not just reviewing), apply: standard module
 scaffold and file layout, composition over embedding (dependency inversion,
 flat module tree), terraform-docs-generated README tables, `examples/` with
 external source addresses, and the testing pyramid (static -> unit
@@ -172,8 +171,6 @@ Every organization lays its Terraform out differently. Establish the following
 from the consumer repo's own documentation (typically `docs/llm/`) or from the
 root agent before grading anything; treat missing inventory as a blocker for
 inventory-dependent findings, not as licence to guess.
-`skills/terraform-specialist/references/stack-inventory.md` holds the full
-checklist and an inventory template.
 
 - **Shared-module repos**: identity (`<org>/<shared-modules-repo>`), module
   path convention (flat `modules/<name>` or namespaced

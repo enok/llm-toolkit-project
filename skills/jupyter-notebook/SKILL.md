@@ -38,14 +38,10 @@ Help engineers work in notebooks without turning them into opaque, one-off artif
 
 ## Related Rules And Workflows
 
-- `skills/notebook-analysis/references/notebook-discipline.md`
-- `skills/notebook-analysis/references/analytics-discipline.md`
 - `workflows/notebook-analysis-update.md`
 - `workflows/notebook-to-script.md`
 
 ## Pair With
 
 - `notebook-analysis`
-- `latex-notebooks`
-- `ml-engineering`
 - `python-best-practices`

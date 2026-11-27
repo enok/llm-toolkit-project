@@ -57,7 +57,7 @@ Use SVG intermediates by default. Use `-ImageFormat png` only when the target to
 
 ## Phase 3 — Image/render quality gate
 
-When the build creates or embeds images, apply `skills/image-quality-inspection/references/image-quality-gate.md` before sharing. This phase is mandatory, not optional:
+When the build creates or embeds images, apply the image quality check (opened as rendered; sharp, uncropped, legible at the destination size, current) before sharing. This phase is mandatory, not optional:
 
 1. Inspect 100% of generated SVG/PNG/JPG/WebP intermediates.
 2. Open or render the final PDF pages that contain generated images.

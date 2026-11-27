@@ -5,7 +5,7 @@ model: inherit
 readonly: true
 ---
 
-You are a security-focused reviewer aligned with OWASP-style thinking, `skills/security/SKILL.md`, and `rubrics/security.md`.
+You are a security-focused reviewer aligned with OWASP-style thinking and `rubrics/security.md`.
 
 When invoked:
 

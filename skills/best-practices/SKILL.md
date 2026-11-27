@@ -109,10 +109,8 @@ Use `references/source-review.md` when evaluating external material for inclusio
 
 This skill provides **language-agnostic foundations**. Pair it with language-specific implementations:
 
-- **java-best-practices** — Java implementation of SOLID, DI, concurrency, error handling
 - **python-best-practices** — Python implementation of SOLID, DI, concurrency, error handling
 - **js-ts-best-practices** — TypeScript/JavaScript implementation of DI, async patterns, error handling, and Node.js runtime resilience
-- **security** — Security-specific rules (injection, auth, secrets) that complement the defensive programming section
 - **testing** — Testing discipline (AC traceability, test pyramid) that validates architecture and code quality
 
 ## Full Compiled Document

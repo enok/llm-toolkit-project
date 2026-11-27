@@ -12,7 +12,7 @@ Use this when improving the shared toolkit from PR reviews, CI failures, Conflue
 2. Review orchestrator and subagent outputs for judged misses, contradictions, weak evidence, missing specialists, complexity-tier misassignments, repeated validation gaps, and reusable execution shortcuts.
 3. Search internal docs for repeated procedures, architecture analysis patterns, diagram requirements, and operational gotchas.
 4. Search official/public LLM-tool docs for provider behavior changes that affect `AGENTS.md`, skills, workflows, MCP, rules, or memory.
-5. When the input is chat/history/memory-heavy, use `workflows/chat-knowledge-curation.md` and `skills/chat-knowledge-curation/SKILL.md` to mine evidence into durable assets instead of copying raw chat into shared guidance.
+5. When the input is chat/history/memory-heavy, use `workflows/chat-knowledge-curation.md` to mine evidence into durable assets instead of copying raw chat into shared guidance.
 6. Review external skill repositories through `skills/external-skill-intake/SKILL.md`; use them for discovery and generic adaptation only after source, license, SkillSpector, Snyk Agent Scan, and Gen Agent Trust Hub URL review where applicable.
 7. For agent self-improvement, eval, trace, and orchestration patterns, include the curated starting points in `skills/external-skill-intake/references/agent-evolution-sources.md` and add reliable community repos only after source and license review.
 8. Record only transferable patterns; keep project-specific details in the source project or in a learning marked as evidence.

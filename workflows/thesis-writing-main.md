@@ -31,12 +31,12 @@ This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
 | **Writing new chapter** | `workflows/thesis-chapter-writing.md` | Chapter-type guidance |
 | **Adding citations** | This workflow §Phase 3 | Citation integration |
 | **Method selection** | `workflows/research-analysis-cycle.md` | Method framework |
-| **Formatting check** | `skills/abnt-formatting/SKILL.md` | ABNT vs institutional manual |
+| **Formatting check** | This workflow §Phase 4 | ABNT vs institutional manual |
 | **Plagiarism scan** | `workflows/thesis-plagiarism-check.md` | Originality check |
 | **Bilingual sync** | `workflows/bilingual-notebook-sync.md` | EN ↔ pt-BR |
 | **Analysis→Thesis sync** | `workflows/research-analysis-cycle.md` | Evidence flow |
 | **Advisor submission** | `workflows/thesis-submission-preparation.md` | Submission prep |
-| **Final formatting** | `skills/abnt-formatting/SKILL.md` | ABNT compliance |
+| **Final formatting** | This workflow §Phase 4 | ABNT compliance |
 
 ### Step 2: Load Thesis Knowledge Base
 
@@ -52,11 +52,11 @@ This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
 - [ ] The project's reference database — Method references
 
 **For formatting:**
-- [ ] `skills/abnt-formatting/SKILL.md` — ABNT vs the institution's manual
+- [ ] ABNT NBR 14724:2011 — compared with the institution's manual (Step 7)
 - [ ] The institution's thesis manual — Deliverable expectations
 
 **For bibliography:**
-- [ ] `skills/abnt-formatting/SKILL.md` — NBR 6023 reference format
+- [ ] ABNT NBR 6023:2023 — reference format (Step 6)
 - [ ] The project's reference database — Complete list of sources
 
 ### Step 3: Determine Language Scope
@@ -108,7 +108,7 @@ Run the **thesis-chapter-writing** workflow (`workflows/thesis-chapter-writing.m
 5. Build reference list alphabetically
 ```
 
-**Reference format:** `skills/abnt-formatting/SKILL.md`
+**Reference format:** ABNT NBR 6023:2023 (Step 6)
 
 ### Step 6: Reference List Compilation
 
@@ -135,7 +135,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `skills/abnt-formatting/SKILL.md` and `skills/abnt-formatting/references/abnt-nbr-14724-core-requirements.md`
+1. Read the institution's thesis manual
 2. Compare the institution's thesis manual vs ABNT NBR 14724:2011
 3. Check page setup:
    - Margins: Left 3cm, Right 2cm, Top 3cm, Bottom 2cm (verify the institution's manual)
@@ -241,7 +241,6 @@ Run the **thesis-submission-preparation** workflow (`workflows/thesis-submission
 8. `workflows/bilingual-doc-sync.md` — Document sync
 
 ### Skills (for guidance)
-- `skills/abnt-formatting/SKILL.md` — ABNT formatting
 - `skills/document-conversion/SKILL.md` — File handling
 
 ---
@@ -253,7 +252,7 @@ What thesis task?
 ├── Writing chapter → workflows/thesis-chapter-writing.md
 ├── Adding citations → This workflow §Phase 3
 ├── Method selection → workflows/research-analysis-cycle.md
-├── Formatting check → skills/abnt-formatting/SKILL.md
+├── Formatting check → This workflow §Phase 4
 ├── Plagiarism scan → workflows/thesis-plagiarism-check.md
 ├── Bilingual sync → bilingual-notebook-sync.md / bilingual-doc-sync.md
 └── Final submission → workflows/thesis-submission-preparation.md

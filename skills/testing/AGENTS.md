@@ -285,8 +285,6 @@ calculateDiscount_bulkOrder_appliesTierDiscount
 
 This skill provides **universal testing discipline**. Pair it with language-specific testing patterns:
 
-- **java-best-practices** — JUnit 5, Mockito, `assertThrows`, mock-at-interface patterns for Java
 - **python-best-practices** — pytest, `Mock(spec=ABC)`, fixtures, given/when/then patterns for Python
 - **js-ts-best-practices** — Vitest/Jest, `vi.fn()`, async test patterns, mock-at-interface for TypeScript
 - **best-practices** — Architecture patterns (layered, SOLID) that make code testable in the first place
-- **security** — Security-specific test cases: injection attempts, auth bypass, PII exposure

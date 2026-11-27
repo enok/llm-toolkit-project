@@ -37,7 +37,7 @@ Run all four steps before anything is saved to the repository or the KB:
    | 6 | service unreachable | not a pass: search the catalog and `learnings/INDEX.md` by hand for duplicates, run step 2, and retry `add` once the service is back |
 
 2. **Security check.** Anything entering the repository passes `rules/security-check-required.md`, including the LLM-surface scan; anything entering the KB passes the secret quarantine that `check` runs. A file with a secret is quarantined, never indexed.
-3. **Classification.** Choose the asset type with the Destination Guide in `skills/chat-knowledge-curation/SKILL.md`; treat the destination `check` suggests as input, not a verdict. Pass the matching `--kind` to `add`, and prefer extending the smallest existing asset over creating a new one.
+3. **Classification.** Choose the asset type with the destination table in Phase 3 of `workflows/chat-knowledge-curation.md`; treat the destination `check` suggests as input, not a verdict. Pass the matching `--kind` to `add`, and prefer extending the smallest existing asset over creating a new one.
 4. **Indexes and docs in the same change.** Update every index the change touches (AGENTS.md "After Completing Tasks", `learnings/INDEX.md`), route the documentation through `rules/documentation-review-required.md`, and run the AGENTS.md "Validation" commands.
 
 ## 4. Improvement check

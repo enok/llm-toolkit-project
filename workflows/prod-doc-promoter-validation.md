@@ -78,8 +78,10 @@ Run the narrowest relevant checks:
 - Link checks for Jira, PR/release, repository source docs, related runbooks,
   diagrams, and canonical Confluence destinations.
 - `documentation-reviewer` for promoted or merged documentation content.
-- `image-quality-inspection` for every generated/exported image, screenshot,
-  PDF page render, slide/document render, or Confluence-processed attachment.
+- an image quality check for every generated/exported image, screenshot,
+  PDF page render, slide/document render, or Confluence-processed attachment
+  (opened as rendered; sharp, uncropped, legible at the destination size,
+  current).
 - `node scripts/validate-specialist-agent.js prod-doc-promoter`, workflow size
   validation, index validation, and LLM-surface security checks when toolkit
   assets changed.

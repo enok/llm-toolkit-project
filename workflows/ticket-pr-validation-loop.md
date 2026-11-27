@@ -16,7 +16,6 @@ Compose existing workflows instead of copying them:
 - `workflows/gh-address-comments.md` for PR review threads and replies.
 - `workflows/gh-fix-ci.md` for failing CI/CD checks.
 - `workflows/changed-code-quality-gate.md` when source code changed.
-- `skills/ci-watcher/SKILL.md` for read-only background monitoring after push.
 - `workflows/self-improvement.md` for durable lessons from repeated failures.
 
 ## Required inputs
@@ -109,8 +108,8 @@ resolution.
 5. If a fix is needed, change only ticket-scoped code, validate locally, push,
    and monitor the new head.
 
-After each successful push on an open PR, start or request a read-only
-`ci-watcher` run when the repo has CI workflows. The root agent remains
+After each successful push on an open PR, watch CI read-only until the checks
+finish when the repo has CI workflows. The root agent remains
 responsible for edits, commits, pushes, comments, and final reporting.
 
 ## Phase 6 - Approval readiness decision

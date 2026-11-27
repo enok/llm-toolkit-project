@@ -1,6 +1,6 @@
-# Jira Setup For Task Starter
+# Jira Setup For Ticket Workflows
 
-The `task-starter` skill (`skills/task-starter/SKILL.md`) can fetch Jira
+The ticket workflows (`workflows/ticket-research.md`) can fetch Jira
 ticket details and turn them into an implementation plan. It prefers the
 **Atlassian CLI (`acli`)** (recommended - lower context and token use), and
 falls back to **Jira MCP** (optional, more context-heavy, native IDE tools)
@@ -51,7 +51,7 @@ small; the agent parses the JSON for summary, description, and comments.
 
 ## Detection And Setup (For The Agent)
 
-When the user invokes `task-starter` with a Jira ticket ID and the fetch
+When a ticket workflow gets a Jira ticket ID and the fetch
 fails or is unclear:
 
 1. **Detect the CLI:** run `acli --version` (or `which acli`). If the

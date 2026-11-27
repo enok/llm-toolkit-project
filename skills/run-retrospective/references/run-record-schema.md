@@ -146,7 +146,7 @@ deletes it once `append` prints its run_id (or reports it already exists):
 
 ## Complete record
 
-A run that landed a `learning` for a platform quirk and a `guard` for a
+A run that landed a `learning` for a platform quirk and a `checklist` item for a
 high-severity escaped defect:
 
 ```json
@@ -168,11 +168,11 @@ high-severity escaped defect:
     "category": "validation-gap", "severity": "high", "source": "user",
     "summary": "literal markdown markers reached the draft; the validator only checked the source",
     "fix": "validator scans the rendered HTML for leftover markdown tokens",
-    "prevented_by": "skills/medium-publishing/scripts/medium_paste_html.py"}],
+    "prevented_by": "workflows/study-publication-medium-linkedin.md"}],
  "promotions": [
    {"signature": "platform-quirk/editor-paste-splits-code-block-at-blank-line",
     "level": "learning", "asset": "learnings/medium-paste-splits-code-blocks-at-blank-lines.md"},
    {"signature": "validation-gap/rendered-html-not-scanned-for-markdown",
-    "level": "guard", "asset": "skills/medium-publishing/scripts/medium_paste_html.py"}],
+    "level": "checklist", "asset": "workflows/study-publication-medium-linkedin.md"}],
  "notes": "escape: the leftover markdown was found by the user after the draft was marked ready"}
 ```

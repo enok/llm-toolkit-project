@@ -41,9 +41,6 @@ text also failed.
   U+201D) to `"`, curly single quotes (U+2018, U+2019) to `'`, no-break space (U+00A0) to a
   space.
 
-Durable guidance: skills/medium-publishing/references/publish-dialog.md (section 7) and
-skills/medium-publishing/references/editor-verification.md (section 4).
-
 # Why
 
 Observed: the pasted paragraph's straight quotes became curly quotes in the editor, and a

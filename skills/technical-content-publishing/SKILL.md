@@ -112,7 +112,7 @@ Platform numbers are time-sensitive: each carries a source URL and verification 
 
 - `references/medium-article.md` - before drafting `article.md`: Medium specs, anatomy (1,100-2,000 words, up to five tags), craft, SEO, disclosure.
 - `references/linkedin-post-and-carousel.md` - before drafting `post.md` and `carousel.md`: LinkedIn specs; claim in the first ~140 characters, one call to action shared by all assets, at most three hashtags, no engagement bait, no tagging without approval; carousel 8-10 slides, one page size, at most ~35 words per slide.
-- `references/visual-assets.md` - at step 6: cover, diagram, slide design, rendering, inspection. Reuse `skills/diagram-authoring`, `skills/image-quality-inspection` (mandatory inspection of every generated image and PDF page), `skills/markdown-pdf-export`. A check that cannot run is reported as not run, never as passed; never state a visual passed inspection unless the rendered file was opened and checked.
+- `references/visual-assets.md` - at step 6: cover, diagram, slide design, rendering, inspection. Reuse `skills/diagram-authoring` and `skills/markdown-pdf-export`; inspection of every generated image and PDF page is mandatory. A check that cannot run is reported as not run, never as passed; never state a visual passed inspection unless the rendered file was opened and checked.
 - `scripts/render_assets.py` - renders `slides.html` to the carousel PDF and PNGs, or a cover HTML to `cover.png`.
 - `references/package-templates.md` - package tree, skeletons, hook-pattern table.
-- Publishing a finished draft (only after the approval in Never post): `skills/medium-publishing/SKILL.md`, `skills/linkedin-publishing/SKILL.md`.
+- Publishing a finished draft (only after the approval in Never post): `workflows/study-publication-medium-linkedin.md` (Phases 7-10).

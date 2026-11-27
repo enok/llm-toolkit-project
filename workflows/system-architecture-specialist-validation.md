@@ -14,8 +14,7 @@ implementation, documentation, PR approval, or handoff.
    affected services, constraints, and whether the ask is current-state,
    target-state, review, or migration planning.
 2. Load only relevant context: `workflows/project-discovery.md`,
-   `workflows/document-creation.md`, `skills/best-practices/SKILL.md`,
-   `skills/llm-application-architecture/SKILL.md` for LLM systems, language
+   `workflows/document-creation.md`, `skills/best-practices/SKILL.md`, language
    skills, security/testing skills, ADRs, docs, diagrams, configs, tickets, PRs,
    logs, metrics, and the consumer repo's `docs/llm/` for project facts.
 3. Identify whether code, contract, security, log, release, diagram, or docs

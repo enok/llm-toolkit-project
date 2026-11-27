@@ -23,7 +23,7 @@ Every tasks table print of the agent-orchestrator is this complete, in the chat 
 
 **Tasks table: session `s3-retry` · print #9 · 2026-11-26 12:05 UTC (UTC+00:00) · trigger: row 11 entered validating**
 
-**Route:** `INTENTS.md` → "implement a ticket" → primary `workflow:ticket-implementation` (helpers: `skill:java-best-practices`, `skill:pre-pr-check`)
+**Route:** `INTENTS.md` → "implement a ticket" → primary `workflow:ticket-implementation` (helpers: `skill:best-practices`, `skill:pre-pr-check`)
 **Rules in force:** `rule:request-orchestration`, `rule:external-write-authorization`, `rule:human-comment-reply-gate`, `workflow:task-quality-loop`
 **Agents:** `agent-orchestrator` (root, Claude Opus 5.5), `parallel-explorer` (Claude Haiku 5.5), `java-change-validator` (Claude Sonnet 5.5), `test-runner` (Claude Haiku 5.5), `code-reviewer` (Claude Sonnet 5.5), `pr-validator` (Claude Haiku 5.5), `task-quality-judge` (Claude Opus 5.5)
 **Helpers:** `script:check_tasks_table.py`, `script:mvn verify`, `script:gh pr checks`, `skill:run-tests`
@@ -34,8 +34,8 @@ Every tasks table print of the agent-orchestrator is this complete, in the chat 
 | 1 | W1 | Read `learnings/INDEX.md`, map uploader call sites | `agent:parallel-explorer` · `rule:request-orchestration` | yes - 2 searches; call-site map from past uploads | light | Claude Haiku 5.5 / low | completed | `CONTEXT_STATE.md#recon` (14 call sites) | — | — | 8.2K | 100% | 00:10 | 00:00 |
 | 2 | W1 | Pull current SDK retry documentation | `skill:run-tests` | no | light | Claude Haiku 5.5 / low | completed | `notes/sdk-retry.md` | — | — | 6.4K | 100% | 00:10 | 00:00 |
 | 3 | W2 | Design retry policy (backoff with jitter, idempotency) | `agent:task-quality-judge` · `workflow:task-quality-loop` | yes - via row 1 | deep *(trigger: ambiguous idempotency contract)* | Claude Opus 5.5 / high | completed | `docs/retry-policy.md`; judge pass on iteration 2 of 5 | — | — | 41.7K | 100% | 00:25 | 00:00 |
-| 4 | W3 | Implement retrying uploader and config | `skill:java-best-practices` · `agent:java-change-validator` | no | standard | Claude Sonnet 5.5 / medium | failed | breached (cause: scope too large), re-split into #5 and #6; `feat/retry@a1b2c3d` partial | — | — | 52.3K | 50% | 00:30 | 00:00 |
-| 5 | W3 | `RetryingUploader` class and unit tests | `skill:java-best-practices` · `agent:java-change-validator` | no | standard | Claude Sonnet 5.5 / medium | completed | `feat/retry@d4e5f6a`; 18 tests green | — | — | 22.9K | 100% | 00:20 | 00:00 |
+| 4 | W3 | Implement retrying uploader and config | `skill:best-practices` · `agent:java-change-validator` | no | standard | Claude Sonnet 5.5 / medium | failed | breached (cause: scope too large), re-split into #5 and #6; `feat/retry@a1b2c3d` partial | — | — | 52.3K | 50% | 00:30 | 00:00 |
+| 5 | W3 | `RetryingUploader` class and unit tests | `skill:best-practices` · `agent:java-change-validator` | no | standard | Claude Sonnet 5.5 / medium | completed | `feat/retry@d4e5f6a`; 18 tests green | — | — | 22.9K | 100% | 00:20 | 00:00 |
 | 6 | W3 | Wire config properties and the Spring bean | `agent:java-change-validator` | no | light | Claude Haiku 5.5 / low | completed | `feat/retry@9f8e7d6` | — | — | 9.1K | 100% | 00:15 | 00:00 |
 | 7 | W4 | Full test suite and failure triage | `agent:test-runner` · `script:mvn verify` | no | light | Claude Haiku 5.5 / low | completed | `mvn verify` 412 of 412 pass | — | — | 11.8K | 100% | 00:15 | 00:00 |
 | 8 | W4 | Diff code review | `agent:code-reviewer` | no | standard | Claude Sonnet 5.5 / medium | completed | 0 blockers, 2 nits fixed | — | — | 27.5K | 100% | 00:20 | 00:00 |

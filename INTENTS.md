@@ -6,67 +6,56 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| review my changes / review this PR | `ticket-review` or `review` | workflow + skill | `run-tests`, `code-review`, `rubrics/code-review-checklist.md` |
-| review and fix this branch / fix my branch | `ticket-review-and-fix` or `review-and-fix` | workflow + skill | `run-tests`, `pre-pr-check`, `commit-and-push` |
-| fix the issues from the review | `fix` | skill | `ticket-review`, `pre-pr-check` |
+| review my changes / review this PR | `ticket-review` or `review` | workflow + skill | `run-tests`, `rubrics/code-review-checklist.md` |
+| review and fix this branch / fix my branch | `ticket-review-and-fix` or `review-and-fix` | workflow | `run-tests`, `pre-pr-check`, `commit-and-push` |
 | pre-PR check this branch / ready for PR | `pre-pr-check` | workflow + skill | `changed-code-quality-gate`, `ticket-review`, `doc-delta`, `ui-verify` |
-| run the quality gate on my changed code / Sonar / Semgrep | `changed-code-quality-gate` | workflow + skill | `rules/changed-code-quality-gate-required.md`, `scripts/changed_code_quality_gate.py` |
+| run the quality gate on my changed code / Sonar / Semgrep | `changed-code-quality-gate` | workflow | `rules/changed-code-quality-gate-required.md`, `scripts/changed_code_quality_gate.py` |
 | validate this PR / is PR #123 ready to approve / approve or block | `pr-validator-validation` | workflow + skill | `pr-validator`, `tool-subagents/pr-validator.md`, `ticket-pr-validation-loop` |
-| the ticket is solved, take its PR to approval / monitor the PR | `ticket-pr-validation-loop` | workflow | `ticket-review-and-fix`, `gh-address-comments`, `gh-fix-ci`, `ci-watcher` |
-| validate these Java changes / Java reviewer replies | `java-change-validation` | workflow + skill | `java-change-validator`, `java-best-practices`, `rules/human-comment-reply-gate.md` |
-| run the right tests / give me a test plan | `run-tests` / `test-plan` | workflow + skill | `testing`, stack-specific best-practices skills, `e2e-release-verification` |
+| the ticket is solved, take its PR to approval / monitor the PR | `ticket-pr-validation-loop` | workflow | `ticket-review-and-fix`, `gh-address-comments`, `gh-fix-ci` |
+| validate these Java changes / Java reviewer replies | `java-change-validation` | workflow + skill | `java-change-validator`, `rules/human-comment-reply-gate.md` |
+| run the right tests / give me a test plan | `run-tests` | workflow + skill | `testing`, stack-specific best-practices skills |
 | commit and push / validate and push | `commit-and-push` | workflow | `pre-pr-check`, `git-conventions`, duplicate-file gate |
 | address PR comments / reply to the reviewer | `gh-address-comments` | workflow | `rules/human-comment-reply-gate.md`, `review-and-fix` |
-| fix CI / GitHub Actions failing / watch CI after push | `gh-fix-ci` | workflow | `ci-watcher`, `rules/ci-feedback-loop.md` |
+| fix CI / GitHub Actions failing / watch CI after push | `gh-fix-ci` | workflow | `rules/ci-feedback-loop.md` |
 | fix PR bot findings / PR automation review | `pr-automation-review` | workflow | `review-and-fix` |
-| verify the UI works in a browser | `ui-verify` | skill | `figma-compare`, `image-quality-inspection`, `pre-pr-check` |
-| does this match the Figma design | `figma-compare` | skill | `ui-verify`, `image-quality-inspection` |
-| check the exported image / blurry diagram / screenshot quality | `image-quality-inspection` | skill | `diagram-authoring`, `markdown-pdf-export`, `documentation-reviewer` |
+| verify the UI works in a browser | `ui-verify` | skill | `pre-pr-check` |
 | second opinion / sanity check this plan | `second-opinion` | skill | `design-driven-dev` |
-| load test / JMeter / performance test | `jmeter-performance-testing` | skill | `e2e-release-verification`, `log-analysis` |
 
 ## Tickets, Implementation, And Releases
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| start ticket `<TICKET-ID>` / plan this task | `task-starter` or `ticket-research` | skill / workflow | `ticket-implementation`, `cross-repo-impact`, `design-driven-dev` |
+| start ticket `<TICKET-ID>` / plan this task | `ticket-research` | workflow | `ticket-implementation`, `cross-repo-impact`, `design-driven-dev` |
 | implement a ticket / research then implement | `ticket-implementation` / `ticket-research-and-implementation` | workflow | `run-tests`, `review-and-fix`, `ticket-research-and-implementation-and-validation` |
-| implement a change / fix a bug / regression | `design-driven-dev` | skill | language best-practices skill, `run-tests`, `test-plan` |
-| new backend feature / add endpoint | `new-backend-feature` | workflow | `api-contract-surface`, `testing`, `security` |
+| implement a change / fix a bug / regression | `design-driven-dev` | skill | language best-practices skill, `run-tests` |
+| new backend feature / add endpoint | `new-backend-feature` | workflow | `api-contract-surface`, `testing` |
 | explore before coding / investigate unfamiliar code | `design-driven-dev` | skill | `project-discovery`, `parallel-explorer` |
-| slice this plan / break into phases | `pathfinder` | skill | `task-starter` |
-| check cross-repo impact / downstream consumers | `cross-repo-impact` | workflow + skill | `api-contract-surface`, `cross-repo-analyst` |
-| upgrade dependencies / bump library | `dependency-upgrade` | workflow | `run-tests`, `security` |
-| cut or verify a release / rollout / rollback | `release-manager` | skill | `e2e-release-verification`, `release-coordinator`, `rules/release-safety.md` |
+| slice this plan / break into phases | `pathfinder` | skill | - |
+| check cross-repo impact / downstream consumers | `cross-repo-impact` | workflow | `api-contract-surface`, `cross-repo-analyst` |
+| upgrade dependencies / bump library | `dependency-upgrade` | workflow | `run-tests` |
 | Maven release / release:prepare / deploy to Nexus | `ticket-release` | workflow + skill | `maven-release`, `maven-build-troubleshooting` |
-| Maven build failing / OWASP dependency-check / webapp will not start | `maven-build-troubleshooting` | skill | `environment-diagnose`, `java-best-practices` |
-| migrate Jenkins to GitHub Actions / Jenkinsfile | `jenkins-to-github-actions` | skill | `ci-migration-and-parity`, `gh-fix-ci` |
-| keep CI parity while migrating pipelines | `ci-migration-and-parity` | skill | `jenkins-to-github-actions` |
-| copy this record from prod to stage / prep stage data | `cross-env-data-copy` | skill | `rules/command-safety.md`, `runbook-authoring` |
-| embed Zoom meeting / Meeting SDK / Zoom signature | `zoom-meeting-sdk` | skill | `security`, `js-ts-best-practices` |
-| create a CLI / wrap this as a command | `cli-creator` | skill | `shell-scripting`, `python-best-practices` |
+| Maven build failing / OWASP dependency-check / webapp will not start | `maven-build-troubleshooting` | skill | `environment-diagnose` |
+| migrate Jenkins to GitHub Actions / Jenkinsfile | `jenkins-to-github-actions` | skill | `gh-fix-ci` |
+| create a CLI / wrap this as a command | `cli-creator` | skill | `python-best-practices` |
 
 ## Infrastructure, Operations, And Logs
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| Terraform / OpenTofu / `.tf` change / plan or apply / state or import (mandatory routing) | `terraform-specialist-validation` | workflow + skill | `terraform-specialist`, `terraform-change-safety`, `terraform`, `pr-validator`, `security-auditor` |
+| Terraform / OpenTofu / `.tf` change / plan or apply / state or import (mandatory routing) | `terraform-specialist-validation` | workflow | `terraform-specialist`, `terraform-change-safety`, `pr-validator`, `security-auditor` |
 | Terraform cannot apply / manual infrastructure table for the platform team | `terraform-manual-infrastructure-handoff` | workflow | `terraform-specialist`, `confluence-documentation-specialist`, `documentation-reviewer` |
 | `terraform_data` / provisioner not re-running / module variable wiring | `terraform-change-safety` | skill | `terraform-specialist` |
-| Terraform module patterns / tests / CI | `terraform` | skill | `terraform-specialist`, `security`, `testing` |
-| import existing infrastructure into IaC | `infra-adoption` | skill | `terraform-specialist`, `terraform` |
-| validate a DAG / Airflow / MWAA / Glue job / crawler / Data Catalog | `dag-glue-specialist-validation` | workflow + skill | `dag-glue-specialist`, `python-best-practices`, `log-analysis`, `system-architecture-specialist` |
+| validate a DAG / Airflow / MWAA / Glue job / crawler / Data Catalog | `dag-glue-specialist-validation` | workflow | `dag-glue-specialist`, `python-best-practices`, `log-analysis`, `system-architecture-specialist` |
 | investigate this AWS alarm / CloudWatch alarm root cause / alarm RCA email | `aws-alarm-investigator-validation` | workflow + skill | `aws-alarm-investigator`, `log-analysis`, `incident-ops` |
 | analyze logs / CloudWatch logs / server, nginx, Log4j, Lambda, Glue logs | `log-investigation` | workflow + skill | `log-analysis`, `log-analyst`, `rules/log-analysis-safety.md`, `incident-ops` |
-| incident / production issue / triage / blank dashboards | `incident-ops` | skill | `release-manager`, `runbook-authoring`, `aws-alarm-investigator` |
+| incident / production issue / triage / blank dashboards | `incident-ops` | skill | `runbook-authoring`, `aws-alarm-investigator` |
 | write a runbook / operational docs | `runbook-authoring` | skill | `rules/operational-doc-required.md`, `incident-ops` |
-| AWS data pipeline / MWAA / S3 operations | `aws-data-pipeline-ops` or `aws-data-platform-ops` | workflow | `data-pipeline`, `dag-glue-specialist` |
+| AWS data pipeline / MWAA / S3 operations | `aws-data-pipeline-ops` or `aws-data-platform-ops` | workflow | `dag-glue-specialist` |
 | Airflow on AWS with Terraform | `aws-airflow-terraform-change` | workflow | `terraform-specialist`, `aws-airflow-terraform-project` (toolkit-local) |
 | bootstrap or repair local setup / set up my machine | `local-env-bootstrap` | skill | `INFRA.sh` / `INFRA.ps1`, `environment-diagnose` |
 | diagnose my environment / cannot build locally | `environment-diagnose` | workflow + skill | `local-env-bootstrap`, `onboarding` |
 | which plugins or extensions are installed / reproduce my assistant setup | `llm-toolchain-provisioning` | skill | `local-env-bootstrap` |
 | reorganize / restructure / clean up a folder tree | `folder-reorganization` | workflow + skill | `agent-orchestrator`, `automation-maintenance` |
-| shell script / Bash / PowerShell work | `shell-scripting` | skill | `rules/command-safety.md`, `rules/cross-platform-scripts.md`, `security` |
 | is this installer safe / a third party wants me to install an app | `third-party-installer-vetting` | workflow | `recruiter-legitimacy-check`, `rules/command-safety.md`, `rules/external-write-authorization.md` |
 
 ## Documentation, Diagrams, And Wiki
@@ -75,37 +64,29 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | --- | --- | --- | --- |
 | update docs for this change | `update-docs` | workflow + skill | `doc-delta`, `documentation-reviewer-validation`, `document-creation` |
 | review documentation / validate generated docs / is this runbook accurate | `documentation-reviewer-validation` | workflow + skill | `documentation-reviewer`, `rules/documentation-review-required.md` |
-| create architecture docs / technical documentation | `document-creation` | workflow + skill | `diagram-authoring`, `system-architecture-specialist-validation`, `confluence-documentation` |
-| create or fix diagrams / Mermaid / PlantUML / AWS diagrams / C4 | `diagram-authoring` | skill | `diagram-creation-specialist-validation`, `image-quality-inspection` |
-| validate diagrams / strict deterministic diagram review | `diagram-creation-specialist-validation` | workflow + skill | `diagram-creation-specialist`, `image-quality-inspection` |
+| create architecture docs / technical documentation | `document-creation` | workflow | `diagram-authoring`, `system-architecture-specialist-validation`, `confluence-documentation` |
+| create or fix diagrams / Mermaid / PlantUML / AWS diagrams / C4 | `diagram-authoring` | skill | `diagram-creation-specialist-validation` |
+| validate diagrams / strict deterministic diagram review | `diagram-creation-specialist-validation` | workflow + skill | `diagram-creation-specialist` |
 | system architecture review / boundaries / data flows / quality attributes | `system-architecture-specialist-validation` | workflow + skill | `system-architecture-specialist`, `best-practices`, `api-contract-surface` |
 | Confluence documentation / wiki CRUD / page hierarchy | `confluence-documentation` | workflow + skill | `rules/external-write-authorization.md`, `rules/examples/confluence-backup-gate.md` |
-| validate wiki docs / source-to-wiki drift / attachments and comments | `confluence-documentation-specialist-validation` | workflow + skill | `confluence-documentation-specialist`, `documentation-reviewer` |
+| validate wiki docs / source-to-wiki drift / attachments and comments | `confluence-documentation-specialist-validation` | workflow | `confluence-documentation-specialist`, `documentation-reviewer` |
 | promote deployed ticket docs / clean up the intake folder | `prod-doc-promoter-validation` | workflow + skill | `prod-doc-promoter`, `confluence-documentation-specialist`, `rules/human-comment-reply-gate.md` |
-| export Markdown to PDF / ticket-ready PDF | `markdown-pdf-export` | workflow + skill | `image-quality-inspection`, `security` |
-| create or edit PowerPoint / PPTX slides | `pptx-generator` | skill | `powerpoint-slides`, `document-conversion` |
-| academic or thesis defense deck | `powerpoint-slides` | skill | `pptx-generator` |
+| export Markdown to PDF / ticket-ready PDF | `markdown-pdf-export` | workflow + skill | - |
 | convert PDF / DOCX / XLSX / Markdown | `document-conversion` | skill | `markdown-pdf-export` |
 | keep bilingual or paired docs in sync / translation drift | `bilingual-doc-sync` / `paired-doc-sync` / `translation-sync` | workflow | `documentation-reviewer` |
-| publish this article on Medium / turn this repo into a Medium story / fix a published Medium story / write the short system-design-first study article (default; the non-obvious-applications-first order is for a full-tutorial profile only) | `medium-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
-| share this on LinkedIn with a diagram / repost with an image / replace my LinkedIn post | `linkedin-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
-| find the best YouTube video per language / verify these video links | `youtube-video-curation` | skill | `multi-language-study-repo`, `medium-publishing` |
-| study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `multi-language-study-repo`, `diagram-authoring`, `youtube-video-curation`, `medium-publishing`, `linkedin-publishing` |
-| publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `medium-publishing`, `linkedin-publishing`, `diagram-authoring`, `rules/external-write-authorization.md` |
-| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `medium-publishing`, `linkedin-publishing`, `rubrics/technical-content.md` (if present) |
-| review this article or post before I approve it / check a draft against my publication profile | `medium-publishing` | skill | `rules/publication-positioning.md`, `skills/medium-publishing/scripts/check_publication.py`, `documentation-reviewer` |
-| write a technical article / LinkedIn post or carousel about my project (draft only) | `technical-content-publishing` | workflow + skill | `rules/publication-positioning.md`, `diagram-authoring`, `medium-publishing`, `linkedin-publishing` |
+| study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `diagram-authoring` |
+| publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `diagram-authoring`, `rules/external-write-authorization.md` |
+| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `rubrics/technical-content.md` (if present) |
+| write a technical article / LinkedIn post or carousel about my project (draft only) | `technical-content-publishing` | workflow + skill | `rules/publication-positioning.md`, `diagram-authoring` |
 | what is the analysis of last night's debate / hearing / ruling / what do the polls and fact-checkers say | `current-events-briefing` | skill | - |
 
 ## Security
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| security review / OWASP audit / AppSec report | `security-report` | workflow | `security`, `owasp-security-review`, `security-auditor`, `owasp-security-auditor` |
-| injection / auth / secrets / PII question | `security` | skill | `security-best-practices` |
-| secure-by-default review for this language or framework | `security-best-practices` | skill | `security` |
-| threat model this system | `security-threat-model` | skill | `security`, `owasp-security-review` |
-| security ownership / bus factor | `security-ownership-map` | skill | `security` |
+| security review / OWASP audit / AppSec report | `security-report` | workflow | `security-auditor`, `owasp-security-auditor` |
+| secure-by-default review for this language or framework | `security-best-practices` | skill | - |
+| security ownership / bus factor | `security-ownership-map` | skill | - |
 | run the security gate before commit | `security-check-required` | workflow + rule | `scripts/security-check-toolkit.sh`, `changed-code-quality-gate` |
 | is this change safe to ship | `rules/release-safety.md` | rule | `rules/security-check-required.md`, `rules/changed-code-quality-gate-required.md` |
 | validate installed or new skills / scan a skill for prompt injection | `external-skill-intake` | skill | `scripts/validate-skills-with-skillspector.sh`, `scripts/scan-llm-surface-security.py` |
@@ -120,7 +101,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | judge subagent results / produce-validate-refine loop | `task-quality-loop` | workflow | `task-quality-judge`, `verifier` |
 | save tokens / reduce context usage / compact command output | `token-efficiency` | skill | `context-compaction` |
 | compact this chat / preserve context / create a handoff | `context-compaction` | workflow | `chat-knowledge-curation`, `capture-learning` |
-| mine chat history / memory / automation runs into durable assets | `chat-knowledge-curation` | workflow + skill | `toolkit-maintenance`, `self-improvement` |
+| mine chat history / memory / automation runs into durable assets | `chat-knowledge-curation` | workflow | `toolkit-maintenance`, `self-improvement` |
 | create a specialist agent / specialist factory | `specialist-agent-factory` | workflow + skill | `llm-context-engineering`, `tool-subagents/README.md` |
 | improve the specialist / the validator got it wrong again | `specialist-agent-evolution` | workflow | the matching `*-evolution` workflow (`pr-validator-evolution`, `java-validator-evolution`, `documentation-reviewer-evolution`, `terraform-specialist-evolution`, `dag-glue-specialist-evolution`, `aws-alarm-investigator-evolution`, `diagram-creation-specialist-evolution`, `system-architecture-specialist-evolution`, `confluence-documentation-specialist-evolution`, `prod-doc-promoter-evolution`, `model-selector-evolution`, `agent-orchestrator-evolution`) |
 | create, rename, pause, or delete an automation | `automation-maintenance` | workflow | `rules/external-write-authorization.md` |
@@ -134,13 +115,12 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | improve the toolkit from this work / capture mistakes | `self-improvement` | workflow | `capture-learning`, `external-skill-intake` |
 | run a retrospective / learn from this run's mistakes / what keeps going wrong in `<workflow>` / show the quality trend of a workflow | `run-retrospective` | workflow + skill | `rules/workflow-self-improvement.md`, `self-improvement`, `capture-learning`, `task-quality-loop` |
 | make every workflow learn from its mistakes / measure workflow accuracy over time | `rules/workflow-self-improvement.md` | rule | `run-retrospective`, `error-driven-learning`, `rules/request-orchestration.md` |
-| import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement`, `security` |
+| import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement` |
 | add or install a plugin / find a plugin in the marketplace | `docs/plugins.md` | script | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
 | remove unnecessary plugins / prune plugins | `docs/plugins.md` | script | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
 | audit installed plugins / are my plugins safe | `docs/plugins.md` | script | `llm-toolchain-provisioning`, `scripts/plugins.py` |
 | add a new skill, workflow, agent or rule / does this resource beat the plain model / value-check a toolkit resource | `resource-value-check` | workflow | `docs/llm/value-checks.csv`, `scripts/check_value_checks.py` |
 | which plugin, skill or agent is best for this task | `rules/plugin-governance.md` | rule | `agent-orchestrator`, `knowledge-base`, `scripts/plugins.py` |
-| LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
 | set up dev-tools in this repo / get started | `onboarding` | skill | `scripts/setup-repo.sh`, `docs/repo-setup-prompt.md` |
 | use the toolkit in every session / install it globally for my user | `docs/global-install.md` | script | `scripts/install-global-surfaces.sh`, `scripts/install-global-surfaces.ps1`, `tool-subagents/agent-orchestrator.md` |
@@ -154,12 +134,10 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| Java patterns / Spring | `java-best-practices` | skill | `best-practices`, `testing`, `java-change-validator` |
 | JavaScript or TypeScript patterns / async | `js-ts-best-practices` | skill | `best-practices`, `testing` |
 | Python patterns | `python-best-practices` | skill | `best-practices`, `testing` |
-| create a study repo for `<topic>` in one or more languages / same example in Java, Python, JavaScript, and TypeScript / drop languages from a study repo | `multi-language-study-repo` | skill | `study-repo-to-publication`, `java-best-practices`, `python-best-practices`, `js-ts-best-practices`, `git-conventions` |
 | SOLID / clean code / architecture patterns | `best-practices` | skill | `system-architecture-specialist` |
-| testing patterns / coverage / AC traceability | `testing` | skill | `test-plan`, `run-tests` |
+| testing patterns / coverage / AC traceability | `testing` | skill | `run-tests` |
 | git conventions / branch naming / semantic commits | `git-conventions` | skill + rule | `commit-and-push` |
 | should I use the CLI or the MCP server | `rules/cli-over-mcp.md` | rule | `rules/command-safety.md` |
 | can you post this comment / update the ticket | `rules/human-comment-reply-gate.md` | rule | `rules/external-write-authorization.md` |
@@ -169,20 +147,19 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| notebook analysis / EDA / clean up this notebook | `notebook-analysis` | workflow + skill | `jupyter-notebook`, `latex-notebooks`, `notebook-to-script` |
+| notebook analysis / EDA / clean up this notebook | `notebook-analysis` | workflow | `jupyter-notebook`, `notebook-to-script` |
 | update an existing notebook analysis | `notebook-analysis-update` | workflow | `notebook-analysis`, `analysis-validation` |
-| polish LaTeX math in a notebook | `notebook-latex-polish` | workflow | `latex-notebooks` |
+| polish LaTeX math in a notebook | `notebook-latex-polish` | workflow | - |
 | keep the English and Portuguese notebooks in sync | `bilingual-notebook-sync` | workflow | `bilingual-doc-sync`, `paired-doc-sync` |
-| ML experiment / model training / leakage check | `ml-experiment` | workflow + skill | `ml-engineering`, `experiment-result-update` |
+| ML experiment / model training / leakage check | `ml-experiment` | workflow | `experiment-result-update` |
 | update an existing ML experiment | `ml-experiment-update` | workflow | `ml-experiment`, `experiment-result-update` |
-| data pipeline change / Bronze, Silver, Gold | `data-pipeline-change` | workflow + skill | `data-pipeline`, `data-pipeline-boundaries`, `data-governance` |
-| project-local pipeline change (toolkit-local) | `pipeline-change-project` | workflow | `data-pipeline-change`, `data-pipeline-boundaries` |
-| project-local docs sync after a change (toolkit-local) | `documentation-sync-project` | workflow | `update-docs`, `documentation-governance` |
+| data pipeline change / Bronze, Silver, Gold | `data-pipeline-change` | workflow | - |
+| project-local pipeline change (toolkit-local) | `pipeline-change-project` | workflow | `data-pipeline-change` |
+| project-local docs sync after a change (toolkit-local) | `documentation-sync-project` | workflow | `update-docs` |
 | orchestrate broad project work (toolkit-local) | `project-execution-main` | workflow | `agent-orchestrator` |
-| ingest a new data source / dataset onboarding | `data-source-ingestion` / `dataset-onboarding` | workflow | `data-source-storage-backend`, `data-governance` |
+| ingest a new data source / dataset onboarding | `data-source-ingestion` / `dataset-onboarding` | workflow | `data-source-storage-backend` |
 | research or thesis analysis cycle | `research-analysis-cycle` | workflow | `analysis-validation` |
 | write the thesis / thesis chapter / submission | `thesis-writing-main` | workflow | `thesis-chapter-writing`, `thesis-submission-preparation` |
-| ABNT formatting / citations and references / thesis manual review | `abnt-formatting` | skill | `document-conversion` |
 | plagiarism check before submission | `thesis-plagiarism-check` | workflow | `thesis-plagiarism-prevention` |
 
 ## Career And Job Search
@@ -193,8 +170,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | check my applications / move my tracker rows / recruiter replies | `job-search-pipeline` | workflow + skill | `skills/job-search-pipeline/scripts/tracker_ops.py` |
 | set up a job search for me / adopt my job tracker / schedule my job scan | `job-search-setup` | workflow | `job-search-pipeline`, `automation-maintenance` |
 | is this course / degree / MBA / certification worth it for my career / does it carry weight in the market | `credential-evaluation` | skill | `agent-orchestrator`, `task-quality-loop`, `skills/credential-evaluation/references/lane-prompts.md` |
-| remove these from my LinkedIn profile / update my LinkedIn skills/certifications/experience / delete old skills, courses, certifications / set my end date on a role / add a skill or project | `linkedin-profile-maintenance` | skill | `agent-orchestrator`, `career-profile-sync`, `skills/linkedin-profile-maintenance/references/details-pages.md` |
-| sync my CV with LinkedIn / keep my profile, CV and job-search files consistent / I left my employer, update everything / re-render my CV | `career-profile-sync` | workflow | `linkedin-profile-maintenance`, `cv-truthfulness-reviewer`, `task-quality-loop` |
+| sync my CV with LinkedIn / keep my profile, CV and job-search files consistent / I left my employer, update everything / re-render my CV | `career-profile-sync` | workflow | `cv-truthfulness-reviewer`, `task-quality-loop` |
 | check my CV for unsupported claims / is every claim in my CV or profile true / check my CV against my repos and master CV | `cv-truthfulness-reviewer` | subagent | `career-profile-sync`, `task-quality-loop` |
 | I need results fast / urgent job search / attack plan / find me more positions | `job-search-attack-plan` | workflow | `contract-platform-vetting`, `job-search-pipeline`, `technical-interview-prep` |
 | I am signed in to a job board, finish or fix my profile there | `job-portal-profile-sync` | workflow | `job-search-pipeline`, `career-profile-sync`, `skills/job-search-pipeline/references/application-truthfulness.md` |

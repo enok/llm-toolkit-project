@@ -27,7 +27,7 @@ Run the **run-retrospective** workflow (workflows/run-retrospective.md) in full 
    - root cause explanation
 3. Use `workflows/capture-learning.md` for the exact learning format.
 4. Keep project-specific details in the source project; shared toolkit learnings must be generic or explicitly evidence-focused.
-5. When useful lessons are spread across chat history, memory, rollout summaries, or automation runs, use `workflows/chat-knowledge-curation.md` and `skills/chat-knowledge-curation/SKILL.md` to mine and convert a bounded evidence batch.
+5. When useful lessons are spread across chat history, memory, rollout summaries, or automation runs, use `workflows/chat-knowledge-curation.md` to mine and convert a bounded evidence batch.
 
 ## Phase 3 — Convert repeated value into reusable capability
 

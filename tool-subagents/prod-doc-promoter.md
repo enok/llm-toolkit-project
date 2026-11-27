@@ -72,9 +72,10 @@ deployment state, permissions, source ownership, or content safety is unclear.
    attachments, archiving or purging folders, or posting explanatory comments
    requires explicit user approval of the exact target and text.
 7. Require `documentation-reviewer` for promoted/merged documentation content
-   and `image-quality-inspection` for every generated/exported image,
-   screenshot, PDF page render, slide/document render, or Confluence-processed
-   attachment.
+   and an image quality check for every generated/exported image, screenshot,
+   PDF page render, slide/document render, or Confluence-processed attachment:
+   each one opened in its real render path and fixed and re-rendered until it
+   is sharp, uncropped, legible at its destination size and current.
 8. After execution by the root automation, require live read-back of final
    hierarchy, page versions, labels, attachments, rendered content, links, and
    the emptied or intentionally retained intake folder state.
@@ -87,8 +88,6 @@ deployment state, permissions, source ownership, or content safety is unclear.
   generated LLM surfaces, and draft-only human-facing documentation replies.
 - Use `pr-validator` when Jira/PR/live-head readiness or ticket-to-evidence
   trace affects the production deployment gate.
-- Use `release-manager` when release/deployment evidence, rollback state, or
-  production rollout sequencing is unclear.
 - Use `diagram-creation-specialist` when promoted docs include diagrams,
   exported artifacts, or rendered diagram attachments.
 - Use `system-architecture-specialist` when destination choice depends on

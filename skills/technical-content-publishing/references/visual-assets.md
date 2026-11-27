@@ -10,7 +10,6 @@ Companion to `skills/technical-content-publishing/SKILL.md`. Covers the cover im
 Reuse, do not duplicate:
 
 - `skills/diagram-authoring` - diagram type, deterministic style, source-of-truth rules, SVG/PNG export.
-- `skills/image-quality-inspection` - the blocking inspection gate for every generated or exported image and every rendered PDF page.
 - `skills/markdown-pdf-export` - only if a PDF of the article itself is requested.
 
 ## Asset list
@@ -100,7 +99,7 @@ Diagram: author and compile the source with `skills/diagram-authoring`, export S
 ## Inspection and privacy gate
 
 1. Run mechanical checks first: PNG dimensions from the file header (or `identify`/`file`); page count and uniform page size with `pdfinfo -f 1 -l <N>` when present, else the stdlib fallback below; `pdffonts` for embedded fonts and `pdftotext` for selectable text in reading order when present; file sizes under the platform limits.
-2. Inspect 100% of generated images and every rendered PDF page (`pdftoppm -r 80 -png`) in a real viewer under `skills/image-quality-inspection/references/image-quality-gate.md`. View carousel pages at phone width. Fix at the source (HTML, diagram source, export flags) and re-render; never retouch an output.
+2. Inspect 100% of generated images and every rendered PDF page (`pdftoppm -r 80 -png`) in a real viewer: sharp, uncropped, undistorted, legible at the destination size, current. This gate blocks. View carousel pages at phone width. Fix at the source (HTML, diagram source, export flags) and re-render; never retouch an output.
 3. If a tool or viewer is unavailable, report that check as not run, with the exact blocker; never as passed. Fallbacks: without `pdftoppm`, inspect the per-slide PNGs and open the PDF in any PDF viewer; without `pdftotext`, use `pypdf` if installed.
 4. Privacy sweep on the rendered artifacts: visible text, alt text, filenames, PDF properties (Title set neutrally; no author or local path), and image metadata (strip camera or location EXIF; keep provenance metadata on AI-generated images). Terminal or editor captures must not show usernames, hostnames, absolute home paths, or tokens.
 5. Log in `HANDOFF.md`: artifact, dimensions, checks run, fixes made, remaining blockers.

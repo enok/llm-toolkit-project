@@ -121,7 +121,7 @@ Measure with a script or command, not by eye; record the numbers in `HANDOFF.md`
 ### Carousel checks before handoff
 
 - [ ] Same page size on every page and the expected page count (`pdfinfo -f 1 -l <N> <file>.pdf`, or the stdlib fallback)
-- [ ] Every page rendered (`pdftoppm -r 80 -png`) and inspected under `skills/image-quality-inspection`; no clipped, overlapping, or tiny text
+- [ ] Every page rendered (`pdftoppm -r 80 -png`) and inspected (image quality check); no clipped, overlapping, or tiny text
 - [ ] Slide text is extractable in reading order (`pdftotext` or `pypdf`)
 - [ ] Every number and quote on a slide maps to a shippable fact-sheet row (verified or author-confirmed)
 - [ ] Genericity sweep over slide text, notes, alt text, and PDF metadata

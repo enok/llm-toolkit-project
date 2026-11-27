@@ -1,6 +1,6 @@
 # Security Rubric
 
-Evaluate security posture during code review. For the full review checklist (including correctness, architecture, testing), see `rubrics/code-review-checklist.md`; use together with `rules/security-check-required.md` and `skills/security/SKILL.md`. Every item marked Blocker must be fixed before merge.
+Evaluate security posture during code review. For the full review checklist (including correctness, architecture, testing), see `rubrics/code-review-checklist.md`; use together with `rules/security-check-required.md`. Every item marked Blocker must be fixed before merge.
 
 ---
 

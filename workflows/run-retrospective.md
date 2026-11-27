@@ -62,10 +62,10 @@ Build the record as one JSON object in a scratch file outside the repository (pr
     "category": "validation-gap", "severity": "high", "source": "user",
     "summary": "literal markdown markers reached the draft; the validator only checked the source",
     "fix": "validator scans the rendered HTML for leftover markdown tokens",
-    "prevented_by": "skills/medium-publishing/scripts/medium_paste_html.py"}],
+    "prevented_by": "workflows/study-publication-medium-linkedin.md"}],
  "promotions": [
    {"signature": "validation-gap/rendered-html-not-scanned-for-markdown",
-    "level": "guard", "asset": "skills/medium-publishing/scripts/medium_paste_html.py"}]}
+    "level": "checklist", "asset": "workflows/study-publication-medium-linkedin.md"}]}
 ```
 
 The example shows the final state (a fuller one is in the schema reference); in the draft leave `promotions` empty. Dry-run the draft with `append --log <scratch>/retro-draft.jsonl` against a fresh scratch copy of the log (commands in the SKILL.md "Dry run" section): this validates the record (schema, privacy lint, run_id uniqueness) and counts it without touching the real log. Exit 1 prints the failing field; fix and repeat (nothing was written). `warning:` lines on stderr flag likely under-reporting: resolve the warnings `append` prints for this record, or explain in `notes`; `validate` repeats them per earlier line (`warning: line N:`) as information only.

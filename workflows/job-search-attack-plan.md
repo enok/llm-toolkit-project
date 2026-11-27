@@ -81,7 +81,7 @@ what to skip. Never claim a stack fit the profile does not support.
   and `skills/job-search-pipeline/scripts/render_cv.py`. Render it and look at the
   first page before delivering. Offer two tailoring variants (AI-native roles,
   backend roles) as reorder instructions.
-- Profile edits: `skills/linkedin-profile-maintenance/SKILL.md` (audit mode); other portals:
+- Profile edits: audit mode on LinkedIn; other portals:
   `workflows/job-portal-profile-sync.md`.
 
 ## Phase 5 - Interview prep

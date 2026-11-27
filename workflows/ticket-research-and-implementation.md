@@ -49,7 +49,6 @@ Run the **ticket-implementation** workflow (`workflows/ticket-implementation.md`
 | Research now, implement later (or in another session) | `ticket-research` alone |
 | Research already done, ready to code | `ticket-implementation` alone |
 | Research and implement in one shot | **This workflow** |
-| Quick task with clear scope, no deep research needed | `task-starter` skill → implement directly |
 
 ---
 

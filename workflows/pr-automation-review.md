@@ -214,7 +214,7 @@ gh pr comment <PR_NUMBER> --body "## Automation review — resolution
 **20. If any Red finding revealed a gap in existing rules or workflows**, update the corresponding rule file to prevent recurrence (see `rules/ci-feedback-loop.md`).
 
 Common rule updates after automation review:
-- Vulnerable dependency → update `skills/security/SKILL.md` or `skills/security-best-practices/SKILL.md` with version pinning guidance
+- Vulnerable dependency → update `skills/security-best-practices/SKILL.md` with version pinning guidance
 - Payload logging → update language-specific best practices with log-safety rules
 - Request body size → update `skills/best-practices/SKILL.md` with input validation patterns
 - IMDS/startup fragility → update project-specific infra rules (see `rules/examples/infra-deployment.md` as a template)

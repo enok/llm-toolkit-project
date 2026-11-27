@@ -14,8 +14,7 @@ return evidence-backed findings that an implementer agent can act on.
 - Repo path, base/head refs, and whether the worktree has unrelated dirty files.
 - Ticket/PR/thread links and the exact human comments to validate, when present.
 - Project-local Java guidance: `AGENTS.md`, `docs/llm/`, build files, toolchains,
-  framework config, migration conventions, and relevant skills such as
-  `skills/java-best-practices/SKILL.md`.
+  framework config, migration conventions, and relevant skills.
 - Available validation evidence: local command output, CI logs, test reports,
   generated docs, PR body, and reviewer reply drafts.
 

@@ -28,7 +28,7 @@ never in this skill or in the toolkit.
 - Learnings behind the rules: `learnings/many-daily-automations-exhaust-usage-limits.md`, `learnings/cloud-session-device-bridge-file-io.md`.
 - Related, not duplicated: `workflows/automation-maintenance.md` (edit one
   scheduled task), `workflows/task-quality-loop.md` (per-lane
-  produce-validate-refine), `skills/chat-knowledge-curation/SKILL.md` (mine
+  produce-validate-refine), `workflows/chat-knowledge-curation.md` (mine
   chats for toolkit assets before deleting them).
 
 Hand off instead of using this skill for repository branches or files (`skills/git-conventions/SKILL.md`) and for editing one scheduled task (`workflows/automation-maintenance.md`).

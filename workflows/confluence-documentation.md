@@ -64,7 +64,7 @@ Use this workflow for Confluence documentation CRUD and synchronization.
 4. Avoid secrets, tokens, PII, internal-only hostnames, customer-specific details, branch names, and one-off ticket names unless the destination is explicitly approved.
 5. Preserve useful existing sections and minimize unrelated rewrites.
 6. For diagrams and other generated images, keep source in the repo and attach SVG/PDF or high-resolution PNG generated from current source when the page cannot render source directly.
-7. Apply `skills/image-quality-inspection/references/image-quality-gate.md` to every generated/exported image before upload and again after Confluence renders or processes it. If quality is unacceptable, fix, re-export, and re-upload.
+7. Apply the image quality check (opened as rendered; sharp, uncropped, legible at the destination size, current) to every generated/exported image before upload and again after Confluence renders or processes it. If quality is unacceptable, fix, re-export, and re-upload.
 8. Run `documentation-reviewer` on new or updated Confluence content, generated
    artifacts, and human-facing page comments before publication or final
    reporting. Comments remain draft-only until the user approves the exact text

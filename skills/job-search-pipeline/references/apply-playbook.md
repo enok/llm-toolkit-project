@@ -96,8 +96,7 @@ Work in a visible browser tab. Before typing, confirm the posting is open and
 the job is not already applied (board applied list, inbox, or a reload that
 shows "already applied"). Fill, read every field back, compare with the
 approved batch, then submit only if the OK covers the form and no consent box
-is left for the owner. Typeaheads, rich-text fields and lazy lists on other
-single-page apps: `skills/linkedin-profile-maintenance/references/browser-edit-pitfalls.md`.
+is left for the owner.
 
 | Control | What works | What fails |
 | --- | --- | --- |

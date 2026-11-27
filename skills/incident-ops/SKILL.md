@@ -65,8 +65,6 @@ Return:
 ## Related Skills
 
 - **runbook-authoring** — Convert incident learnings into operational runbooks
-- **release-manager** — If the incident requires a hotfix release
-- **security** — If the incident has security implications
 - **log-analysis** — Read-only operational log investigation and evidence reduction
 - **aws-alarm-investigator** — When the entry point is a specific alarm rather than a reported outage
 

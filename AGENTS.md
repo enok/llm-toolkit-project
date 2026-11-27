@@ -30,7 +30,7 @@ Apply these to every task.
 ### 5. Verify Your Changes
 
 - Always check work after you change it; never assert success from the edit alone. Run the narrowest meaningful verification (tests, linters, the script you touched, filesystem or API output).
-- Generated or exported images require the `image-quality-inspection` gate before completion.
+- Generated or exported images require an image quality check before completion: open each one in its real render path and fix and re-render until it is sharp, uncropped, legible at its destination size and current.
 - Documentation created or changed by agents, chats, automations, scripts, or humans requires `documentation-reviewer` before completion (`rules/documentation-review-required.md`).
 - Workflow files must stay under 12,000 characters (`rules/workflow-authoring.md`); split reusable phases instead of deleting detail.
 - If verification cannot run here, say explicitly what was not checked and what the user should run.
@@ -68,7 +68,7 @@ llm-toolkit-project/
 ├── README.md                  # Overview, setup, full catalogs
 ├── INFRA.sh / INFRA.ps1       # Plan-first machine bootstrap (wraps scripts/bootstrap-dev.*)
 ├── package.json               # npm entrypoints for the validators
-├── rules/                     # Generic rules, 17 always-on + 7 on demand (+ rules/examples/ templates)
+├── rules/                     # Generic rules, 16 always-on + 8 on demand (+ rules/examples/ templates)
 ├── workflows/                 # Step-by-step procedures (<= 12,000 chars each)
 ├── skills/                    # On-demand capabilities (SKILL.md + references/rules/scripts/agents)
 ├── tool-subagents/            # Shared subagent prompts (.md + .toml), agent-orchestrator first
@@ -113,32 +113,29 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Review my changes" / "review this PR" | **ticket-review** or **review** workflow |
 | "Review and fix" / "fix my branch" | **ticket-review-and-fix** or **review-and-fix** workflow |
 | "Pre-PR check" / "ready for PR" | **pre-pr-check** workflow + skill |
-| "Quality gate" / "Sonar" / "Semgrep changed code" | **changed-code-quality-gate** workflow + skill |
+| "Quality gate" / "Sonar" / "Semgrep changed code" | **changed-code-quality-gate** workflow |
 | "Validate this PR" / "approve or block" | **pr-validator-validation** workflow + **pr-validator** skill |
 | "Ticket is solved, drive the PR" | **ticket-pr-validation-loop** workflow |
 | "Validate Java changes" | **java-change-validation** workflow + **java-change-validator** skill |
 | "Commit and push" / "validate and push" | **commit-and-push** workflow (with **pre-pr-check** first) |
 | "Fix CI" / "address PR comments" / "PR bot findings" | **gh-fix-ci**, **gh-address-comments**, **pr-automation-review** workflows |
-| "Start ticket ABC-123" / "implement a ticket" | **task-starter** skill, **ticket-research** and **ticket-implementation** workflows |
-| "Run tests" / "test plan" | **run-tests** workflow or **test-plan** skill |
-| "Terraform" / ".tf change" / "plan/apply" / "state or import" (mandatory routing) | **terraform-specialist-validation** workflow + **terraform-specialist** skill, with **terraform-change-safety** |
-| "Airflow DAG" / "Glue job" / "crawler" / "MWAA" | **dag-glue-specialist-validation** workflow + **dag-glue-specialist** skill |
+| "Start ticket ABC-123" / "implement a ticket" | **ticket-research** and **ticket-implementation** workflows |
+| "Run tests" / "test plan" | **run-tests** workflow |
+| "Terraform" / ".tf change" / "plan/apply" / "state or import" (mandatory routing) | **terraform-specialist-validation** workflow, with **terraform-change-safety** |
+| "Airflow DAG" / "Glue job" / "crawler" / "MWAA" | **dag-glue-specialist-validation** workflow |
 | "Investigate this alarm" / "CloudWatch alarm RCA" | **aws-alarm-investigator-validation** workflow + **aws-alarm-investigator** skill |
 | "Analyze logs" / "CloudWatch logs" / "nginx logs" | **log-investigation** workflow + **log-analysis** skill |
 | "Incident" / "production issue" / "runbook" | **incident-ops**, **runbook-authoring** skills |
 | "Update docs" / "review documentation" | **update-docs** workflow or **doc-delta** skill; **documentation-reviewer-validation** workflow |
 | "Architecture docs" / "diagrams" / "C4" / "PlantUML" | **document-creation** workflow, **diagram-authoring** skill, **diagram-creation-specialist-validation**, **system-architecture-specialist-validation** |
 | "Confluence" / "wiki page" / "promote deployed docs" | **confluence-documentation** workflow + skill; **confluence-documentation-specialist-validation**; **prod-doc-promoter-validation** |
-| "Verify the UI" / "compare with Figma" / "check exported images" | **ui-verify**, **figma-compare**, **image-quality-inspection** skills |
-| "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill; **pptx-generator** / **powerpoint-slides** skills |
-| "Publish this on Medium" / "share on LinkedIn with a diagram" / "best YouTube video per language" | **medium-publishing**, **linkedin-publishing**, **youtube-video-curation** skills |
-| "Study a topic and publish repo, Medium and LinkedIn" / "study repo in one or more languages" / "reduce a study repo to one language" | **study-repo-to-publication** workflow + **multi-language-study-repo** skill |
+| "Verify the UI" / "compare with Figma" / "check exported images" | **ui-verify** skill |
+| "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill |
+| "Study a topic and publish repo, Medium and LinkedIn" / "study repo in one or more languages" / "reduce a study repo to one language" | **study-repo-to-publication** workflow |
 | "Write / replace / review a publication (article or post)" / "position this article for my target role" / "replace the published story and post" | **study-publication-medium-linkedin** workflow; **publication-positioning** rule |
-| "Security review" / "OWASP audit" / "threat model" | **security-report** workflow, **security**, **owasp-security-review**, **security-threat-model** skills |
-| "Cut a release" / "Maven release" / "E2E for release" | **release-manager**, **maven-release**, **e2e-release-verification** skills; **ticket-release** workflow |
-| "Load test" / "JMeter" | **jmeter-performance-testing** skill |
-| "Copy this record from prod to stage" | **cross-env-data-copy** skill |
-| "Migrate Jenkins to GitHub Actions" / "CI parity" | **jenkins-to-github-actions**, **ci-migration-and-parity** skills |
+| "Security review" / "OWASP audit" / "threat model" | **security-report** workflow |
+| "Cut a release" / "Maven release" / "E2E for release" | **maven-release** skill; **ticket-release** workflow |
+| "Migrate Jenkins to GitHub Actions" / "CI parity" | **jenkins-to-github-actions** skill |
 | "Local env broken" / "set up my machine" | **environment-diagnose** workflow, **local-env-bootstrap** skill, `INFRA.sh` / `INFRA.ps1` |
 | "Which plugins are installed" / "reproduce my assistant setup" | **llm-toolchain-provisioning** skill |
 | "Split this across agents" / "which model per task" / "LOA mode" | **agent-orchestrator** skill, **model-selector** skill, **agent-orchestrator-validation** workflow |
@@ -151,13 +148,11 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Import external skills" | **external-skill-intake** skill |
 | "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | `docs/plugins.md` and `scripts/plugins.py`, under `rules/plugin-governance.md` (loaded on demand) |
 | "Add a skill / workflow / agent / rule" / "is this resource worth it" | **resource-value-check** workflow (mandatory before adding), `scripts/check_value_checks.py` |
-| "Java / Python / JavaScript / shell patterns" | **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **shell-scripting** skills |
-| "RAG" / "agent memory" / "LLM app architecture" | **llm-application-architecture** skill |
-| "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows + skills |
-| "Thesis" / "ABNT" | **thesis-writing-main** workflow; **abnt-formatting** skill |
+| "Java / Python / JavaScript / shell patterns" | **python-best-practices**, **js-ts-best-practices** skills |
+| "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows |
+| "Thesis" / "ABNT" | **thesis-writing-main** workflow |
 | "Job scan" / "job search" / "track my applications" | **job-search-pipeline** workflow + skill; **job-search-setup** workflow for a new candidate |
 | "Is this course / degree / MBA / certification worth it" / "does it carry weight in the market" | **credential-evaluation** skill |
-| "Remove these from my LinkedIn profile" / "update my LinkedIn skills/certifications/experience" / "clean up my LinkedIn" / "set my end date" | **linkedin-profile-maintenance** skill |
 | "Sync my CV with LinkedIn" / "I left my employer, update everywhere" / "keep my CV, profile and job files consistent" | **career-profile-sync** workflow (review step: **cv-truthfulness-reviewer**) |
 | "Check my CV for unsupported claims" / "is every claim in my CV or profile true" | **cv-truthfulness-reviewer** subagent |
 
@@ -225,9 +220,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **model-selector** | Assign every task a complexity tier, concrete model, effort, and token band before it runs; audit finished task tables for overspend |
 | **specialist-agent-factory** | Create or update reusable specialist agents (subagent prompt, validation/evolution workflows, skill entrypoint, routing, provider overlays) |
 | **token-efficiency** | Reduce token consumption: command-output compaction (RTK), `gh --json`/`jq` field selection, ripgrep budgeting, ast-grep, repomix packing |
-| **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
-| **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
 | **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest |
 | **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories |
 | **error-driven-learning** | Always-on discipline: read `learnings/INDEX.md` before work and capture trial-and-error discoveries after it |
@@ -249,54 +242,33 @@ Consumer-specific rule templates live in `rules/examples/`.
 | Skill | Purpose |
 | --- | --- |
 | **best-practices** | SOLID, clean code, layered architecture, resilience, anti-patterns |
-| **java-best-practices** | Java patterns: DI, concurrency, logging, metrics wiring, testing, modern JDK/Spring choices |
 | **js-ts-best-practices** | JavaScript/TypeScript patterns: async, type safety, DI, Node/TS toolchain choices |
 | **python-best-practices** | Python patterns: typing, DI, concurrency, packaging, testing |
-| **shell-scripting** | Bash, POSIX sh, and PowerShell best practices: strict mode, error handling, portability, UTF-8 without BOM |
 | **testing** | AC traceability, test pyramid, mocking, coverage, and test patterns |
-| **test-plan** | Generate a test plan from a staged diff or branch |
 | **run-tests** | Pick and run the smallest meaningful validation for a change set |
 | **git-conventions** | Branch naming, semantic commits, PR lifecycle, rebase workflow, duplicate-file gate |
 | **environment-diagnose** | Diagnose local environment, auth, Docker, cache, and setup issues |
 | **local-env-bootstrap** | Bootstrap or repair a local development environment across repos |
-| **multi-language-study-repo** | One protected public repo per study topic with an example in one or more languages (identical across them), golden-table tests, docs drift guards, a code-by-component page, and the steps to reduce the language set later |
 | **web-form-submit-debugging** | Diagnose a web form whose Next or Submit button does nothing: read validation, capture network and console, instrument the page, rule out extensions, then pick a workaround or report a site defect |
 
 ### Review, Validation, And Quality Gates
 
 | Skill | Purpose |
 | --- | --- |
-| **code-review** | Structured code review for bugs, correctness, security, and test coverage |
-| **review** | In-agent diff review of staged changes or current branch (report only) |
 | **ticket-review** | In-agent diff review scoped to a ticket, PR, or branch (report only) |
-| **review-and-fix** | Review, split investigation and fixes across subagents, apply scoped fixes, converge on a verified result |
-| **fix** | Apply fixes from a prior review report (`docs/jira/<TICKET>/review-report.json`) |
 | **pre-pr-check** | Full pre-PR gate: repo validations, changed-code quality gate, UI-verify check, in-agent review |
-| **changed-code-quality-gate** | Mandatory static-analysis gate limited to code added or modified in the current Git change set |
 | **pr-validator** | Read-only PR/ticket readiness validation on the live head with approve-ready, blocked, or monitor reporting |
 | **java-change-validator** | Read-only Java diff, test, framework wiring, migration, and build-evidence validation before merge or reply |
 | **documentation-reviewer** | Read-only review of docs, runbooks, PR bodies, release notes, and generated surfaces for source-grounded accuracy |
 | **ui-verify** | Verify front-end changes in a real browser through any configured browser MCP before declaring work done |
-| **figma-compare** | Compare implemented UI against a Figma frame and report severity-ranked mismatches |
-| **image-quality-inspection** | Blocking quality gate and fix-and-rerender loop for every generated or exported image |
-| **task-starter** | Turn a ticket or task description into a scoped implementation plan |
-| **ticket-research** | Research a ticket across code, docs, Jira, Confluence, and GitHub context |
 
 ### CI, Releases, And Delivery
 
 | Skill | Purpose |
 | --- | --- |
-| **ci-watcher** | Background CI monitoring after push with failure triage |
-| **ci-migration-and-parity** | Keep parity while moving or comparing CI pipelines across systems |
 | **jenkins-to-github-actions** | Migrate Jenkins pipelines to GitHub Actions safely |
-| **cross-repo-impact** | Map downstream impact of a shared change across sibling repos |
-| **e2e-release-verification** | Pick and run the smallest relevant E2E or regression verification for a release |
-| **release-manager** | Cut, verify, and manage releases with rollout and rollback planning |
 | **maven-release** | Maven release: prepare, perform, Nexus deployment, downstream updates |
 | **maven-build-troubleshooting** | Diagnose Maven build, OWASP dependency-check, Java runtime, and local webapp startup failures |
-| **jmeter-performance-testing** | Plan, run, analyze, and report Apache JMeter load and performance tests against any HTTP service |
-| **cross-env-data-copy** | Copy a single record between environments with read-only fetch, MERGE preview, and human confirmation before any write |
-| **zoom-meeting-sdk** | Secure defaults for embedding Zoom meetings (server-side SDK JWT signatures, credentials, web embed rules) |
 
 ### Operations, Infrastructure, And Cloud
 
@@ -306,11 +278,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **incident-ops** | Incident triage, mitigation, communication, and observability-gap recovery |
 | **log-analysis** | Read-only CloudWatch, server, access, Log4j, Lambda, Glue, and Firehose log investigation with redaction |
 | **aws-alarm-investigator** | Read-only CloudWatch alarm root-cause investigation with confidence-rated hypotheses and email-ready fixes |
-| **dag-glue-specialist** | Read-only Airflow DAG, MWAA/Astro, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation |
-| **terraform** | Terraform/OpenTofu modules, tests, CI/CD, and security/compliance patterns |
-| **terraform-specialist** | Read-only Terraform specialist: module/root review, plan safety, state and import lifecycle, multi-env roots, drift codification |
 | **terraform-change-safety** | Terraform change-safety patterns: `terraform_data` lifecycle, module variable wiring, alarm first-datapoint planning, alias-qualified permissions |
-| **infra-adoption** | Adopt or import existing infrastructure into managed IaC |
 | **folder-reorganization** | Reorganize a folder tree (renames, moves, archive) without breaking automations, scripts, documents, or cloud-sync links: approval-first proposal, path map, resumable scripted run with rollback, verification against live consumers |
 | **aws-airflow-terraform-project** | Repository-specific AWS Airflow Terraform guidance for the data-science project (toolkit-local context) |
 
@@ -318,12 +286,8 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 | Skill | Purpose |
 | --- | --- |
-| **security** | Injection prevention, auth, secrets, XSS/CSRF/SSRF, PII, threat modeling |
 | **security-best-practices** | Language- and framework-specific secure-by-default reviews |
-| **security-threat-model** | Repository-grounded threat modeling with trust boundaries, abuse paths, and mitigations |
 | **security-ownership-map** | Git-based security ownership topology, bus factor, and sensitive-code ownership |
-| **owasp-security-review** | OWASP-style application security audit for Java, JS/TS, Python, and React projects |
-| **security-checkpoint** | Repository-specific minimum security gate for the data-science thesis repository (toolkit-local context) |
 
 ### Documentation, Diagrams, And Wiki
 
@@ -331,21 +295,13 @@ Consumer-specific rule templates live in `rules/examples/`.
 | --- | --- |
 | **doc-delta** | Suggest or apply documentation updates from staged changes |
 | **update-docs** | Keep docs aligned with code changes |
-| **document-creation** | Create or update architecture docs, diagrams, and wiki pages |
 | **document-conversion** | Convert between PDF, DOCX, PPTX, XLSX, and Markdown (thesis exports, reports) |
-| **documentation-governance** | Repository-specific documentation and governance constraints for the data-science thesis repository (toolkit-local context) |
 | **diagram-authoring** | Create, validate, and export deterministic high-resolution C4, AWS, sequence, and flow diagrams with mandatory image QA |
 | **diagram-creation-specialist** | Read-only source-grounded diagram planning, notation, export, and image-quality validation |
 | **system-architecture-specialist** | Read-only application architecture, boundary, data-flow, integration, and quality-attribute review |
 | **confluence-documentation** | Safe Confluence CRUD, hierarchy, labels, comments, attachments, and rollback-state backups |
-| **confluence-documentation-specialist** | Read-only Confluence page, hierarchy, attachment, comment, rendered-page, and source-to-wiki validation |
 | **prod-doc-promoter** | Read-only promotion planning for deployed-ticket documentation from a wiki intake folder to canonical homes |
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
-| **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
-| **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
-| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
-| **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
-| **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 | **technical-content-publishing** | Turn a software project into evidence-grounded Medium-style article, LinkedIn post and carousel, cover image, and architecture diagram as reviewed drafts, never posted |
 | **current-events-briefing** | Brief the user on a live or just-finished public event with symmetric coverage, independent analysis, fact-checker findings, same-pollster comparisons, and an honest "no consolidated verdict yet" |
 
@@ -354,13 +310,6 @@ Consumer-specific rule templates live in `rules/examples/`.
 | Skill | Purpose |
 | --- | --- |
 | **jupyter-notebook** | Notebook hygiene: kernel state, cell order, outputs, review, promotion to scripts |
-| **latex-notebooks** | LaTeX math inside notebooks and technical docs |
-| **notebook-analysis** | EDA, statistical analysis, plots, notebook cleanup, and narrative reporting with reproducibility |
-| **ml-engineering** | Feature engineering, model training, evaluation, and experiment reporting in end-to-end projects |
-| **ml-experiment** | Run or update ML experiments with baselines, leakage checks, and reproducible evaluation |
-| **data-pipeline** | Ingestion, transformation, schema, storage, and backfill changes across Bronze/Silver/Gold layers |
-| **data-pipeline-boundaries** | Repository-specific data pipeline boundaries for the data-science project (toolkit-local context) |
-| **data-governance** | Dataset provenance, privacy, licensing, and evidence integrity in analytics projects |
 
 ### Career And Job Search
 
@@ -368,18 +317,11 @@ Consumer-specific rule templates live in `rules/examples/`.
 | --- | --- |
 | **job-search-pipeline** | Profile-driven job scan: board discovery and hard-rule screening, owner-approved applications, inbox/board status reconciliation, guarded xlsx tracker updates, skill-gap mapping, ranked digest |
 | **credential-evaluation** | Decide whether a degree, MBA, master's, bootcamp, or certification is worth it for someone's career: who really awards it, legal recognition where it will be used, market signal, opportunity cost, and accredited alternatives. |
-| **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 | **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
-### Thesis And Academic Formatting
-
-| Skill | Purpose |
-| --- | --- |
-| **abnt-formatting** | ABNT academic formatting for thesis documents |
-
-Skills marked toolkit-local in `skills/README.md` (documentation governance, security checkpoint, data pipeline boundaries, AWS Airflow Terraform project) carry this toolkit's own data-science/thesis context; other consumers can ignore them.
+Skills marked toolkit-local in `skills/README.md` (AWS Airflow Terraform project) carry this toolkit's own data-science/thesis context; other consumers can ignore them.
 
 ---
 
@@ -423,7 +365,7 @@ If a validation failure reveals a reusable toolchain gotcha, capture it under `l
 
 ## After Completing Tasks
 
-- If code changed, run **changed-code-quality-gate** before **ticket-review** or **pre-pr-check** can pass.
+- If code changed, run the **changed-code-quality-gate** workflow before **ticket-review** or **pre-pr-check** can pass.
 - Before adding any new skill, workflow, agent or rule, pass `workflows/resource-value-check.md` (mandatory; learnings are exempt).
 - If rules, workflows, skills, or subagents changed, update the indexes (`README.md`, this file, `INTENTS.md`, the folder `README.md`) in the same change; consumer repos using links get updates automatically.
 - Keep root `AGENTS.md`, `README.md`, and `INTENTS.md` as indexes, not playbooks (`skills/llm-context-engineering/SKILL.md`).

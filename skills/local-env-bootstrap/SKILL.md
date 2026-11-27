@@ -76,6 +76,5 @@ Return:
 
 - **runbook-authoring** — Formalize the setup as a reusable runbook
 - **onboarding** — Broader project onboarding; local-env-bootstrap focuses on the environment
-- **shell-scripting** — Setup scripts follow shell best practices
 - **llm-toolchain-provisioning** — Installing and verifying the LLM/agent toolchain on a new machine
 - **environment-diagnose** — Diagnosing an environment that used to work

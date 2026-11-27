@@ -1,5 +1,5 @@
 ---
-description: End-to-end study topic to protected GitHub repo (one or more languages), a short profile-positioned Medium article and a LinkedIn teaser post, validated by check_publication.py and a profile check, with bidirectional links, drafts-only mode, a replacement path, and separate approval gates
+description: End-to-end study topic to protected GitHub repo (one or more languages), a short profile-positioned Medium article and a LinkedIn teaser post, validated by a shape check and a profile check, with bidirectional links, drafts-only mode, a replacement path, and separate approval gates
 ---
 
 # Study Repo To Publication
@@ -21,23 +21,23 @@ Route through `rules/request-orchestration.md`. The root agent owns all writes, 
 Ask only what is missing, in one batch:
 
 1. Topic, source (book chapter, article), and example scope: one small realistic scenario, 3-6 components, deterministic output.
-2. Repo `<owner>/<repo>` with `<repo>` = `<prefix>-<topic>` (`<prefix>`: the user's series prefix) and the **language set**: one or more languages with target versions, the user's per-project choice (one is fine; never assume all four; versions per `skills/multi-language-study-repo/references/toolchain-notes.md`). Required checks follow: one job per language plus `docs`.
-3. **Positioning profile, content angle, narrative.** Read the consumer's `PUBLICATION-PROFILE.md` (project root, or the path the project names; `skills/medium-publishing/references/positioning-profile.md`): target role, primary focus (for example system design), article and post budgets, hashtag cap, approval mode (`gated` or `drafts-only`). No profile: ask for the target role and primary focus in this batch; if unanswered use the toolkit defaults and say so. Titles and hooks lead with the highest-level concept the body credibly supports for that role, never more than the body delivers; the study topic stays inside the article body. Article and post follow AIDA (`skills/medium-publishing/references/aida-narrative.md`). System-design focus: the short article of `skills/medium-publishing/references/system-design-article.md`, the post a teaser linking it; each framework claim cites an official source checked on the day. A profile asking for a full tutorial keeps the order of `skills/medium-publishing/references/content-angle.md` (non-obvious applications first for a widely covered topic).
+2. Repo `<owner>/<repo>` with `<repo>` = `<prefix>-<topic>` (`<prefix>`: the user's series prefix) and the **language set**: one or more languages with target versions, the user's per-project choice (one is fine; never assume all four). Required checks follow: one job per language plus `docs`.
+3. **Positioning profile, content angle, narrative.** Read the consumer's `PUBLICATION-PROFILE.md` (project root, or the path the project names): target role, primary focus (for example system design), article and post budgets, hashtag cap, approval mode (`gated` or `drafts-only`). No profile: ask for the target role and primary focus in this batch; if unanswered use the toolkit defaults and say so. Titles and hooks lead with the highest-level concept the body credibly supports for that role, never more than the body delivers; the study topic stays inside the article body. Article and post follow AIDA (Attention, Interest, Desire, Action). System-design focus: a short system-design article, the post a teaser linking it; each framework claim cites an official source checked on the day. A profile asking for a full tutorial puts non-obvious applications first for a widely covered topic.
 4. Approval gates, each asked separately when reached, none implied by "do it all": repo creation plus protection; repo topics; every PR merge (Phase 6 rule); Medium draft creation; Medium publish; the Medium back-link edit; LinkedIn post; editing, unlisting, or deleting an earlier story or post. `drafts-only` mode pre-approves only the Medium draft and the LinkedIn draft; every other gate stays. Phase 0 only confirms they will be asked.
 5. Environment readiness: device bridge, `gh` auth, browser signed in to Medium and LinkedIn, toolchains installable user-locally (no admin).
 
-Print the wave-ordered task table with tier and model per task (Phase 3 lanes `standard`; transcription and script runs `light`); the profile's budgets are acceptance criteria of the article and post tasks, validated by `check_publication.py` and a profile check against the consumer's publication profile and `rubrics/technical-content.md` if that file exists (`standard`).
+Print the wave-ordered task table with tier and model per task (Phase 3 lanes `standard`; transcription and script runs `light`); the profile's budgets are acceptance criteria of the article and post tasks, validated by the shape check and a profile check against the consumer's publication profile and `rubrics/technical-content.md` if that file exists (`standard`).
 
 ## Phase 1 - Example Spec And Golden Table
 
-Write the shared example spec and golden table as `EXAMPLE-SPEC.md` in the work folder (template: `skills/multi-language-study-repo/references/golden-table-spec.md`): golden table with edge cases, exact demo output text. Copy its human-readable parts to `docs/03-application-example.md`; the naming map, layout, and toolchain targets stay in `EXAMPLE-SPEC.md` only. Every language's tests assert every golden row and every demo prints the identical text. Freeze the spec before any language lane starts; changes go through the root.
+Write the shared example spec and golden table as `EXAMPLE-SPEC.md` in the work folder: golden table with edge cases, exact demo output text. Copy its human-readable parts to `docs/03-application-example.md`; the naming map, layout, and toolchain targets stay in `EXAMPLE-SPEC.md` only. Every language's tests assert every golden row and every demo prints the identical text. Freeze the spec before any language lane starts; changes go through the root.
 
 ## Phase 2 - Repo Bootstrap And Protection
 
 1. Create the public repo (owner-only write: no collaborators) with a seed commit (contents: the layout reference); `ci.yml` arrives in the first PR.
 2. Protect `main` with no required checks yet: PR required (0 approvals when solo), enforce for admins, no force-push or deletion, conversation resolution. Repo settings: squash-only, delete branch on merge.
 
-From here on every change is a branch plus PR; work for Phases 3-5 goes on one ticket-named branch, `<TICKET-ID>-initial-content` (no ticket: ask for an issue or a user-picked name; never a generic one). Recipes: `skills/multi-language-study-repo/references/repo-layout-and-protection.md`.
+From here on every change is a branch plus PR; work for Phases 3-5 goes on one ticket-named branch, `<TICKET-ID>-initial-content` (no ticket: ask for an issue or a user-picked name; never a generic one).
 
 ## Phase 3 - Per-Language Lanes
 
@@ -52,12 +52,12 @@ Needed: a generic diagram, an application diagram, and an architecture view when
 1. Keep sources in `docs/diagrams/`; hand-author SVG when the diagram tool cannot draw the notation.
 2. Pilots first: render 2-3 in the candidate style and show the user before restyling all.
 3. Render all publication PNGs in one environment (the one QA inspects) and commit them.
-4. Independent visual QA by a validator that did not produce the images, per `skills/image-quality-inspection` and its `references/destination-legibility.md` (legible at the Medium column width and LinkedIn feed size). Iterate until pass, max 5 rounds.
+4. Independent visual QA by a validator that did not produce the images: each image opened as rendered and legible at the Medium column width and LinkedIn feed size (text size, aspect ratio, margins, no crop or blur). Iterate until pass, max 5 rounds.
 5. Push the branch and check the diagrams as GitHub renders them.
 
 ## Phase 5 - Docs And Videos
 
-Write the README and the `docs/` pages of the content checklist in `skills/multi-language-study-repo/SKILL.md`: explanation, diagrams, example, principles page `docs/06-design-principles.md` (`skills/multi-language-study-repo/references/design-principles-doc.md`; article section: `skills/medium-publishing/references/content-angle.md`), architecture page with cited framework claims, run steps, videos, generated code-by-component page. Run the drift guards (`check_docs.py`, then `gen_code_by_component.py --check`; see the skill's Scripts section). Curate one video per chosen language with `skills/youtube-video-curation` (from the user's machine), verifying every id through oEmbed; never invent ids. Run `documentation-reviewer` per `rules/documentation-review-required.md`. Derive the tag list from the finished docs (repo topics, approval); extend it at the article and post drafts (Medium's five, hashtags within the profile's cap): `skills/multi-language-study-repo/references/tags-and-topics.md`.
+Write the README and the `docs/` pages: explanation, diagrams, example, principles page `docs/06-design-principles.md`, architecture page with cited framework claims, run steps, videos, generated code-by-component page. Check docs drift: each `.mmd` equals its Mermaid block, each code block marked with a source file equals that file, every relative link resolves (case-sensitive), and the code-by-component page matches the code. Curate one video per chosen language (from the user's machine), verifying every id through oEmbed; never invent ids. Run `documentation-reviewer` per `rules/documentation-review-required.md`. Derive the tag list from the finished docs (repo topics, approval); extend it at the article and post drafts (Medium's five, hashtags within the profile's cap).
 
 ## Phase 6 - CI, Required Checks, Merge
 
@@ -67,7 +67,7 @@ Merge rule (here and in Phases 8 and 10): merge only after the user names the sp
 
 ## Phases 7-10 - Medium, README Links, LinkedIn, Back-Links
 
-Run the **study-publication-medium-linkedin** workflow (workflows/study-publication-medium-linkedin.md) in full: Medium draft, approval and publish (7), README link PR (8), LinkedIn teaser post with diagram (9), back-links (10). Its Validation Gate (`check_publication.py` plus the profile check) runs before every draft is shown, its `drafts-only` branch stops after the two drafts, and its Replacement Path (new story, pointer, unlist, "More..." pointer) covers a live publication that misses the profile. Its Known pitfalls apply to this run; the merge rule of Phase 6 binds Phases 8 and 10.
+Run the **study-publication-medium-linkedin** workflow (workflows/study-publication-medium-linkedin.md) in full: Medium draft, approval and publish (7), README link PR (8), LinkedIn teaser post with diagram (9), back-links (10). Its Validation Gate (shape check plus profile check) runs before every draft is shown, its `drafts-only` branch stops after the two drafts, and its Replacement Path (new story, pointer, unlist, "More..." pointer) covers a live publication that misses the profile. Its Known pitfalls apply to this run; the merge rule of Phase 6 binds Phases 8 and 10.
 
 ## Known pitfalls
 

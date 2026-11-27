@@ -59,7 +59,7 @@ metadata:
 - MCP page create/update tools are best for small or medium text-only pages.
 - Large pages, image-heavy pages, and bulk syncs should use a separately reviewed REST or sync tool with a dry-run/preview mode.
 - Do not download or execute third-party Confluence upload/download scripts until `skills/external-skill-intake/SKILL.md` has been completed for that source.
-- For diagrams and other generated images, keep source (Mermaid/PlantUML) in the repo when possible and attach/render generated images only when Confluence cannot render the source directly. Prefer SVG/PDF attachments when supported; otherwise attach high-resolution PNG generated from current source. Apply `skills/image-quality-inspection/references/image-quality-gate.md` to 100% of generated/exported images after Confluence processing; this gate is mandatory. Fix and re-upload until acceptable, or report the exact image that cannot be inspected.
+- For diagrams and other generated images, keep source (Mermaid/PlantUML) in the repo when possible and attach/render generated images only when Confluence cannot render the source directly. Prefer SVG/PDF attachments when supported; otherwise attach high-resolution PNG generated from current source. Apply the image quality check to 100% of generated/exported images after Confluence processing (each image opened as rendered: sharp, uncropped, legible at its destination size, current); this gate is mandatory. Fix and re-upload until acceptable, or report the exact image that cannot be inspected.
 
 ## Architecture spike guidance
 
@@ -196,5 +196,4 @@ curl -u "<email>:<api-token>" -X POST -H "X-Atlassian-Token: no-check" \
 - `integrations/confluence.md`
 - `workflows/document-creation.md`
 - `skills/diagram-authoring/SKILL.md`
-- `skills/image-quality-inspection/SKILL.md`
 - `skills/external-skill-intake/SKILL.md`

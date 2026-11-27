@@ -7,7 +7,7 @@ description: Minimum security gate that must run before opening a PR or merging 
 
 Use this rule together with:
 
-- `skills/security/SKILL.md`
+- `rubrics/security.md`
 - `rules/command-safety.md`
 - `rules/code-rules.md`
 - `rules/operational-doc-required.md`

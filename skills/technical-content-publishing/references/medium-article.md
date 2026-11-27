@@ -152,7 +152,7 @@ The assistant does not perform these. The human does, in the editor, after appro
 - [ ] Display title, subtitle, SEO title (60), SEO description (156), up to 5 tags written
 - [ ] Every number and quote maps to a shippable fact-sheet row (verified or author-confirmed) at the pinned ref
 - [ ] Code ran; output pasted from the real run; no secrets or local paths
-- [ ] Cover and hero diagram rendered and inspected (`skills/image-quality-inspection`); PNG or JPG only
+- [ ] Cover and hero diagram rendered and inspected (image quality check); PNG or JPG only
 - [ ] Alt text and captions written; disclosure decided
 - [ ] Genericity sweep clean across text, images, alt text
 - [ ] Length and reading time within the planning range

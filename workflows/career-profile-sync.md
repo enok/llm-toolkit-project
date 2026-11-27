@@ -10,8 +10,7 @@ courses") or when asked to "sync my CV with LinkedIn", and the same fact appears
 in more than one place. The recurring
 job-search runs are `workflows/job-search-pipeline.md` and
 `workflows/job-search-setup.md`; they read the files this workflow keeps in
-step. Public-profile mechanics live in
-`skills/linkedin-profile-maintenance/SKILL.md`.
+step.
 
 Everything personal (employers, dates, titles, handles, file locations) comes
 from the owner and their files, never from this workflow. Every edit to a
@@ -72,8 +71,8 @@ not others is the failure this workflow exists to prevent.
    standard answers, targeting, and job-scan profile files. Update source and
    HTML comments as well as visible text: a stale comment can contradict the
    page.
-2. **Public profile.** Use `skills/linkedin-profile-maintenance/SKILL.md`:
-   inventory, backup, owner approval, one item at a time, re-read. The owner's
+2. **Public profile.** Inventory, backup, owner approval, one item at a time,
+   re-read. The owner's
    signed-in browser is used; the agent never signs in or passes a bot check.
 3. **Applicant portals.** Each portal is an external write in the owner's
    account. Prepare the exact values per portal and hand them to the owner, or
@@ -88,8 +87,7 @@ When the CV changed, regenerate it with the CV project's own render script
 check the result; do not assume the edit left the layout intact.
 
 1. Re-render, then read the page count and any "N of M" footer.
-2. Inspect the page images (`skills/image-quality-inspection/SKILL.md`), not
-   only the text: look for overflow, orphaned headings, and blank bands.
+2. Inspect the page images as rendered, not only the text: look for overflow, orphaned headings, and blank bands.
 3. Keep-with-next rules can leave several blank lines at the bottom of a page.
    Levers that worked:
    - merge skill-group lines;

@@ -162,12 +162,7 @@ The Lambda console's function-level **Triggers** tab reads only the *unqualified
 
 ## Related
 
-- `skills/terraform-specialist/SKILL.md` — mandatory routing for all Terraform requests
-- `skills/terraform-specialist/references/validation-checklist.md` — full detection-rule checklist (style, pinning, state safety, multi-env, secrets, testing)
-- `skills/terraform-specialist/references/stack-inventory.md` — what to establish about a consumer's shared modules, environment roots, and backends before judging a change
-- `skills/terraform/SKILL.md` — general Terraform/OpenTofu authoring, testing, and CI/CD guidance
+- `workflows/terraform-specialist-validation.md` — mandatory routing for all Terraform requests
 - `tool-subagents/terraform-specialist.md` — the read-only specialist that enforces these patterns
 - `rules/release-safety.md` — deploy order, verification, and rollback discipline
-- `skills/shell-scripting/SKILL.md` — the scripts that provisioners and wrappers invoke
-- `skills/dag-glue-specialist/references/validation-checklist.md` — IaC checks for data pipelines
 - `tool-subagents/aws-alarm-investigator.md` — known false-positive alarm patterns

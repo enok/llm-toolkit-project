@@ -28,7 +28,7 @@ The CLI reads these environment variables (native Jenkins convention):
 | `JENKINS_USER_ID` | Your Jenkins username |
 | `JENKINS_API_TOKEN` | API token from `<JENKINS_URL>/user/<username>/configure` |
 
-Store them per project secret conventions - `.env` (gitignored) locally, secret manager elsewhere; see `skills/security/rules/secrets-no-hardcoded.md`. Never print the token in chat, logs, or command echoes.
+Store them per project secret conventions - `.env` (gitignored) locally, secret manager elsewhere. Never print the token in chat, logs, or command echoes.
 
 Verify auth:
 

@@ -13,7 +13,7 @@ metadata:
 
 This skill identifies the languages and frameworks used by the current context, then applies security best practices specific to those stacks. It can write new secure-by-default code, passively detect major issues while working, or produce a formal security report with prioritized findings and fix guidance.
 
-If the user explicitly asks for an OWASP review, OWASP Top 10 assessment, or a formal security findings report, prefer `security-report` as the primary workflow entrypoint and use `owasp-security-review` plus this skill as supporting sources of OWASP coverage and stack-specific secure-default guidance.
+If the user explicitly asks for an OWASP review, OWASP Top 10 assessment, or a formal security findings report, prefer `security-report` as the primary workflow entrypoint and use this skill as a supporting source of stack-specific secure-default guidance.
 
 ## Workflow
 
@@ -21,7 +21,7 @@ The initial step is to identify ALL languages and ALL frameworks in scope. Focus
 
 Then check this skill's `references/` directory, but only when that directory is present — this skill currently ships without bundled reference files, so it usually is not. When references exist, filenames follow `<language>-<framework>-<stack>-security.md`, plus `<language>-general-<stack>-security.md` for framework-agnostic guidance; for a web application, check reference documents for BOTH frontend and backend.
 
-When no matching reference exists (the default), take the generic path: apply the built-in guidance below together with the **security** skill and the relevant language best-practices skills, plus well-known security best practices for the language and framework.
+When no matching reference exists (the default), take the generic path: apply the built-in guidance below together with the relevant language best-practices skills, plus well-known security best practices for the language and framework.
 
 ## Operating Modes
 
@@ -43,7 +43,7 @@ Projects may have cases where they need to bypass or override certain best pract
 
 ## Report Format
 
-When producing a formal security findings report, defer to the `security-report` workflow and the `owasp-security-review` output contract. Default to `docs/security/<repo-or-dir-name>-security-report.md`.
+When producing a formal security findings report, defer to the `security-report` workflow. Default to `docs/security/<repo-or-dir-name>-security-report.md`.
 
 The report should have:
 - Short executive summary at the top
@@ -77,7 +77,4 @@ While TLS is important for production, most development work will be with TLS di
 
 ## Related Skills
 
-- **security** — general application security principles
-- **owasp-security-review** — OWASP-specific audit and findings report
-- **security-threat-model** — architectural threat modeling
-- **java-best-practices**, **python-best-practices**, **js-ts-best-practices** — language-specific patterns
+- **python-best-practices**, **js-ts-best-practices** — language-specific patterns

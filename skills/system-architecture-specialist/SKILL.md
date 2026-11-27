@@ -29,7 +29,6 @@ Trigger examples:
 3. Keep root-agent ownership for edits, docs, diagrams, validation, commits,
    pushes, and user-facing communication.
 4. Compose with `skills/best-practices/SKILL.md`,
-   `skills/llm-application-architecture/SKILL.md`,
    `workflows/project-discovery.md`, `workflows/document-creation.md`,
    `diagram-creation-specialist`, `confluence-documentation-specialist`,
    `documentation-reviewer`, `pr-validator`, and language/security/contract/log

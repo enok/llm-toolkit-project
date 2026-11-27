@@ -25,7 +25,7 @@ models, or request/response contract packages.
   `long`, document and test the `Long.MAX_VALUE` boundary; if arbitrary digits
   are allowed, avoid `Long.parseLong`.
 - Cross-check consumers with `rules/api-contract-surface.md` and the
-  **cross-repo-impact** skill when the artifact is consumed by other repos.
+  **cross-repo-impact** workflow when the artifact is consumed by other repos.
 
 ## Review Hygiene
 

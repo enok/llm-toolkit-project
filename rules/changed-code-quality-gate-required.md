@@ -5,8 +5,8 @@ description: Load when source code was created or modified and is about to be va
 
 # Changed-code quality gate required
 
-Whenever source code is created or updated, code validation must include the
-`changed-code-quality-gate` skill and `workflows/changed-code-quality-gate.md`.
+Whenever source code is created or updated, code validation must include
+`workflows/changed-code-quality-gate.md`.
 The gate is blocking before commit, push, PR readiness, or completion.
 
 - Derive scope from Git. Include added, modified, renamed destinations, and

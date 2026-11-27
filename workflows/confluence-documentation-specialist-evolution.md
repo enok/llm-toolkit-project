@@ -17,7 +17,6 @@ context.
      (mirror the body into the `.toml`);
    - workflow procedure: `workflows/confluence-documentation-specialist-validation.md`;
    - trigger/routing: `INTENTS.md`, `rules/request-orchestration.md`;
-   - skill entrypoint: `skills/confluence-documentation-specialist/SKILL.md`;
    - broader pattern: `skills/confluence-documentation/`, `integrations/confluence.md`,
      or `workflows/confluence-documentation.md`;
    - project- or page-specific fact (space key, page ID, page map): the

@@ -28,7 +28,7 @@ Match the validator to the task's evidence type; use `task-quality-judge` when n
 | Test selection / build evidence | `test-runner` |
 | Documentation, runbooks, generated LLM surfaces | `documentation-reviewer` |
 | CV / career-profile claims | `cv-truthfulness-reviewer` |
-| Public article and social post drafts | Read-only validator lane checking the consumer's publication profile and `rubrics/technical-content.md` if that file exists (with `skills/medium-publishing/scripts/check_publication.py`); the draft stays `NOT POSTED` until the owner approves |
+| Public article and social post drafts | Read-only validator lane checking the consumer's publication profile and `rubrics/technical-content.md` if that file exists (with the shape check of `workflows/study-publication-medium-linkedin.md`); the draft stays `NOT POSTED` until the owner approves |
 | Java changes | `java-change-validator` |
 | Security-sensitive work | `security-auditor` or `owasp-security-auditor` |
 | Diagrams / exported images | `diagram-creation-specialist` |

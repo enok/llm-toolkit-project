@@ -269,7 +269,6 @@ For day-to-day prevention habits (note-taking, writing, citing, paraphrasing), r
 
 ## Related Resources
 
-- `skills/abnt-formatting/SKILL.md` — Proper citation formats
 - `workflows/thesis-submission-preparation.md` — Final thesis checklist
 - The institution's academic integrity policy
 - ABNT NBR 6023:2023 (References)

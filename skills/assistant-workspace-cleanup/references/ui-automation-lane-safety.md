@@ -12,8 +12,9 @@ between a snapshot and a click, and look-alike items (repeated titles,
 "Untitled" entries) are common. These constraints add to
 `rules/external-write-authorization.md` (authority for each mutation) and
 `rules/command-safety.md` (credential handoff); they do not replace them.
-Procedures that apply them: `skills/assistant-workspace-cleanup/SKILL.md` and
-`skills/linkedin-profile-maintenance/references/browser-session-notes.md`.
+Procedure that applies them: `skills/assistant-workspace-cleanup/SKILL.md`.
+Result-size, wait, screenshot and multi-browser limits of the browser tools:
+`learnings/browser-tool-operational-limits.md`.
 
 ## Scope of touch
 

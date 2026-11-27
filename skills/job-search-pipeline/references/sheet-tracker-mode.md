@@ -84,7 +84,7 @@ Print the tasks table first (wave, task, tier, explicit model, validator, SLA).
 | Wave | Task | Tier | Validator |
 | --- | --- | --- | --- |
 | W0 | Lock, read profile and sheet, build the dedup set, retry `pending_moves` | root | none |
-| W1 | Profile summary refresh when due ([profile-summary-for-scoring](../../linkedin-profile-maintenance/references/profile-summary-for-scoring.md)) | light | root reduce |
+| W1 | Profile summary refresh when due | light | root reduce |
 | W1 | Search collect, all queries and pages, with dedup marks | light | root count check |
 | W1 | Board status read for rows Applied or Interviewing | light | root cross-check |
 | W1 | Mail evidence since the last run | standard | root reduce |

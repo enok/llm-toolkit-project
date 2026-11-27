@@ -42,8 +42,10 @@ root agent owns every write and every user-facing action.
    reply draft-only until the user approves the exact target and text.
 6. Prefer fixing the source documentation, diagram, attachment, or page content
    over adding explanatory comments. Recommend the smallest implementer action.
-7. For generated diagrams, screenshots, PDFs, or wiki attachments, require
-   `image-quality-inspection` after export and after final wiki rendering.
+7. For generated diagrams, screenshots, PDFs, or wiki attachments, require an
+   image quality check after export and after final wiki rendering: each image
+   opened in its real render path and fixed and re-rendered until it is sharp,
+   uncropped, legible at its destination size and current.
 8. Separate evidence gaps from findings. Do not infer that Confluence is synced
    when the available tool can only read, or when write verification is missing.
 

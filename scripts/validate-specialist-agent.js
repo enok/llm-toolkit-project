@@ -282,11 +282,16 @@ function checkSpecialist(agent) {
     fail(`agent name must be kebab-case: ${agent}`);
     return;
   }
+  // A skill twin is optional (some were removed after value checks); when its
+  // folder exists it must be complete and indexed.
+  const hasSkillTwin = exists(`skills/${agent}`);
   const required = [
     `tool-subagents/${agent}.md`,
     `tool-subagents/${agent}.toml`,
-    `skills/${agent}/SKILL.md`,
   ];
+  if (hasSkillTwin) {
+    required.push(`skills/${agent}/SKILL.md`);
+  }
   for (const file of required) {
     if (!exists(file)) {
       fail(`${file} missing`);
@@ -318,8 +323,10 @@ function checkSpecialist(agent) {
     fail(`evolution workflow missing for ${agent}`);
   }
   assertContains("INTENTS.md", agent, `routing for ${agent}`);
-  assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
-  assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
+  if (hasSkillTwin) {
+    assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
+    assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
+  }
   if (validationWorkflow) {
     assertContains("workflows/README.md", path.basename(validationWorkflow), `workflow index for ${agent}`);
   }

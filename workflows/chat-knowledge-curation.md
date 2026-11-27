@@ -153,3 +153,7 @@ Summarize:
 - index/client sync status;
 - validation commands and results;
 - remaining unprocessed evidence.
+
+## Known pitfalls
+
+- Before building on a consolidation branch, read `learnings/consolidation-pr-is-the-harvest-base.md`.

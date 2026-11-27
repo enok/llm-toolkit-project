@@ -16,9 +16,7 @@ approval, merge, deployment, rerun, or handoff.
    downstream consumers, and environment/runtime versions.
 3. Load only the needed evidence: changed DAG/job/crawler files, unchanged
    dependency paths, Airflow/Glue config, IaC, dependency manifests, tests, CI,
-   docs, logs, and runbooks. Use
-   `skills/dag-glue-specialist/references/validation-checklist.md` when the task
-   needs deeper validation prompts.
+   docs, logs, and runbooks.
 4. Invoke or follow `tool-subagents/dag-glue-specialist.md`.
 5. Reduce findings locally: accept only evidence-backed, in-scope findings and
    reject generic style advice or unsupported PR-comment agreement.
@@ -37,7 +35,7 @@ approval, merge, deployment, rerun, or handoff.
    - Architecture/data flow: `system-architecture-specialist`
    - Docs/diagrams/wiki: `documentation-reviewer`, `diagram-creation-specialist`,
      or `confluence-documentation-specialist`
-   - Secrets/IAM/data exposure: `security`
+   - Secrets/IAM/data exposure: `security-auditor`
 9. Keep production pipeline operations read-only: do not trigger DAGs, clear
    task instances, start jobs, run crawlers, or change schedules without
    explicit user authorization for that specific mutation.

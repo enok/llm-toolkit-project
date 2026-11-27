@@ -72,7 +72,6 @@ Run the **ticket-review-and-fix** workflow (`workflows/ticket-review-and-fix.md`
 | Research and implement, review later | `ticket-research-and-implementation` |
 | Code already written, need review + fix loop | `ticket-review-and-fix` alone |
 | Full end-to-end: research → implement → validate | **This workflow** |
-| Quick task with clear scope, no deep research needed | `task-starter` skill → implement directly |
 
 ---
 

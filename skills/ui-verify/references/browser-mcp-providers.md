@@ -48,9 +48,9 @@ Map **capabilities** (what ui-verify needs) to whatever tools your server expose
 | Type / fill | `browser_type`, `browser_fill`, `browser_fill_form`, `fill` | Yes |
 | Select option | `browser_select_option`, `select_option` | If forms use `<select>` |
 | Scroll | `browser_scroll`, `scroll` | Often helpful |
-| Screenshot | `browser_take_screenshot`, `screenshot` | Yes (evidence + figma-compare) |
+| Screenshot | `browser_take_screenshot`, `screenshot` | Yes (evidence + Figma comparison) |
 | Wait for UI | `browser_wait_for`, `wait_for` | Recommended |
-| Resize viewport | `browser_resize`, `resize` | For responsive checks and figma-compare |
+| Resize viewport | `browser_resize`, `resize` | For responsive checks and Figma comparison |
 | Run script | `browser_evaluate`, CDP evaluate | Optional fallback; prefer snapshot/click/fill and use script evaluation only when no supported interaction tool can reach the element |
 | Tab management | `browser_tabs`, `browser_close` | Optional |
 | Session lock | `browser_lock` / `browser_unlock` | Provider-specific; skip if absent |

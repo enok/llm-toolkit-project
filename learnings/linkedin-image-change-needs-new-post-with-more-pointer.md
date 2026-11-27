@@ -36,8 +36,6 @@ pointing to it.
 
 Each external write (new post, pointer edit, each link edit) needs its own approval.
 
-Durable guidance: skills/linkedin-publishing/references/repost-and-delete.md
-
 # Why
 
 The session recorded the editor limit and the user's two corrections: edit what can be

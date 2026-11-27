@@ -25,7 +25,7 @@ Create or update architecture documentation — diagrams, README files, and exte
 4. **Consistency**: All diagrams in a folder should share the same notation and export path.
 5. **Right-sized completeness**: Cover the scope being documented; split diagrams when a single view becomes dense.
 6. **Deterministic diagram system**: Apply `skills/diagram-authoring/references/deterministic-diagram-system.md` before drafting or validating C4, AWS, sequence, or flow diagrams.
-7. **Mandatory 100% image inspection**: Every generated/exported image artifact must pass `skills/image-quality-inspection/references/image-quality-gate.md`; fix and re-render until acceptable. If an image cannot be inspected after export, the documentation task is blocked.
+7. **Mandatory 100% image inspection**: Every generated/exported image artifact must pass the image quality check: open it in its real render path and fix and re-render until it is sharp, uncropped, legible at its destination size and current. If an image cannot be inspected after export, the documentation task is blocked.
 8. **Mandatory documentation review**: Documentation created or changed by any
    agent, chat, automation, script, or human must pass
    `documentation-reviewer` before completion.
@@ -71,7 +71,7 @@ For detailed authoring rules, use `skills/diagram-authoring/SKILL.md`,
 - **Compile gate**: Always compile changed `*.puml` files with PlantUML before considering the documentation change complete.
 - **Image export**: Always re-export images after any source file change when the destination repo versions generated images. Prefer SVG/PDF; when PNG/JPG is required, render from source at high resolution and verify dimensions.
 - **Rendered review**: Open every exported PNG/SVG/PDF and visually inspect readability, spacing, grouping, labels, and arrow direction; improve and re-export if the rendered result is unclear. This post-export quality-control step is mandatory.
-- **Image QA**: Apply `skills/image-quality-inspection/references/image-quality-gate.md` to generated diagram images, screenshots, PDF page renders, wiki attachments, and document/slide renders before completion. Uninspected exported output is a blocker.
+- **Image QA**: Apply the image quality check to generated diagram images, screenshots, PDF page renders, wiki attachments, and document/slide renders before completion. Uninspected exported output is a blocker.
 
 ---
 

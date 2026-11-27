@@ -16,23 +16,24 @@ check.
 1. **Profile first.** Before writing, read the consumer's positioning profile:
    `PUBLICATION-PROFILE.md` at the project root, or the path the project
    instructions name. When none exists, ask the user for the target role and
-   primary focus; if that goes unanswered, use the toolkit defaults in
-   `skills/medium-publishing/references/positioning-profile.md` and say so
-   with the draft.
+   primary focus; if that goes unanswered, use the toolkit defaults and say
+   so with the draft: article <= 1,500 words, 2-3 diagrams, at most one code
+   block of <= 15 lines; post <= 1,300 characters, hook <= 200, <= 5
+   hashtags; `gated` approval.
 2. **AIDA order.** Every piece moves through Attention, Interest, Desire, and
-   Action, in that order (`skills/medium-publishing/references/aida-narrative.md`).
+   Action, in that order.
    A short system-design article includes one sentence naming the main
    principles it applies; in the teaser post that sentence is optional.
 3. **Position at the profile's level.** The title, subtitle, and hook (a
    post's first paragraph, before the first blank line, within the profile's
-   hook budget, default 200 characters, as the script measures it) name a
+   hook budget, default 200 characters) name a
    concept at the profile's target-role level and primary focus. A lower-level detail (for example a class-level
    pattern name) stays out of them and appears in the body as the mechanism,
    unless the profile allows it. Every noun in the title and hook is
    delivered by the body.
 4. **Budgets from the profile.** Length, hook length, code blocks and lines,
-   images, and hashtags follow the profile and are enforced by
-   `skills/medium-publishing/scripts/check_publication.py`. A non-zero exit
+   images, and hashtags follow the profile and are enforced by the shape
+   check in `workflows/study-publication-medium-linkedin.md`. A failed check
    means the draft is not ready. Detail beyond the budget stays in the source
    repo and is linked.
 5. **Sourced claims.** Every fact, number, result, and hashtag topic is backed
@@ -58,9 +59,8 @@ check.
    that action (`rules/external-write-authorization.md`,
    `rules/human-comment-reply-gate.md`); `drafts-only` is not an exemption.
 9. **Edits and replacements** of a published piece follow the same contract.
-   An edit in place follows the retrofit section of `aida-narrative.md`; a new
-   piece that replaces an old one follows
-   `skills/medium-publishing/references/replace-published-story.md`. Check the
+   An edit in place keeps the AIDA order; a new piece that replaces an old one
+   follows the Replacement Path of `workflows/study-publication-medium-linkedin.md`. Check the
    public page and every back-link afterwards.
 
 Keep person, company, and project specifics in the consumer's profile, never in

@@ -16,7 +16,7 @@ llm-toolkit-project/
 │   │   │   └── arch-layered.md
 │   │   └── references/       # Deep reference material (on-demand)
 │   │       └── rules.md
-│   └── ... (100+ skills; see skills/README.md)
+│   └── ... (60+ skills; see skills/README.md)
 ├── workflows/                # CANONICAL workflows (source of truth)
 │   ├── review.md
 │   ├── ticket-research.md

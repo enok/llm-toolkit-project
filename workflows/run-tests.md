@@ -83,7 +83,7 @@ npm test -- --coverage                       # Node
 - **All tests must pass** before proceeding.
 - If a test fails, diagnose the root cause and fix before continuing.
 - Re-run after every fix to confirm.
-- In a cloud sandbox a pass is partial: run the definitive suite on the user's machine (see `## Known pitfalls` in `skills/run-tests/SKILL.md`).
+- In a cloud sandbox a pass is partial (registries may return 403, the toolchain may lag the target versions): run the definitive suite on the user's machine and log each step's name, exit code and toolchain versions as evidence. (sig: env-constraint/sandbox-egress-blocks-registries)
 
 ---
 

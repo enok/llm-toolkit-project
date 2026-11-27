@@ -43,8 +43,10 @@ automation, script, or human before it is treated as final.
 5. Validate structure and maintainability: title, scope, ownership, examples,
    commands, paths, environment names, links, tables, diagrams, and update hooks.
 6. For generated or exported diagrams, screenshots, PDFs, or rendered docs,
-   require the `image-quality-inspection` skill and evidence that the actual
-   artifact was inspected.
+   require an image quality check (each image opened in its real render path
+   and fixed and re-rendered until it is sharp, uncropped, legible at its
+   destination size and current) and evidence that the actual artifact was
+   inspected.
 7. For human-facing documentation replies or PR/wiki comments, reread the full
    thread and keep every reply as a draft until explicit user approval.
 8. Prefer fixing the documentation over writing explanatory replies. Recommend

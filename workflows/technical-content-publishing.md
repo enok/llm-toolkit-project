@@ -101,7 +101,7 @@ Follow `skills/technical-content-publishing/references/visual-assets.md`.
 - **Cover:** built from the chosen hook/thesis.
 - **Carousel render:** render `carousel.md` to the platform's page format; export all pages.
 - Write alt text for every image and a text alternative per slide.
-- **Image gate (mandatory):** inspect 100% of generated images and carousel pages per `skills/image-quality-inspection/references/image-quality-gate.md`. An image that cannot be inspected is a blocker.
+- **Image gate (mandatory):** inspect 100% of generated images and carousel pages as rendered (sharp, uncropped, legible at the destination size, current). An image that cannot be inspected is a blocker.
 
 Diagram and cover need only `angle.md`, so they run in parallel with the article. The carousel render waits for `carousel.md`.
 

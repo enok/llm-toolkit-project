@@ -7,7 +7,7 @@ tags: [diagrams, mermaid, svg, publication, github, readme, article, carousel, p
 
 Use this reference for teaching and explainer diagrams that are read in a GitHub README and as a PNG inside an article or social post: class, sequence, and flowchart views of a pattern, a use case, or a small design. The look is reference-driven: white canvas, flat saturated fills, one hue per role, dark borders, UML-style compartments, written relationship labels.
 
-Scope. Architecture views (C4 component, AWS topology, runtime sequence for a system) keep following `deterministic-diagram-system.md`, including its 5-colour gate. This profile is a repo-level theme standard for publication diagrams: a single diagram uses only the roles it needs (usually 3-5), never a colour outside the table below. Export and inspection gates from `diagram-export-quality.md` and `skills/image-quality-inspection/references/image-quality-gate.md` still apply; judge the final PNG at its destination width with `skills/image-quality-inspection/references/destination-legibility.md`.
+Scope. Architecture views (C4 component, AWS topology, runtime sequence for a system) keep following `deterministic-diagram-system.md`, including its 5-colour gate. This profile is a repo-level theme standard for publication diagrams: a single diagram uses only the roles it needs (usually 3-5), never a colour outside the table below. Export gates from `diagram-export-quality.md` and the image quality check still apply; judge the final PNG at its destination width (section 4).
 
 ## 1. Init line
 
@@ -92,7 +92,7 @@ classDiagram
 
 ## 4. Legibility and layout
 
-The thresholds (effective text size, aspect ratio, margin, resolution floor) and their worked numbers live only in `skills/image-quality-inspection/references/destination-legibility.md`; apply them to every PNG and do not copy them here. What this style adds:
+Judge every PNG at its destination width: effective text px = text px x column width / image width is at least 14 px (target 16) for every label that carries meaning, computed from the source's natural width; at most 9-10 nodes per image; aspect ratio between 2:1 and 1:1.6; a uniform margin with nothing touching an edge; resolution about 2x the displayed size. A diagram that fails legibility is re-laid out, never just re-exported bigger. What this style adds:
 
 - Never lower the init `fontSize` (20px) and never use `<small>` or tiny labels. A diagram too wide to pass the legibility check is split or given fewer participants or nodes, not shrunk.
 - Keep node count and label length within the limits in section 3; an article-column or carousel image uses the tighter node cap in `destination-legibility.md`.
@@ -103,7 +103,7 @@ The thresholds (effective text size, aspect ratio, margin, resolution floor) and
 
 GitHub renders the inline ` ```mermaid ` blocks, so use only long-standing syntax: the `%%{init}%%` directive, `classDef`, `class`, `style`, `subgraph`, `autonumber`, `box`, `rect`, `Note`, `activate`. `cssClass` parses but does not colour class boxes (section 3). Avoid frontmatter config, the `look:` option, icons or images, HTML labels, `click` callbacks, and beta diagram types.
 
-If the repo keeps `.mmd` files and inline copies, keep them byte-identical and let CI check it (see `skills/multi-language-study-repo/SKILL.md`).
+If the repo keeps `.mmd` files and inline copies, keep them byte-identical and let CI check it.
 
 ## 6. Ports-and-adapters (hexagonal) views: hand-authored SVG
 
@@ -248,6 +248,6 @@ with sync_playwright() as p:
     browser.close()
 ```
 
-An overflow exits non-zero before any PDF is written. Then run the PDF checks in `skills/image-quality-inspection/references/image-quality-gate.md` and inspect every page at phone width.
+An overflow exits non-zero before any PDF is written. Then check the PDF (page size as set, text selectable) and inspect every page at phone width.
 
-Before delivery run the carousel gate (`skills/image-quality-inspection/scripts/check_carousel.py`; section "Carousel gate" in the same gate file): type floors, safe area, contrast and PDF text exactness against the source markdown.
+Before delivery check the carousel: type floors on the 1080 px page (headline >= 64 px, body >= 36 px, footer and disclosure >= 32 px), safe area, contrast, and PDF text exactly matching the source markdown.

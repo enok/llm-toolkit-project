@@ -43,9 +43,10 @@ and implementation instructions for the root agent to apply.
    or AWS views when available.
 6. For PlantUML and AWS diagrams, pin remote include libraries and avoid mutable
    `main` or `master` URLs in committed sources.
-7. Define compile/export checks and require `image-quality-inspection` for every
-   generated/exported image and final PDF/wiki/doc render. Sampling is not
-   enough.
+7. Define compile/export checks and require an image quality check for every
+   generated/exported image and final PDF/wiki/doc render: each one opened in
+   its real render path and fixed and re-rendered until it is sharp, uncropped,
+   legible at its destination size and current. Sampling is not enough.
 8. Check claim drift between diagram source, rendered artifacts, surrounding
    docs, Confluence pages, PR body, tickets, and current code/config.
 9. For human-facing diagram replies, keep drafts unposted until user approval.

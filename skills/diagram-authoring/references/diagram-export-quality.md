@@ -5,7 +5,7 @@ tags: [diagrams, export, resolution, plantuml, mermaid, svg, png, pdf]
 
 # High-resolution diagram export standard
 
-Use this reference whenever a diagram is rendered, attached, committed, exported to PDF, or uploaded to a wiki. The inspection contract lives in `skills/image-quality-inspection/references/image-quality-gate.md` and applies to 100% of generated/exported image artifacts.
+Use this reference whenever a diagram is rendered, attached, committed, exported to PDF, or uploaded to a wiki. The image quality check (open each image in its real render path; fix and re-render until it is sharp, uncropped, legible at its destination size and current) applies to 100% of generated/exported image artifacts.
 
 Post-export quality control is mandatory. A diagram is incomplete until every exported image, including PNG outputs, has been opened in a real viewer or rendered in its final document/wiki/PDF context and accepted.
 

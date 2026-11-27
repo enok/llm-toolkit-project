@@ -14,7 +14,7 @@ acli jira workitem attachment list --key <ISSUE_KEY> --json
 acli jira workitem attachment delete --id <OLD_ATTACHMENT_ID>
 ```
 
-## Upload fallback and secrets
+## Upload fallback
 
 If the CLI cannot upload an attachment, use the Jira REST API with the active authenticated
 session and the header `X-Atlassian-Token: no-check`. Never print bearer tokens or cookies.

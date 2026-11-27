@@ -43,8 +43,9 @@ Run the narrowest relevant checks:
 
 - read-back page/child/label/comment/version evidence;
 - link/render checks and attachment inventory;
-- `image-quality-inspection` for every generated/exported image and final wiki
-  render;
+- an image quality check for every generated/exported image and final wiki
+  render (opened as rendered; sharp, uncropped, legible at the destination
+  size, current);
 - `npm run workflows:size:check` and index checks when toolkit docs changed.
 
 ## Phase 5 - Evolve

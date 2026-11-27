@@ -64,8 +64,7 @@ Per that document, the setup sequence is:
 
 A different part of this same upstream project (its data-lake/Glue ingestion
 skill content, reviewed separately from the setup flow above) was already
-scanned during `dag-glue-specialist` intake — see
-[`../skills/dag-glue-specialist/references/external-source-intake.md`](../skills/dag-glue-specialist/references/external-source-intake.md).
+scanned during `dag-glue-specialist` intake.
 That scan returned **HIGH/MEDIUM** findings on MCP-discovery wording and
 autonomous data/schema actions, and the resulting decision was to import only
 bounded, reviewed guidance rather than vendor that skill. Combined with the

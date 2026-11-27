@@ -127,7 +127,6 @@ Each rule file contains:
 
 - Project-local frontend guidance — React/Next.js performance optimization when the destination repo provides it
 - **best-practices** — SOLID principles, architecture patterns, resilience (language-agnostic foundations)
-- **security** — Injection prevention, auth, secrets, XSS/CSRF (applies to all JS/TS endpoints)
 - **testing** — AC traceability, test pyramid, coverage checklist (universal testing discipline)
 
 ## Full Compiled Document

@@ -193,7 +193,6 @@ Anything crossing into the system — HTTP requests, queue messages, file conten
 - Validate shape, type, range, and size before use; reject with actionable errors.
 - Prefer declarative validation at the edge (schema validators, framework binding) over ad-hoc checks scattered through business logic.
 - Internal calls between your own modules don't need re-validation — validate once at the boundary, then trust typed data.
-- Security-critical validation (injection, path traversal) is covered in depth by the **security** skill.
 
 ### `error-immutability` — Prefer Immutable Data
 
@@ -382,6 +381,5 @@ If services share a database or must deploy in lockstep, they are one monolith p
 
 This document provides **language-agnostic foundations**. Pair it with:
 
-- **java-best-practices** / **python-best-practices** / **js-ts-best-practices** — language-specific implementations of DI, error handling, concurrency, and testing patterns
-- **security** — injection prevention, auth, secrets, PII (builds on the defensive programming rules here)
+- **python-best-practices** / **js-ts-best-practices** — language-specific implementations of DI, error handling, concurrency, and testing patterns
 - **testing** — AC traceability, test pyramid, mocking discipline that validates these structures

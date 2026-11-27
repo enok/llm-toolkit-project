@@ -12,13 +12,10 @@ Use this workflow when the DAG/Glue Specialist needs a durable improvement.
    runtime recommendation, weak related-specialist handoff, external-source
    lesson, or token inefficiency.
 2. Classify the fix target:
-   - specialist prompt -> `tool-subagents/dag-glue-specialist.md` (mirror the
+   - specialist prompt or detection rule -> `tool-subagents/dag-glue-specialist.md` (mirror the
      body into the `.toml`);
    - validation procedure -> `workflows/dag-glue-specialist-validation.md`;
-   - detection rule -> `skills/dag-glue-specialist/references/validation-checklist.md`;
-   - skill entrypoint -> `skills/dag-glue-specialist/SKILL.md`;
    - trigger/routing -> `INTENTS.md`, `rules/request-orchestration.md`;
-   - external-source note -> `skills/dag-glue-specialist/references/external-source-intake.md`;
    - pipeline-specific fact (DAG IDs, job names, catalog layout) -> the consumer
      repo's `docs/llm/`, never a shared asset.
 3. Keep the update generic and provider-neutral unless the validated lesson is

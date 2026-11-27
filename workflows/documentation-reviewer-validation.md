@@ -23,7 +23,7 @@ mandatory for the documentation surfaces it lists.
    (`rules/human-comment-reply-gate.md`).
 6. Run the narrowest meaningful validation: index checks, link/render checks,
    workflow size checks, tool-config sync checks, artifact QA
-   (`skills/image-quality-inspection/SKILL.md`), or security gates as
+   (each image opened as rendered), or security gates as
    applicable.
 7. Report findings, changes, validation, skipped gates, residual risk, and
    reusable learning.

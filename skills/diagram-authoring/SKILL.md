@@ -45,7 +45,7 @@ metadata:
 8. **Export at high quality** using `skills/diagram-authoring/references/diagram-export-quality.md`.
    - Prefer SVG/PDF for generated diagrams whenever the destination supports vector output.
    - If PNG/JPG is required, render from source at high resolution and verify actual dimensions before committing or attaching it.
-   - Then apply the `image-quality-inspection` gate to every generated/exported image artifact and final embedded render.
+   - Then apply the image quality check to every generated/exported image artifact and final embedded render: open it in its real render path and fix and re-render until it is sharp, uncropped, legible at its destination size and current.
 9. **Run mandatory post-export quality control** after export.
    - Open the rendered PNG/SVG/PDF and inspect it visually before completion. This is not optional.
    - For AWS architecture PNG exports, also apply `skills/diagram-authoring/references/aws-architecture-quality-control.md`.
@@ -67,7 +67,7 @@ metadata:
 - A subgraph's `direction` is ignored when its nodes link outside it, so a long chain collapses into a strip. Fan out, fold ranks, or split instead of relying on it.
 - Renderers drift between versions (the same file laid out differently in 11.16 and 11.17). Render publication PNGs in one environment, the one the visual validator inspected, and commit those PNGs.
 - `mmdc` shrinks a wide flowchart (natural width above its 800 px page, `-w`) together with its text; pass `-w 2400` and compute legibility from the natural width.
-- For the publication look (init line, role palette, per-type grammar, GitHub compatibility, hexagonal SVG, pilot-first rule), follow `references/publication-diagram-style.md`; check the PNG at its destination width with `skills/image-quality-inspection/references/destination-legibility.md`.
+- For the publication look (init line, role palette, per-type grammar, GitHub compatibility, hexagonal SVG, pilot-first rule), follow `references/publication-diagram-style.md`; check the PNG at its destination width (section 4 of that file).
 - For carousel pages (HTML to PDF and PNG, with the overflow-checking renderer), follow section 9 of `references/publication-diagram-style.md`.
 
 ## PlantUML guardrails
@@ -99,7 +99,7 @@ metadata:
 - [ ] Diagram renders in the target viewer.
 - [ ] PlantUML source files compile successfully when `*.puml` files are changed.
 - [ ] Generated diagram artifacts are vector output or high-resolution raster output that meets the export-quality standard.
-- [ ] 100% of generated/exported diagram images passed `image-quality-inspection`, including embedded PDF/wiki renders when present.
+- [ ] 100% of generated/exported diagram images passed the image quality check, including embedded PDF/wiki renders when present.
 - [ ] AWS architecture diagrams were compared against official AWS reference diagrams and the official AWS Architecture Icons source, with resource names/timings/long explanations moved to nearby text or tables unless they are essential topology labels.
 - [ ] Rendered PNG/SVG/PDF output was visually inspected after export and improved if needed; uninspected output is a blocker.
 - [ ] Publication diagrams: committed Mermaid sources use the safe font and stay byte-identical to their inline copies; PNGs were rendered in one environment and judged at destination width by a validator other than the producer.
@@ -125,8 +125,6 @@ metadata:
 - `skills/diagram-authoring/references/diagram-export-quality.md`
 - `skills/diagram-authoring/references/diagram-quality-review.md`
 - `skills/diagram-authoring/references/publication-diagram-style.md`
-- `skills/image-quality-inspection/SKILL.md`
-- `skills/image-quality-inspection/references/destination-legibility.md`
 - `skills/project-discovery/references/diagram-conventions.md`
 - `workflows/document-creation.md`
 - `workflows/markdown-pdf-export.md`

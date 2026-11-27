@@ -19,7 +19,7 @@ context.
    - workflow procedure: `workflows/system-architecture-specialist-validation.md`;
    - trigger/routing: `INTENTS.md`, `rules/request-orchestration.md`;
    - skill entrypoint: `skills/system-architecture-specialist/SKILL.md`;
-   - broader method: `skills/best-practices`, `skills/llm-application-architecture`,
+   - broader method: `skills/best-practices`,
      `workflows/project-discovery.md`, `workflows/document-creation.md`;
    - project-specific architecture fact: the consumer repo's `docs/llm/`, never
      a shared asset.

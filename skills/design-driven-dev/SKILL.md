@@ -367,6 +367,5 @@ Rate confidence: **High**, **Medium**, or **Low**.
 ## Related Skills
 
 - **project-discovery** — Broader architecture understanding; use before design-driven-dev for unfamiliar repos
-- **task-starter** — Lighter planning from a ticket; use design-driven-dev when the task has architectural uncertainty
-- **review** / **ticket-review** — Post-implementation review; design-driven-dev is the pre-implementation counterpart
+- **ticket-review** — Post-implementation review; design-driven-dev is the pre-implementation counterpart
 - **best-practices** — Architecture and coding patterns referenced during codebase exploration

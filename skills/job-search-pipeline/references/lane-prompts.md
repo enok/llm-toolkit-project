@@ -50,8 +50,7 @@ cadence day (`search.boards`, see board-playbook.md); on other days the root
 skips it.
 
 L0 (optional, before L2): a read-only lane builds or refreshes the cached
-profile summary used for fit scoring; template in
-`skills/linkedin-profile-maintenance/references/profile-summary-for-scoring.md`.
+profile summary used for fit scoring.
 
 ## L1 - inbox evidence
 
