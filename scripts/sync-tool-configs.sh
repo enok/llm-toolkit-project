@@ -365,6 +365,24 @@ escape_frontmatter_value() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+# Prints the frontmatter trigger value of a rule (empty when there is none).
+rule_trigger() {
+  awk '
+    NR == 1 { sub(/^\xef\xbb\xbf/, ""); if ($0 != "---") exit; next }
+    /^---[ \t\r]*$/ { exit }
+    /^trigger:/ {
+      sub(/^trigger:[ \t]*/, "")
+      sub(/[ \t\r]+$/, "")
+      print
+      exit
+    }
+  ' "$1"
+}
+
+rule_is_on_demand() {
+  [[ "$(rule_trigger "$1")" == "model_decision" ]]
+}
+
 cursor_convert_rule() {
   local src="$1"
   local dest="$2"
@@ -385,6 +403,11 @@ cursor_convert_rule() {
         next
       }
       in_front && /^trigger:[ \t]*glob/ {
+        print "alwaysApply: false"
+        printed_apply=1
+        next
+      }
+      in_front && /^trigger:[ \t]*model_decision/ {
         print "alwaysApply: false"
         printed_apply=1
         next
@@ -502,13 +525,30 @@ generate_concatenated_export() {
       echo "> Edit the source rule/workflow files and re-run the script."
     fi
     echo ""
+    local on_demand_rules=()
     while IFS= read -r f; do
       [[ -f "$f" ]] || continue
+      if rule_is_on_demand "$f"; then
+        on_demand_rules+=("$f")
+        continue
+      fi
       echo "---"
       echo ""
       strip_frontmatter "$f"
       echo ""
     done < <(ordered_rule_list EXPORT_RULE_FILES)
+    if [[ ${#on_demand_rules[@]} -gt 0 ]]; then
+      echo "---"
+      echo ""
+      echo "# Rules loaded on demand"
+      echo ""
+      echo "Read the rule file when its topic comes up; it is not pasted here."
+      echo ""
+      for f in "${on_demand_rules[@]}"; do
+        echo "- \`${DISPLAY_RULES_PREFIX}$(basename "$f")\`: $(get_description "$f")"
+      done
+      echo ""
+    fi
     if [[ ${#LOCAL_RULE_FILES[@]} -gt 0 ]]; then
       emit_file_section "Repo-Local Rules" "${LOCAL_RULE_FILES[@]}"
     fi

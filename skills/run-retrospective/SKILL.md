@@ -9,7 +9,7 @@ metadata:
 
 # Run Retrospective
 
-Tooling for the always-on loop in `rules/workflow-self-improvement.md`:
+Tooling for the loop in `rules/workflow-self-improvement.md`:
 preflight -> capture -> retrospective + record -> promote -> verify -> measure.
 The procedure is `workflows/run-retrospective.md`; this skill is the quick
 start and the reference set.

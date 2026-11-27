@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Close a measurable learn-from-mistakes loop on every non-trivial LLM or agent run - preflight known pitfalls, capture mistakes by signature, record the run, promote recurring lessons to verified guards, and report trend metrics
+trigger: model_decision
+description: Load when a workflow, skill or orchestrated run with 3+ steps, a validator fail, a forced change of approach or a user correction needs its preflight, run record, retrospective, promotion or trend line.
 ---
 
 # Workflow Self-Improvement

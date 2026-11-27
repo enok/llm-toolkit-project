@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Scripts created or changed by agents must be portable across Windows, Linux, and macOS unless a platform-specific wrapper is intentional
+trigger: model_decision
+description: Load when creating or editing a script, wrapper, hook or CLI helper that must run on Windows, Linux and macOS, including PowerShell sources, line endings, SHA256 pins or Git Bash quirks.
 ---
 
 # Cross-platform scripts

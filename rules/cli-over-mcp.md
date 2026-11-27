@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Prefer capable authenticated CLIs for external systems while preserving explicit user-selected apps and MCP-only capabilities
+trigger: model_decision
+description: Load when choosing between a CLI (gh, aws, acli) and an MCP server or connector for Confluence, Jira, GitHub, Slack or AWS, or when sending large writes to an external system.
 ---
 
 # CLI over MCP

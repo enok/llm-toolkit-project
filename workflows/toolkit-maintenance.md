@@ -129,7 +129,7 @@ Then verify:
 
 ## Known pitfalls
 
-- Before drafting a workflow gate, phase, or approval step, read the always-on rules and keep the draft consistent with them: no per-workflow retrospective phase (`rules/workflow-self-improvement.md`) and no blanket merge approval (`rules/external-write-authorization.md`). (sig: spec-gap/workflow-contradicted-existing-rule)
+- Before drafting a workflow gate, phase, or approval step, read the rules (always-on, plus any on-demand rule whose topic applies) and keep the draft consistent with them: no per-workflow retrospective phase (`rules/workflow-self-improvement.md`) and no blanket merge approval (`rules/external-write-authorization.md`). (sig: spec-gap/workflow-contradicted-existing-rule)
 - When promoting a learning or session evidence into a skill, rule, or reference, carry only recorded facts: label untested guidance as such and never state untested behaviour as observed. (sig: quality-defect/unobserved-claims-presented-as-fact)
 - When a change touches both a governance document and the script it describes (for example `skills/run-retrospective/references/promotion-ladder.md` and `run_retro.py`), write the CLI contract first and run every documented example against the script. (sig: validation-gap/governance-doc-script-drift)
 - When a validator hangs or times out, reproduce and fix the validator (for example batch large file lists with `find -print0 | xargs -0`) and prove the fix on a large synthetic input; do not skip it or call the hang environmental. See `learnings/hanging-validator-trains-agents-to-skip-validation.md`.

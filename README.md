@@ -1,6 +1,6 @@
 # LLM Toolkit for Data Science Projects
 
-A generic, IDE-agnostic toolkit for LLM-assisted development: always-on **rules**, step-by-step **workflows**, on-demand **skills**, reusable **tool subagents**, review **rubrics**, integration guides, captured **learnings**, and cross-platform setup/validation **scripts**. It works with Codex, Cursor, Claude Code, Windsurf, GitHub Copilot, Gemini CLI, OpenCode, Antigravity, and generic agents.
+A generic, IDE-agnostic toolkit for LLM-assisted development: **rules** (always-on or loaded on demand), step-by-step **workflows**, on-demand **skills**, reusable **tool subagents**, review **rubrics**, integration guides, captured **learnings**, and cross-platform setup/validation **scripts**. It works with Codex, Cursor, Claude Code, Windsurf, GitHub Copilot, Gemini CLI, OpenCode, Antigravity, and generic agents.
 
 The toolkit is the single source of truth. Consumer projects link to it (symlinks or junctions) plus a few generated pointer files; they never copy canonical content. Keep generic guidance here and repository-specific details in the consumer's own `AGENTS.md` and `docs/llm/`. A small set of assets is scoped to this toolkit's own data-science/thesis context and is labelled as such.
 
@@ -8,7 +8,7 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 
 | Area | Path | Purpose |
 | --- | --- | --- |
-| Rules | `rules/` | 24 short constraints (23 always-on, `plugin-governance` on demand): code, git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
+| Rules | `rules/` | 24 short constraints (16 always-on, 8 loaded on demand): code, git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
 | Workflows | `workflows/` | 112 sequenced procedures: review and fix loops, knowledge-base sync, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
 | Skills | `skills/` | 112 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
 | Tool subagents | `tool-subagents/` | 27 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |

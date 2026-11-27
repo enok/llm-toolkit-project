@@ -68,7 +68,7 @@ llm-toolkit-project/
 ├── README.md                  # Overview, setup, full catalogs
 ├── INFRA.sh / INFRA.ps1       # Plan-first machine bootstrap (wraps scripts/bootstrap-dev.*)
 ├── package.json               # npm entrypoints for the validators
-├── rules/                     # Always-on generic rules (+ rules/examples/ templates)
+├── rules/                     # Generic rules, 17 always-on + 7 on demand (+ rules/examples/ templates)
 ├── workflows/                 # Step-by-step procedures (<= 12,000 chars each)
 ├── skills/                    # On-demand capabilities (SKILL.md + references/rules/scripts/agents)
 ├── tool-subagents/            # Shared subagent prompts (.md + .toml), agent-orchestrator first
@@ -147,7 +147,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Compact this chat" / "mine chat history into assets" | **context-compaction** / **chat-knowledge-curation** workflows |
 | "What do we know about X" / "save this knowledge" / "keep the knowledge base in sync" | **knowledge-base** skill, **knowledge-base-sync** workflow, under `rules/knowledge-base.md` |
 | "Save this as a learning" / "improve the toolkit" | **capture-learning**, **self-improvement**, **toolkit-maintenance** workflows; **llm-context-engineering** skill |
-| "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under the always-on `rules/workflow-self-improvement.md` |
+| "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under `rules/workflow-self-improvement.md` |
 | "Import external skills" | **external-skill-intake** skill |
 | "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | `docs/plugins.md` and `scripts/plugins.py`, under `rules/plugin-governance.md` (loaded on demand) |
 | "Add a skill / workflow / agent / rule" / "is this resource worth it" | **resource-value-check** workflow (mandatory before adding), `scripts/check_value_checks.py` |
@@ -168,12 +168,8 @@ For every non-trivial request the root agent routes through `rules/request-orche
 Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 
 - `rules/api-contract-surface.md`
-- `rules/changed-code-quality-gate-required.md`
 - `rules/ci-feedback-loop.md`
-- `rules/cli-over-mcp.md`
 - `rules/code-rules.md`
-- `rules/command-safety.md`
-- `rules/cross-platform-scripts.md`
 - `rules/documentation-review-required.md`
 - `rules/error-driven-learning.md`
 - `rules/external-write-authorization.md`
@@ -185,15 +181,19 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/operational-doc-required.md`
 - `rules/publication-positioning.md`
 - `rules/release-safety.md`
-- `rules/repository-context-layers.md`
 - `rules/request-orchestration.md`
 - `rules/security-check-required.md`
-- `rules/workflow-authoring.md`
-- `rules/workflow-self-improvement.md`
 
-Loaded on demand (`trigger: model_decision`):
+Loaded on demand (read the rule when its topic comes up):
 
-- `rules/plugin-governance.md`: when adding, removing, auditing or choosing a plugin, skill, MCP server or connector, or when a plugin's text conflicts with toolkit rules.
+- `rules/command-safety.md`: running risky shell commands (network, pipes, installs, deletes, sudo)
+- `rules/workflow-self-improvement.md`: a non-trivial run needs its run record, retrospective or promotion
+- `rules/cross-platform-scripts.md`: writing or editing scripts for Windows, Linux and macOS
+- `rules/workflow-authoring.md`: creating, editing or splitting a file in `workflows/`
+- `rules/cli-over-mcp.md`: choosing a CLI or an MCP server for an external system
+- `rules/changed-code-quality-gate-required.md`: code was changed and is being validated or pushed
+- `rules/repository-context-layers.md`: toolkit rules meet a repo-local AGENTS.md, CLAUDE.md or IDE rule
+- `rules/plugin-governance.md`: adding, removing, auditing or choosing a plugin, skill, MCP server or connector, or a plugin's text conflicting with toolkit rules
 
 Consumer-specific rule templates live in `rules/examples/`.
 

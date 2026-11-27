@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Review shell commands for destructive, exfiltration, or injection risk before execution
+trigger: model_decision
+description: Load when about to run a shell command that downloads, pipes, installs, deletes, rewrites Git history, touches secrets or uses sudo, or when quoting regex patterns or PowerShell and bash arguments.
 ---
 
 # Command safety

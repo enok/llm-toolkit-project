@@ -5,7 +5,7 @@
 # Paths not listed here are hidden from Cursor locally by the generated
 # .cursorignore / .cursorindexingignore blocks (they stay available on disk).
 
-# Always-on rules
+# Rules (always-on, or loaded on demand when marked model_decision)
 rules/api-contract-surface.md
 rules/changed-code-quality-gate-required.md
 rules/ci-feedback-loop.md

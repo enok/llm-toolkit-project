@@ -11,7 +11,7 @@ metadata:
 
 Use this skill whenever source code was added or modified. Load
 `workflows/changed-code-quality-gate.md` and treat a blocked or failed gate as
-a code-validation blocker. The always-on rule
+a code-validation blocker. The rule
 `rules/changed-code-quality-gate-required.md` makes this gate mandatory before
 commit, push, PR readiness, or completion.
 

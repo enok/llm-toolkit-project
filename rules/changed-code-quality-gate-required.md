@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Require a static-analysis quality gate scoped to added or modified code during code validation
+trigger: model_decision
+description: Load when source code was created or modified and is about to be validated, committed, pushed or declared ready for PR, so the changed-line static-analysis gate runs.
 ---
 
 # Changed-code quality gate required

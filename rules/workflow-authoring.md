@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Size limits and structure rules for workflow files
+trigger: model_decision
+description: Load when creating, editing, splitting or validating a file under workflows/, including the 12,000-character size limit, split conventions and the value gate for new workflows.
 ---
 
 # Workflow Authoring
