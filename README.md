@@ -35,8 +35,9 @@ learnings/         indexed gotchas (read learnings/INDEX.md first)
 
 .agents/skills .claude/skills .codex/skills .cursor/skills .windsurf/skills   -> skills/
 .agent/skills .gemini/skills .opencode/skills                                 -> skills/
-.windsurf/rules .cursor/rules                                                 -> rules/
-.windsurf/workflows .cursor/workflows                                         -> workflows/
+.windsurf/rules                                                               -> rules/
+.windsurf/workflows                                                            -> workflows/
+.cursor/rules/*.mdc                                                           generated from rules/ (gitignored)
 .cursor/agents .claude/agents .codex/agents                                   -> tool-subagents/ (rendered)
 ```
 

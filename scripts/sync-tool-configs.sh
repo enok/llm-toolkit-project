@@ -6,8 +6,8 @@
 #   2. rules/*.md and workflows/*.md at project root (toolkit canonical layout)
 #
 # Repairs shared compatibility surfaces:
-#   .cursor/rules -> canonical shared rules
-#   .cursor/workflows -> canonical shared workflows
+#   .cursor/rules/*.mdc -> generated from the canonical shared rules (gitignored; never an old directory link)
+#   .cursor/workflows -> no longer created (not a Cursor surface); an existing link is left alone
 #   .cursor/agents -> canonical shared tool-subagents
 #   .claude/agents -> canonical shared tool-subagents
 #
@@ -28,7 +28,7 @@
 #
 # Use --skip-agents-md when syncing this toolkit repo itself so handcrafted AGENTS.md
 # is not modified.
-# Use --skip-cursor-rules to skip repairing `.cursor/rules` and `.cursor/workflows`.
+# Use --skip-cursor-rules to skip generating `.cursor/rules/*.mdc`.
 # Use --skip-github to avoid generating `.github/copilot-instructions.md`.
 # Use --force to replace blocking paths that do not point at the expected sources.
 
@@ -412,6 +412,10 @@ cursor_convert_rule() {
         printed_apply=1
         next
       }
+      in_front && /^trigger:[ \t]*manual/ {
+        printed_apply=1
+        next
+      }
       in_front && /^trigger:/ {
         print "alwaysApply: true"
         printed_apply=1
@@ -431,6 +435,36 @@ cursor_convert_rule() {
       strip_frontmatter "$src"
     } > "$dest"
   fi
+}
+
+CURSOR_GENERATED_MARKER="generated-by: sync-tool-configs"
+
+cursor_is_generated() {
+  [[ -f "$1" ]] && grep -q -- "$CURSOR_GENERATED_MARKER" "$1" 2>/dev/null
+}
+
+# Writes dest as a Cursor .mdc rule from a shared rule and tags it as generated
+# (a comment right after the frontmatter) so later syncs can tell it from hand-made files.
+cursor_generate_rule() {
+  local src="$1"
+  local dest="$2"
+  local tmp="$dest.tmp-gen-$$"
+  cursor_convert_rule "$src" "$tmp"
+  awk -v marker="<!-- $CURSOR_GENERATED_MARKER from rules/$(basename "$src"); do not edit, rerun the sync -->" '
+    /^---[ \t\r]*$/ { seen++; print; if (seen == 2) { print marker } next }
+    { print }
+  ' "$tmp" > "$dest"
+  rm -f "$tmp"
+}
+
+# True when the path is a link or junction (anything that is not a plain directory under .cursor).
+cursor_path_is_link() {
+  local path="$1" parent_resolved path_resolved
+  [[ -L "$path" ]] && return 0
+  [[ -d "$path" ]] || return 1
+  parent_resolved="$(cd "$(dirname "$path")" 2>/dev/null && pwd -P)" || return 1
+  path_resolved="$(cd "$path" 2>/dev/null && pwd -P)" || return 1
+  [[ "$path_resolved" != "$parent_resolved/$(basename "$path")" ]]
 }
 
 get_description() {
@@ -800,29 +834,60 @@ if [[ "${#LOCAL_RULE_FILES[@]}" -gt 0 || "${#LOCAL_WORKFLOW_FILES[@]}" -gt 0 ]];
 fi
 
 CURSOR_RULES=""
-CURSOR_WORKFLOWS=""
 CURSOR_RULES_SOURCE=""
-CURSOR_WORKFLOWS_SOURCE=""
+CURSOR_RULES_GENERATED=0
 
-if [[ -d "$PROJECT/rules" ]]; then
-  CURSOR_RULES_SOURCE="../rules"
-  CURSOR_WORKFLOWS_SOURCE="../workflows"
-elif [[ -d "$PROJECT/.windsurf/rules" ]]; then
-  CURSOR_RULES_SOURCE="../.windsurf/rules"
-  CURSOR_WORKFLOWS_SOURCE="../.windsurf/workflows"
+if [[ -d "$PROJECT/rules" || -d "$PROJECT/.windsurf/rules" ]]; then
+  CURSOR_RULES_SOURCE="$WINDSURF_RULES"
 fi
 
 if [[ -n "$CURSOR_RULES_SOURCE" ]]; then
   CURSOR_RULES="$PROJECT/.cursor/rules"
-  CURSOR_WORKFLOWS="$PROJECT/.cursor/workflows"
   if [[ "$SKIP_CURSOR_RULES" -eq 1 ]]; then
-    echo "  Cursor shared surfaces: skipped (--skip-cursor-rules)"
+    echo "  Cursor rules: skipped (--skip-cursor-rules)"
   else
-    ensure_symlink "$CURSOR_RULES" "$CURSOR_RULES_SOURCE"
-    if [[ -d "$WINDSURF_WORKFLOWS" ]]; then
-      ensure_symlink "$CURSOR_WORKFLOWS" "$CURSOR_WORKFLOWS_SOURCE"
+    CURSOR_RULES_OK=1
+    if cursor_path_is_link "$CURSOR_RULES"; then
+      if [[ "$ALLOW_REPAIR" -eq 1 ]]; then
+        reset_path "$CURSOR_RULES"
+      else
+        echo "Warning: $CURSOR_RULES is a directory link from an older sync; leaving it and not generating .mdc rules." >&2
+        echo "  Re-run with --force to replace the link with generated .mdc rules." >&2
+        CURSOR_RULES_OK=0
+      fi
+    elif [[ -e "$CURSOR_RULES" && ! -d "$CURSOR_RULES" ]]; then
+      echo "Warning: $CURSOR_RULES exists and is not a directory; leaving it and not generating .mdc rules." >&2
+      CURSOR_RULES_OK=0
     fi
-    echo "  OK Cursor shared symlinks repaired"
+    if [[ "$CURSOR_RULES_OK" -eq 1 ]]; then
+      mkdir -p "$CURSOR_RULES"
+      CURSOR_RULES_NAMES=()
+      for f in "${EXPORT_RULE_FILES[@]}"; do
+        base_name="$(basename "$f")"
+        [[ "$base_name" == "README.md" ]] && continue
+        mdc_name="${base_name%.md}.mdc"
+        if [[ -e "$CURSOR_RULES/$mdc_name" ]] && ! cursor_is_generated "$CURSOR_RULES/$mdc_name"; then
+          echo "Warning: $CURSOR_RULES/$mdc_name is hand-made; not overwritten." >&2
+          continue
+        fi
+        cursor_generate_rule "$f" "$CURSOR_RULES/$mdc_name"
+        CURSOR_RULES_NAMES+=("$mdc_name")
+      done
+      # Remove generated files whose rule is gone; hand-made files never carry the marker.
+      for existing in "$CURSOR_RULES"/*.mdc; do
+        [[ -f "$existing" ]] || continue
+        cursor_is_generated "$existing" || continue
+        if ! array_contains "$(basename "$existing")" "${CURSOR_RULES_NAMES[@]}"; then
+          rm -f "$existing"
+          echo "  Removed stale generated Cursor rule: $(basename "$existing")"
+        fi
+      done
+      CURSOR_RULES_GENERATED=1
+      echo "  OK Cursor rules generated (${#CURSOR_RULES_NAMES[@]} .mdc files)"
+    fi
+    if [[ -e "$PROJECT/.cursor/workflows" || -L "$PROJECT/.cursor/workflows" ]]; then
+      echo "  Note: .cursor/workflows is no longer created or updated (not a Cursor surface); the existing one can be removed."
+    fi
   fi
 fi
 
@@ -884,7 +949,7 @@ if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
         basename_f="$(basename "$f")"
         if ! array_contains "$basename_f" "${SELECTED_RULE_NAMES[@]}"; then
           echo "${DISPLAY_RULES_PREFIX}${basename_f}"
-          echo ".cursor/rules/${basename_f}"
+          echo ".cursor/rules/${basename_f%.md}.mdc"
           ignored_any=1
         fi
       done
@@ -939,8 +1004,8 @@ if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   WORKFLOWS_LABEL="### Selected Workflow Files"
   SELECTION_NOTE="> Curated by \`$SELECTION_FILE_LABEL\` for this repository.
 >
-> When \`.cursor/\` is linked to the shared toolkit, keep shared \`.cursor/rules/\` and
-> \`.cursor/workflows/\` generic and use \`.cursorignore\` plus \`.cursorindexingignore\`
+> When \`.cursor/\` is linked to the shared toolkit, keep shared \`.cursor/rules/\` generic
+> (generated \`.mdc\` files) and use \`.cursorignore\` plus \`.cursorindexingignore\`
 > to hide non-selected items locally."
 else
   RULES_LABEL="### Rules Files"
@@ -1010,7 +1075,7 @@ Canonical shared content lives in toolkit \`skills/\`, \`rules/\`, \`workflows/\
 |------|----------|--------|
 | Antigravity | \`.agent/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; provider skill paths stay thin links to the shared skill catalog |
-| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/workflows/\`, \`.cursor/agents/\` | Symlinked compatibility surfaces that point to canonical shared files; project filtering happens via local ignore files |
+| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills and agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated (gitignored) from \`rules/\`; project filtering happens via local ignore files |
 | Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` imports \`AGENTS.md\` (\`@AGENTS.md\`); shared skills and agents are links |
 | Gemini CLI | \`.gemini/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus resolved LLM config docs |
@@ -1090,7 +1155,7 @@ fi
 echo ""
 echo "Done. All tool configs synced for $DOC_TITLE."
 # Guard: remove cloud-sync conflict-resolution duplicates (e.g., "file (1).md")
-if [[ "$SKIP_CURSOR_RULES" -eq 0 ]] && [[ -d "${CURSOR_RULES:-}" ]]; then
+if [[ "$SKIP_CURSOR_RULES" -eq 0 ]] && [[ -L "${CURSOR_RULES:-}" ]]; then
   dupes=()
   while IFS= read -r -d '' f; do
     dupes+=("$f")
@@ -1115,11 +1180,11 @@ fi
 GENERATED_LIST="CLAUDE.md import"
 [[ "$SKIP_GITHUB" -eq 0 ]] && GENERATED_LIST="$GENERATED_LIST, .github/copilot-instructions.md"
 [[ "$SKIP_AGENTS_MD" -eq 0 ]] && GENERATED_LIST="$GENERATED_LIST, AGENTS.md (sync section)"
+if [[ "$CURSOR_RULES_GENERATED" -eq 1 ]]; then
+  GENERATED_LIST="$GENERATED_LIST, .cursor/rules/*.mdc"
+fi
 echo "Generated:        $GENERATED_LIST"
 LINKED_LIST=""
-if [[ -n "$CURSOR_RULES_SOURCE" ]] && [[ "$SKIP_CURSOR_RULES" -eq 0 ]]; then
-  LINKED_LIST=".cursor/rules/, .cursor/workflows/"
-fi
 append_linked() {
   local entry="$1"
   if [[ -n "$LINKED_LIST" ]]; then

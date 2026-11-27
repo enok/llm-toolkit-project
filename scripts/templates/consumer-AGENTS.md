@@ -9,7 +9,7 @@ This repo uses symlinked skills, rules, and workflows for LLM-assisted developme
 - **Claude Code**: `.claude/skills/<name>` and `.claude/agents/` -> shared toolkit content
 - **Codex (optional)**: `.codex/skills/<name>` and optional `.codex/agents/`; `AGENTS.md` stays primary
 - **Windsurf**: `.windsurf/rules/`, `.windsurf/workflows/`, and optional `.windsurf/skills/<name>` -> shared toolkit content
-- **Cursor**: `.cursor/skills/`, `.cursor/rules/`, `.cursor/workflows/`, and `.cursor/agents/` stay symlinked to canonical shared files
+- **Cursor**: `.cursor/skills/` and `.cursor/agents/` stay symlinked to canonical shared files; `.cursor/rules/*.mdc` is generated from the shared rules (gitignored)
 
 ## Repo-local LLM files
 
@@ -41,7 +41,7 @@ Review shared rules via `.windsurf/rules/` and workflows via `.windsurf/workflow
 Put repository-only guidance in committed local files such as `docs/llm/rules/`, `docs/llm/workflows/`, or project-specific skill directories that are not toolkit-managed links. Do not place repo-only content inside linked shared-toolkit paths.
 
 ### Step 3 - Reduce IDE noise locally
-When `.cursor/` is linked to the shared toolkit, keep shared `.cursor/rules/` and `.cursor/workflows/` generic. Use `.cursorignore` and `.cursorindexingignore` to hide non-selected shared files locally.
+When `.cursor/` is linked to the shared toolkit, keep shared `.cursor/rules/` generic. Use `.cursorignore` and `.cursorindexingignore` to hide non-selected shared files locally.
 
 ### Step 4 - Use examples
 Read toolkit `rules/examples/` for starting points, then adapt the useful parts into repo-local files.

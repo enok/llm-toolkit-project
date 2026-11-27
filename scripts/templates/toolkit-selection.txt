@@ -16,7 +16,7 @@
 #   and rules/multi-agent-orchestration.md in curated selections.
 # - For the self-improvement loop (pitfall preflight, run records, promotions),
 #   include rules/workflow-self-improvement.md in curated selections.
-# - When `.cursor/` is linked to the shared toolkit, this file does not rewrite shared `.cursor/rules/`.
+# - When `.cursor/` is linked to the shared toolkit, this file selects which `.cursor/rules/*.mdc` files are generated.
 # - `sync-tool-configs.sh` uses this selection to curate `AGENTS.md`,
 #   `.github/copilot-instructions.md`, and local Cursor ignore blocks.
 #   `CLAUDE.md` imports `AGENTS.md` (`@AGENTS.md`).

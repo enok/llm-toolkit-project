@@ -7,12 +7,13 @@ This directory mirrors how other tools consume the same knowledge:
 | `rules/` (repo root) | Canonical source for shared markdown rules |
 | `workflows/` (repo root) | Canonical workflow steps |
 | `tool-subagents/` (repo root) | Canonical source for shared project subagent prompts |
-| `.cursor/rules` | Symlink to the canonical shared rules |
-| `.cursor/workflows` | Symlink to the canonical shared workflows |
+| `.cursor/rules/*.mdc` | Generated from `rules/` by `scripts/sync-tool-configs.sh` (gitignored; marked `generated-by: sync-tool-configs`; hand-made files there are never touched) |
 | `.cursor/agents` | Symlink to `../tool-subagents` |
 | `.cursor/skills` | Symlink to `../.agents/skills` (catalog; consumer repos use per-skill links instead) |
 
-**`.cursor` should stay thin.** The tool-facing folders are symlinks to the canonical sources. Do not hand-edit through `.cursor/`; edit `skills/`, `rules/`, `workflows/`, or `tool-subagents/` instead.
+**`.cursor` should stay thin.** Skills and agents are symlinks to the canonical sources and the rules are generated from `rules/`. Do not hand-edit generated files; edit `skills/`, `rules/`, or `tool-subagents/` instead. `.cursor/workflows` is no longer created (not a Cursor surface); an existing link can be removed.
+
+**Rule conversion:** `trigger: always_on` becomes `alwaysApply: true`; `model_decision` becomes `alwaysApply: false` and keeps its `description` (Cursor loads it when relevant); `glob` becomes `alwaysApply: false` with `globs:`; `manual` sets neither. An older `.cursor/rules` directory link is replaced only with `--force`; stale generated files are removed on the next sync.
 
 **Cursor Agent Skills** load from `.cursor/skills/` (and `.agents/skills/`); see `skills/README.md` for the skill catalog.
 
