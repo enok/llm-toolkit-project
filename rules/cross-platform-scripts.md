@@ -27,7 +27,7 @@ Checksums used as contract pins (SHA256 of a shipped file, fixture, or template)
 
 ## Windows notes
 
-- Keep PowerShell sources ASCII-only, or save them as UTF-8 with a BOM: Windows PowerShell 5.1 reads a BOM-less file in the ANSI code page, where an em dash decodes to a typographic quote that ends the string literal (`learnings/powershell-5-1-bomless-utf8-dash-ends-string-literal.md`).
+- Keep PowerShell sources ASCII-only, or save them as UTF-8 with a BOM: Windows PowerShell 5.1 reads a BOM-less file in the ANSI code page, where an em dash decodes to a typographic quote that ends the string literal.
 - Use PowerShell-safe quoting for Maven, Git, AWS CLI, and path arguments. Windows PowerShell 5 strips embedded double quotes from arguments passed to native executables (for example `bash.exe`); pass them after `--%` or through a script file.
 - Git Bash can resolve `python` to the WindowsApps store stub; put the real interpreter directory first on `PATH`.
 - Avoid destructive filesystem operations composed across shells.

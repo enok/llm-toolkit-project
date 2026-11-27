@@ -44,7 +44,7 @@ Every task gets its own slim context. The root checks this before each wave; a f
 
 1. Separate execution: each task row runs in its own lane (or its own root step when it needs a root-only tool); a task never continues inside another task's context.
 2. Slim brief: goal (one or two sentences), exact inputs as paths or IDs (a path, not pasted content), boundaries, write location, return contract. Never the parent conversation, the whole ledger or tasks table, or findings of unrelated tasks.
-3. Leanest executor: the agent type with the smallest tool surface that can do the task, then the cheapest model the tier allows (`learnings/subagent-fixed-context-cost-pick-leanest-agent-type.md`).
+3. Leanest executor: the agent type with the smallest tool surface that can do the task, then the cheapest model the tier allows.
 4. Slim return: only what the root needs to decide the next step, within the four-block cap; detail goes to a file and the return gives its path. Never ask a lane to paste outputs.
 5. Gate: before dispatching a wave, check every brief against 1-4 and rewrite any that forwards history or unrelated context (`tool-subagents/agent-orchestrator.md` "Context economy and parallel dispatch", item 5).
 

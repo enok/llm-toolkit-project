@@ -102,7 +102,7 @@ budgeted resource in both directions:
    - *Leanest executor.* Pick the agent type with the smallest tool surface
      that can do the task, then the cheapest model the tier allows. Measured: an
      idle helper cost about 78k tokens with a full tool surface, 66k search-only,
-     14k with six tools (`learnings/subagent-fixed-context-cost-pick-leanest-agent-type.md`).
+     14k with six tools.
      A narrow type brings its own role prompt; avoid it where that biases the result.
    - *Slim return.* The lane returns only what the root needs to decide the next
      step (the four-block return below, within its cap); detail goes to a file

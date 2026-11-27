@@ -28,4 +28,3 @@ stays raw (`rules/command-safety.md`).
 - **Ponytail**: Claude Code plugin only, installed by the owner from a local clone at reviewed commit `ebd8654`, never `marketplace add`; ledger off, webhook URL and token empty, `PONYTAIL_MAP=0` on client repos; its three `hook-outside-root` scanner findings are judged false positives. Re-review before moving the commit. <!-- gitleaks:allow -->
 - **Headroom**: proxies the model API path (sees prompts, responses, credentials) and sends a usage beacon by default.
 
-Verdict conditions: `learnings/external-tool-intake-verdicts-pin-and-opt-in.md`.

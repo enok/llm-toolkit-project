@@ -21,7 +21,6 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 - [`linkedin-composer-file-inputs-belong-to-messaging-overlay.md`](./linkedin-composer-file-inputs-belong-to-messaging-overlay.md) — Attach LinkedIn post images through your own temporary file input plus a drop/paste onto the Create post editor, remove it in `finally`, never touch messaging Send, and recover if it lands in a chat draft (`linkedin`, `composer`, `messaging-overlay`, `file-input`, `hazard`).
 - [`av-false-positives-on-encoded-commands-and-scanner-fixtures.md`](./av-false-positives-on-encoded-commands-and-scanner-fixtures.md) — After an AV false positive: allowlist the folders actually in use but never `.ssh` or the tool's own config folder; restore quarantined fixtures from the tag after tag/`git fsck`/diff checks, AV left on (`antivirus`, `false-positive`, `base64`, `gzip`, `scanner-fixtures`, `allow-list`, `triage`, `git-fsck`).
 - [`chained-email-ingest-and-workbook-update-tasks.md`](./chained-email-ingest-and-workbook-update-tasks.md) — Chained email-to-folder and workbook-update tasks - split ingest from update and harden both. (`scheduled-task`, `email`, `automation`, `workbook`, `formula-injection`, `allow-list`, `sha256`, `dry-run`, `additive`).
-- [`external-tool-intake-verdicts-pin-and-opt-in.md`](./external-tool-intake-verdicts-pin-and-opt-in.md) — Four token-saving tools reviewed: adopt only a pinned, switched-off slice (RTK, Ponytail from a pinned clone); reject Caveman (plugin and CLI blocked; skill text not added after the value check) and Context Mode (`intake`, `rtk`, `caveman`, `ponytail`, `context-mode`, `telemetry`, `pinning`, `permission-prompt`).
 
 ### Notebooks / Toolchain
 
@@ -61,7 +60,6 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 
 ### Git / Windows / Shell
 
-- [`powershell-5-1-bomless-utf8-dash-ends-string-literal.md`](./powershell-5-1-bomless-utf8-dash-ends-string-literal.md) — A BOM-less UTF-8 `.ps1` with an em dash in a string fails to parse on Windows PowerShell 5.1 (the dash decodes to a typographic quote); keep PowerShell sources ASCII-only or add a BOM, and test for it
 - [`cloud-session-device-bridge-file-io.md`](./cloud-session-device-bridge-file-io.md) — Refresh existing files on the device-bridge mount without unlink: extract to a new folder, then `cat new > old` (no `tar -x`/`cp` over existing names) (`device-bridge`, `device_bash`, `desktop-commander`, `base64`, `mount`, `unlink`, `md5`).
 - [`google-drive-desktop-folder-reorg.md`](./google-drive-desktop-folder-reorg.md) — Verify a Drive for desktop reorg per file (mapped path, same size) and treat Drive's own `desktop.ini` churn as noise, not a count mismatch (`google-drive`, `file-id`, `folder-id`, `rename`, `desktop.ini`, `reorg`).
 - [`cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md`](./cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md) — In Cowork the device bridge returns "Permission denied" for `skills/` and `tool-subagents/`; read the toolkit through a shallow cloud clone and push from a fresh PC worktree via Desktop Commander, because the container cannot push or run the security scanners; to run a script from a protected folder, copy it to a non-protected folder first and park the copy for deletion (`cowork`, `device-bridge`, `permission-denied`, `worktree`, `desktop-commander`, `push`, `copy-out`).
@@ -81,7 +79,6 @@ Fast-scan index of every committed learning. **Read this at session start** (per
 
 ### Agent Behavior / Validation
 
-- [`subagent-fixed-context-cost-pick-leanest-agent-type.md`](./subagent-fixed-context-cost-pick-leanest-agent-type.md) — A helper's fixed start cost depends on its agent type (idle: ~78k tokens full tool surface, ~66k search-only, ~14k six-tool); pick the smallest tool surface that can do the task, then the cheapest model (`subagent`, `tokens`, `context`, `agent-type`, `tool-surface`, `orchestration`).
 
 ---
 
