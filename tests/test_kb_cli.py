@@ -778,6 +778,36 @@ class ScheduledRunTests(KBTestCase):
         self.assertEqual(self.pulls(calls), [])
         self.assertIn("not clean", text)
 
+    def test_untracked_folder_and_file_do_not_block_pull(self):
+        self.make_repo()
+        (self.corpus / "wt").mkdir()
+        (self.corpus / "wt" / "x.md").write_text("x\n")
+        (self.corpus / "scratch.md").write_text("s\n")
+        rc, text, calls = self.run_scheduled()
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(self.pulls(calls)), 1)
+        self.assertNotIn("not clean", text)
+
+    def test_modified_tracked_file_blocks_pull_with_reason(self):
+        self.make_repo()
+        (self.corpus / "wt").mkdir()
+        (self.corpus / "wt" / "x.md").write_text("x\n")
+        (self.corpus / "a.md").write_text("changed\n")
+        ok, reason = kb.can_fast_forward(self.corpus)
+        self.assertFalse(ok)
+        self.assertEqual(reason, "working tree not clean")
+        rc, text, calls = self.run_scheduled()
+        self.assertEqual(self.pulls(calls), [])
+        self.assertIn("working tree not clean", text)
+
+    def test_git_state_clean_ignores_untracked(self):
+        self.make_repo()
+        (self.corpus / "wt").mkdir()
+        (self.corpus / "wt" / "x.md").write_text("x\n")
+        self.assertTrue(kb.git_state(self.corpus, fetch=False)["clean"])
+        (self.corpus / "a.md").write_text("changed\n")
+        self.assertFalse(kb.git_state(self.corpus, fetch=False)["clean"])
+
     def test_no_pull_outside_git_and_no_other_git_writes(self):
         (self.corpus / "a.md").write_text("a\n")
         rc, text, calls = self.run_scheduled()
