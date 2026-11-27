@@ -203,3 +203,7 @@ sync.
 ## Known pitfalls
 
 - A successful fetch or remote listing of a public repository proves nothing about push credentials; use the Phase 0 push dry run and the pull-request tool's auth status before planning on a push. (sig: wrong-assumption/anonymous-read-taken-as-push-credentials)
+- An unposted local sync commit is reset and redone by the next run (predicted, not observed); two later runs kept the branch and treated the inbox names in its commit message as in flight (observed). Preflight check is a candidate, untested. Detail: `skills/knowledge-base/references/sync-run-state.md` > "An unposted local sync commit".
+- Read the routine's own hand-off or parked-draft documents before drafting; a run that parks work must leave a pointer the next preflight reads (observed once). Detail: same file > "Finished work parked in a side document".
+- Two runs of this routine overlapped (observed once); add a run marker before any write, see `workflows/automation-maintenance.md` > "Catch-up runs and overlapping sessions" (proposed, untested). Detail: same file > "Overlapping runs of one routine".
+- Another open pull request may already contain the rolling branch (`git merge-base --is-ancestor`); do not open a second one (observed once, untested). Detail: same file > "Another open pull request already carries the rolling branch".

@@ -69,3 +69,27 @@ cmd /c '"C:\Program Files\Git\bin\bash.exe" -l scripts/security-check-toolkit.sh
 ```
 
 Under PowerShell 5.1 the wrapper turns native stderr into an error record: it aborted at "Semgrep auto scan" with an empty `bash.exe :` NativeCommandError, exit 1, log truncated.
+
+## A command that reads standard input swallows the rest of a piped script
+
+Problem: a multi-step shell script sent to a shell through a here-document is the shell's own standard input. A command in it that also reads standard input consumes the remaining script lines. The shell then reaches end of input, every later step (state checks, verification, closing timestamp) is skipped, no error is printed, and the exit status is 0. The gap shows only because expected output sections are missing.
+
+Observed once, with a remote-shell client run in connection-test mode that inherited the shell's standard input. Other standard-input readers (interactive container commands, media converters, read loops) are expected to behave the same way: untested.
+
+Happy path:
+
+```bash
+ssh -o BatchMode=yes <host> true </dev/null   # give every possible stdin reader an empty input
+echo SCRIPT-COMPLETE                            # sentinel as the last line
+```
+
+- Inside a script that arrives on standard input, redirect every command that may read it from the null device (`</dev/null`), or use the client's own no-input flag; or write the script to a file and run the file.
+- End the script with a sentinel line and treat a missing sentinel as a failed run, because the exit status does not show the loss.
+
+## Git over SSH from an automation-started process on macOS
+
+Observed once: git over SSH run from a process started by a desktop automation tool failed with "Permission denied (publickey)" because the process had no SSH agent socket. On macOS, exporting the socket before the git command made fetch and push work:
+
+```bash
+export SSH_AUTH_SOCK=$(launchctl getenv SSH_AUTH_SOCK)
+```

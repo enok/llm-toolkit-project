@@ -814,7 +814,7 @@ def git_state(corpus: Path, fetch=True) -> dict:
         if git("rev-parse", "--is-inside-work-tree").returncode != 0:
             return {"git": False}
         branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
-        clean = git("status", "--porcelain").stdout.strip() == ""
+        clean = git("status", "--porcelain", "--untracked-files=no").stdout.strip() == ""
         if fetch:
             git("fetch", "--quiet", timeout=60)
         behind = None
@@ -1333,7 +1333,11 @@ def default_branch(corpus: Path):
 
 
 def can_fast_forward(corpus: Path):
-    """(ok, reason): only on the default branch with a clean tree."""
+    """(ok, reason): only on the default branch with no modified tracked files.
+
+    Untracked paths (for example a linked worktree) are ignored: `git pull --ff-only`
+    itself refuses if an incoming commit would overwrite one.
+    """
     if git_run(corpus, "rev-parse", "--is-inside-work-tree").returncode != 0:
         return False, "not a git checkout"
     branch = git_run(corpus, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
@@ -1341,7 +1345,7 @@ def can_fast_forward(corpus: Path):
     allowed = {default} if default else {"main", "master"}
     if branch not in allowed:
         return False, f"on branch {branch}, not the default branch"
-    if git_run(corpus, "status", "--porcelain").stdout.strip():
+    if git_run(corpus, "status", "--porcelain", "--untracked-files=no").stdout.strip():
         return False, "working tree not clean"
     return True, "ok"
 

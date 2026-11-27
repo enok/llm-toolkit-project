@@ -335,6 +335,9 @@ Start with `doctor`. After a bulk change or a move, run `doctor --deep`.
 - Quarantined files: read `quarantined` in `/health`, remove
   the secret from the file, then `index`. Rotate the secret if it was
   real.
+- Scheduled pull skipped with "working tree not clean": a tracked file in the
+  indexed checkout is modified. Untracked files and folders (for example a
+  linked worktree) do not block the fast-forward.
 - Changes not showing: `POST /reindex` or `index`.
 
 ## Uninstall
