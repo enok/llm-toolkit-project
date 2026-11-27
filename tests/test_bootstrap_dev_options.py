@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import sys
 import subprocess
 import tempfile
 import unittest
@@ -43,10 +44,12 @@ class ShellOptionTests(unittest.TestCase):
         self.assertIn("== RTK (reviewed version only) ==", result.stdout)
         self.assertNotIn("\n+ ", "\n" + result.stdout)
 
+    @unittest.skipUnless(sys.platform.startswith(("linux", "darwin")), "runs a real (stubbed) install: Linux/macOS only")
     def test_a_failing_package_manager_does_not_stop_the_bootstrap(self) -> None:
         # A real (non dry-run) install that fails must be reported, not abort the script.
+        # Every package manager the script can pick is stubbed, so nothing is ever installed.
         with tempfile.TemporaryDirectory() as tmp:
-            for name in ("sudo", "brew"):
+            for name in ("sudo", "brew", "apt-get", "dnf", "winget.exe"):
                 stub = Path(tmp) / name
                 stub.write_text("#!/bin/sh\nexit 100\n", encoding="utf-8")
                 stub.chmod(0o755)
@@ -62,8 +65,7 @@ class ShellOptionTests(unittest.TestCase):
             )
         self.assertEqual(0, result.returncode, result.stdout[-2000:])
         self.assertIn("Never run 'rtk init'", result.stdout)
-        if "install -y jq" in result.stdout or "brew install jq" in result.stdout:
-            self.assertIn("jq (install attempted", result.stdout)
+        self.assertIn("jq (install attempted", result.stdout)
 
     def test_maven_is_never_requested_from_winget(self) -> None:
         self.assertNotIn("Apache.Maven", BOOTSTRAP_SH.read_text(encoding="utf-8"))
