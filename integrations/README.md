@@ -6,7 +6,7 @@ Guides for connecting LLM agents to external tools and services. These integrati
 
 | Integration | File | Purpose |
 |-------------|------|---------|
-| **Jira** | `jira.md` | Fetch ticket details, search issues, manage sprints |
+| **Jira** | `jira.md` | acli syntax, safe REST upload fallback, local-path leak check, MCP alternative |
 | **Confluence** | `confluence.md` | Search and read documentation, project wikis |
 | **GitHub** | `github.md` | Read code, PRs, branches, issues across repos |
 | **AWS CLI** | `aws-cli.md` | Manage cloud infrastructure, deploy, inspect resources |
