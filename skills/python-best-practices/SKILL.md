@@ -136,3 +136,8 @@ Each rule file contains:
 ## Full Compiled Document
 
 For the complete guide with all rules expanded: `references/guide.md`
+
+## Sources
+
+- <https://docs.pytest.org/>
+- <https://docs.python.org/3/library/concurrent.futures.html>

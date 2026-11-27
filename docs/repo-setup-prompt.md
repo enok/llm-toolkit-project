@@ -69,7 +69,7 @@ Clean up and re-setup all LLM tool configurations for this project:
    - **macOS / Linux**: use `ln -s`
 
 3. **Scaffold missing workspace artifacts** (all gitignored):
-   - `docs/llm/` with `README.md`, `toolkit-selection.txt`, `rules/README.md`, `docs/catalog/workflows.md`
+   - `docs/llm/` with `README.md`, `toolkit-selection.txt`, `rules/README.md`, `workflows/README.md`
    - `scripts/sync-llm-configs.sh` and `scripts/sync-llm-configs.ps1`
    - `.cursorignore` and `.cursorindexingignore`
 

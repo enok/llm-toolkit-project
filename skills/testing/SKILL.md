@@ -113,3 +113,10 @@ This skill provides **universal testing discipline**. Pair it with language-spec
 ## Full Compiled Document
 
 For the complete guide with all rules expanded: `references/guide.md`
+
+## Sources
+
+- <https://martinfowler.com/articles/practical-test-pyramid.html>
+- <https://testing-library.com/docs/guiding-principles>
+- <https://jestjs.io/docs/getting-started>
+- <https://docs.pytest.org/>

@@ -116,3 +116,9 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 - `docs/plugins.md`
 - `skills/llm-context-engineering/SKILL.md`
 - `rules/security-check-required.md`
+
+## Sources
+
+- <https://github.com/anthropics/claude-code>
+- <https://github.com/openai/codex>
+- <https://modelcontextprotocol.io/>

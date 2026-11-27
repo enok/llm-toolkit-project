@@ -127,3 +127,16 @@ metadata:
 - `skills/diagram-authoring/references/publication-diagram-style.md`
 - `skills/project-discovery/references/diagram-conventions.md`
 - `workflows/markdown-pdf-export.md`
+
+## Sources
+
+- <https://mermaid.js.org/>
+- <https://plantuml.com/>
+- <https://c4model.com/>
+- <https://github.com/awslabs/aws-icons-for-plantuml>
+- <https://github.com/plantuml-stdlib/C4-PlantUML>
+- <https://github.com/plantuml-stdlib/C4-PlantUML/blob/v2.13.0/LayoutOptions.md>
+- <https://github.com/mermaid-js/mermaid-cli>
+- <https://docs.kroki.io/kroki/setup/diagram-options/>
+- <https://aws.amazon.com/blogs/architecture/sequence-diagrams-enrich-your-understanding-of-distributed-architectures/>
+- <https://github.com/softaworks/agent-toolkit/tree/main/skills/c4-architecture>

@@ -67,7 +67,10 @@ Collect only what is needed for the current migration slice:
 
 ## Source Notes
 
-This skill adapts patterns from official GitHub migration and Actions security
-documentation (migrate-from-jenkins and automated-migrations guides, secure-use and
-secrets concepts pages on docs.github.com, and the anthropics/skills repository).
-No external executable code is vendored.
+No external executable code is vendored. Patterns adapted from:
+
+- <https://docs.github.com/en/actions/tutorials/migrate-to-github-actions/manual-migrations/migrate-from-jenkins>
+- <https://docs.github.com/en/actions/tutorials/migrate-to-github-actions/automated-migrations/jenkins-migration>
+- <https://docs.github.com/en/actions/reference/security/secure-use>
+- <https://docs.github.com/en/actions/concepts/security/secrets>
+- <https://github.com/anthropics/skills>

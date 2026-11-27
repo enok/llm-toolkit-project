@@ -116,3 +116,10 @@ This skill provides **language-agnostic foundations**. Pair it with language-spe
 ## Full Compiled Document
 
 For the complete guide with all rules expanded: `references/guide.md`
+
+## Sources
+
+- <https://en.wikipedia.org/wiki/SOLID>
+- <https://refactoring.guru/design-patterns>
+- <https://12factor.net/>
+- <https://martinfowler.com/articles/patterns-of-distributed-systems/>

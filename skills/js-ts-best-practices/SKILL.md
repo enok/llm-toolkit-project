@@ -132,3 +132,10 @@ Each rule file contains:
 ## Full Compiled Document
 
 For the complete guide with all rules expanded: `references/guide.md`
+
+## Sources
+
+- <https://www.typescriptlang.org/docs/>
+- <https://developer.mozilla.org/en-US/docs/Web/JavaScript>
+- <https://nodejs.org/en/docs/>
+- <https://jestjs.io/docs/getting-started>
