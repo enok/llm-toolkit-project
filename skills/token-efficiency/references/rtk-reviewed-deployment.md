@@ -76,16 +76,16 @@ RTK 1.0.0 and later link the `rtk-engine` crate under BUSL-1.1 (change date 2030
 
 `rtk mvn` silently runs a repository-local `mvnw.cmd` when one exists, and that wrapper may download a Maven distribution from the URL in `.mvn/wrapper/maven-wrapper.properties`. Treat `rtk mvn` in an untrusted repository as running that repository's code; use the raw `mvn` there.
 
-## macOS variant (not yet verified on a Mac)
+## macOS variant (smoke-tested with the Homebrew build of 1.2.1)
 
-Version 1.2.1 and the privacy controls are the same; the platform was not reviewed or smoke-tested. `NUL` does not exist on macOS and `/dev/null` is not a usable SQLite parent, so point the DB paths at a plain file used as a directory parent:
+Version 1.2.1 and the privacy controls are the same. The Homebrew core formula `rtk` builds that version, and with the settings below the smoke test was clean on a Mac (only `config.toml` and the empty parent file exist afterwards; exit codes equal to plain git; telemetry reported as blocked, with no endpoint in that build). `NUL` does not exist on macOS and `/dev/null` is not a usable SQLite parent, so point the DB paths at a plain file used as a directory parent:
 
 ```bash
-brew install rtk              # formula name and version unverified: `rtk --version` must print 1.2.1, otherwise stop and remove it
+brew install rtk && brew pin rtk   # `rtk --version` must print 1.2.1, otherwise stop and remove it
 touch "$HOME/.rtk-off"        # a regular file: paths below can never be created beneath it
 export RTK_DB_PATH="$HOME/.rtk-off/history.db"
 export RTK_RECALL_DB="$HOME/.rtk-off/recall.db"
 export RTK_TELEMETRY_DISABLED=1 RTK_TEE=0 RTK_RECALL=0 RTK_SUPPRESS_HOOK_WARNING=1
 ```
 
-Run the smoke test equivalent (`~/Library/Application Support/rtk` and `~/.config/rtk` instead of the Windows folders) before relying on it. `scripts/bootstrap-dev.sh --rtk` refuses to continue unless `rtk --version` reports 1.2.1.
+The config file lives at `~/Library/Application Support/rtk/config.toml`. Run the smoke test equivalent (`~/Library/Application Support/rtk` and `~/.config/rtk` instead of the Windows folders) on each new machine. `scripts/bootstrap-dev.sh --rtk` refuses to continue unless `rtk --version` reports 1.2.1.
