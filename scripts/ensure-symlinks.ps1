@@ -123,20 +123,18 @@ else {
 
     $consumerCodexRoot = Join-Path $Consumer '.codex'
     Ensure-ConsumerDirectory -Path $consumerCodexRoot
-    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCodexRoot 'skills') -Label 'Codex: .codex/skills/<name> -> toolkit/skills/<name>'
-    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
-        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    if ((Test-Path -LiteralPath $toolkitAgents -PathType Container) -and (Invoke-CodexAgentRender -ToolkitRoot $ToolkitRoot)) {
+        Remove-LegacyAgentsLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -ToolkitRoot $ToolkitRoot
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath (Join-Path $toolkitAgents '.generated/codex') -AllowRepair:$Force
     }
 
     $consumerWindsurfRoot = Join-Path $Consumer '.windsurf'
     Ensure-ConsumerDirectory -Path $consumerWindsurfRoot
     $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'rules') -TargetPath (Join-Path $ToolkitRoot 'rules') -AllowRepair:$Force
     $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'workflows') -TargetPath (Join-Path $ToolkitRoot 'workflows') -AllowRepair:$Force
-    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerWindsurfRoot 'skills') -Label 'Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>'
 
     $consumerCursorRoot = Join-Path $Consumer '.cursor'
     Ensure-ConsumerDirectory -Path $consumerCursorRoot
-    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCursorRoot 'skills') -Label 'Cursor: .cursor/skills/<name> -> toolkit/skills/<name>'
     if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
         $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursorRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
     }

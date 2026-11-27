@@ -72,7 +72,7 @@ llm-toolkit-project/
 ├── rules/                     # Generic rules, 15 always-on + 8 on demand (+ rules/examples/ templates)
 ├── workflows/                 # Step-by-step procedures (<= 12,000 chars each)
 ├── skills/                    # On-demand capabilities (SKILL.md + references/rules/scripts/agents)
-├── tool-subagents/            # Shared subagent prompts (.md + .toml), agent-orchestrator first
+├── tool-subagents/            # Shared subagent prompts (.md; Codex TOML is generated), agent-orchestrator first
 ├── rubrics/                   # Architecture and technical-content rubrics
 ├── integrations/              # Jira, Confluence, AWS CLI, Slack CLI
 ├── clients/                   # Provider overlay guidance and sync commands
@@ -95,10 +95,10 @@ For every non-trivial request the root agent routes through `rules/request-orche
 
 1. **100% of non-trivial prompts go through `agent-orchestrator` evaluation.** It decides what is handled inline vs delegated and owns capability-first routing, safe parallel splitting, bounded quality loops, and result judging. Trivial exceptions only: single-file lookups, one-line answers, conversational turns; when unsure, route it.
 2. **Model selection is part of the split.** `model-selector` gives every delegated task a complexity tier (`light`/`standard`/`deep`), a concrete model, and an effort tier before it runs (Claude Code map: `light` -> `haiku`, `standard` -> `sonnet`, `deep` -> `opus`; other clients per the client model map in the orchestrator prompt). Cheapest capable tier wins; the session model is never the default for delegated work, and a task never silently inherits it.
-3. **Every delegated task runs a quality loop** (`workflows/task-quality-loop.md`): verifiable acceptance criteria before dispatch, a read-only validator matched to the evidence type (`task-quality-judge` when no domain specialist fits), targeted refinement from the defect list on `fail`, max 5 iterations (1 for deterministic `light` tasks), escalation to the root instead of silent acceptance.
+3. **Every delegated task runs a quality loop** (`workflows/task-quality-loop.md`): verifiable acceptance criteria before dispatch, a read-only validator matched to the evidence type that is never the producer (`task-quality-judge` when no domain specialist fits), targeted refinement from the defect list on `fail`, max 5 iterations (1 for deterministic `light` tasks), escalation to the root instead of silent acceptance.
 4. **30-minute cap per task.** Split before execution when the estimate exceeds it; SLA breach forces termination, diagnosis, and restart as a fresh lane, with the breached row kept in the table.
 5. **The orchestrator stays thin; the ledger carries the state.** The root holds only the durable state ledger (`CONTEXT_STATE.md` + `TASKS_TABLE.md`), open decisions, and lanes in flight. Dispatches carry the task, acceptance criteria, breachable constraints, and the ledger path; lanes return four blocks (outcome / evidence / blockers / decisions) capped at 40 lines.
-6. **Tasks tables record what actually ran.** The 15-column table (`#`, `Wave`, `Task`, `Assets`, `Vector DB used`, `Complexity`, `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run link(s)`, `Tokens`, `% Complete`, `SLA`, `Remaining SLA`, plus three footer rows and an assets manifest) is defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints". It shows the real model and token spend per task and is reprinted in full after every task completion; a uniform expensive column means tiering was skipped. The ledger is checkpointed before each dispatch so a run that dies resumes instead of restarting.
+6. **Tasks tables record what actually ran.** The 15-column table (`#`, `Wave`, `Task`, `Assets`, `Vector DB used`, `Complexity`, `Model/Effort`, `Status`, `Evidence`, `PR link(s)`, `CI/CD run link(s)`, `Tokens`, `% Complete`, `SLA`, `Remaining SLA`, plus three footer rows and an assets manifest) is defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints". It shows the real model and token spend per task, is printed before the first task runs and reprinted in full after every task completion; a uniform expensive column means tiering was skipped. The ledger is checkpointed before each dispatch so a run that dies resumes instead of restarting.
 7. **The root owns writes.** Specialists are read-only; the root performs edits, validation, commits, pushes, PR actions, and user communication. Explicit `LOA mode` (long-running autonomous orchestration) is opt-in only and keeps the parent as reconciliation/final checker with an `LLM-STATE.md` checkpoint.
 8. **Knowledge base first, root writes back.** The KB lookup is the preflight step before splitting; lanes get hit paths, report `knowledge:` candidates, and the root alone runs `kb.py add` and promotions (`rules/knowledge-base.md`).
 9. **Notifications are configuration.** Mirroring the tasks table to a chat channel is opt-in per consumer (a configured route plus standing authorization) and never assumed.
@@ -175,7 +175,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has one `.md` source (Cursor/Claude); the Codex TOML is generated from it (`npm run subagents:render`, gitignored) and `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 
@@ -203,7 +203,7 @@ PowerShell:
 npm run validate
 ```
 
-`security-check-toolkit` runs every installed scanner (gitleaks, semgrep, shellcheck, PSScriptAnalyzer, yamllint, actionlint, hadolint, syft/grype/trivy, SkillSpector) plus the dependency-free LLM-surface prompt-injection scan; missing scanners are skipped with a reason. `npm run validate` runs the node validators (skill index, rules redirects, workflow sizes, subagent parity), the always-on size check (`scripts/measure-always-on.py --check`: this file stays <= 24,576 bytes) and the Python unit tests. Also run the duplicate-file gate before push:
+`security-check-toolkit` runs every installed scanner (gitleaks, semgrep, shellcheck, PSScriptAnalyzer, yamllint, actionlint, hadolint, syft/grype/trivy, SkillSpector) plus the dependency-free LLM-surface prompt-injection scan; missing scanners are skipped with a reason. `npm run validate` runs the node validators (skill index, rules redirects, workflow sizes, subagent parity), the always-on size check (`scripts/measure-always-on.py --check --rules-budget 50000`: this file stays <= 24,576 bytes and the always-on rules <= 50,000 bytes together) and the Python unit tests. Also run the duplicate-file gate before push:
 
 ```bash
 git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED: remove duplicate files" && exit 1

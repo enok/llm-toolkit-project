@@ -1,0 +1,83 @@
+{
+  "agent-orchestrator": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "aws-alarm-investigator": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "diagram-creation-specialist": [
+    "description",
+    "developer_instructions",
+    "name",
+    "readonly"
+  ],
+  "documentation-reviewer": [
+    "description",
+    "developer_instructions",
+    "name",
+    "readonly"
+  ],
+  "documentation-sync": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "java-change-validator": [
+    "description",
+    "developer_instructions",
+    "name",
+    "readonly"
+  ],
+  "log-analyst": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "model-selector": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "pr-validator": [
+    "description",
+    "developer_instructions",
+    "name",
+    "readonly"
+  ],
+  "prod-doc-promoter": [
+    "description",
+    "developer_instructions",
+    "name",
+    "readonly"
+  ],
+  "release-coordinator": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "task-quality-judge": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "test-runner": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "verifier": [
+    "description",
+    "developer_instructions",
+    "name"
+  ],
+  "workspace-hygiene-auditor": [
+    "description",
+    "developer_instructions",
+    "name",
+    "readonly"
+  ]
+}

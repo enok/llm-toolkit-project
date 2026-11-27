@@ -937,12 +937,45 @@ fi
 if [[ -d "$PROJECT/tool-subagents" ]]; then
   ensure_symlink "$PROJECT/.cursor/agents" "../tool-subagents"
   ensure_symlink "$PROJECT/.claude/agents" "../tool-subagents"
-  if ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents"; then
+  # Codex reads generated TOML (rendered from the .md sources, never committed).
+  # A legacy link onto tool-subagents/ is re-pointed; nothing else is removed.
+  CODEX_LINK_OK=0
+  CODEX_CONSUMER_SKIP=0
+  SYNC_TOOLKIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+  if [[ "$(cd "$PROJECT" && pwd -P)" != "$SYNC_TOOLKIT_ROOT" ]]; then
+    # Consumer repo with its own tool-subagents/: never render into the
+    # consumer's tree. Only the toolkit's own agents are rendered, into the
+    # toolkit's .generated folder; setup-repo/ensure-symlinks link them.
+    command -v node >/dev/null 2>&1 \
+      && node "$SYNC_TOOLKIT_ROOT/scripts/create-specialist-agent.js" --render-codex >/dev/null 2>&1 || true
+    if compgen -G "$PROJECT/tool-subagents/*.toml" >/dev/null; then
+      # The consumer keeps its own hand-written Codex TOML there: link it as
+      # before (read-only; nothing is written into the consumer's folder).
+      ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents" && CODEX_LINK_OK=1
+      CODEX_CONSUMER_SKIP=1
+    else
+      CODEX_CONSUMER_SKIP=1
+      echo "  Note: $PROJECT has its own tool-subagents/; Codex TOML is not rendered into it (toolkit agents are rendered in the toolkit's tool-subagents/.generated/codex)."
+    fi
+  elif command -v node >/dev/null 2>&1 \
+    && node "$(dirname "${BASH_SOURCE[0]}")/create-specialist-agent.js" --render-codex \
+      --source "$PROJECT/tool-subagents" "$PROJECT/tool-subagents/.generated/codex" >/dev/null 2>&1; then
+    if [[ -L "$PROJECT/.codex/agents" ]] \
+      && [[ "$(cd "$PROJECT/.codex/agents" 2>/dev/null && pwd -P)" == "$(cd "$PROJECT/tool-subagents" && pwd -P)" ]]; then
+      echo "  WARNING: .codex/agents still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex." >&2
+      echo "  Re-pointing legacy .codex/agents -> tool-subagents/.generated/codex"
+      rm -f -- "$PROJECT/.codex/agents"
+    fi
+    ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents/.generated/codex" && CODEX_LINK_OK=1
+  else
+    echo "Warning: could not render Codex agent TOML (needs node and valid tool-subagents/*.md)." >&2
+  fi
+  if [[ "$CODEX_LINK_OK" -eq 1 ]]; then
     CODEX_AGENTS_SYNCED=1
     echo "  OK shared subagent symlinks repaired"
   else
     CODEX_AGENTS_SYNCED=0
-    echo "Warning: optional .codex/agents link could not be repaired; continuing." >&2
+    [[ "$CODEX_CONSUMER_SKIP" -eq 1 ]] || echo "Warning: optional .codex/agents link could not be repaired; continuing." >&2
     echo "  OK shared Cursor/Claude subagent symlinks repaired"
   fi
 fi
@@ -960,11 +993,8 @@ if [[ -d "$PROJECT/skills" ]]; then
     "$PROJECT/.agents/skills|../skills" \
     "$PROJECT/.agent/skills|../.agents/skills" \
     "$PROJECT/.claude/skills|../.agents/skills" \
-    "$PROJECT/.codex/skills|../.agents/skills" \
-    "$PROJECT/.cursor/skills|../.agents/skills" \
     "$PROJECT/.gemini/skills|../.agents/skills" \
-    "$PROJECT/.opencode/skills|../.agents/skills" \
-    "$PROJECT/.windsurf/skills|../.agents/skills"; do
+    "$PROJECT/.opencode/skills|../.agents/skills"; do
     link_target="${link_spec%%|*}"
     link_source="${link_spec#*|}"
     if ! ensure_symlink "$link_target" "$link_source"; then
@@ -979,6 +1009,23 @@ if [[ -d "$PROJECT/skills" ]]; then
     echo "  Re-run with --force if a blocking local path should be replaced." >&2
   fi
 fi
+
+# Skill roots now created: .agents/skills (Codex, Cursor, Windsurf, Copilot)
+# and .claude/skills. Old per-tool roots are never created again and never
+# deleted here; say which ones can be removed by hand.
+for legacy_root in ".codex/skills" ".cursor/skills" ".windsurf/skills"; do
+  legacy_found=0
+  if [[ -L "$PROJECT/$legacy_root" ]]; then
+    legacy_found=1
+  elif [[ -d "$PROJECT/$legacy_root" ]]; then
+    for legacy_entry in "$PROJECT/$legacy_root"/*; do
+      [[ -L "$legacy_entry" ]] && { legacy_found=1; break; }
+    done
+  fi
+  if [[ "$legacy_found" -eq 1 ]]; then
+    echo "  Note: $legacy_root holds links that are no longer created; it can be removed (.agents/skills is used)."
+  fi
+done
 
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   build_ignore_block() {
@@ -1117,13 +1164,13 @@ Canonical shared content lives in toolkit \`skills/\`, \`rules/\`, \`workflows/\
 | Tool | Location | Format |
 |------|----------|--------|
 | Antigravity | \`.agent/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
-| Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; provider skill paths stay thin links to the shared skill catalog |
-| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills and agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated from \`rules/\` (git-ignored through \`.cursor/rules/.gitignore\`; hand-made rules there stay visible to git); project filtering happens via local ignore files |
+| Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; \`.agents/skills/\` is the shared skill root (Codex also reads it) |
+| Cursor | \`.agents/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills come from the shared \`.agents/skills/\` root; agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated from \`rules/\` (git-ignored through \`.cursor/rules/.gitignore\`; hand-made rules there stay visible to git); project filtering happens via local ignore files |
 | Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` imports \`AGENTS.md\` (\`@AGENTS.md\`); shared skills and agents are links |
 | Gemini CLI | \`.gemini/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus resolved LLM config docs |
 | OpenCode | \`.opencode/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
-| Windsurf | \`.windsurf/skills/\`, \`.windsurf/rules/\`, \`.windsurf/workflows/\` | Thin skill links plus shared rule/workflow links |
+| Windsurf | \`.agents/skills/\`, \`.windsurf/rules/\`, \`.windsurf/workflows/\` | Skills come from the shared \`.agents/skills/\` root; rule/workflow links are shared |
 
 ### Clone Bootstrap
 
@@ -1236,7 +1283,7 @@ if [[ -d "$PROJECT/workflows" ]]; then
 fi
 if [[ -d "$PROJECT/skills" ]]; then
   if [[ "${SKILLS_SYNCED:-0}" -eq 1 ]]; then
-    append_linked ".agents/skills/, .agent/skills/, .claude/skills/, .codex/skills/, .cursor/skills/, .gemini/skills/, .opencode/skills/, .windsurf/skills/"
+    append_linked ".agents/skills/, .agent/skills/, .claude/skills/, .gemini/skills/, .opencode/skills/"
   fi
 fi
 if [[ -n "$LINKED_LIST" ]]; then

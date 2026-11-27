@@ -180,14 +180,12 @@ ensure_plain_dir "$CONSUMER/.windsurf" "$FORCE" || exit 1
 ensure_dir_link "$CONSUMER/.windsurf/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
 ensure_dir_link "$CONSUMER/.windsurf/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
 if [[ $USE_WINDSURF -eq 1 ]]; then
-  link_shared_skill_catalog "$CONSUMER/.windsurf/skills" "Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>" || exit 1
   echo "Windsurf: .windsurf/rules and .windsurf/workflows linked to toolkit"
 fi
 
 # Cursor: create the provider root; sync-tool-configs links shared subpaths.
 if [[ $USE_CURSOR -eq 1 ]]; then
   ensure_plain_dir "$CONSUMER/.cursor" "$FORCE" || exit 1
-  link_shared_skill_catalog "$CONSUMER/.cursor/skills" "Cursor: .cursor/skills/<name> -> toolkit/skills/<name>" || exit 1
   if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
     ensure_dir_link "$CONSUMER/.cursor/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
   fi
@@ -216,9 +214,9 @@ fi
 # Codex: link only shared subpaths; AGENTS.md remains primary.
 if [[ $USE_CODEX -eq 1 ]]; then
   ensure_plain_dir "$CONSUMER/.codex" "$FORCE" || exit 1
-  link_shared_skill_catalog "$CONSUMER/.codex/skills" "Codex: .codex/skills/<name> -> toolkit/skills/<name>" || exit 1
-  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
-    ensure_dir_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
+  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]] && render_codex_agents "$TOOLKIT_ROOT"; then
+    repoint_legacy_agents_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT"
+    ensure_dir_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT/tool-subagents/.generated/codex" "$FORCE" || exit 1
   fi
 fi
 
@@ -347,16 +345,14 @@ else
     echo "node_modules/"
     echo ".DS_Store"
     append_shared_skill_ignores ".agents"
-    echo ".agents/skills/AGENTS.md"
     echo ".windsurf/rules/"
     echo ".windsurf/workflows/"
-    [[ $USE_WINDSURF -eq 1 ]] && append_shared_skill_ignores ".windsurf"
-    [[ $USE_ANTIGRAVITY -eq 1 ]] && append_shared_skill_ignores ".agent" && echo ".agent/skills/AGENTS.md"
-    [[ $USE_CURSOR -eq 1 ]]   && append_shared_skill_ignores ".cursor" && echo ".cursor/skills/AGENTS.md" && echo ".cursor/workflows/" && echo ".cursor/agents/"
-    [[ $USE_CLAUDE -eq 1 ]]   && append_shared_skill_ignores ".claude" && echo ".claude/skills/AGENTS.md"
-    [[ $USE_CODEX -eq 1 ]]    && append_shared_skill_ignores ".codex" && echo ".codex/skills/AGENTS.md" && echo ".codex/agents/"
-    [[ $USE_GEMINI -eq 1 ]]   && append_shared_skill_ignores ".gemini" && echo ".gemini/skills/AGENTS.md"
-    [[ $USE_OPENCODE -eq 1 ]] && append_shared_skill_ignores ".opencode" && echo ".opencode/skills/AGENTS.md"
+    [[ $USE_ANTIGRAVITY -eq 1 ]] && append_shared_skill_ignores ".agent"
+    [[ $USE_CURSOR -eq 1 ]]   && echo ".cursor/workflows/" && echo ".cursor/agents/"
+    [[ $USE_CLAUDE -eq 1 ]]   && append_shared_skill_ignores ".claude"
+    [[ $USE_CODEX -eq 1 ]]    && echo ".codex/agents/"
+    [[ $USE_GEMINI -eq 1 ]]   && append_shared_skill_ignores ".gemini"
+    [[ $USE_OPENCODE -eq 1 ]] && append_shared_skill_ignores ".opencode"
   } >> "$CONSUMER_GITIGNORE"
   echo ".gitignore: appended LLM tool entries."
 fi
@@ -385,11 +381,11 @@ echo "    .windsurf/workflows/       - shared workflows -> toolkit workflows/"
 echo "    docs/llm/                  - repo-local LLM guidance"
 echo "    scripts/sync-llm-configs.* - consumer-local LLM sync wrapper"
 echo "    AGENTS.md                  - repo-level instructions and context"
-[[ $USE_WINDSURF -eq 1 ]] && echo "  Windsurf:"  && echo "    .windsurf/skills/<name>    - shared skills -> toolkit skills/<name>"
+[[ $USE_WINDSURF -eq 1 ]] && echo "  Windsurf:"  && echo "    .windsurf/rules, workflows     - shared links (skills: .agents/skills)"
 [[ $USE_ANTIGRAVITY -eq 1 ]] && echo "  Antigravity:" && echo "    .agent/skills/<name>       - shared skills -> toolkit skills/<name>"
-[[ $USE_CURSOR -eq 1 ]]   && echo "  Cursor:"    && echo "    .cursor/skills/<name>      - shared skills -> toolkit skills/<name>" && echo "    .cursor/                   - provider root with shared subpath links"
+[[ $USE_CURSOR -eq 1 ]]   && echo "  Cursor:"    && echo "    .cursor/                   - provider root with shared subpath links"
 [[ $USE_CLAUDE -eq 1 ]]   && echo "  Claude Code:" && echo "    .claude/skills/<name>      - shared skills -> toolkit skills/<name>"
-[[ $USE_CODEX -eq 1 ]]    && echo "  Codex:"     && echo "    .codex/skills/<name>       - shared skills -> toolkit skills/<name>"
+[[ $USE_CODEX -eq 1 ]]    && echo "  Codex:"     && echo "    .codex/agents              - generated agent TOML (skills: .agents/skills)"
 [[ $USE_GEMINI -eq 1 ]]   && echo "  Gemini CLI:" && echo "    .gemini/skills/<name>      - shared skills -> toolkit skills/<name>"
 [[ $USE_OPENCODE -eq 1 ]] && echo "  OpenCode:" && echo "    .opencode/skills/<name>    - shared skills -> toolkit skills/<name>"
 echo ""
