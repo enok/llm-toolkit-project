@@ -8,6 +8,10 @@ venv="${DOCS_VENV:-.venv-docs}"
 
 python_bin="$(command -v python3 || command -v python || true)"
 [[ -n "$python_bin" ]] || { echo "python3 not found" >&2; exit 1; }
+if ! "$python_bin" -c "import sys; sys.exit(sys.version_info < (3, 11))"; then
+  echo "Python 3.11 or newer is required (pinned Pillow 13.0.0)." >&2
+  exit 1
+fi
 
 [[ -d "$venv" ]] || "$python_bin" -m venv "$venv"
 if [[ -x "$venv/bin/python" ]]; then
