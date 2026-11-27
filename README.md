@@ -156,7 +156,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 71 workflows. Highlights:
+See `docs/catalog/workflows.md` for the categorized catalog of all 71 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -346,7 +346,7 @@ The gate checks skill frontmatter, referenced paths, the 12,000-character workfl
 
 - `AGENTS.md` - agent guidance, core principles, and the always-loaded routing index
 - `INTENTS.md` - phrase-to-capability map
-- `workflows/README.md`, `skills/README.md`, `rules/README.md`, `tool-subagents/README.md` - catalogs
+- `docs/catalog/workflows.md`, `skills/README.md`, `rules/README.md`, `tool-subagents/README.md` - catalogs
 - `learnings/INDEX.md` - one-line index of every captured learning
 - `docs/knowledge-base.md` - local vector knowledge base: setup, CLI, scheduled sync
 - `docs/plugins.md` - plugin catalog, security scan, recommend, and decision register (`scripts/plugins.py`)

@@ -82,3 +82,9 @@ mvn clean verify
 - `references/legacy-java-webapp-runtime.md`
 - `references/jdk17-legacy-migration.md`
 - `learnings/` for project-specific Maven gotchas
+
+## Sources
+
+- <https://maven.apache.org/guides/>
+- <https://maven.apache.org/plugins/maven-dependency-check-plugin/>
+- <https://www.eclipse.org/jetty/>

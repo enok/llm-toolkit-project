@@ -17,11 +17,15 @@ This directory contains **generic templates** for creating project-specific rule
 | `python-backend.md` | Python backend code style, patterns, and conventions |
 | `infra-deployment.md` | Local environment setup, Docker, database management, CI/CD |
 | `api-reference.md` | API endpoints, data flow, controller patterns (glob-triggered) |
+| `data-science-project.md` | Data contracts, notebooks, orchestration, and DS project conventions |
+| `ml-engineering-project.md` | Modeling objective, evaluation, feature ownership, and experiment tracking |
+| `machine-learning-project.md` | Feature engineering, modeling, and evaluation workflows |
+| `jupyter-notebook-project.md` | Notebook-specific environment, output, and promotion conventions |
+| `data-pipeline-project.md` | Medallion, batch, and analytics pipeline conventions |
+| `bilingual-docs.md` | Source-of-truth language, paired paths, and translation conventions |
 | `python-lambda.md` | Python Lambda projects: execution model, boto3 patterns, error handling |
 | `aws-sam-lambda.md` | AWS SAM Lambda structure, local testing, IAM, and deployment conventions |
 | `confluence-backup-gate.md` | Fail-closed backup gate before mutating existing Confluence pages or folders (configure the approved destination) |
-
-Additional domain templates — data science, ML engineering, Jupyter notebooks, data pipelines, and bilingual docs — ship with the setup bundle in `.setup/examples/`.
 
 ## Structure of a Good Project Rule
 

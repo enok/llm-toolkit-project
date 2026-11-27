@@ -60,10 +60,10 @@ Before running this prompt, ensure the following:
 
 Clean up and re-setup all LLM tool configurations for this project:
 
-1. **Remove** all existing LLM junctions/symlinks: `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`, `.setup`
+1. **Remove** all existing LLM junctions/symlinks: `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`, and the retired legacy `.setup` link if present
 
-2. **Recreate** all 6 directory links pointing to the sibling toolkit repo in the same parent directory:
-   - `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`, `.setup`
+2. **Recreate** all 5 directory links pointing to the sibling toolkit repo in the same parent directory:
+   - `.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`
    - Resolve the toolkit path relative to this repo: `<this-repo>/../<toolkit-repo>/<dir>`
    - **Windows**: use `New-Item -ItemType Junction` (not symlinks — avoids admin/Developer Mode)
    - **macOS / Linux**: use `ln -s`

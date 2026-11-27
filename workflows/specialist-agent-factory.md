@@ -45,7 +45,7 @@ Update:
 - `AGENTS.md` only when the agent adds a mandatory route or gate (it points to the catalogs)
 - `README.md`
 - `skills/README.md`
-- `workflows/README.md`
+- `docs/catalog/workflows.md`
 - `clients/README.md` if client overlay behavior changes
 
 Keep indexes short. Put detailed operating instructions in the prompt, workflow,

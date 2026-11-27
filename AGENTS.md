@@ -66,7 +66,7 @@ llm-toolkit-project/
 ├── AGENTS.md                  # This file: principles, orchestration defaults, routing index
 ├── CLAUDE.md                  # Imports this file (`@AGENTS.md`)
 ├── INTENTS.md                 # Plain-English ask -> rule / workflow / skill map
-├── README.md                  # Overview, setup, full catalogs (skills/README.md, workflows/README.md hold the per-folder ones)
+├── README.md                  # Overview, setup, full catalogs (skills/README.md, docs/catalog/workflows.md hold the per-folder ones)
 ├── INFRA.sh / INFRA.ps1       # Plan-first machine bootstrap (wraps scripts/bootstrap-dev.*)
 ├── package.json               # npm entrypoints for the validators
 ├── rules/                     # Generic rules, 15 always-on + 8 on demand (+ rules/examples/ templates)
@@ -163,7 +163,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 ## Workflows
 
-`workflows/README.md` is the workflow catalog, grouped by area with one line per workflow. Open it when a request is an end-to-end process and `INTENTS.md` did not name the workflow, or before adding or splitting a workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair; core loops used everywhere are `workflows/task-quality-loop.md`, `workflows/run-retrospective.md` and `workflows/resource-value-check.md`.
+`docs/catalog/workflows.md` is the workflow catalog, grouped by area with one line per workflow. Open it when a request is an end-to-end process and `INTENTS.md` did not name the workflow, or before adding or splitting a workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair; core loops used everywhere are `workflows/task-quality-loop.md`, `workflows/run-retrospective.md` and `workflows/resource-value-check.md`.
 
 ---
 

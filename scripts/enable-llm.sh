@@ -170,7 +170,6 @@ LLM_ITEMS=(
     ".agents"
     ".claude"
     ".codex"
-    ".setup"
     "rubrics"
     ".cursorignore"
     ".cursorindexingignore"
@@ -185,7 +184,6 @@ LLM_DIRS_ONLY=(
     ".agents"
     ".claude"
     ".codex"
-    ".setup"
     "rubrics"
     ".cursorignore"
     ".cursorindexingignore"
@@ -274,6 +272,10 @@ if [ "$MODE" = "clean" ]; then
     for item in "${LLM_ITEMS[@]}"; do
         disable_item "$item"
     done
+    # Legacy link retired from the toolkit; explicit --clean still removes it.
+    if [ -e "$TARGET_PATH/.setup" ] || [ -L "$TARGET_PATH/.setup" ]; then
+        disable_item ".setup"
+    fi
     create_docs_structure
 
     # Update .gitignore

@@ -7,7 +7,6 @@ This directory contains repository-specific LLM configuration that complements t
 - `.codex/`
 - `.cursor/`
 - `.windsurf/`
-- `.setup/`
 
 Do not place repo-only customizations inside those linked directories. Doing so would modify the shared toolkit checkout instead of this repository.
 
@@ -81,9 +80,9 @@ See `rules/security-check-required.md`.
 
 ## Example Templates
 
-Templates remain available under `.setup/examples/`, but they are not the source of truth for this repository. All rules, skills, and workflows are now in the shared toolkit and accessible via `.agents/skills/` and `.windsurf/workflows/`.
+Templates remain available under `rules/examples/` in the shared toolkit, but they are not the source of truth for this repository. All rules, skills, and workflows are now in the shared toolkit and accessible via `.agents/skills/` and `.windsurf/workflows/`.
 
-If the templates become noisy in the IDE, hide `.setup/examples/` locally instead of deleting anything from the linked toolkit.
+If the templates become noisy in the IDE, hide `rules/examples/` locally instead of deleting anything from the linked toolkit.
 
 ## Integrations
 
@@ -92,7 +91,7 @@ The active integrations for this repository are:
 - AWS CLI
 - GitHub CLI
 
-Jira and Confluence are not used for this project. Their guides may still exist in `.setup/integrations/` because that directory is linked from the shared toolkit, so hide them locally in the IDE if they are distracting.
+Jira and Confluence are not used for this project. Their guides may still exist in the shared toolkit's `integrations/` directory, so hide them locally in the IDE if they are distracting.
 
 ## Workflow Customization
 

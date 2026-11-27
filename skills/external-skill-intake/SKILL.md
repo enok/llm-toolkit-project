@@ -106,7 +106,7 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 - [ ] Imported content adapted to generic toolkit format.
 - [ ] A new skill, workflow, rule, or agent passed the mandatory value gate in `workflows/resource-value-check.md` (blind race against the plain model) before it is added.
 - [ ] Any imported executable path is cross-platform or has documented OS-specific limits.
-- [ ] Related knowledge linked and indexed in `AGENTS.md`, `README.md`, `INTENTS.md`, or `workflows/README.md` as applicable.
+- [ ] Related knowledge linked and indexed in `AGENTS.md`, `README.md`, `INTENTS.md`, or `docs/catalog/workflows.md` as applicable.
 - [ ] `scripts/validate-toolkit-indexes.sh` passed (PowerShell: `scripts/validate-toolkit-indexes.ps1`).
 - [ ] `scripts/security-check-toolkit.sh` passed (PowerShell: `scripts/security-check-toolkit.ps1`) or findings were fixed.
 
@@ -116,3 +116,9 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 - `docs/plugins.md`
 - `skills/llm-context-engineering/SKILL.md`
 - `rules/security-check-required.md`
+
+## Sources
+
+- <https://github.com/anthropics/claude-code>
+- <https://github.com/openai/codex>
+- <https://modelcontextprotocol.io/>

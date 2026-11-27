@@ -196,3 +196,8 @@ curl -u "<email>:<api-token>" -X POST -H "X-Atlassian-Token: no-check" \
 - `integrations/confluence.md`
 - `skills/diagram-authoring/SKILL.md`
 - `skills/external-skill-intake/SKILL.md`
+
+## Sources
+
+- <https://developer.atlassian.com/cloud/confluence/rest/>
+- <https://support.atlassian.com/confluence-cloud/docs/>
