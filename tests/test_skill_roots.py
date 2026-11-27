@@ -4,7 +4,9 @@ Runs the real scripts against throwaway directories (a scratch project and a scr
 - sync-tool-configs.sh creates `.agents/skills` and `.claude/skills` but not `.codex/skills`, `.cursor/skills`, `.windsurf/skills`;
 - existing old links are left in place and reported as removable;
 - install-global-surfaces.sh links `~/.agents/skills/<name>` once for Codex, Cursor and Windsurf, creates none of the old
-  user-level roots, never deletes existing ones and reports them.
+  user-level roots, never deletes existing ones and reports them;
+- install-global-surfaces.sh gives `~/.claude/skills` one link per skill inside a real directory (like `~/.agents/skills`),
+  so a file another tool writes there lands in HOME and not in the toolkit checkout.
 """
 from __future__ import annotations
 
@@ -108,6 +110,95 @@ class SkillRootsTest(unittest.TestCase):
         self.assertTrue((self.home / ".cursor" / "skills").is_symlink())
         self.assertEqual(result.stdout.count("legacy skills"), 2)
         self.assertIn("can be removed", result.stdout)
+
+    def _toolkit_skills_state(self) -> str:
+        status = subprocess.run(
+            ["git", "-C", str(ROOT), "status", "--porcelain", "--", "skills"],
+            capture_output=True, text=True, check=False,
+        ).stdout
+        listing = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "skills").rglob("*") if p.is_file())
+        return status + "\n".join(listing)
+
+    def _skill_names(self) -> list:
+        return sorted(p.name for p in (ROOT / "skills").iterdir() if (p / "SKILL.md").is_file())
+
+    def test_claude_fresh_install_has_real_dir_with_per_skill_links(self) -> None:
+        result = self._install("claude")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        claude_skills = self.home / ".claude" / "skills"
+        self.assertTrue(claude_skills.is_dir())
+        self.assertFalse(claude_skills.is_symlink())
+        names = self._skill_names()
+        self.assertEqual(sorted(p.name for p in claude_skills.iterdir()), names)
+        for name in names:
+            self.assertTrue((claude_skills / name).is_symlink(), name)
+            self.assertEqual((claude_skills / name).resolve(), (ROOT / "skills" / name).resolve())
+        self.assertTrue((self.home / ".claude" / "agents").is_symlink())
+
+    def test_claude_migrates_directory_link_without_touching_toolkit(self) -> None:
+        before = self._toolkit_skills_state()
+        (self.home / ".claude").mkdir()
+        (self.home / ".claude" / "skills").symlink_to(ROOT / "skills")
+        result = self._install("claude")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        claude_skills = self.home / ".claude" / "skills"
+        self.assertFalse(claude_skills.is_symlink())
+        self.assertTrue(claude_skills.is_dir())
+        self.assertEqual(sorted(p.name for p in claude_skills.iterdir()), self._skill_names())
+        self.assertEqual(self._toolkit_skills_state(), before)
+        again = self._install("claude")
+        self.assertEqual(again.returncode, 0, again.stdout + again.stderr)
+        self.assertEqual(self._toolkit_skills_state(), before)
+
+    def test_claude_dry_run_changes_nothing_on_a_directory_link(self) -> None:
+        (self.home / ".claude").mkdir()
+        (self.home / ".claude" / "skills").symlink_to(ROOT / "skills")
+        result = subprocess.run(
+            ["bash", str(INSTALL), "--tools", "claude"],
+            capture_output=True, text=True, env=_env(self.home), check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((self.home / ".claude" / "skills").is_symlink())
+        self.assertNotIn("blocked", result.stdout)
+
+    def test_claude_existing_real_dir_keeps_contents_and_gains_links(self) -> None:
+        mine = self.home / ".claude" / "skills" / "my-own-skill"
+        mine.mkdir(parents=True)
+        (mine / "SKILL.md").write_text("---\nname: my-own-skill\ndescription: Mine.\n---\n", encoding="utf-8")
+        foreign = self.home / ".claude" / "skills" / "other-tool-link"
+        foreign.symlink_to(self.tmp)
+        result = self._install("claude")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        claude_skills = self.home / ".claude" / "skills"
+        self.assertTrue((mine / "SKILL.md").is_file())
+        self.assertFalse(mine.is_symlink())
+        self.assertTrue(foreign.is_symlink())
+        for name in self._skill_names():
+            self.assertTrue((claude_skills / name).is_symlink(), name)
+
+    def test_claude_removes_only_stale_links_into_the_toolkit(self) -> None:
+        claude_skills = self.home / ".claude" / "skills"
+        claude_skills.mkdir(parents=True)
+        stale = claude_skills / "gone-skill"
+        stale.symlink_to(ROOT / "skills" / "gone-skill")
+        elsewhere = claude_skills / "dangling-elsewhere"
+        elsewhere.symlink_to(self.tmp / "nowhere")
+        result = self._install("claude")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(stale.is_symlink())
+        self.assertTrue(elsewhere.is_symlink())
+
+    def test_foreign_file_written_through_claude_skills_lands_in_home(self) -> None:
+        before = self._toolkit_skills_state()
+        (self.home / ".claude").mkdir()
+        (self.home / ".claude" / "skills").symlink_to(ROOT / "skills")
+        self.assertEqual(self._install("claude").returncode, 0)
+        newdir = self.home / ".claude" / "skills" / "zz-foreign-new-skill"
+        newdir.mkdir()
+        (newdir / "SKILL.md").write_text("---\nname: zz-foreign-new-skill\n---\n", encoding="utf-8")
+        self.assertTrue((self.home / ".claude" / "skills" / "zz-foreign-new-skill" / "SKILL.md").is_file())
+        self.assertFalse((ROOT / "skills" / "zz-foreign-new-skill").exists())
+        self.assertEqual(self._toolkit_skills_state(), before)
 
 
 if __name__ == "__main__":

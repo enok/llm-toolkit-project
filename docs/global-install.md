@@ -68,7 +68,7 @@ inspection at any time (for example in a script or CI step).
 
 | Tool | Skills | Agents | Global instruction file |
 | --- | --- | --- | --- |
-| Claude Code | `~/.claude/skills` -> `skills/` | `~/.claude/agents` -> `tool-subagents/` | `~/.claude/CLAUDE.md` (managed block) |
+| Claude Code | `~/.claude/skills/<name>` -- one link per skill directory inside a real `~/.claude/skills` directory | `~/.claude/agents` -> `tool-subagents/` | `~/.claude/CLAUDE.md` (managed block) |
 | Codex | `~/.agents/skills/<name>` -- one link per skill directory (shared with Cursor and Windsurf) | `~/.codex/agents` -> `tool-subagents/.generated/codex/` (rendered from the `.md` by the installer; a legacy link to `tool-subagents/` is re-pointed) | `~/.codex/AGENTS.md` (managed block; created if missing or empty) |
 | Cursor | `~/.agents/skills/<name>` (shared; no `~/.cursor/skills` link) | `~/.cursor/agents` -> `tool-subagents/` | None -- Cursor has no global rules file. The script prints the directive text to paste into **Cursor Settings > Rules > User Rules**. |
 | Windsurf | `~/.agents/skills/<name>` (shared; no `~/.codeium/windsurf/skills` link) | -- | `~/.codeium/windsurf/memories/global_rules.md` (managed block; directories created if missing) |
@@ -85,8 +85,19 @@ longer creates `~/.codex/skills`, `~/.cursor/skills` or
 `legacy skills` row per old one it finds saying it can be removed. An existing real
 (non-symlink) directory with the same name as a toolkit skill is
 preserved unless `--force`/`-Force` is given, and entries under
-`~/.agents/skills/` that don't match a toolkit skill are never touched or
-removed.
+`~/.agents/skills/` that are not links into the toolkit's `skills/` are never
+touched or removed; a link into the toolkit's `skills/` whose skill no longer
+exists is removed.
+
+`~/.claude/skills` works the same way (one link per skill in a real
+directory), so a tool or skill that writes into `~/.claude/skills` writes into
+your home directory and not into the toolkit checkout. An older install left
+`~/.claude/skills` as one directory link to `skills/`: the installer replaces
+that link with a real directory plus per-skill links (only the link is
+removed; the toolkit's `skills/` is untouched). An existing real
+`~/.claude/skills` directory keeps all its contents and only gains the links.
+Gemini CLI, OpenCode and Antigravity still use one directory link to
+`skills/`.
 
 On Windows, a link is a directory junction (`New-Item -ItemType
 Junction`) -- no admin rights or Developer Mode required. On non-Windows
@@ -162,29 +173,54 @@ There is no built-in uninstall subcommand; remove the links and the
 managed block manually. Only remove a link if it's a symlink/junction --
 never `rm -rf` in case a real directory landed at that path.
 
+Skill roots such as `~/.agents/skills` and `~/.claude/skills` are shared with
+other tools, so delete only the links that point into this toolkit's
+`skills/` folder, never every link in the root. In both blocks replace
+`<toolkit-root>` with the absolute path of this checkout.
+
 **Links** (bash):
 
 ```bash
-rm -f ~/.claude/skills ~/.claude/agents \
-      ~/.codex/agents ~/.cursor/skills ~/.cursor/agents \
-      ~/.codeium/windsurf/skills ~/.gemini/skills \
-      ~/.config/opencode/skills ~/.gemini/antigravity/skills
-find ~/.agents/skills -maxdepth 1 -type l -delete   # per-skill shared links
-find ~/.codex/skills -maxdepth 1 -type l -delete   # legacy per-skill Codex links
+TK=<toolkit-root>
+rm -f ~/.claude/agents ~/.codex/agents ~/.cursor/agents
+for d in ~/.claude/skills ~/.agents/skills ~/.codex/skills ~/.cursor/skills \
+         ~/.codeium/windsurf/skills ~/.gemini/skills ~/.config/opencode/skills \
+         ~/.gemini/antigravity/skills; do
+  # older install: the root itself is one directory link into the toolkit
+  find "$d" -maxdepth 0 -type l -lname "$TK/*" -delete 2>/dev/null
+  # per-skill links into the toolkit (the root and other tools' entries stay)
+  find "$d" -mindepth 1 -maxdepth 1 -type l -lname "$TK/skills/*" -delete 2>/dev/null
+done
 ```
 
 **Links** (PowerShell): a junction/symlink is safe to remove with
 `Remove-Item` as long as you don't add `-Recurse` (which would otherwise
 recurse into -- and delete -- the link's target on older PowerShell
-versions):
+versions). The helper removes a path only when it is a link whose target is
+inside the toolkit:
 
 ```powershell
-Remove-Item ~/.claude/skills, ~/.claude/agents, ~/.codex/agents, `
-    ~/.cursor/skills, ~/.cursor/agents, ~/.codeium/windsurf/skills, `
-    ~/.gemini/skills, ~/.config/opencode/skills, `
-    ~/.gemini/antigravity/skills -Force
-Get-ChildItem ~/.agents/skills | Where-Object LinkType | Remove-Item -Force
-Get-ChildItem ~/.codex/skills | Where-Object LinkType | Remove-Item -Force   # legacy
+$toolkit = '<toolkit-root>'
+function Remove-ToolkitLink([string]$Path) {
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if ($item -and $item.LinkType) {
+        $target = [string]($item.Target | Select-Object -First 1)
+        if ($target.StartsWith($toolkit, [System.StringComparison]::OrdinalIgnoreCase)) {
+            Remove-Item -LiteralPath $Path -Force
+        }
+    }
+}
+foreach ($rel in '.claude\agents', '.codex\agents', '.cursor\agents') {
+    Remove-ToolkitLink (Join-Path $HOME $rel)
+}
+foreach ($rel in '.claude\skills', '.agents\skills', '.codex\skills', '.cursor\skills',
+                 '.codeium\windsurf\skills', '.gemini\skills', '.config\opencode\skills',
+                 '.gemini\antigravity\skills') {
+    $root = Join-Path $HOME $rel
+    Remove-ToolkitLink $root   # older install: the root itself was one link
+    Get-ChildItem -LiteralPath $root -Force -ErrorAction SilentlyContinue |
+        ForEach-Object { Remove-ToolkitLink $_.FullName }
+}
 ```
 
 **Managed instruction blocks** -- strip the block from each file the

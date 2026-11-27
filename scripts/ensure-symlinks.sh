@@ -92,7 +92,7 @@ link_shared_skill_catalog() {
   echo "$label"
 }
 
-# Toolkit repo uses catalog junctions (.cursor/skills -> .agents/skills -> skills/)
+# Toolkit repo uses catalog links (.claude/skills -> .agents/skills -> skills/)
 # repaired by sync-tool-configs.sh. Consumer repos use per-skill links so local skills can coexist.
 ensure_toolkit_windsurf_layout "$TOOLKIT_ROOT" "$FORCE" || exit 1
 

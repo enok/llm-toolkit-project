@@ -192,8 +192,8 @@ function Get-FullPathSafe {
 
 function Get-LinkTargetCanonical {
     param([Parameter(Mandatory)][string]$LinkPath)
-    if (-not (Test-Path -LiteralPath $LinkPath)) { return $null }
-    $item = Get-Item -LiteralPath $LinkPath -Force
+    $item = Get-Item -LiteralPath $LinkPath -Force -ErrorAction SilentlyContinue
+    if (-not $item) { return $null }
     if (-not $item.LinkType) { return $null }
     $raw = $item.Target
     if ($raw -is [System.Array]) {
@@ -210,8 +210,8 @@ function Get-LinkTargetCanonical {
 
 function Remove-LinkOrPath {
     param([Parameter(Mandatory)][string]$Path)
-    if (-not (Test-Path -LiteralPath $Path)) { return }
-    $item = Get-Item -LiteralPath $Path -Force
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if (-not $item) { return }
     $isReparse = [bool]($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)
     if ($isReparse -and $item.PSIsContainer) {
         [System.IO.Directory]::Delete($Path, $false)
@@ -412,22 +412,125 @@ function Set-ManagedBlock {
 
 $script:AgentsSkillsDone = $false
 
-# Shared user-level skill root read by Codex, Cursor and Windsurf: one link per
-# skill under ~/.agents/skills (never a link to the whole catalog, and entries
-# that are not toolkit skills are left alone).
-function Install-AgentsSkills {
-    if ($script:AgentsSkillsDone) { return }
-    $script:AgentsSkillsDone = $true
-    $base = Join-Path $HomeDir '.agents'
+# Link item at Path even when it dangles (Test-Path is false for a dangling
+# link); $null when Path is missing or is not a link/reparse point.
+function Get-LinkItem {
+    param([Parameter(Mandatory)][string]$Path)
+    $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+    if (-not $item) { return $null }
+    $isReparse = [bool]($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)
+    if ($item.LinkType -or $isReparse) { return $item }
+    return $null
+}
+
+function Get-LinkRawTarget {
+    param([Parameter(Mandatory)]$Item)
+    $raw = $Item.Target
+    if ($raw -is [System.Array]) {
+        if ($raw.Length -eq 0) { return '' }
+        $raw = $raw[0]
+    }
+    if ($null -eq $raw) { return '' }
+    return [string]$raw
+}
+
+function Test-PathUnder {
+    param(
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Path,
+        [Parameter(Mandatory)][string]$Root
+    )
+    if ([string]::IsNullOrEmpty($Path)) { return $false }
+    $p = (Get-FullPathSafe $Path).Replace('\', '/')
+    $r = (Get-FullPathSafe $Root).Replace('\', '/').TrimEnd('/') + '/'
+    return $p.StartsWith($r, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+# User-level skill roots that hold one link per skill inside a real directory
+# (~/.agents/skills, read by Codex, Cursor and Windsurf, and ~/.claude/skills):
+# never a link to the whole catalog, so anything another tool writes into the
+# root lands in the home directory and not in the toolkit checkout. Entries that
+# are not links into the toolkit's skills/ are left alone; an old directory link
+# to the whole catalog is replaced by the real directory (only the link is
+# removed, never its target's contents); links into the toolkit's skills/ whose
+# skill no longer exists are removed.
+function Install-SkillDir {
+    param(
+        [Parameter(Mandatory)][string]$Tool,
+        [Parameter(Mandatory)][string]$Dir
+    )
     $skillsRoot = Join-Path $ToolkitRoot 'skills'
-    if (Test-Path -LiteralPath $skillsRoot -PathType Container) {
-        Get-ChildItem -LiteralPath $skillsRoot -Directory | Sort-Object -Property Name | ForEach-Object {
-            $skillMd = Join-Path $_.FullName 'SKILL.md'
-            if (Test-Path -LiteralPath $skillMd -PathType Leaf) {
-                Set-LinkSurface -Tool 'agents' -SurfaceLabel "skills/$($_.Name)" -LinkPath (Join-Path $base "skills/$($_.Name)") -TargetPath $_.FullName
+    if (-not (Test-Path -LiteralPath $skillsRoot -PathType Container)) { return }
+    $migrating = $false
+
+    $linkItem = Get-LinkItem -Path $Dir
+    if ($linkItem) {
+        $existing = Get-LinkTargetCanonical -LinkPath $Dir
+        $isCatalog = $existing -and ($existing -ieq (Get-FullPathSafe $skillsRoot))
+        if ($isCatalog -or $Force) {
+            $migrating = $true
+            if ($Apply) {
+                Remove-LinkOrPath -Path $Dir
+                New-Item -ItemType Directory -Path $Dir -Force | Out-Null
+            }
+            Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'updated' -Detail "$Dir was a link to the whole catalog; now a real directory with one link per skill"
+        }
+        else {
+            Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'blocked' -Detail "existing link at $Dir does not point to the toolkit; rerun with -Force"
+            return
+        }
+    }
+    elseif ((Test-Path -LiteralPath $Dir) -and -not (Test-Path -LiteralPath $Dir -PathType Container)) {
+        if ($Force) {
+            $backup = "$Dir.bak-$BackupTimestamp"
+            if ($Apply) {
+                Move-Item -LiteralPath $Dir -Destination $backup
+                New-Item -ItemType Directory -Path $Dir -Force | Out-Null
+            }
+            Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'updated' -Detail "backed up to $backup, then created a directory"
+            $migrating = $true
+        }
+        else {
+            Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'blocked' -Detail "existing non-directory path at $Dir; rerun with -Force"
+            return
+        }
+    }
+
+    Get-ChildItem -LiteralPath $skillsRoot -Directory | Sort-Object -Property Name | ForEach-Object {
+        $name = $_.Name
+        $skillMd = Join-Path $_.FullName 'SKILL.md'
+        if (-not (Test-Path -LiteralPath $skillMd -PathType Leaf)) { return }
+        $linkPath = Join-Path $Dir $name
+        if ($migrating -and -not $Apply) {
+            Add-ResultRow -Tool $Tool -Surface "skills/$name" -Action 'created' -Detail "$linkPath -> $($_.FullName)"
+            return
+        }
+        $entry = Get-LinkItem -Path $linkPath
+        if ($entry -and -not (Test-PathUnder -Path (Get-LinkRawTarget -Item $entry) -Root $skillsRoot)) {
+            Add-ResultRow -Tool $Tool -Surface "skills/$name" -Action 'skipped' -Detail "$linkPath is a link outside the toolkit; left alone"
+            return
+        }
+        Set-LinkSurface -Tool $Tool -SurfaceLabel "skills/$name" -LinkPath $linkPath -TargetPath $_.FullName
+    }
+
+    # Stale per-skill links: only links into the toolkit's skills/ whose skill is gone.
+    if ((Test-Path -LiteralPath $Dir -PathType Container) -and -not (Get-LinkItem -Path $Dir)) {
+        foreach ($child in @(Get-ChildItem -LiteralPath $Dir -Force -ErrorAction SilentlyContinue)) {
+            $entry = Get-LinkItem -Path $child.FullName
+            if (-not $entry) { continue }
+            if (-not (Test-PathUnder -Path (Get-LinkRawTarget -Item $entry) -Root $skillsRoot)) { continue }
+            if (-not (Test-Path -LiteralPath (Join-Path $skillsRoot "$($child.Name)/SKILL.md") -PathType Leaf)) {
+                if ($Apply) { Remove-LinkOrPath -Path $child.FullName }
+                Add-ResultRow -Tool $Tool -Surface "skills/$($child.Name)" -Action 'removed' -Detail "stale link; $($child.Name) is no longer a toolkit skill"
             }
         }
     }
+}
+
+# Shared by Codex, Cursor and Windsurf.
+function Install-AgentsSkills {
+    if ($script:AgentsSkillsDone) { return }
+    $script:AgentsSkillsDone = $true
+    Install-SkillDir -Tool 'agents' -Dir (Join-Path (Join-Path $HomeDir '.agents') 'skills')
 }
 
 # Old per-tool skill roots are no longer created. Existing links are never
@@ -438,13 +541,13 @@ function Write-LegacySkillRootNote {
         [Parameter(Mandatory)][string]$Root
     )
     $found = $false
-    if (Test-Path -LiteralPath $Root) {
-        $item = Get-Item -LiteralPath $Root -Force
-        if ($item.LinkType) {
+    $item = Get-Item -LiteralPath $Root -Force -ErrorAction SilentlyContinue
+    if ($item) {
+        if ($item.LinkType -or ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
             $found = $true
         } elseif ($item.PSIsContainer) {
-            foreach ($child in (Get-ChildItem -LiteralPath $Root -Force)) {
-                if ($child.LinkType) { $found = $true; break }
+            foreach ($child in @(Get-ChildItem -LiteralPath $Root -Force -ErrorAction SilentlyContinue)) {
+                if ($child.LinkType -or ($child.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) { $found = $true; break }
             }
         }
     }
@@ -455,7 +558,7 @@ function Write-LegacySkillRootNote {
 
 function Install-ClaudeSurface {
     $base = Join-Path $HomeDir '.claude'
-    Set-LinkSurface -Tool 'claude' -SurfaceLabel 'skills' -LinkPath (Join-Path $base 'skills') -TargetPath (Join-Path $ToolkitRoot 'skills')
+    Install-SkillDir -Tool 'claude' -Dir (Join-Path $base 'skills')
     Set-LinkSurface -Tool 'claude' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents')
     Set-ManagedBlock -Tool 'claude' -SurfaceLabel 'CLAUDE.md' -FilePath (Join-Path $base 'CLAUDE.md')
 }
