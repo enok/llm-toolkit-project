@@ -17,7 +17,7 @@ Use this directory for repository-specific LLM guidance that should not live in 
 
 ## Cursor note
 
-When `.cursor/` is linked to the shared toolkit, do not treat `.cursor/skills/` or `.cursor/agents/` as repo-local. `.cursor/rules/*.mdc` is generated from the shared rules by the sync (listed in a generated `.cursor/rules/.gitignore`; files you create by hand there are never touched or ignored).
+When `.cursor/` is linked to the shared toolkit, do not treat `.cursor/agents/` as repo-local. `.cursor/rules/*.mdc` is generated from the shared rules by the sync (listed in a generated `.cursor/rules/.gitignore`; files you create by hand there are never touched or ignored).
 Use `docs/llm/toolkit-selection.txt`, `.cursorignore`, and `.cursorindexingignore`
 to narrow the local surface without editing shared toolkit files.
 

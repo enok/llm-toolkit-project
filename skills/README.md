@@ -1,6 +1,6 @@
 # Skills
 
-Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKILL.md` and may include optional `rules/`, `references/`, `scripts/`, `agents/`, or `assets/`. Provider folders (`.agents/skills`, `.claude/skills`, `.codex/skills`, `.cursor/skills`, `.windsurf/skills`, `.agent/skills`, `.gemini/skills`, `.opencode/skills`) are links back to this catalog; see `docs/tool-compatibility-paths.md`.
+Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKILL.md` and may include optional `rules/`, `references/`, `scripts/`, `agents/`, or `assets/`. Provider folders (`.agents/skills` and `.claude/skills`, plus the `.agent`, `.gemini` and `.opencode` roots) are links back to this catalog; skills are authored once here and never copied. See `docs/tool-compatibility-paths.md` for which tool reads which path. Skills follow the [Agent Skills specification](https://agentskills.io/specification).
 
 ## Conventions
 
@@ -123,6 +123,40 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
+## Skill Format And Layout
+
+```
+skill-name/
+  SKILL.md        required: frontmatter + instructions
+  references/     optional: deep reference docs (frontmatter `title`, `tags`), linked from SKILL.md with relative links
+  rules/          optional: fine-grained prefixed rules (for example `error-classification-code.md`), loaded on demand
+  scripts/        optional: executable helpers
+  assets/         optional: templates, images, data files
+```
+
+`SKILL.md` starts with frontmatter and then a short body (title, overview, `## When to Apply` bullets, a `## Reference Files` table of `[file.md](references/file.md)` rows, a `## Quick Reference` summary):
+
+```markdown
+---
+name: skill-name
+description: What this skill does and when to use it, with trigger keywords. 1-1024 chars.
+---
+```
+
+- `name` (required): 1-64 chars, lowercase alphanumeric and hyphens, equal to the folder name. `description` (required): 1-1024 chars. `metadata` (optional): key-value pairs, not currently used.
+- Progressive disclosure: level 1 is `name` + `description` (about 100 tokens per skill, loaded at startup for all skills); level 2 is the `SKILL.md` body (under 5000 tokens, loaded when the skill activates); level 3 is `rules/*.md` and `references/*.md` (about 500-3000 tokens each, loaded only when needed). Only metadata for all skills sits in context.
+- No duplication: skills reference rules in `rules/` and workflows in `workflows/` (use `> **Reference**: For complete rules, see rules/xxx.md`); do not copy their content into skills. Broad always-relevant constraints live in `rules/`; specialized guidance lives in `skills/<name>/rules/` or `skills/<name>/references/`.
+- Skills and workflows live in exactly one place each (`skills/`, `workflows/`, `rules/`); the provider links are described in `docs/tool-compatibility-paths.md`.
+
+### Creating A New Skill
+
+1. Create `skills/<new-skill-name>/` and add `SKILL.md` with `name` and `description` (the name must match the folder exactly).
+2. Add optional `rules/` and `references/`; reference detailed rules via `> **Reference**: see rules/xxx.md` and keep the body under 5000 tokens.
+3. Run `./scripts/validate-skills-with-skillspector.sh --skill <name>` and `python3 scripts/scan-llm-surface-security.py`.
+4. Add the skill row to `skills/README.md`, `README.md`, `AGENTS.md`, and a phrase row to `INTENTS.md`.
+5. Run `./scripts/sync-tool-configs.sh . --skip-agents-md` so the provider links see it (see the path map).
+6. Re-run the global installer so the user-level roots get the new link (`./scripts/install-global-surfaces.sh --apply`).
+
 ## Validation
 
 Run from the repository root:
@@ -141,4 +175,6 @@ npm run skills:index:check
 .\scripts\validate-skills-with-skillspector.ps1
 ```
 
-See `skills/ARCHITECTURE.md` for the full structure and `workflows/specialist-agent-factory.md` for creating a new specialist (skill + subagent + validation/evolution workflows).
+Count checks: `find skills/ -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l` (skills), `find workflows/ -name "*.md" | wc -l` (workflows plus README.md), `find rules/ -maxdepth 1 -name "*.md" | wc -l` (rules plus README.md); `npm run skills:index:check` confirms every skill is indexed in `skills/README.md` and `README.md`.
+
+See `workflows/specialist-agent-factory.md` for creating a new specialist (skill + subagent + validation/evolution workflows).

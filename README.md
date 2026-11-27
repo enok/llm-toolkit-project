@@ -33,7 +33,7 @@ tool-subagents/    reusable subagent prompts (.md; Codex TOML generated, not com
 rubrics/           review scoring and checklists
 learnings/         indexed gotchas (read learnings/INDEX.md first)
 
-.agents/skills .claude/skills .codex/skills .cursor/skills .windsurf/skills   -> skills/
+.agents/skills .claude/skills                                                 -> skills/
 .agent/skills .gemini/skills .opencode/skills                                 -> skills/
 .windsurf/rules                                                               -> rules/
 .windsurf/workflows                                                            -> workflows/
