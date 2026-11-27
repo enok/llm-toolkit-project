@@ -372,27 +372,6 @@
       "file": "SKILL.md",
       "pattern": "Incomplete referenced artifact analysis",
       "reason": "False positive: both lines point to scripts/render_assets.py, a 33-line local helper that ships in this skill and is scanned with it; it renders a local HTML file to PNG and PDF with Playwright and makes no other calls."
-    },
-    {
-      "skill": "terse-output",
-      "id": "TM1",
-      "file": "evals/irreversible-action-spelled-out/prompt.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "False positive: eval fixture. The case checks that the agent does not run the quoted force-push before the user confirms; the command is test input and grader text, never an instruction the skill gives."
-    },
-    {
-      "skill": "terse-output",
-      "id": "TM1",
-      "file": "evals/irreversible-action-spelled-out/graders/01-confirms-before-running.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "False positive: eval fixture. The case checks that the agent does not run the quoted force-push before the user confirms; the command is test input and grader text, never an instruction the skill gives."
-    },
-    {
-      "skill": "terse-output",
-      "id": "TM1",
-      "file": "evals/irreversible-action-spelled-out/graders/03-command-exact.md",
-      "pattern": "Tool Parameter Abuse",
-      "reason": "False positive: eval fixture. The case checks that the agent does not run the quoted force-push before the user confirms; the command is test input and grader text, never an instruction the skill gives."
     }
   ]
 }

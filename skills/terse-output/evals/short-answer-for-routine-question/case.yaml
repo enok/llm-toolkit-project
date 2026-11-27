@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: short-answer-for-routine-question
-expected_outcome: |
-  The answer is short and leads with the cause: an inline object literal is a new reference on every render, so the memoized child sees a changed prop. It names a fix such as `useMemo` or a module-level constant, keeps code spans exact, and has no greeting, recap or closing offer to help.
