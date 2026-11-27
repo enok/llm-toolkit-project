@@ -25,7 +25,8 @@ never in this skill or in the toolkit.
 - Read-only classifier specialist: `tool-subagents/workspace-hygiene-auditor.md`.
 - Browser-lane safety: `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md` (read when dispatching any lane that drives a browser or desktop UI).
 - Ledger compaction: `scripts/ledger_compact.py`.
-- Learnings behind the rules: `learnings/many-daily-automations-exhaust-usage-limits.md`, `learnings/cloud-session-device-bridge-file-io.md`.
+- Read `references/scheduled-task-lessons.md` when pausing, renaming, catching up, or consolidating scheduled tasks.
+- Device-bridge file rules: `skills/environment-diagnose/references/device-bridge.md` ("Moving and refreshing files through the bridge mount").
 - Related, not duplicated: `workflows/automation-maintenance.md` (edit one
   scheduled task), `workflows/task-quality-loop.md` (per-lane
   produce-validate-refine).

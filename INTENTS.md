@@ -93,7 +93,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | improve the specialist / the validator got it wrong again | the matching `*-evolution` workflow (`pr-validator-evolution`, `documentation-reviewer-evolution`, `aws-alarm-investigator-evolution`, `diagram-creation-specialist-evolution`, `prod-doc-promoter-evolution`, `model-selector-evolution`, `agent-orchestrator-evolution`) | workflow | - |
 | create, rename, pause, or delete an automation | `automation-maintenance` | workflow | `rules/external-write-authorization.md` |
 | edit AGENTS / rules / workflows / skills | `llm-context-engineering` | skill | `rules/workflow-authoring.md` |
-| search what we know about X / which asset covers X / how do we do X here | `knowledge-base` | skill | `rules/knowledge-base.md`, `learnings/INDEX.md` |
+| search what we know about X / which asset covers X / how do we do X here | `knowledge-base` | skill | `rules/knowledge-base.md` |
 | save this knowledge / remember this for every agent | `knowledge-base` | skill | `rules/knowledge-base.md` (intake gate), `capture-learning` |
 | set up the knowledge base on this machine / the knowledge base is down | `knowledge-base` | skill | `docs/knowledge-base.md`, `environment-diagnose` |
 | keep the knowledge base in sync / promote the knowledge inbox | `knowledge-base-sync` | workflow | `knowledge-base`, `rules/external-write-authorization.md` |

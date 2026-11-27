@@ -8,7 +8,7 @@ Entry point for technical changes to the data-analysis project: Bronze/Silver/Go
 
 ## 0. Consult learnings (always-on)
 
-Before any other step, scan `learnings/INDEX.md` for matching entries, follow their *Solution*, and avoid their *Failed Approaches* (`skills/error-driven-learning/SKILL.md`).
+Before any other step, read the `## Known pitfalls` of the skills and workflows this task uses and scan `learnings/INDEX.md` (pending intake items); follow the recorded solutions (`skills/error-driven-learning/SKILL.md`).
 
 ## 1. Route
 

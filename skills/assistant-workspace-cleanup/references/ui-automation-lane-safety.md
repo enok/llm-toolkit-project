@@ -14,7 +14,7 @@ between a snapshot and a click, and look-alike items (repeated titles,
 `rules/command-safety.md` (credential handoff); they do not replace them.
 Procedure that applies them: `skills/assistant-workspace-cleanup/SKILL.md`.
 Result-size, wait, screenshot and multi-browser limits of the browser tools:
-`learnings/browser-tool-operational-limits.md`.
+see "Browser tool limits" below.
 
 ## Scope of touch
 
@@ -70,3 +70,44 @@ Result-size, wait, screenshot and multi-browser limits of the browser tools:
   not create, an item skipped or changed outside the allow-list, a changed
   precondition, an unattributed change in shared state. With none, state
   `deviations: none`.
+
+## Browser tool limits
+
+Tool-side limits, not site behavior; knowing them avoids misdiagnosing the page
+and wasting retries. Observed failures in long runs: a single wait over 10
+seconds was rejected; a very long page extraction exceeded the result-size
+limit; the file-upload tool refused host file paths; the JavaScript tool
+redacted cookies and query strings; tab handles from an earlier turn were
+reported "not in the tab group"; a screenshot right after navigating to a heavy
+app failed with a zero-width error.
+
+- A custom (React-style) widget that ignores a plain `click` (dropdown stays
+  closed): dispatch on the trigger `pointerdown`, `mousedown`, `pointerup`,
+  `mouseup`, `click`, in that order, and pick the option the same way. Do not
+  assign `.value`; the framework tracks its own state.
+- Start each browser turn with the tab-context call and use the ids it returns;
+  do not reuse tab ids across turns.
+- Chain waits of 10 seconds or less instead of one long wait; retry a failed
+  screenshot after a short wait.
+- Split long extractions (fewer scrolls per call, or a subtree) instead of
+  extracting a whole lazy list in one call.
+- When a file must be attached from the owner's disk and the tool cannot read
+  the path (do not pass a local path), ask the owner to click the page's upload
+  control and continue after.
+- Expect redaction in script results; log what you need in short fields.
+  Query-string-like returned text is blocked outright.
+- A "not connected" message from the extension is often transient: retry once,
+  then tell the owner how to reconnect. It can also appear in the middle of a
+  publish or save: re-read the page state before doing anything else and never
+  assume the publish landed (or did not land); a retry on an unread state can
+  duplicate it.
+
+### Several browsers connected
+
+- Do an explicit select-browser (or switch-browser) step before any tab action;
+  a tab call without it can land in the wrong browser or fail.
+- Each account or identity may have its own Chrome profile. Pick the profile
+  that is signed in to the account the task needs, and never sign in for the
+  owner.
+- Prefer the real signed-in browser over the built-in app browser, which is
+  often signed out of the services the task needs.

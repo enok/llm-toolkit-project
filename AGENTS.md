@@ -11,7 +11,7 @@ Apply these to every task.
 ### 1. Knowledge Base First, Then Learnings
 
 - Query the toolkit knowledge base (`python3 scripts/kb.py search`) before reading catalog or source files, open only what the hits point to, and write reusable knowledge back through the intake gate (`rules/knowledge-base.md`); when it is unreachable, say so and read directly.
-- Then read `learnings/INDEX.md` before non-trivial work and follow any relevant happy path (`rules/error-driven-learning.md`).
+- Then read the owning asset's `## Known pitfalls` for the task, and `learnings/INDEX.md` for pending intake items (`rules/error-driven-learning.md`).
 - Every non-trivial workflow or agent run also closes the self-improvement loop: preflight known pitfalls, capture mistakes with stable signatures, record the run, promote recurring mistakes, and read the trend (`rules/workflow-self-improvement.md`, `workflows/run-retrospective.md`).
 
 ### 2. Think Before Coding
@@ -76,7 +76,7 @@ llm-toolkit-project/
 ├── rubrics/                   # Architecture and technical-content rubrics
 ├── integrations/              # Jira, Confluence, AWS CLI, Slack CLI
 ├── clients/                   # Provider overlay guidance and sync commands
-├── learnings/                 # Indexed trial-and-error discoveries (INDEX.md first)
+├── learnings/                 # Short-lived lesson intake (INDEX.md: pending items)
 ├── kb/                        # Local vector knowledge-base runtime (Docker); CLI scripts/kb.py, guide docs/knowledge-base.md
 ├── docs/                      # tool-compatibility-paths, repo-setup-prompt, jira-setup, docs/llm/
 ├── scripts/                   # Setup, sync, validation, security gate, quality gate, PDF export, plugin catalog (plugins.py, guide docs/plugins.md)
@@ -209,7 +209,7 @@ npm run validate
 git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED: remove duplicate files" && exit 1
 ```
 
-If a validation failure reveals a reusable toolchain gotcha, capture it under `learnings/` (`workflows/capture-learning.md`) after user approval.
+If a validation failure reveals a reusable toolchain gotcha, write it into its owning asset (`workflows/capture-learning.md`) after user approval.
 
 ## After Completing Tasks
 

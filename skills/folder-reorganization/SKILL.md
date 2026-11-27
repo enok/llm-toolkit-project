@@ -168,20 +168,25 @@ and read only their output files (see the pitfalls below).
   instead of recreating them, and ignore client-managed `desktop.ini` churn when
   comparing counts. A file saved through a temp file and `os.replace` in the same
   folder was observed to keep its ID, but overwrite in place for one-off edits.
-  See `learnings/google-drive-desktop-folder-reorg.md`.
+  Verify per file, not by count: each pre-move file exists at its mapped path with
+  the same size. Ignore hidden `desktop.ini` files (Hidden+System, about 106
+  bytes) that appear or disappear in moved/new folders and report them as
+  Drive-managed noise (observed: 20 added, 6 removed).
 - When a cloud session reaches the files through a device bridge, move files with
   the file-transfer tools (never large pasted base64), refresh mounted files with
   `cat new > old` because the mount refuses unlink, run whole-tree scans
   natively, and write multi-line Python to a temp file instead of `python -c`.
-  See `learnings/cloud-session-device-bridge-file-io.md`.
+  `tar -x` or `cp` over existing names fails with `Cannot open: File exists`:
+  extract to a NEW folder, then `cat new/file > old/file` and verify with
+  `md5sum`. Details: `skills/environment-diagnose/references/device-bridge.md`.
 - A computer-bound scheduled task's attached folder cannot be changed through the
   scheduling API. Pause the task with a recovery record before the move, update
   the prompt through the API, and give the owner the settings change; do not work
-  around a permission denial. See `learnings/scheduled-task-attached-folder-rename.md`.
+  around a permission denial. See `workflows/automation-maintenance.md` ("Moving folders that automations use").
 - A scheduled run that ended FAILED on a usage limit may resume later and overlap
   a catch-up (overlap observed, cause inferred from timing). Check the run history before firing, fire at most once, and audit
-  shared files afterwards. See `learnings/scheduled-run-resumes-after-usage-limit.md`.
-- When moving a folder that tools or agents reference, search references read-only first, back up the tool's config file next to the moved data, and update only live pointers, including symlinks for agent and skill directories. Leave dated backups and web URLs as they are, and report stored memory paths that belong to another machine instead of editing them. See `learnings/relocate-repo-update-claude-config-paths.md`.
+  shared files afterwards. See `workflows/automation-maintenance.md` ("Catch-up runs and overlapping sessions").
+- When moving a folder that tools or agents reference, search references read-only first, back up the tool's config file next to the moved data, and update only live pointers, including symlinks for agent and skill directories. Leave dated backups and web URLs as they are, and report stored memory paths that belong to another machine instead of editing them. Repoint every occurrence (`g` flag) in every kind of file found (`CLAUDE.md`, shell rc, other tools' configs, launch-agent plists, compose files); macOS: `sed -i '' 's|<old>|<new>|g' <file>`. A line can hold the path twice. Tell the user that already-open sessions keep the old `CLAUDE.md` until restarted.
 - When the user suspects files were deleted, list the folder from the device first, compare with the last saved listing or ledger and hash the files, then report facts only (nothing deleted, N files renamed at time T, content byte-identical, actor unknown) without speculating. Flag when a new name now collides with a different file that must not be sent and say which copy to attach.
 - Keep separate spreadsheet ledgers separate and link by cell reference; write a new version and keep the old as a backup. For a bulk rename, derive the new period from the data (month to quarter), apply it to the whole set, and list the gaps found (missing documents).
 - `rollback` restores edited files from their backups, so it overwrites any

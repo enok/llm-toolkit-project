@@ -16,8 +16,8 @@ hold the model back.
   skill, or by promotion from chat evidence).
 - On request for an existing resource (an audit, a slimming pass, a suspected
   regression).
-- **Exempt:** `learnings/` files. They record evidence of what happened, not
-  behaviour to load; record them as `exempt` only if a gate asks for a row.
+- **Exempt:** `learnings/` files. They are short-lived intake items, migrated
+  and deleted; record them as `exempt` only if a gate asks for a row.
 - Owner-mandated contract files (for example the orchestration contract set) are
   measured and slimmed, never removed by this gate.
 

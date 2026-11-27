@@ -60,17 +60,17 @@ reorganized:
   once every path it uses resolves. An attached folder is not editable through
   the scheduling API: update the prompt through the API, then have the user
   switch the attached folder in the task settings and re-enable it; prefer
-  attaching a stable parent folder. See learnings/scheduled-task-attached-folder-rename.md.
+  attaching a stable parent folder (details: skills/assistant-workspace-cleanup/references/scheduled-task-lessons.md › Attached folder rename).
 - In a cloud-synced folder (for example Google Drive for desktop), rename and
   move in place so file and folder IDs survive, overwrite edited files in place,
   move (never re-create) pointer files, and ignore client-managed `desktop.ini`
-  files when verifying counts. See learnings/google-drive-desktop-folder-reorg.md.
+  files when verifying counts. See `skills/folder-reorganization/SKILL.md` (Known pitfalls).
 - When the files live on the user's computer and the session reaches them
   through a device bridge, move files with the file-transfer tools (never large
   pasted base64), refresh mounted files with `cat new > old`, and run whole-tree
   scans natively on the computer. If the bridge shell shows Permission denied on
   folders or cannot delete git lock files, switch to the native shell instead of
-  retrying. See learnings/cloud-session-device-bridge-file-io.md.
+  retrying. See `skills/environment-diagnose/references/device-bridge.md`.
 
 For the full reorganization procedure (inspect, propose, approve, execute,
 verify, resume) use `workflows/folder-reorganization.md`.
@@ -79,8 +79,8 @@ verify, resume) use `workflows/folder-reorganization.md`.
 
 A run the scheduler marks FAILED with a usage-limit reason may resume on its
 own once usage returns (an observed overlap whose cause was inferred from
-timing, not confirmed). A hand-fired catch-up can then run beside it. See
-learnings/scheduled-run-resumes-after-usage-limit.md.
+timing, not confirmed). A hand-fired catch-up can then run beside it (details:
+skills/assistant-workspace-cleanup/references/scheduled-task-lessons.md › Catch-up after a usage limit).
 
 - Before a catch-up, read the task's run history and `last_run`. Prefer the
   next scheduled run when the skipped run is not time-critical.
@@ -96,8 +96,7 @@ learnings/scheduled-run-resumes-after-usage-limit.md.
 - If a permission check denies a fire, create or enable call, do not retry or
   work around it (no replacement task, no other tool). Tell the owner the exact
   UI action (Run now, or the task's settings). Retry once only if the owner then
-  explicitly asks you to do that same action. See
-  learnings/scheduled-task-attached-folder-rename.md.
+  explicitly asks you to do that same action.
 
 ## Hygiene
 
@@ -108,8 +107,9 @@ Use when inventorying, consolidating, or tidying scheduled tasks.
 - Delete fired one-shots only from an ID allow-list the owner approved; prefer
   one recurring task with an end condition over a chain of one-shots.
 - Consolidate overlapping dailies into one task and pause (do not delete) the
-  old ones until the new one has run well. See
-  learnings/many-daily-automations-exhaust-usage-limits.md.
+  old ones until the new one has run well. Put the priority task hours (not
+  minutes) after the digest window; retries and small start-time nudges hit the
+  same shared usage limit.
 - Creation has no model field: ask the owner which model, or report the one the
   task actually got.
   A run-now call may be denied; do not work around it, tell the user to press
@@ -124,7 +124,8 @@ Use when inventorying, consolidating, or tidying scheduled tasks.
 - Before a consolidation that writes to the shared repo, pause the scheduled
   writers (knowledge sync and any task that edits the repo or its ledger),
   record each task ID with its prior enabled state, and resume exactly those
-  afterwards. Same record format as `workflows/folder-reorganization.md`
+  afterwards. Pause only enabled tasks that write to the repository; leave
+  non-writing and already-disabled tasks untouched (never enable one). Same record format as `workflows/folder-reorganization.md`
   steps 2-4; see `workflows/knowledge-base-sync.md` for the writer.
 - Agent sessions are absent from chat-history tools. The full cleanup
   procedure is `workflows/assistant-workspace-cleanup.md`.
@@ -132,7 +133,8 @@ Use when inventorying, consolidating, or tidying scheduled tasks.
 ## Deferred follow-ups ("send me X when it is ready")
 
 A request to do something later and deliver it is a one-shot scheduled task,
-not a limitation (see `learnings/deferred-follow-up-declared-impossible.md`).
+not a limitation. Never say a flat "I cannot work after the conversation
+ends".
 
 1. Check for an existing follow-up on the same subject first (Phases 1-3);
    update it instead of creating a duplicate.
@@ -147,7 +149,9 @@ not a limitation (see `learnings/deferred-follow-up-declared-impossible.md`).
    delivery channel. The run is read-only research plus a notification to the
    requester (`rules/external-write-authorization.md`).
 5. Confirm only what the tool returned: name, time, approval mode, channel.
-   See learnings/deferred-follow-up-declared-impossible.md.
+   If no scheduler exists, say what you checked (declared and deferred tools,
+   scheduling tools, connectors) and give a concrete fallback, such as a
+   reminder whose text carries the full scope.
 
 ## Chained automations
 
@@ -163,8 +167,8 @@ When one task consumes another's output:
 - Split ingest from consume: the ingest task alone downloads (silent when
   nothing is new; first-run dry run and a cutoff date); the consumer updates the
   workbook additively and never regenerates it. Update the prompt before the
-  first firing, or that firing runs the old prompt. See
-  learnings/chained-email-ingest-and-workbook-update-tasks.md.
+  first firing, or that firing runs the old prompt. Hardening list (formula
+  injection, pinned script SHA-256, allow-list): skills/assistant-workspace-cleanup/references/scheduled-task-lessons.md › Chained email-to-folder and workbook-update tasks.
 - After rebuilding a plan or document, audit every scheduled task that writes
   the same file and repoint or disable it; a stale generator overwrites the new
   version.
@@ -181,8 +185,7 @@ exit path: a run that stops early must leave state the next run continues from.
 ## Unsaved-work sweep
 
 Use periodically, and before archiving chats: parallel "save learnings, then
-archive" requests leave drafts in separate worktrees and in-progress ledger rows
-(learnings/parallel-save-requests-leave-orphan-worktrees.md).
+archive" requests leave drafts in separate worktrees and in-progress ledger rows.
 
 1. Run `python scripts/unsaved_work_sweep.py --root <repo-root> [--json]`; it
    is read-only.
@@ -191,7 +194,9 @@ archive" requests leave drafts in separate worktrees and in-progress ledger rows
    in output folders.
 3. The root presents the findings; it never auto-deletes or pushes
    (`rules/external-write-authorization.md`). Keep the main checkout off
-   long-lived feature branches.
+   long-lived feature branches: move it back to the default branch only after
+   securing the feature branch's modified and untracked files (commit them
+   there or move them into a worktree, then push); discard nothing.
 
 ## Failure handling
 
@@ -201,10 +206,6 @@ archive" requests leave drafts in separate worktrees and in-progress ledger rows
   automation untouched.
 - If a recurring task is obsolete, delete it and tell the user why the heartbeat
   stopped.
-
-## Known pitfalls
-
-- While consolidating a branch, pause only the enabled scheduled tasks that write to the repository, record them, and resume exactly those. See learnings/consolidation-pr-is-the-harvest-base.md.
 
 ## Final Step - Self-improvement
 

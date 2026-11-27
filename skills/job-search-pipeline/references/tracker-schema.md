@@ -103,8 +103,12 @@ Undo a bulk exclusion by re-adding the rows from the snapshot taken before the
 change, or by restoring the timestamped backup. Take that snapshot before any
 bulk move, and never promise an undo before proving it (dry-run one row, or
 read the command's rules); when a doc or reply turns out wrong, correct it
-immediately. Keeping the tracker in step with a study plan or an online sheet
-follows [tracker-sync-refuses-guessing](../../../learnings/tracker-sync-refuses-guessing.md).
+immediately. Design rules for any sync of a plan with a progress tracker (study plan,
+online sheet): it must refuse to guess. Write to a separate output path by
+default, never over the tracker. Refuse (exit 2) when ANY output path already
+holds ticks, unless an explicit carry-ticks option is given; checking only
+output == tracker lets a re-run wipe ticks in an earlier output. Ticks are user
+data that cannot be rebuilt.
 For a tracker kept in an online sheet see [sheet-tracker-mode.md](sheet-tracker-mode.md). Dedup (`known`) includes Closed and Excluded, so a reposted role with the
 same company and title is not suggested again.
 

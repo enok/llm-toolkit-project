@@ -89,7 +89,7 @@ A third-party marketplace entry whose source lives outside the marketplace repos
 
 ## Rejected sources
 
-Evaluated and rejected; do not re-import without the listed re-evaluation condition being met. Record each rejection as a `learnings/` entry (category `security`) so the reasoning survives.
+Evaluated and rejected; do not re-import without the listed re-evaluation condition being met. Record each rejection as a row in this table so the reasoning survives.
 
 | Source | Decision (date) | Why | Re-evaluate when |
 | --- | --- | --- | --- |

@@ -13,7 +13,7 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
 | `ci-feedback-loop.md` | Turn CI failures into rule/workflow updates instead of one-off fixes |
 | `documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` before completion |
-| `error-driven-learning.md` | Capture trial-and-error wins as indexed learnings and migrate them into durable toolkit assets |
+| `error-driven-learning.md` | Write trial-and-error lessons into the owning asset; `learnings/` is a short-lived intake |
 | `external-write-authorization.md` | Bind every external mutation (tickets, PR metadata, wiki, chat, email) to an explicit current instruction |
 | `git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, PR lifecycle, rebase, duplicate-file gate |
 | `human-comment-reply-gate.md` | Draft-and-approve gate for any human-facing review or comment reply |

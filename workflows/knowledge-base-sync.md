@@ -104,7 +104,8 @@ Apply `rules/knowledge-base.md` duty 3 to every candidate.
 
 Choose each item's destination: the smallest existing asset that owns it
 (rule, workflow, skill, subagent, script, the consumer's `docs/llm/`, or a
-learning). Learnings follow `workflows/capture-learning.md`; workflow
+short-lived learning intake item only when no owner is clear). Lessons
+follow `workflows/capture-learning.md`; workflow
 edits follow `rules/workflow-authoring.md`; checklist bullets follow the
 `## Known pitfalls` convention there. Keep a mapping table:
 inbox name -> destination path -> action (new, extended, merged, rejected).

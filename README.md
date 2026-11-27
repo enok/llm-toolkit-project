@@ -15,7 +15,7 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 | Rubrics | `rubrics/` | Architecture severity calls and the technical-content scoring rubric |
 | Integrations | `integrations/` | Jira, Confluence, AWS CLI, Slack CLI setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
-| Learnings | `learnings/` | 37 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing) |
+| Learnings | `learnings/` | Short-lived intake for lessons whose owning skill, rule or workflow is not yet clear; migrated and deleted (normally empty) |
 | Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export, plugin catalog and scan (`scripts/plugins.py`, guide `docs/plugins.md`) |
 | Tests and CI | `tests/`, `.github/workflows/` | Unit tests for the validators and GitHub Actions that run the full gate on `main` |
 | Knowledge base | `kb/`, `scripts/kb.py` | Local vector index of this toolkit plus a pending inbox; agents search it first and write reusable knowledge back (`rules/knowledge-base.md`) |
@@ -31,7 +31,7 @@ workflows/         manually invoked procedures (<= 12,000 characters each)
 skills/            on-demand capabilities
 tool-subagents/    reusable subagent prompts (.md; Codex TOML generated, not committed)
 rubrics/           review scoring and checklists
-learnings/         indexed gotchas (read learnings/INDEX.md first)
+learnings/         short-lived lesson intake (learnings/INDEX.md: pending items)
 
 .agents/skills .claude/skills                                                 -> skills/
 .agent/skills .gemini/skills .opencode/skills                                 -> skills/
@@ -138,7 +138,7 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Command Safety** | `rules/command-safety.md` | Review shell commands for destructive, exfiltration, or injection risk |
 | **Cross-Platform Scripts** | `rules/cross-platform-scripts.md` | Scripts must run on Windows, Linux, and macOS |
 | **Documentation Review Required** | `rules/documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` |
-| **Error-Driven Learning** | `rules/error-driven-learning.md` | Capture trial-and-error wins as indexed learnings |
+| **Error-Driven Learning** | `rules/error-driven-learning.md` | Write trial-and-error wins into the asset that owns them |
 | **External Write Authorization** | `rules/external-write-authorization.md` | Bind every external mutation (tickets, PRs, wiki, chat, email) to an explicit instruction |
 | **Git Conventions** | `rules/git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, rebase, duplicate-file gate |
 | **Human Comment Reply Gate** | `rules/human-comment-reply-gate.md` | Draft-and-approve gate for human-facing replies |
@@ -202,7 +202,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest |
 | **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories |
-| **error-driven-learning** | Always-on discipline: read `learnings/INDEX.md` before work and capture trial-and-error discoveries after it |
+| **error-driven-learning** | Always-on discipline: check the owning asset's known pitfalls and `learnings/INDEX.md` (pending intake) before work; write discoveries into the owning asset after it |
 | **onboarding** | Get started with this toolkit in a repo, or add it to one |
 | **project-discovery** | Understand a project: structure, architecture, flows, how-tos, related projects |
 | **design-driven-dev** | Investigation-first Socratic design process before coding |
@@ -350,7 +350,7 @@ The gate checks skill frontmatter, referenced paths, the 12,000-character workfl
 - `AGENTS.md` - agent guidance, core principles, and the always-loaded routing index
 - `INTENTS.md` - phrase-to-capability map
 - `docs/catalog/workflows.md`, `skills/README.md`, `rules/README.md`, `tool-subagents/README.md` - catalogs
-- `learnings/INDEX.md` - one-line index of every captured learning
+- `learnings/INDEX.md` - pending learning intake items (normally none)
 - `docs/knowledge-base.md` - local vector knowledge base: setup, CLI, scheduled sync
 - `docs/plugins.md` - plugin catalog, security scan, recommend, and decision register (`scripts/plugins.py`)
 - `docs/tool-compatibility-paths.md` - provider path map

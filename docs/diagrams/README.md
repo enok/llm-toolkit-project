@@ -1,6 +1,6 @@
 # Architecture diagrams
 
-Diagrams of the agent orchestrator and of the toolkit around it. Each figure ships as Mermaid source (`.mmd.txt`, diffable), a vector `.svg` and a high-resolution `.png`; the `.svg` and `.png` are rendered from the `.mmd.txt`, so edit the source and re-render. The source carries a `.txt` suffix because the changed-code quality gate blocks file types it cannot classify (`learnings/quality-gate-blocks-unclassified-suffixes.md`).
+Diagrams of the agent orchestrator and of the toolkit around it. Each figure ships as Mermaid source (`.mmd.txt`, diffable), a vector `.svg` and a high-resolution `.png`; the `.svg` and `.png` are rendered from the `.mmd.txt`, so edit the source and re-render. The source carries a `.txt` suffix because the changed-code quality gate blocks file types it cannot classify (see `skills/testing/references/changed-code-gate-fixtures.md`).
 
 | Figure | Files | What it shows | Used in |
 | --- | --- | --- | --- |

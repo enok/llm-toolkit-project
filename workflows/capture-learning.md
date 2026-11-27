@@ -1,10 +1,10 @@
 ---
-description: Capture a trial-and-error discovery into `learnings/` so any future LLM session goes directly to the happy path
+description: Write a trial-and-error discovery into the skill, rule or workflow that owns it, or capture a short-lived `learnings/` intake item when the owner is unclear
 ---
 
 # Capture Learning
 
-Use this workflow after recovering from trial-and-error, discovering a non-obvious solution, or hitting a platform/toolchain gotcha. The output is a committed markdown file in `learnings/` that any LLM tool can consume — a temporary evidence record that preserves the failure until it is migrated into durable rules, workflows, skills, agents, docs, scripts, tests, templates, generated surfaces, or validation gates.
+Use this workflow after recovering from trial-and-error, discovering a non-obvious solution, or hitting a platform/toolchain gotcha. The preferred output is the lesson written into the asset that owns it, so the next session meets it where it works. A file in `learnings/` is only a short-lived intake for a lesson whose owner is not yet clear; it is migrated and deleted.
 
 > This workflow is invoked automatically by the always-on `error-driven-learning` skill (see `skills/error-driven-learning/SKILL.md` and `rules/error-driven-learning.md`). Trigger conditions are listed there — the agent should not wait for the user to ask.
 
@@ -23,25 +23,24 @@ Do **not** capture trivial typos or one-off environment blips.
 
 Summarize in one sentence what you just discovered. If you cannot state it clearly, the learning is not ready to capture yet.
 
-### 2. Ensure the directory exists
+### 2. Find the owner
 
-If `learnings/` does not exist at the repo root, create it along with the `README.md` template:
+Name the skill, rule, workflow, agent, script or test whose work the lesson changes (`python3 scripts/kb.py search` helps). If the owner is clear, go to step 3. Only if it is not, go to step 4.
 
-```bash
-mkdir -p learnings
-```
+### 3. Write it into the owner (preferred)
 
-Copy the README template from the toolkit's `learnings/README.md`, or create one following the convention in `rules/error-driven-learning.md`.
+Add the smallest form that carries the lesson, and create no learning file:
 
-### 3. Write the learning file
+- a skill: one `## Known pitfalls` bullet, or a section in one of its `references/` files when the lesson needs detail;
+- a workflow: one `## Known pitfalls` bullet (`rules/workflow-authoring.md`);
+- a rule: one line;
+- a script or test: the fix plus a regression test.
 
-Create a new file in `learnings/` named with lowercase kebab-case summarizing the topic:
+A bullet is imperative, states the happy path and why, and ends with `(sig: <signature>)` when the run log has one. Then go to step 5.
 
-```
-learnings/<topic>.md
-```
+### 4. Capture an intake file (owner unclear)
 
-Use this structure:
+Create `learnings/<kebab-topic>.md` (lowercase kebab-case summarizing the topic). If `learnings/` does not exist, create it with the `README.md` template from the toolkit's `learnings/README.md`. Use this structure:
 
 ```markdown
 ---
@@ -65,50 +64,41 @@ The correct approach — the happy path.
 Root cause explanation.
 ```
 
-### 4. Quality check
-
-Before saving, verify:
-
-- [ ] Title is specific enough to match on a keyword scan.
-- [ ] Failed approaches include concrete details (commands, errors), not just "it didn't work."
-- [ ] Solution is copy-pasteable or directly actionable.
-- [ ] Root cause is explained — not just "use X instead of Y" but **why**.
-- [ ] File is 20–60 lines. If longer, split into multiple learnings.
-- [ ] Tags cover the keywords a future LLM would search for.
-- [ ] Every statement is a recorded fact: guidance that was not tried in the session is labelled as such (for example "General guidance, not observed in this session"), and no failed approach is invented.
-
-### 5. Supplement tool-specific memory (optional)
-
-If your LLM tool has built-in memory or tool-native context, also store a brief reference there pointing to the learning file:
-
-> See `learnings/<topic>.md` for the full solution.
-
-This gives faster retrieval within that tool while keeping the committed file as the shared source of truth.
-
-### 6. User Approval Gate (MANDATORY)
-
-**STOP and present the learning file content to the user for review.**
-
-**Do NOT commit until the user explicitly approves.** If the user requests changes, revise the learning file and re-run the quality check. Skip this gate only if the user explicitly asked to skip approval.
-
-### 7. Update the INDEX
-
-Append one line to `learnings/INDEX.md` under the appropriate category:
+Add one line to `learnings/INDEX.md` under `## Pending intake`, in the same change:
 
 ```markdown
 - [`<file>.md`](./<file>.md) — <one-line summary> (`tag1`, `tag2`, `tag3`).
 ```
 
-This keeps the always-on `error-driven-learning` fast-scan working.
+### 5. Quality check
 
-### 8. Commit or migrate
+Before saving, verify:
 
-If the durable destination is obvious in the same change — a rule, workflow, skill reference, script, test, or validation gate — update that asset instead of writing a learning file.
+- [ ] The happy path is specific enough to match on a keyword scan (title and tags for an intake file).
+- [ ] Failed approaches include concrete details (commands, errors), not just "it didn't work."
+- [ ] Solution is copy-pasteable or directly actionable.
+- [ ] Root cause is explained — not just "use X instead of Y" but **why**.
+- [ ] An owner bullet is one or two sentences; an intake file is 20–60 lines (split it if longer).
+- [ ] Every statement is a recorded fact: guidance that was not tried in the session is labelled as such (for example "General guidance, not observed in this session"), and no failed approach is invented.
+- [ ] No ticket IDs, customer names, hostnames or credentials.
+- [ ] No reference to `learnings/<slug>.md` for a file that does not exist (`tests/test_learning_promotion_coverage.py`).
 
-Otherwise stage and commit the learning file, its INDEX update, and the link from its owning asset together: a new learning ships in the same change as a `## Known pitfalls` bullet (or the path added to text that already states the lesson) in the skill, rule, workflow, or agent definition that owns it, and `tests/test_learning_promotion_coverage.py` fails when that link or the INDEX line is missing. Use the Documentation commit category from `rules/git-conventions.md`:
+### 6. Supplement tool-specific memory (optional)
+
+If your LLM tool has built-in memory, store a brief pointer to the owning asset (or the intake file) there. The committed asset stays the shared source of truth.
+
+### 7. User Approval Gate (MANDATORY)
+
+**STOP and present the change (owner edit or intake file) to the user for review.**
+
+**Do NOT commit until the user explicitly approves.** If the user requests changes, revise and re-run the quality check. Skip this gate only if the user explicitly asked to skip approval.
+
+### 8. Commit
+
+Use the Documentation commit category from `rules/git-conventions.md`:
 
 ```bash
-git add learnings/<topic>.md learnings/INDEX.md <owning-asset-path>
+git add <owning-asset-path>            # or: learnings/<topic>.md learnings/INDEX.md
 git commit -m "<TICKET-ID>: Add learning — <short description>"
 ```
 
@@ -118,7 +108,9 @@ If no ticket context exists, use a descriptive prefix:
 git commit -m "docs: Add learning — <short description>"
 ```
 
-Promotion handles at most 5 learning files per run; promoted files and their `learnings/INDEX.md` lines stay (`rules/error-driven-learning.md`).
+### 9. Migrate intake items
+
+An intake file is migrated into its owner (step 3) and deleted, together with its `learnings/INDEX.md` line, in the change that migrates it — at the latest in the next toolkit maintenance pass. A migrated learning never keeps its file, and nothing may keep linking it. If an item cannot be migrated safely yet, leave it pending and report the blocker.
 
 ## Known pitfalls
 

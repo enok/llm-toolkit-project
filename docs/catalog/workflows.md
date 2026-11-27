@@ -18,7 +18,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `specialist-agent-factory.md` | Create a reusable specialist agent with prompt, workflows, skill entrypoint, routing, client overlays, and validation gates |
 | `context-compaction.md` | Preserve useful chat or workspace context into durable LLM knowledge and produce a compact future handoff |
 | `automation-maintenance.md` | Safely inspect, rename, update, or delete scheduled LLM-tool automations while preserving schedule, status, prompt, and thread binding |
-| `capture-learning.md` | Capture a trial-and-error discovery into `learnings/` so any future LLM session goes directly to the happy path |
+| `capture-learning.md` | Write a trial-and-error discovery into the skill, rule or workflow that owns it, or capture a short-lived `learnings/` intake item when the owner is unclear |
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
 | `knowledge-base-sync.md` | Scheduled knowledge-base sync: gather new knowledge, run the intake gate, promote it on one rolling pull request, archive inbox items after the merge |
 | `resource-value-check.md` | Mandatory gate before adding a skill, workflow, agent or rule: blind race against the plain model, CSV record, `scripts/check_value_checks.py` |
