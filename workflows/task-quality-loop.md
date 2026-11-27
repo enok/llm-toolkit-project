@@ -16,17 +16,17 @@ Produce->validate->refine loop that `agent-orchestrator` applies to every delega
 
 | Task output type | Validator |
 | --- | --- |
-| Code change / diff | `code-reviewer` (+ `test-runner` when tests exist) |
+| Code change / diff | read-only validator lane on the plain model for behavior and regression risk (+ `test-runner` when tests exist) |
 | Test selection / build evidence | `test-runner` |
 | Documentation, runbooks, generated LLM surfaces | `documentation-reviewer` |
-| CV / career-profile claims | `cv-truthfulness-reviewer` |
+| CV / career-profile claims | read-only validator lane on the plain model checking each claim, date, and title against its evidence |
 | Public article and social post drafts | read-only lane on the publication profile and `rubrics/technical-content.md` if present (shape check of `workflows/study-publication-medium-linkedin.md`); draft stays `NOT POSTED` until the owner approves |
 | Java changes | `java-change-validator` |
-| Security-sensitive work | `security-auditor` or `owasp-security-auditor` |
+| Security-sensitive work | read-only validator lane on the plain model with `skills/security-best-practices` |
 | Diagrams / exported images | `diagram-creation-specialist` |
 | PR / ticket readiness | `pr-validator` |
-| Airflow/Glue/ETL | `dag-glue-specialist` |
-| Architecture claims | `system-architecture-specialist` |
+| Airflow/Glue/ETL | read-only validator lane on the plain model |
+| Architecture claims | read-only validator lane on the plain model with `skills/system-architecture-specialist` |
 | Log/evidence reduction | `log-analyst` |
 | Web research findings | `verifier` at `light`: per-claim PASS / FAIL / UNVERIFIED with a short quote (`skills/credential-evaluation/references/lane-prompts.md`) |
 | Alarm RCA / hypotheses | `aws-alarm-investigator` |

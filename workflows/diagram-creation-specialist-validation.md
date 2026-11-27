@@ -16,7 +16,7 @@ PDF, slide, or PR diagrams need specialist creation guidance or validation.
    `skills/diagram-authoring/references/deterministic-diagram-system.md`,
    existing diagrams, source files, configs, tickets, PRs, wiki pages, and any
    checked-in diagram standard in the consumer repo's `docs/llm/`.
-3. Identify whether `system-architecture-specialist` should first validate
+3. Identify whether the `system-architecture-specialist` skill should first validate
    boundaries, ownership, or quality attributes.
 
 ## Phase 2 - Specialist Pass

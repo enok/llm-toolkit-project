@@ -16,11 +16,9 @@ finding.
      expensive
    - the evidence that proved the better investigation path
 2. Classify the fix target:
-   - prompt procedure or output contract ->
-     `tool-subagents/aws-alarm-investigator.md` (mirror the body into the
-     `.toml`)
-   - service probe hint or known false-positive pattern -> the same prompt's
-     probe/false-positive sections
+   - procedure, output contract, service probe hint or known false-positive
+     pattern -> `skills/aws-alarm-investigator/SKILL.md` (the agent file is
+     only a pointer to it)
    - validation procedure -> `workflows/aws-alarm-investigator-validation.md`
    - skill entrypoint -> `skills/aws-alarm-investigator/SKILL.md`
    - trigger/routing -> `INTENTS.md`, `rules/request-orchestration.md`

@@ -20,7 +20,7 @@ at 3+) is proposed while the signature is not yet promoted to that level or
 above, so a recorded `learning` does not hide a due checklist, and a deferral
 keeps showing until a later run records it. `--threshold 1` also proposes
 `learning` for single occurrences; otherwise `learning` is decided by the
-trial-and-error triggers in `rules/error-driven-learning.md`. Levels can be
+trial-and-error triggers in `skills/error-driven-learning/SKILL.md`. Levels can be
 skipped upward (a `critical` mistake goes straight to `guard`), never
 downward.
 

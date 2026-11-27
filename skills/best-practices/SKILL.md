@@ -101,7 +101,7 @@ rules/handler-lifecycle-cleanup.md
 
 Each rule file contains a brief explanation of why it matters, an incorrect example, a correct example, and key rules.
 
-`references/rules.md` is a compact always-on summary suitable for consumer repos that want the whole baseline in one short file. Toolkit-wide coding discipline, orchestration, and learning-capture constraints live in the canonical top-level rules (`rules/code-rules.md`, `rules/multi-agent-orchestration.md`, `rules/error-driven-learning.md`), not in this skill.
+`references/rules.md` is a compact always-on summary suitable for consumer repos that want the whole baseline in one short file. Toolkit-wide coding discipline, orchestration, and learning-capture constraints live in the canonical top-level rules (`rules/multi-agent-orchestration.md`, `rules/error-driven-learning.md`), not in this skill.
 
 Use `references/source-review.md` when evaluating external material for inclusion in this generic skill.
 

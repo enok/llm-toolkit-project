@@ -6,7 +6,7 @@
 # workflows/<name>.md
 #
 # Example entries:
-# rules/code-rules.md
+# rules/security-check-required.md
 # rules/python-best-practices.md
 # workflows/project-discovery.md
 # workflows/ticket-review.md

@@ -40,14 +40,14 @@ DEFAULT_ROWS = [
     ("Addressing review comments", 2.0, 10, 25,
      "workflows/gh-address-comments.md, workflows/pr-automation-review.md"),
     ("CI failure triage & fix", 1.5, 5, 20,
-     "workflows/gh-fix-ci.md, tool-subagents/ci-triage.md, skills/maven-build-troubleshooting"),
+     "workflows/gh-fix-ci.md, skills/maven-build-troubleshooting"),
     ("Ops: logs, alarms, incidents", 4.0, 3, 15,
      "workflows/log-investigation.md, skills/aws-alarm-investigator, skills/incident-ops"),
     ("Documentation (wiki, runbooks, diagrams)", 1.5, 20, 40,
      "skills/update-docs, skills/doc-delta, skills/confluence-documentation, "
      "skills/runbook-authoring, skills/diagram-authoring"),
     ("Infra (Terraform) & data-pipeline changes", 2.0, 3, 12,
-     "tool-subagents/terraform-specialist.md, skills/terraform-change-safety, tool-subagents/dag-glue-specialist.md, "
+     "skills/terraform-change-safety, "
      "workflows/data-pipeline-change.md"),
     ("Releases & verification", 1.0, 3, 10,
      "tool-subagents/release-coordinator.md"),

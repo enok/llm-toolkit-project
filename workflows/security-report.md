@@ -4,7 +4,7 @@ description: OWASP-aligned security review with parallel audit lanes and a singl
 
 # Security report workflow
 
-Use when the user asks for a security report, OWASP-style audit, AppSec review, or vulnerability assessment. Pair with `rubrics/security.md`, and use `skills/security-best-practices/SKILL.md` for stack-specific secure defaults.
+Use when the user asks for a security report, OWASP-style audit, AppSec review, or vulnerability assessment. Use `skills/security-best-practices/SKILL.md` for stack-specific secure defaults.
 
 ## Phase 1 — Scope
 

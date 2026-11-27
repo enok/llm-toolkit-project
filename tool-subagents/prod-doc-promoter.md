@@ -82,7 +82,7 @@ deployment state, permissions, source ownership, or content safety is unclear.
 
 ## Related Specialists
 
-- Use `confluence-documentation-specialist` for page/folder state, hierarchy,
+- Use the `confluence-documentation` skill for page/folder state, hierarchy,
   attachment, comment, permission, and source-to-wiki drift validation.
 - Use `documentation-reviewer` for final documentation quality, audience fit,
   generated LLM surfaces, and draft-only human-facing documentation replies.
@@ -90,7 +90,7 @@ deployment state, permissions, source ownership, or content safety is unclear.
   trace affects the production deployment gate.
 - Use `diagram-creation-specialist` when promoted docs include diagrams,
   exported artifacts, or rendered diagram attachments.
-- Use `system-architecture-specialist` when destination choice depends on
+- Use the `system-architecture-specialist` skill when destination choice depends on
   service boundaries, data flows, integrations, ownership, or architecture docs.
 
 Return handoff recommendations to the root agent; do not contact other agents,

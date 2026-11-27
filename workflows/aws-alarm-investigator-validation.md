@@ -68,8 +68,9 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
      session identifiers, and full payloads
    - mark uncertain owner-level causes as likely or needs-owner-verification
 8. Route the fix lane when the alarm is IaC-provisioned: authoring-side
-   remediation goes through `skills/terraform-change-safety/SKILL.md` and the
-   `terraform-specialist` lane, never through this workflow.
+   remediation goes through `skills/terraform-change-safety/SKILL.md` with
+   `terraform fmt -check`, `terraform validate`, and a reviewed plan per touched
+   root (apply only on explicit user authorization), never through this workflow.
 9. Capture reusable learning:
    - if the alarm exposed a recurring pattern, update a runbook, the consumer
      repo's `docs/llm/`, a rule, or run

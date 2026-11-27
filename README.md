@@ -8,12 +8,12 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 
 | Area | Path | Purpose |
 | --- | --- | --- |
-| Rules | `rules/` | 24 short constraints (16 always-on, 8 loaded on demand): code, git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
+| Rules | `rules/` | 23 short constraints (15 always-on, 8 loaded on demand): git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
 | Workflows | `workflows/` | 71 sequenced procedures: review, knowledge-base sync, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
 | Skills | `skills/` | 64 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
-| Tool subagents | `tool-subagents/` | 27 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
-| Rubrics | `rubrics/` | Architecture severity calls, security, and holistic code-review checklists with the `review-report.json` contract |
-| Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
+| Tool subagents | `tool-subagents/` | 15 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
+| Rubrics | `rubrics/` | Architecture severity calls and the technical-content scoring rubric |
+| Integrations | `integrations/` | Jira, Confluence, AWS CLI, Slack CLI setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
 | Learnings | `learnings/` | 40 indexed trial-and-error discoveries (AWS, Terraform, Confluence, git/Windows/shell, agent behavior, notebooks, publishing) |
 | Scripts | `scripts/` | Setup, link repair, sync, machine bootstrap, security gate, index validation, changed-code quality gate, LLM-surface scan, PDF export, plugin catalog and scan (`scripts/plugins.py`, guide `docs/plugins.md`) |
@@ -60,7 +60,7 @@ A thin root routes each non-trivial request and assigns every task a tier (light
 
 1. **Rules** travel with every request (`rules/request-orchestration.md` routes non-trivial work; `rules/security-check-required.md`, `rules/human-comment-reply-gate.md`, and `rules/external-write-authorization.md` gate side effects).
 2. **`agent-orchestrator`** (`tool-subagents/agent-orchestrator.md`) splits multi-lane work into a wave-ordered task table, assigns each task a complexity tier and concrete model through `model-selector`, runs every delegated task as a bounded produce-validate-refine loop (`workflows/task-quality-loop.md`, max 5 iterations), keeps a durable state ledger (`CONTEXT_STATE.md` + `TASKS_TABLE.md`), and enforces a 30-minute SLA per task.
-3. **Read-only specialists** (`pr-validator`, `java-change-validator`, `documentation-reviewer`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `system-architecture-specialist`, `diagram-creation-specialist`, `confluence-documentation-specialist`, `prod-doc-promoter`, `task-quality-judge`, `verifier`, ...) return evidence, findings, and draft replies; the root agent owns edits, commits, pushes, and human-facing replies.
+3. **Read-only specialists** (`pr-validator`, `java-change-validator`, `documentation-reviewer`, `aws-alarm-investigator`, `log-analyst`, `diagram-creation-specialist`, `prod-doc-promoter`, `task-quality-judge`, `verifier`, ...) return evidence, findings, and draft replies; the root agent owns edits, commits, pushes, and human-facing replies.
 4. Each specialist ships as a **skill** entrypoint plus a **validation** workflow and an **evolution** workflow; `workflows/specialist-agent-factory.md` creates new ones.
 
 ## Quick Start
@@ -116,7 +116,6 @@ After setup, hand this prompt to the agent inside the consumer repo:
 Consumer repos curate shared context in `docs/llm/toolkit-selection.txt`:
 
 ```text
-rules/code-rules.md
 rules/security-check-required.md
 rules/request-orchestration.md
 workflows/pre-pr-check.md
@@ -133,7 +132,6 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Changed-Code Quality Gate Required** | `rules/changed-code-quality-gate-required.md` | Blocking static-analysis gate scoped to added or modified lines |
 | **CI Feedback Loop** | `rules/ci-feedback-loop.md` | Turn CI failures into rule and workflow updates |
 | **CLI over MCP** | `rules/cli-over-mcp.md` | Prefer capable authenticated CLIs; record why MCP was chosen when it is |
-| **Code Rules** | `rules/code-rules.md` | Coding discipline, source verification, change management |
 | **Command Safety** | `rules/command-safety.md` | Review shell commands for destructive, exfiltration, or injection risk |
 | **Cross-Platform Scripts** | `rules/cross-platform-scripts.md` | Scripts must run on Windows, Linux, and macOS |
 | **Documentation Review Required** | `rules/documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` |
@@ -303,7 +301,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 
 ## Tool Subagents
 
-`tool-subagents/README.md` lists all 27 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, CV/profile truthfulness, and workspace hygiene.
+`tool-subagents/README.md` lists all 15 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki promotion, diagrams, alarms, logs, tests, releases, and workspace hygiene.
 
 ## Integrations
 
@@ -311,11 +309,8 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | --- | --- | --- |
 | **Jira** | `integrations/jira.md` | Ticket details, search, issue management (CLI + MCP); getting-started walkthrough in `docs/jira-setup.md` |
 | **Confluence** | `integrations/confluence.md` | Documentation, wikis, architecture pages (CLI + MCP) |
-| **GitHub** | `integrations/github.md` | Code, PRs, branches, CI status (CLI + MCP) |
-| **Jenkins** | `integrations/jenkins.md` | Job/build status, console logs, triggering builds, pipeline authoring |
 | **AWS CLI** | `integrations/aws-cli.md` | Cloud infrastructure, deployment, logs |
 | **Slack CLI** | `integrations/slack-cli.md` | Slack application development with pinned installation |
-| **AWS Agent Toolkit** | `integrations/aws-agent-toolkit.md` | Upstream AWS Agent Toolkit setup review and side effects (documentation only) |
 
 ## Validation
 

@@ -168,6 +168,5 @@ The Lambda console's function-level **Triggers** tab reads only the *unqualified
 
 ## Related
 
-- `tool-subagents/terraform-specialist.md` — the read-only specialist that enforces these patterns
 - `rules/release-safety.md` — deploy order, verification, and rollback discipline
-- `tool-subagents/aws-alarm-investigator.md` — known false-positive alarm patterns
+- `workflows/aws-alarm-investigator-validation.md` — known false-positive alarm patterns

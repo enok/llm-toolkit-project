@@ -9,9 +9,8 @@ metadata:
 
 # System Architecture Specialist
 
-Use this skill to route architecture review, discovery, or design validation
-through the System Architecture Specialist. The specialist is read-only: it
-grounds every claim in code, config, docs, tickets, logs, or metrics and returns
+Use this skill for architecture review, discovery, or design validation. The
+review is read-only: it grounds every claim in code, config, docs, tickets, logs, or metrics and returns
 findings, tradeoffs, and handoffs; the root agent owns every change.
 
 Trigger examples:
@@ -24,12 +23,13 @@ Trigger examples:
 
 ## Workflow
 
-1. Invoke or follow `tool-subagents/system-architecture-specialist.md`.
+1. Run the review read-only (as a validator lane on the plain model when
+   delegated) and return findings, tradeoffs, and handoffs.
 2. Keep root-agent ownership for edits, docs, diagrams, validation, commits,
    pushes, and user-facing communication.
 3. Compose with `skills/best-practices/SKILL.md`,
    `workflows/project-discovery.md`,
-   `diagram-creation-specialist`, `confluence-documentation-specialist`,
+   `diagram-creation-specialist`, `confluence-documentation`,
    `documentation-reviewer`, `pr-validator`, and language/security/contract/log
    specialists only when their evidence lanes are relevant.
 4. Keep product-specific architecture facts (service inventories, hostnames,

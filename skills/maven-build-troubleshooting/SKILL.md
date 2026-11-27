@@ -78,7 +78,6 @@ mvn clean verify
 ## Related
 
 - `skills/maven-release/SKILL.md`
-- `rules/code-rules.md`
 - `rules/security-check-required.md`
 - `references/legacy-java-webapp-runtime.md`
 - `references/jdk17-legacy-migration.md`

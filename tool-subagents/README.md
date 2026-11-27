@@ -13,26 +13,14 @@ Every agent is a pair: `<name>.md` (YAML frontmatter — `name`, `description`, 
 | `agent-orchestrator` | Automatic request router and map-reduce coordinator with per-task complexity tiering, bounded quality loops, and explicit LOA mode for authorized async execution, state checkpoints, and SLA rollups |
 | `model-selector` | Read-only per-task model selection and overspend auditor: assigns tier, model, effort, and token band at split time and flags tasks that ran above their cheapest capable tier |
 | `task-quality-judge` | Per-task quality-loop validator: judges one delegated task's output against its acceptance criteria and returns a pass/fail verdict with a targeted defect list |
-| `parallel-explorer` | Fast codebase reconnaissance |
-| `cross-repo-analyst` | Multi-repo impact map |
-| `code-reviewer` | Implementation risk and regression review |
 | `test-runner` | Test selection and failure triage |
-| `contract-analyzer` | API, schema, event, and downstream impact |
 | `java-change-validator` | Read-only Java change validation across code, tests, wiring, docs, build evidence, and reviewer drafts |
 | `pr-validator` | Read-only live-head PR/ticket readiness, comments, CI, docs, and approve/block validation |
-| `security-auditor` | Security-focused review |
-| `owasp-security-auditor` | OWASP-style audit lane |
-| `ci-triage` | CI log analysis |
 | `log-analyst` | Read-only operational log evidence reduction |
 | `aws-alarm-investigator` | Read-only AWS CloudWatch alarm root-cause investigator with confidence-rated hypotheses and reviewable possible fixes |
-| `terraform-specialist` | Read-only Terraform module/root, plan safety, state/import lifecycle, multi-env, secrets/metadata hygiene, and drift-codification validation — mandatory for all Terraform requests |
-| `dag-glue-specialist` | Read-only Airflow DAG, MWAA, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation |
-| `system-architecture-specialist` | Read-only application architecture, service boundary, data-flow, integration, and quality-attribute review |
 | `diagram-creation-specialist` | Read-only source-grounded diagram planning, notation, export, and image-quality validation |
 | `documentation-sync` | Docs and changelog drift |
 | `documentation-reviewer` | Read-only review for documentation created or changed by agents, chats, automations, scripts, or humans |
-| `cv-truthfulness-reviewer` | Read-only truthfulness review of a CV, resume, profile, or application answer against its evidence: unsupported claims, dates and titles, verb strength, causal rewording, license-backed open-source claims, counts recomputed from disk, stale source comments, cross-file employment status |
-| `confluence-documentation-specialist` | Read-only Confluence page, hierarchy, attachment, comment, and source-to-wiki validation |
 | `prod-doc-promoter` | Read-only production documentation promotion planning for deployed-ticket wiki cleanup and canonical doc updates |
 | `release-coordinator` | Release order, verification, and rollback |
 | `workspace-hygiene-auditor` | Read-only auditor that classifies every item of an AI-assistant workspace inventory into a cleanup plan and flags stale-state, coverage-gap, and run-duration risks |

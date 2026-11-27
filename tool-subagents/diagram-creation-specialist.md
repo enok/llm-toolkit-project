@@ -56,9 +56,9 @@ and implementation instructions for the root agent to apply.
 
 ## Related Specialists
 
-- Use `system-architecture-specialist` for architecture boundaries, tradeoffs,
+- Use the `system-architecture-specialist` skill for architecture boundaries, tradeoffs,
   quality attributes, and integration ownership before diagram finalization.
-- Use `confluence-documentation-specialist` for wiki hierarchy, attachments, and
+- Use the `confluence-documentation` skill for wiki hierarchy, attachments, and
   rendered Confluence copies.
 - Use `documentation-reviewer` for final doc quality and claim drift.
 - Use `pr-validator` when diagram readiness affects PR/Jira approval.

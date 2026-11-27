@@ -68,12 +68,12 @@ llm-toolkit-project/
 ├── README.md                  # Overview, setup, full catalogs
 ├── INFRA.sh / INFRA.ps1       # Plan-first machine bootstrap (wraps scripts/bootstrap-dev.*)
 ├── package.json               # npm entrypoints for the validators
-├── rules/                     # Generic rules, 16 always-on + 8 on demand (+ rules/examples/ templates)
+├── rules/                     # Generic rules, 15 always-on + 8 on demand (+ rules/examples/ templates)
 ├── workflows/                 # Step-by-step procedures (<= 12,000 chars each)
 ├── skills/                    # On-demand capabilities (SKILL.md + references/rules/scripts/agents)
 ├── tool-subagents/            # Shared subagent prompts (.md + .toml), agent-orchestrator first
-├── rubrics/                   # Architecture, security, and code-review checklists
-├── integrations/              # Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit
+├── rubrics/                   # Architecture and technical-content rubrics
+├── integrations/              # Jira, Confluence, AWS CLI, Slack CLI
 ├── clients/                   # Provider overlay guidance and sync commands
 ├── learnings/                 # Indexed trial-and-error discoveries (INDEX.md first)
 ├── kb/                        # Local vector knowledge-base runtime (Docker); CLI scripts/kb.py, guide docs/knowledge-base.md
@@ -119,7 +119,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Fix CI" / "address PR comments" / "PR bot findings" | **gh-fix-ci**, **gh-address-comments**, **pr-automation-review** workflows |
 | "Start ticket ABC-123" / "implement a ticket" | **ticket-implementation** workflow |
 | "Run tests" / "test plan" | **run-tests** workflow |
-| "Terraform" / ".tf change" / "plan/apply" / "state or import" (mandatory routing) | **terraform-specialist** lane, with **terraform-change-safety** |
+| "Terraform" / ".tf change" / "plan/apply" / "state or import" (mandatory routing) | **terraform-change-safety** skill; the root runs `terraform fmt -check`, `terraform validate`, and a reviewed plan per touched root, with apply and state changes only on explicit user authorization |
 | "Investigate this alarm" / "CloudWatch alarm RCA" | **aws-alarm-investigator-validation** workflow + **aws-alarm-investigator** skill |
 | "Analyze logs" / "CloudWatch logs" / "nginx logs" | **log-investigation** workflow + **log-analysis** skill |
 | "Incident" / "production issue" / "runbook" | **incident-ops**, **runbook-authoring** skills |
@@ -149,8 +149,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Thesis" / "ABNT" | **thesis-writing-main** workflow |
 | "Job scan" / "job search" / "track my applications" | **job-search-pipeline** workflow + skill |
 | "Is this course / degree / MBA / certification worth it" / "does it carry weight in the market" | **credential-evaluation** skill |
-| "Sync my CV with LinkedIn" / "I left my employer, update everywhere" / "keep my CV, profile and job files consistent" | **career-profile-sync** workflow (review step: **cv-truthfulness-reviewer**) |
-| "Check my CV for unsupported claims" / "is every claim in my CV or profile true" | **cv-truthfulness-reviewer** subagent |
+| "Sync my CV with LinkedIn" / "I left my employer, update everywhere" / "keep my CV, profile and job files consistent" | **career-profile-sync** workflow |
 
 ---
 
@@ -160,7 +159,6 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 
 - `rules/api-contract-surface.md`
 - `rules/ci-feedback-loop.md`
-- `rules/code-rules.md`
 - `rules/documentation-review-required.md`
 - `rules/error-driven-learning.md`
 - `rules/external-write-authorization.md`
@@ -323,11 +321,11 @@ Skills marked toolkit-local in `skills/README.md` (AWS Airflow Terraform project
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (27 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `cv-truthfulness-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`, `workspace-hygiene-auditor`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 
-`integrations/README.md` indexes the Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, and AWS Agent Toolkit guides. Each covers CLI, MCP, and manual options; `rules/cli-over-mcp.md` decides between them.
+`integrations/README.md` indexes the Jira, Confluence, AWS CLI, and Slack CLI guides. Each covers CLI, MCP, and manual options; `rules/cli-over-mcp.md` decides between them.
 
 ---
 

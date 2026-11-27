@@ -57,11 +57,9 @@ The `learnings/` directory at the repo root captures trial-and-error discoveries
 
 ## Rubrics
 
-The shared toolkit includes structured review rubrics for architecture, security, and holistic code review:
+The shared toolkit includes a structured review rubric for architecture severity calls:
 
 - `rubrics/architecture.md`
-- `rubrics/code-review-checklist.md`
-- `rubrics/security.md`
 
 ## Mandatory Security Gate
 

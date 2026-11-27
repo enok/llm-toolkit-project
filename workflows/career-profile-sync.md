@@ -96,8 +96,8 @@ check the result; do not assume the edit left the layout intact.
 
 ## Phase 5 - Truthfulness review
 
-Dispatch `tool-subagents/cv-truthfulness-reviewer.md` (read-only; `standard`
-tier, explicit model per the orchestrator's client map) with the CV, the master
+Dispatch a read-only validator lane on the plain model (`standard` tier,
+explicit model per the orchestrator's client map) with the CV, the master
 CV, the profile export or read-back, and the repository facts the CV cites. It
 compares the text with the evidence: claims, dates and titles, verb strength,
 open-source wording, counts from disk, stale comments, and employment status

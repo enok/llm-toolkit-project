@@ -859,23 +859,20 @@ When invoked:
    installed alternative. Never plan around a skill that is not in the current
    session's inventory.
 4. Select specialists from `tool-subagents/` by evidence source and outcome:
-   - `parallel-explorer` for quick repository maps;
-   - `cross-repo-analyst` for multi-repo impact;
-   - `code-reviewer` for behavior and regression risk;
    - `java-change-validator` for Java diffs, framework wiring, build evidence,
      tests, migrations, docs, and Java-related reviewer reply drafts;
    - `pr-validator` for live PR/ticket readiness, full diff review, human review
      threads, CI/CD evidence, docs, and approve-ready/blocked/monitor calls;
-   - `dag-glue-specialist` for Airflow DAG, MWAA, AWS Glue job, crawler, Data
-     Catalog, and ETL pipeline validation, implementation-risk checks, and PR
-     readiness handoffs;
-   - `terraform-specialist` — MANDATORY for every request that touches
-     Terraform/OpenTofu (`.tf`/`.tftpl`/`.tfvars`/lockfiles, plan/apply
-     decisions, state or import operations, multi-environment roots,
-     IaC-provisioned observability, IaC PR readiness); the root runs
-     `terraform fmt -check`, `terraform validate`, and a reviewed plan per
-     touched root and keeps apply and state changes behind explicit user
-     authorization;
+   - Terraform/OpenTofu — MANDATORY check for every request that touches
+     it (`.tf`/`.tftpl`/`.tfvars`/lockfiles, plan/apply decisions, state or
+     import operations, multi-environment roots, IaC-provisioned
+     observability, IaC PR readiness): the root runs `terraform fmt -check`,
+     `terraform validate`, and a reviewed plan per touched root, follows
+     `skills/terraform-change-safety`, and keeps apply and state changes
+     behind explicit user authorization;
+   - Airflow DAG, MWAA, AWS Glue, Data Catalog, and ETL changes: a read-only
+     validator lane on the plain model checks implementation risk and PR
+     readiness;
    - `prod-doc-promoter` for deployed-ticket documentation promotion from a
      configured wiki intake folder to canonical wiki homes after production
      deployment gates pass;
@@ -885,16 +882,17 @@ When invoked:
      chats, automations, scripts, or humans, including generated LLM surfaces,
      PR bodies, release notes, runbooks, wiki drafts, diagrams, and rendered
      artifacts;
-   - `confluence-documentation-specialist` for Confluence page state, hierarchy,
-     comments, attachments, rendered wiki evidence, and source-to-wiki drift;
+   - Confluence page state, hierarchy, comments, attachments, and
+     source-to-wiki drift: a read-only validator lane on the plain model
+     with `skills/confluence-documentation`;
    - `diagram-creation-specialist` for C4, AWS, sequence, Mermaid, PlantUML,
      export, and image-quality handoffs;
-   - `system-architecture-specialist` for source-grounded architecture,
-     service boundaries, data flows, integrations, migrations, quality
-     attributes, and architecture review handoffs;
-   - `contract-analyzer` for APIs, schemas, events, and downstream consumers;
-   - `security-auditor` or `owasp-security-auditor` for security-sensitive work;
-   - `ci-triage` for CI logs;
+   - architecture, service boundaries, data flows, and quality attributes:
+     a read-only validator lane on the plain model with
+     `skills/system-architecture-specialist`;
+   - code diffs, API/schema/event contracts, security-sensitive work, and CI
+     logs: a read-only validator lane on the plain model reviewing that
+     evidence (with `skills/security-best-practices` for security);
    - `log-analyst` for CloudWatch, server, access-log, Log4j, Lambda, Glue, or
      Firehose investigations;
    - `aws-alarm-investigator` for CloudWatch alarm root-cause investigation
@@ -908,7 +906,7 @@ When invoked:
 5. Assign each task a complexity tier and produce a compact delegation plan: agent, task, inputs, expected output, write ownership, complexity tier, the requested model/effort taken from the client model map (see "Complexity tiering" below — mandatory on every dispatch whose platform exposes a model parameter), acceptance criteria, validator assignment, loop budget, and whether it can run in parallel.
 6. Run every delegated task as a bounded produce->validate->refine quality loop per `workflows/task-quality-loop.md`:
    - before dispatch, write verifiable acceptance criteria (mandatory vs advisory): for ticket-driven work the ticket's acceptance criteria are the mandatory set (subtasks must also stay aligned with the parent ticket's goal); if the goal cannot be made verifiable, pause and ask the user for clarification instead of starting the loop;
-   - assign a validator matched to the task's evidence type (`code-reviewer`, `test-runner`, `documentation-reviewer`, `java-change-validator`, `security-auditor`, `diagram-creation-specialist`, `pr-validator`, `dag-glue-specialist`, `terraform-specialist` (mandatory for Terraform/OpenTofu evidence), `system-architecture-specialist`, `log-analyst`; `task-quality-judge` or `verifier` when no domain specialist fits);
+   - assign a validator matched to the task's evidence type (`test-runner`, `documentation-reviewer`, `java-change-validator`, `diagram-creation-specialist`, `pr-validator`, `log-analyst`; for code diffs, security, Airflow/Glue, and architecture evidence a read-only validator lane on the plain model; for Terraform/OpenTofu evidence the mandatory fmt -check, validate, and reviewed-plan check above; `task-quality-judge` or `verifier` when no domain specialist fits);
    - the validator is always a separate invocation from the producer, read-only, and returns a structured verdict (`pass`/`fail`/`escalate`) with a numbered defect list classed `mechanical` or `reasoning`;
    - on `fail`, feed only the defect list back to the producer for a targeted refinement; **max 5 iterations per task** (budget 1 for deterministic `light` tasks — one production pass, one validation pass, no refinement);
    - after 2 consecutive `reasoning`-classed failures, escalate the producer one tier for the next iteration (platform-confirmed mechanism only);
@@ -975,7 +973,7 @@ Complexity tiering (provider-agnostic):
     platform default with `platform default / unconfirmed` recorded — verify
     the mechanism is absent first; a model parameter on the dispatch tool IS
     the mechanism and must be used.
-- Attach the tier to the task, not permanently to the agent identity: the same specialist (e.g. `parallel-explorer`, `code-reviewer`) can run at a different tier on a different invocation based on the actual scope of that task.
+- Attach the tier to the task, not permanently to the agent identity: the same specialist (e.g. `test-runner`, `pr-validator`) can run at a different tier on a different invocation based on the actual scope of that task.
 - A subagent's `model:` frontmatter (`fast` -> `light`, `inherit` -> `standard`) is only a fallback default, never a substitute for the per-call parameter: on clients where `inherit` resolves to the session/root model (e.g. Claude Code), the dispatcher must still pass the explicit tier model on every call.
 - State the tier as a request and confirm it from dispatch evidence: the accepted model/effort parameter on the tool call is the confirmation. Never claim a model switch that did not happen; never skip an available parameter and call the result "default".
 - Never let tiering block correctness: if unsure between two tiers, pick the higher one.
@@ -1055,8 +1053,8 @@ Progress notification (opt-in, gated):
 
 - Use `task-quality-judge`, `verifier`, or the matching domain validator for
   independent LOA validation; never use the producer as its validator.
-- Use `release-coordinator`, `ci-triage`, `pr-validator`, and
-  `documentation-reviewer` only for their respective evidence/action lanes.
+- Use `release-coordinator`, `pr-validator`, and `documentation-reviewer`
+  only for their respective evidence/action lanes.
 - Return handoff recommendations to the LOA coordinator; workers do not expand
   their own scope or contact humans directly.
 

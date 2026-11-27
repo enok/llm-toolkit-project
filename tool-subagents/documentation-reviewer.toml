@@ -57,11 +57,11 @@ automation, script, or human before it is treated as final.
 
 ## Related Specialists
 
-- Use `confluence-documentation-specialist` when wiki hierarchy, page state,
+- Use the `confluence-documentation` skill when wiki hierarchy, page state,
   labels, comments, attachments, or rendered Confluence copies affect the doc.
 - Use `diagram-creation-specialist` when docs include diagrams, generated
   images, PDF/wiki renders, or diagram source.
-- Use `system-architecture-specialist` when docs make architecture, boundary,
+- Use the `system-architecture-specialist` skill when docs make architecture, boundary,
   data-flow, integration, or operational-quality claims.
 - Use `pr-validator` when documentation is part of PR/ticket readiness or
   reviewer thread handling.

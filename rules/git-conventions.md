@@ -5,300 +5,41 @@ description: Git branch naming, protected-branch etiquette, semantic commit stru
 
 # Git Branch & Commit Conventions
 
-## Branch Naming
+## Branches
 
-- **Always** create feature branches using the ticket ID as the branch name.
-- Format: `<TICKET-ID>` or `<TICKET-ID>-short-description`
-- Examples: `ABC-123`, `ABC-123-add-user-endpoint`, `BUG-456-fix-search` (use your tracker's real prefix)
-- The ticket ID is extracted from the task context (Jira ticket, PR title, user request, etc.)
-- **Never** use generic branch names like `feature/my-changes` or `fix/bug`
-- Do not commit directly to `main` or another protected branch unless the repository's documented workflow expects it (see § Protected Branches and Target Ambiguity)
+- Name feature branches after the ticket: `<TICKET-ID>` or `<TICKET-ID>-short-description` (e.g. `ABC-123-add-user-endpoint`); never generic names like `feature/my-changes`.
+- Follow the repository's documented working branch and PR base (README, CONTRIBUTING, `AGENTS.md`); when nothing is documented, ask.
+- "Push this", "deploy this", "finish the work" never authorize a push or merge to `main`, `stage`, `qa`, `prod` or another protected branch. Ask which branch or PR. Protected branches change only through PRs a human merges; no self-merge (`gh pr merge`, `git push origin HEAD:<protected>`) unless the user names that PR and destination in this session.
+- Never force-push, rebase, reset or rewrite a shared branch. Before a reset, checkout or clean, run `git status --porcelain=v1 --untracked-files=all`; sync a clone with `python3 scripts/git_safe_sync.py --repo <clone> --to <ref>` (refuses a dirty tree).
 
-## Protected Branches and Target Ambiguity
+## Commits
 
-`main` (or the repository's documented default branch) and shared environment
-branches such as `stage`, `qa`, and `prod` are shared state: other people's
-checkouts, deployments, and audit history depend on them.
-
-- **Know the target before you push.** Read the repository's README,
-  CONTRIBUTING, or `AGENTS.md` to find its documented working branch and PR
-  base. Some repositories work directly on `main`, others use ticket branches
-  with PRs, others promote through environment branches. Follow the documented
-  model; when nothing is documented, ask.
-- **Ambiguity resolves to asking.** "Push this", "deploy this", "make this
-  live", "finish the work", and "complete the release" do not name a branch or
-  a merge destination and never authorize a push or merge to a protected
-  branch. Ask: "Should I push to `<ticket-branch>`, open a PR to `<base>`, or
-  push to a different branch?"
-- **Protected branches change through pull requests a human reviews and
-  merges.** An agent does not self-merge: `gh pr merge`,
-  `git push origin HEAD:<protected-branch>`, or an API merge targeting a
-  protected branch requires the user to name that specific PR and destination
-  in the current session. Direct commits on `main` are acceptable only where
-  the repository's documented workflow expects them (for example a personal
-  repository that works on `main`), and only for the change the user asked for.
-- **Never force-push, rebase, reset, or rewrite a shared branch.**
-  `--force-with-lease` is for the agent's own ticket/feature branch after an
-  authorized rewrite (see § Ticket/Feature Branch Rebase Before Push).
-- **Verify before every push or merge:** check the target
-  (`git rev-parse --abbrev-ref HEAD` plus the explicit push refspec); if the
-  target is protected or shared, confirm explicit authorization for this
-  specific push/merge; if authorization is missing or unclear, stop and ask.
-
-## Dirty Working Trees
-
-- **Never reset, checkout, or clean a dirty working tree.** Run `git status --porcelain=v1 --untracked-files=all` first: any output is uncommitted work that `git reset --hard <ref>`, `git checkout -f`, or `git clean` discards silently, including edits earlier lanes or runs left in a shared clone. To sync a clone to a ref use `python3 scripts/git_safe_sync.py --repo <clone> --to <ref>` (`--dry-run` to preview, `--wip-commit` or `--stash` to keep dirty work); it refuses with exit 3 on a dirty tree. (sig: coordination/reset-hard-discards-uncommitted-work)
-
-## Commit Messages
-
-- Write clear, concise commit messages describing what changed.
-- If the project uses pre-commit hooks to prepend ticket IDs, write just the description.
-- Otherwise, prefix with ticket ID: `ABC-123: Add user profile endpoint`
-- Use imperative mood: "Add", "Fix", "Update" — not "Added", "Fixed", "Updated"
-
-## Commit Structure (PR Organization)
-
-Organize every non-empty PR diff into the categories below. The first five are
-the canonical implementation categories; Documentation and Cleanup complete the
-PR history when those changes exist. Use the fewest coherent commits that keep
-review boundaries clear; there is no fixed commit count. Keep commits from the
-same category contiguous, and skip categories with no legitimate changes.
-
-| Category | What belongs here |
-|----------|-------------------|
-| **Infrastructure** | Terraform, CloudFormation, deployment resources, dashboards, alarms, and other provisioned-resource definitions |
-| **Configuration** | Build and dependency files, DI and environment config, logging config, CI/CD config, LLM/client config (`AGENTS.md`, `.cursor/`, `.claude/`, `.codex/`, `.windsurf/`), `.gitattributes`, and `.gitignore` |
-| **Support + utilities** | Shared helpers, adapters, filters, aspects, reusable unit-test fixtures, reusable scripts, and low-level utilities that support business behavior |
-| **Business logic + related unit tests** | Domain behavior, controllers/services/models that implement requirements, and the focused unit tests that verify that behavior |
-| **Integration tests** | Integration, component, contract, system, end-to-end, and runtime-wiring tests, including their test-specific fixtures and configuration, that verify multiple units or external boundaries together |
-| **Documentation** | `README.md`, maintained `docs/`, runbooks, learnings, architecture diagrams, API specifications, and PlantUML |
-| **Cleanup** | Removal of retired code, config, documentation, generated clutter, or other obsolete assets when that removal is independently reviewable |
-
-**Rules:**
-- Each commit is prefixed with the ticket ID: `TICKET-ID: <description>`.
-- Never mix categories in a single commit.
-- If one category is still too large for a focused review, split it into
-  contiguous, meaningful subgroups. Examples include
-  `Business logic + related unit tests — request handling` and
-  `Infrastructure — observability`. Do not split merely to lower line counts.
-- Unit tests stay with the business logic or support utility they verify.
-  Integration, component, contract, system, end-to-end, and cross-boundary
-  runtime tests belong in **Integration tests** instead of being mixed into a
-  production-code commit.
-- A file with changes from multiple categories must be split at hunk level with
-  `git add -p` or reconstructed in a clean, dedicated worktree. Do not use an
-  unrelated dirty worktree as scratch space.
-- Do not create empty or audit-only commits merely to represent a category.
-- Preserve the displayed category order. Skip empty categories, and keep every
-  meaningful subgroup contiguous within its category.
-
-### History-regrouping safeguards
-
-- Rewrite only a ticket or feature branch whose history the user explicitly
-  authorized for rewriting. Never apply this procedure to a shared environment
-  or protected branch.
-- Before regrouping, record `git rev-parse 'HEAD^{tree}'` and create a local
-  backup ref such as `backup/<ticket>-before-regroup-<timestamp>`.
-- Use a clean, dedicated worktree or an isolated temporary Git index. If the
-  active worktree contains unrelated staged, unstaged, or untracked work, do not
-  reset, stash, overwrite, or include it implicitly.
-- For a history-only regrouping, immediately after the regroup and before any
-  base-branch rebase, require both
-  `git diff --quiet backup/<ticket>-before-regroup-<timestamp> HEAD` to exit
-  zero and the two refs' `^{tree}` values to match exactly.
-- A rewrite that scrubs terms from a repository's whole history and is then
-  force-pushed also needs a backup, every ref and tag covered, and a mirror
-  re-scan, in addition to the steps above.
-
-### Stacked-PR split safeguards
-
-- Treat commit subjects as evidence, not ownership boundaries. Classify the
-  final tree by path and split mixed files at hunk level; preserve a recovery
-  ref before reconstructing the stack.
-- Every intermediate layer must pass the validations applicable to its files,
-  including compilation and tests when it owns executable code. When moving
-  an entire requested file would break an earlier layer, keep only the minimum
-  dependency, wiring, or contract-test hunk required there and document the
-  exception in both affected PR descriptions.
-- Prove the reconstructed stack with adjacent ancestry checks and an exact
-  final-tree identity check against the pre-split recovery ref. A green final
-  layer does not excuse a broken intermediate PR.
-- Git hosting services can retain stale comparison snapshots after lower-layer
-  heads or bases change. Refresh or recreate the stack as supported, then
-  reconcile every PR's base/head SHA and file table against the hosting
-  service's live PR Files API; local Git diffs alone are insufficient.
-- Before removing a split worktree, prove its tracked, staged, and untracked
-  state is either clean or durably represented by a retained ref/artifact.
-  Prune missing registrations separately; never force-remove unique dirty
-  state merely to reclaim disk space.
+- Prefix each commit `TICKET-ID: <imperative description>` unless a hook prepends the ID.
+- Split every PR diff into these categories, in this order, never mixing two in one commit, skipping empty ones (no empty commits), each contiguous: **Infrastructure** (Terraform, CloudFormation, dashboards, alarms) · **Configuration** (build, DI/env, logging, CI/CD, LLM client config, `.gitattributes`, `.gitignore`) · **Support + utilities** · **Business logic + related unit tests** · **Integration tests** (integration, component, contract, system, e2e) · **Documentation** · **Cleanup**.
+- Unit tests stay with the code they verify. Split a mixed file at hunk level (`git add -p`) or in a clean dedicated worktree. Split an oversized category into named contiguous subgroups, not by line count.
+- Regrouping history (authorized ticket branch only): record `git rev-parse 'HEAD^{tree}'`, create `backup/<ticket>-before-regroup-<timestamp>`, work in a clean worktree, and require an identical tree against the backup before any rebase.
+- Stacked PRs: every layer passes its own build and tests; prove the final tree equals the pre-split recovery ref; reconcile each PR's base/head SHA and files against the hosting service's live PR Files API.
 
 ## PR File Change Table (Mandatory)
 
-Every created PR must include a Markdown table that accounts for every path in
-the base-to-head diff. Build the inventory from
-`git diff --name-status --find-renames origin/<base>...HEAD`; do not rely on
-memory or a hand-maintained planning list.
-
-```markdown
-## File changes
-
-| File | Status | Purpose |
-|------|--------|---------|
-| `path/to/file` | Added / Modified / Deleted / Renamed | Concise, file-specific explanation of why this path changed |
-```
-
-- Include one row for every added, modified, deleted, or renamed path. For a
-  rename, show `old/path -> new/path` in one row.
-- The Purpose column must explain the file's role in the PR; do not merely
-  repeat the filename or use a generic phrase such as "updated file."
-- Do not collapse paths into globs, directories, counts, or "and related files."
-  Generated, lock, binary, and deletion-only paths still require rows.
-- Keep the table synchronized after every scope-changing commit, rebase, or
-  review fix. Immediately before creating or updating the PR, reconcile its
-  rows against the live base-to-head diff and require exact path coverage.
-- Use `--body-file` for large descriptions and read the PR body back after the
-  mutation to verify that the heading, table, and row coverage survived
-  rendering. If the complete table cannot fit within the hosting platform's PR
-  body limit, split the change into smaller PRs before creation.
-- Generate large PR bodies only from complete authoritative sources: the live
-  base-to-head Git diff and a fully paginated PR-files API inventory. Do not
-  reuse terminal, rendered, or tool display output that may be truncated.
-  Before mutation, reject truncation markers and require the expected table
-  count. After mutation, fetch the complete body through the API, compare its
-  normalized content with the intended body file, and require the table paths
-  to match the paginated file inventory with no missing, extra, or duplicate
-  rows. Treat any mismatch as a failed update. Prepare the corrected body and
-  re-confirm approval before another human-visible mutation unless the original
-  authorization explicitly covered that exact idempotent retry.
+Every created PR body has a `## File changes` table (`| File | Status | Purpose |`) with one row per path in `git diff --name-status --find-renames origin/<base>...HEAD`, including generated, lock, binary and deleted paths, renames as `old -> new`, and a file-specific purpose; no globs or "related files". Re-sync it after every rebase or scope change. Write it with `--body-file`, read the body back through the API and require exact path coverage against the paginated PR files list; if it does not fit, split the PR.
 
 ## Draft PR Lifecycle (Mandatory)
 
-- **Always** open PRs as drafts: `gh pr create --draft`
-- A PR stays in draft until **all** of the following are true:
-  1. All CI checks pass (green), or the repo's accepted exact-head gate equivalent (for example a successful review-automation check when GitHub Actions are absent).
-  2. All bot review comments are addressed (e.g., Cursor automation, linters); actionable current-diff findings are zero.
-  3. All human review comments are resolved or explicitly deferred with justification (unresolved threads = 0 unless explicitly deferred).
-  4. The pre-PR check workflow (`workflows/pre-pr-check.md`) reports no blockers, or the ticket/program equivalent validation gate has independently passed.
-  5. The security check (`scripts/security-check-toolkit.sh`) passes or all failures are reviewed / scoped as nonblocking with evidence.
-- **When those criteria are met, immediately mark the PR ready** with `gh pr ready <PR_NUMBER>`. Leaving a validation-complete PR in Draft is a rule violation.
-- Do not keep a finished PR as Draft for handoff convenience, environment rollout sequencing, or "owner will decide later" unless the user explicitly orders Draft retention.
-- **Never** open a PR as ready-for-review on first push.
-- **Never** mark a PR ready while unresolved actionable comments exist — address or defer each one first.
-- A terminal response saying a review bot is disabled, skipped, or unavailable
-  is an external review blocker, not a successful current-head review. Record
-  local builds, CI, deployment/live checks, and review automation as separate
-  gates, and require the review evidence to identify the current head SHA.
-- If a Ready PR later gains an actionable finding, return it to Draft with `gh pr ready <PR_NUMBER> --undo`, fix, re-validate, then mark Ready again.
-- When branch protection refuses a merge (a required scanner, review, or
-  approval the agent cannot give itself), record the exact action the user must
-  take, verify the PR state live, and never report it as merged.
-- A stop-hook or review message about unsigned commits is feedback, not a
-  request to rewrite history: do not re-sign or force-push existing commits
-  unless the user asks.
+- Always open PRs with `gh pr create --draft`.
+- Mark ready (`gh pr ready <PR>`) as soon as all hold: CI green on the current head (or the repo's accepted exact-head gate); bot findings addressed; human threads resolved or explicitly deferred; `workflows/pre-pr-check.md` reports no blockers; `scripts/security-check-toolkit.sh` passes or failures are scoped as nonblocking with evidence. Leaving a validation-complete PR in draft is a violation unless the user ordered it.
+- A review bot reported as disabled or skipped is a blocker, not a pass. A new actionable finding on a ready PR sends it back with `gh pr ready <PR> --undo`.
+- When branch protection refuses a merge, record the exact action the user must take and never report it as merged. Do not re-sign or force-push commits because of an unsigned-commit message unless asked.
 
-## Duplicate-File Gate (Mandatory — Pre-Push)
+## Duplicate-File Gate (Mandatory, Pre-Push)
 
-Cloud-sync tools (Google Drive, OneDrive, Dropbox) silently create conflict-resolution copies named `file (1).ext`, `file (2).ext`, etc. These duplicates can contain **stale or contradictory content** and must **never** be committed.
+Cloud-sync tools create `file (1).ext` copies with stale content. Before every push, `git ls-files | grep -E ' \([0-9]+\)\.'` must print nothing; `git rm` any copy and verify the original first.
 
-**Before every push**, run:
+## Rebase Before Push
 
-```bash
-git ls-files | grep -E ' \([0-9]+\)\.' && echo "BLOCKED: remove duplicate files before pushing" && exit 1
-```
+- On an authorized ticket branch: `git fetch origin`, `git rebase origin/<base>`, resolve, re-run the full tests, run the duplicate-file gate, then push (`--force-with-lease` only when the rebase replaced remote history). Never `git merge` upstream changes.
+- A PR behind its base under strict checks is caught up with `gh pr update-branch <pr> --rebase`, then its state is read back.
 
-If duplicates are found:
-1. Delete them: `git rm 'path/to/file (1).md'`
-2. Verify the original file is correct.
-3. Re-run `git ls-files | grep -E ' \([0-9]+\)\.'` — must return nothing.
+## Environment Branches
 
-This check is **blocking** — do not push while any duplicate exists.
-
-## Windows Git Lock Handling
-
-On Windows, IDEs, file explorers, antivirus scans, and background Git processes
-can hold handles under `.git/objects` or `.git/index` long enough to make
-`git pull`, `git fetch`, `git gc`, or rebase cleanup fail.
-
-Before retrying repeatedly:
-
-1. Check for active Git processes and close duplicate terminals working in the
-   same repository.
-2. Close IDE or file explorer windows that are indexing or browsing the repo.
-3. Enable Git filesystem caching to reduce lock contention:
-
-```bash
-git config --global core.fscache true
-git config --global core.preloadindex true
-```
-
-If locks persist, stop and report the exact locked path and operation. Do not
-delete `.git/objects/*`, remove index files, or run `git reset --hard` unless
-the user explicitly approves the destructive recovery step.
-
-## Accounts and Worktrees Across Machines
-
-- Several accounts on one machine: one key per account plus a host alias or an
-  `includeIf "hasconfig:remote.*.url:git@<host>:*/**"` block (`**` straight
-  after the colon never matches `owner/repo`; needs Git 2.36+). Check with
-  `git config --show-origin --get-regexp 'user\.|includeif'` inside the repo.
-- A worktree created inside a cloud VM stores VM paths: run
-  `git worktree repair` (or recreate it) on the device before running gates
-  there, and never report a gate as passed when a step was skipped.
-
-## Ticket/Feature Branch Rebase Before Push
-
-- For a user-authorized ticket or feature branch, rebase onto the PR base before
-  pushing. This rule never applies to shared environment or protected branches.
-- Steps (always in this order):
-  1. `git fetch origin`
-  2. `git rebase origin/main` (or the PR base branch)
-  3. Resolve any conflicts
-  4. Re-run the full test suite to ensure nothing broke
-  5. Check for cloud-sync duplicates (see § Duplicate-File Gate above)
-  6. Use `git push --force-with-lease` only when the authorized ticket-branch
-     rebase or regroup replaced remote history; otherwise use a normal
-     `git push`.
-- **Never** push without rebasing first — even if the branch was recently created.
-- **Never** use `git merge` to integrate upstream changes — rebase only.
-- A PR that fell behind its base under strict required checks ("require
-  branches to be up to date") is caught up with
-  `gh pr update-branch <pr> --rebase`, never the default merge variant of that
-  command and never `git merge main`; then read the PR state back before
-  reporting it.
-
-## Environment Branch Promotion
-
-Some projects deploy from shared environment branches (for example `stage`).
-When promoting a reviewed ticket branch to such a branch, preserve the ticket
-branch as the source of truth. Do not rebase or rewrite the ticket branch just
-to deploy it.
-
-For multi-repo tickets, declare the final repository scope before validating or
-pushing. In each repository, verify the active branch and remote branches first:
-
-```bash
-git status --short --branch
-git branch -r
-```
-
-Push an environment branch only in repositories where that remote branch already
-exists and the user requested that environment update. Do not create `stage` in
-one repository just because sibling repositories use it.
-
-Do not push shared LLM/tooling repositories to an environment branch as part of
-an application release flow unless the user explicitly names that tooling
-repository as the target.
-
-Before moving the environment branch, inspect whether it has unique deployment
-fixes:
-
-```bash
-git fetch origin --prune
-git log --oneline --right-only origin/<ticket-branch>...origin/<env-branch>
-```
-
-Never rebase, reset, or force-push a shared environment branch such as `stage`
-or `prod`. Preserve its unique commits and advance it only through a normal
-fast-forward, cherry-pick, or non-force merge after inspecting both divergence
-and patch identity. Push the environment branch normally, verify the remote SHA,
-then check out the ticket branch again before continuing.
+Promote a reviewed ticket branch to an environment branch (e.g. `stage`) only where that remote branch exists and the user asked for that environment; never create it to match sibling repos, and never push the shared tooling repo as part of an application release. First check `git log --oneline --right-only origin/<ticket>...origin/<env>` for unique deployment fixes, advance by fast-forward, cherry-pick or non-force merge, verify the remote SHA, and return to the ticket branch.

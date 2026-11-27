@@ -1,7 +1,6 @@
 # Architecture Rubric
 
-Severity calls for architecture findings that reviewers tend to over-escalate. Severity levels
-follow `rubrics/code-review-checklist.md`: **Blocker** must be fixed before merge;
+Severity calls for architecture findings that reviewers tend to over-escalate. Severity levels: **Blocker** must be fixed before merge;
 **Suggestion** should be addressed but can be deferred with explicit justification.
 
 ---

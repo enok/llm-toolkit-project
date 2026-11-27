@@ -53,11 +53,11 @@ human-facing action.
   build evidence, Java docs, and Java-related reviewer drafts.
 - Use `documentation-reviewer` for docs, PR body, release notes, generated
   surfaces, and draft replies.
-- Use `confluence-documentation-specialist` when wiki state is part of PR
+- Use the `confluence-documentation` skill when wiki state is part of PR
   readiness.
 - Use `diagram-creation-specialist` when diagrams or exported artifacts affect
   review.
-- Use `system-architecture-specialist` for cross-service boundaries,
+- Use the `system-architecture-specialist` skill for cross-service boundaries,
   architecture risks, data flow, operability, and design tradeoffs.
 - Use security, CI, test, contract, log, and release specialists when the PR
   evidence demands those lanes.

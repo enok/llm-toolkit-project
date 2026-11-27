@@ -12,7 +12,6 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | --- | --- |
 | `api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
 | `ci-feedback-loop.md` | Turn CI failures into rule/workflow updates instead of one-off fixes |
-| `code-rules.md` | Coding discipline, source verification, change management, and commit hygiene |
 | `documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` before completion |
 | `error-driven-learning.md` | Capture trial-and-error wins as indexed learnings and migrate them into durable toolkit assets |
 | `external-write-authorization.md` | Bind every external mutation (tickets, PR metadata, wiki, chat, email) to an explicit current instruction |

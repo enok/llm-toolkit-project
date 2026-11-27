@@ -10,7 +10,6 @@ rules/api-contract-surface.md
 rules/changed-code-quality-gate-required.md
 rules/ci-feedback-loop.md
 rules/cli-over-mcp.md
-rules/code-rules.md
 rules/command-safety.md
 rules/cross-platform-scripts.md
 rules/documentation-review-required.md

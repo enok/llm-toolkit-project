@@ -24,11 +24,12 @@ Prefer this skill for broad alarm investigation requests such as:
 ## Workflow
 
 1. Load `workflows/aws-alarm-investigator-validation.md`.
-2. Invoke or follow `tool-subagents/aws-alarm-investigator.md`.
+2. Investigate per that workflow (dispatch `tool-subagents/aws-alarm-investigator.md`
+   when a separate read-only lane is wanted).
 3. Keep root-agent or human ownership for remediation, alarm changes, email
    sending, chat/ticket/wiki posts, commits, pushes, and other side effects.
-4. Compose with `log-analysis`, `incident-ops`, `terraform-specialist`,
-   `system-architecture-specialist`, or security specialists only when their
+4. Compose with `log-analysis`, `incident-ops`, `terraform-change-safety`,
+   `system-architecture-specialist`, or a security review only when their
    evidence lanes are relevant.
 5. If the specialist misses a reusable pattern, run
    `workflows/aws-alarm-investigator-evolution.md`.

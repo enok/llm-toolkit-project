@@ -91,14 +91,14 @@ class CreateSpecialistAgentRenderTests(unittest.TestCase):
         result = run_apply("claude", str(self.project))
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        rendered = self.project / ".claude" / "agents" / "ci-triage.md"
+        rendered = self.project / ".claude" / "agents" / "test-runner.md"
         frontmatter = read_frontmatter_block(rendered)
         self.assertNotIn("readonly:", frontmatter)
         self.assertNotIn("tier:", frontmatter)
         self.assertIn("model: haiku", frontmatter)
 
         # Canonical source keeps its tier hint; only the render drops it.
-        source_frontmatter = read_frontmatter_block(SUBAGENTS_DIR / "ci-triage.md")
+        source_frontmatter = read_frontmatter_block(SUBAGENTS_DIR / "test-runner.md")
         self.assertIn("tier: light", source_frontmatter)
         self.assertIn("model: inherit", source_frontmatter)
 
@@ -106,7 +106,7 @@ class CreateSpecialistAgentRenderTests(unittest.TestCase):
         result = run_apply("cursor", str(self.project))
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        rendered = self.project / ".cursor" / "agents" / "ci-triage.md"
+        rendered = self.project / ".cursor" / "agents" / "test-runner.md"
         frontmatter = read_frontmatter_block(rendered)
         self.assertNotIn("readonly:", frontmatter)
         self.assertNotIn("tier:", frontmatter)
@@ -116,12 +116,12 @@ class CreateSpecialistAgentRenderTests(unittest.TestCase):
         result = run_apply("claude", str(self.project))
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        # code-reviewer.md has no tier hint in the canonical source; the
+        # release-coordinator.md has no tier hint in the canonical source; the
         # render must leave its model value alone.
-        source_frontmatter = read_frontmatter_block(SUBAGENTS_DIR / "code-reviewer.md")
+        source_frontmatter = read_frontmatter_block(SUBAGENTS_DIR / "release-coordinator.md")
         self.assertNotIn("tier:", source_frontmatter)
 
-        rendered = self.project / ".claude" / "agents" / "code-reviewer.md"
+        rendered = self.project / ".claude" / "agents" / "release-coordinator.md"
         rendered_frontmatter = read_frontmatter_block(rendered)
         self.assertIn("model: inherit", rendered_frontmatter)
 
@@ -158,7 +158,7 @@ class CreateSpecialistAgentTargetOptionTests(unittest.TestCase):
 
         md_files = list(self.target_dir.glob("*.md"))
         self.assertEqual(len(md_files), SOURCE_MD_COUNT)
-        rendered = self.target_dir / "ci-triage.md"
+        rendered = self.target_dir / "test-runner.md"
         self.assertTrue(rendered.exists())
         self.assertIn("model: haiku", read_frontmatter_block(rendered))
 

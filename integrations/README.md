@@ -8,9 +8,7 @@ Guides for connecting LLM agents to external tools and services. These integrati
 |-------------|------|---------|
 | **Jira** | `jira.md` | acli syntax, safe REST upload fallback, local-path leak check, MCP alternative |
 | **Confluence** | `confluence.md` | Search and read documentation, project wikis |
-| **GitHub** | `github.md` | Read code, PRs, branches, issues across repos |
 | **AWS CLI** | `aws-cli.md` | Manage cloud infrastructure, deploy, inspect resources |
-| **Jenkins** | `jenkins.md` | Check job/build status, read console logs, trigger builds |
 | **Slack CLI** | `slack-cli.md` | Build and deploy Slack apps with a pinned, checksum-verified CLI |
 
 ## Client Preference Order
@@ -33,7 +31,5 @@ Workflows reference integrations when they need external context:
 
 1. **Jira** — required for ticket-based workflows
 2. **Confluence** — recommended for documentation-aware workflows
-3. **GitHub** — recommended for multi-repo projects and PR workflows
-4. **AWS CLI** — optional, for infrastructure and deployment tasks
-5. **Jenkins** — optional, for CI/CD status checks and build automation
-6. **Slack CLI** — optional, for Slack application development; not general message-posting authorization
+3. **AWS CLI** — optional, for infrastructure and deployment tasks
+4. **Slack CLI** — optional, for Slack application development; not general message-posting authorization

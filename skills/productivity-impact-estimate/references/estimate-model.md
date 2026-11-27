@@ -33,10 +33,10 @@ repository; re-check them with `ls` before quoting, because assets move.
 | Pre-PR self-checks | 1.5 | 10 | 30 | skills/pre-pr-check, run-tests; workflows/changed-code-quality-gate.md |
 | Reviewing teammates' PRs | 3.0 | 0 | 15 | skills/ticket-review, pr-validator, java-change-validator |
 | Addressing review comments | 2.0 | 10 | 25 | workflows/gh-address-comments.md, pr-automation-review.md |
-| CI failure triage and fix | 1.5 | 5 | 20 | workflows/gh-fix-ci.md; tool-subagents/ci-triage.md |
+| CI failure triage and fix | 1.5 | 5 | 20 | workflows/gh-fix-ci.md |
 | Ops: logs, alarms, incidents | 4.0 | 3 | 15 | workflows/log-investigation.md; skills/aws-alarm-investigator, incident-ops |
 | Documentation | 1.5 | 20 | 40 | skills/update-docs, doc-delta, confluence-documentation, runbook-authoring, diagram-authoring |
-| Infra and data-pipeline changes | 2.0 | 3 | 12 | skills/terraform-change-safety; tool-subagents/terraform-specialist.md, dag-glue-specialist.md |
+| Infra and data-pipeline changes | 2.0 | 3 | 12 | skills/terraform-change-safety |
 | Releases and verification | 1.0 | 3 | 10 | tool-subagents/release-coordinator.md |
 | Env setup and onboarding | 1.0 | 15 | 30 | scripts/bootstrap-dev.sh; skills/local-env-bootstrap, environment-diagnose, project-discovery |
 | Meetings and other | 10.0 | 0 | 2 | little toolkit effect |

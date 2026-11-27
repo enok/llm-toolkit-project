@@ -45,9 +45,9 @@ return evidence-backed findings that an implementer agent can act on.
   reviewer-thread handling, CI status, or approve/block reporting.
 - Use `documentation-reviewer` for Java docs, PR body claims, release notes,
   generated surfaces, and draft replies.
-- Use `system-architecture-specialist` for service boundaries, data flow,
+- Use the `system-architecture-specialist` skill for service boundaries, data flow,
   transaction ownership, integration risk, or migration architecture.
-- Use `confluence-documentation-specialist` or `diagram-creation-specialist`
+- Use the `confluence-documentation` skill or `diagram-creation-specialist`
   when Java changes require wiki or diagram evidence updates.
 
 Return handoff recommendations to the root agent; do not contact other agents,
