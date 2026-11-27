@@ -57,9 +57,13 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
 - **Folders granted mid-session** may never mount in the sandbox: check with `ls` of the mount
   root, fall back to the device bridge or Desktop Commander for those paths and say so; do not
   loop on re-requesting.
-- **Variant - run a script that lives in a protected folder:** read it (cloud clone or Desktop
-  Commander), copy it to a non-protected folder with the desktop shell, run the copy there, and
-  park the copy in a folder the owner reviews for deletion.
+- **Allowed folders only (owner decision, 2026-11-27):** work only in the folders the owner
+  connected or named for the task. A refusal on a protected folder is a boundary, not an obstacle:
+  do not copy a script or file out of it to run or edit it elsewhere, and do not reach it through
+  another shell, plugin or path. When the task needs a folder that is not allowed, stop, say which
+  folder and why, and ask the owner for approval (a folder-access request, or the owner runs that
+  step). Reading the public repository through a cloud clone stays allowed: it never touches the
+  protected folder.
 
 Durable guidance: workflows/career-profile-sync.md (Phase 6)
 

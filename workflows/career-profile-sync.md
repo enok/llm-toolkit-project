@@ -113,8 +113,9 @@ When files travel between a cloud session and the owner's machine:
    path already used, and verify the SHA-256 on the machine through the device
    shell before trusting the file.
 2. If `skills/` or `tool-subagents/` is unreadable through the bridge, read
-   through a cloud clone; to run a script from a protected folder, copy it to a
-   non-protected folder first and park the copy for deletion afterwards. See
+   through a cloud clone. Work only in allowed folders: never copy a file out
+   of a protected folder to run or edit it elsewhere; when another folder is
+   needed, ask the owner for approval first. See
    `learnings/cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md`.
 
 ## Phase 7 - Cross-check and report
