@@ -313,6 +313,11 @@ if command -v rtk >/dev/null 2>&1 && [[ -z "$DRY_RUN" ]]; then
       echo "# RTK privacy controls (LLM toolkit bootstrap): no DB, no telemetry, no tee"
       if [[ "$OS" == "macos" ]]; then
         # A plain file as the parent: the DB paths below can never be created.
+        if [[ -d "$HOME/.rtk-off" ]]; then
+          # A directory here would let RTK create its databases; refuse instead of guessing.
+          echo "~/.rtk-off is a directory; remove it so the RTK history paths cannot be created, then rerun." >&2
+          exit 3
+        fi
         [[ -e "$HOME/.rtk-off" ]] || : > "$HOME/.rtk-off"
         echo "export RTK_DB_PATH=\"\$HOME/.rtk-off/history.db\""
         echo "export RTK_RECALL_DB=\"\$HOME/.rtk-off/recall.db\""
