@@ -8,7 +8,8 @@ tags: [static-analysis, semgrep, sonar, spotbugs, quality-gate, changed-code]
 Use the narrowest analyzer already configured by the target project.
 
 The shipped executable adapter is Semgrep for Java, Python, JavaScript, and
-TypeScript, plus trusted syntax/policy checks for Bash and PowerShell. Sonar and
+TypeScript, trusted syntax/policy checks for Bash and PowerShell, and hadolint
+for Dockerfiles. Sonar and
 SpotBugs are selection guidance for project-native integrations; this toolkit
 does not claim to ship those adapters.
 
