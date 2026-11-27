@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import importlib.util
+import io
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -68,6 +72,14 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertNotIn("actions/setup-python@v", workflow)
         self.assertIn("pip install --require-hashes", workflow)
         self.assertIn(".github/requirements/semgrep.lock", workflow)
+
+    def test_hadolint_is_pinned_and_checksum_verified(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("HADOLINT_VERSION: v2.12.0", workflow)
+        self.assertIn("HADOLINT_SHA256: 56de6d5e5ec427e17b74fa48d51271c7fc0d61244bf5c90e828aab8362d55010", workflow)
+        self.assertIn("releases/download/${HADOLINT_VERSION}/hadolint-Linux-x86_64", workflow)
+        self.assertIn("sha256sum -c -", workflow)
+        self.assertLess(workflow.index("sha256sum -c -"), workflow.index('chmod +x "$hadolint_dir/hadolint"'))
 
 
 class ScopeTests(unittest.TestCase):
@@ -220,6 +232,19 @@ class ScopeTests(unittest.TestCase):
         with mock.patch.object(Path, "is_symlink", return_value=True):
             _, reason = gate.safe_code_file(self.root, "linked.py", gate.DEFAULT_EXCLUDES)
         self.assertEqual("unsafe changed source symlink", reason)
+
+    def test_dockerfile_names_are_covered_without_reclassifying_other_suffixes(self) -> None:
+        (self.root / "docker").mkdir()
+        for name in ("Dockerfile", "app.Dockerfile", "Dockerfile.dev", "docker/DOCKERFILE", "Dockerfile.sh", "Dockerfile.md", "Dockerfile.go"):
+            (self.root / name).write_text("FROM alpine:3.20\n", encoding="utf-8")
+        scope = gate.build_scope(self.root, self.args(), self.config())
+        self.assertEqual(
+            ("Dockerfile", "Dockerfile.dev", "app.Dockerfile", "docker/DOCKERFILE"),
+            gate.dockerfile_subscope(scope).files,
+        )
+        self.assertEqual(("Dockerfile.sh",), gate.subscope(scope, gate.SCRIPT_SUFFIXES).files)
+        self.assertEqual("non-code file", scope.skipped["Dockerfile.md"])
+        self.assertEqual("unsupported code language", scope.skipped["Dockerfile.go"])
 
     def test_python_bytecode_is_non_code_build_output(self) -> None:
         (self.root / "module.pyc").write_bytes(b"compiled")
@@ -384,6 +409,166 @@ class AnalyzerTests(unittest.TestCase):
             with mock.patch.object(gate.shutil, "which", return_value="/trusted/semgrep"), mock.patch.object(gate.subprocess, "run", return_value=completed), mock.patch.object(Path, "is_file", return_value=True):
                 result = gate.run_semgrep(Path.cwd(), Path.cwd(), scope)
             self.assertEqual("error", result["status"])
+
+
+# Fake hadolint: records its arguments and prints the findings in spec.json,
+# stamped with the file it was asked to lint, in hadolint's JSON format.
+FAKE_HADOLINT = """\
+import json, sys
+from pathlib import Path
+here = Path(__file__).resolve().parent
+with (here / "argv.jsonl").open("a", encoding="utf-8") as log:
+    log.write(json.dumps(sys.argv[1:]) + "\\n")
+spec = json.loads((here / "spec.json").read_text(encoding="utf-8"))
+target = sys.argv[-1]
+if "raw" in spec:
+    sys.stdout.write(spec["raw"])
+else:
+    sys.stdout.write(json.dumps([dict({"column": 1, "message": "fake"}, file=target, **item) for item in spec["findings"]]))
+sys.exit(spec.get("exit", 1 if spec.get("findings") else 0))
+"""
+
+DOCKERFILE = "FROM alpine:3.20\nRUN apk add --no-cache \\\n    curl \\\n    git\nUSER app\n"
+
+
+class DockerfileGateTests(unittest.TestCase):
+    """End-to-end gate runs on a temporary repository with a fake hadolint on PATH."""
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name) / "repo"
+        self.bin = Path(self.temp.name) / "bin"
+        self.root.mkdir()
+        self.bin.mkdir()
+        run_git(self.root, "init", "-q")
+        run_git(self.root, "config", "user.email", "test@example.invalid")
+        run_git(self.root, "config", "user.name", "Quality Gate Test")
+        (self.root / "Dockerfile").write_text(DOCKERFILE, encoding="utf-8")
+        (self.root / "run.sh").write_text("echo old\n", encoding="utf-8")
+        run_git(self.root, "add", ".")
+        run_git(self.root, "commit", "-qm", "base")
+        script = self.bin / "fake_hadolint.py"
+        script.write_text(FAKE_HADOLINT, encoding="utf-8")
+        if os.name == "nt":
+            (self.bin / "hadolint.cmd").write_text(f'@"{sys.executable}" -I "{script}" %*\r\n', encoding="utf-8")
+        else:
+            wrapper = self.bin / "hadolint"
+            wrapper.write_text(f'#!/bin/sh\nexec "{sys.executable}" -I "{script}" "$@"\n', encoding="utf-8")
+            wrapper.chmod(0o755)
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def change_line(self, number: int, text: str) -> None:
+        lines = DOCKERFILE.splitlines()
+        lines[number - 1] = text
+        (self.root / "Dockerfile").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def gate(self, spec: dict[str, object]) -> tuple[int, dict[str, object]]:
+        (self.bin / "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+        env = dict(os.environ, PATH=str(self.bin) + os.pathsep + os.environ.get("PATH", ""))
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--repo", str(self.root)],
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, check=False,
+        )
+        return result.returncode, json.loads(result.stdout)
+
+    def hadolint_report(self, report: dict[str, object]) -> dict[str, object]:
+        (analyzer,) = [item for item in report["analyzers"] if item.get("analyzer") == "hadolint"]
+        return analyzer
+
+    def test_error_on_changed_line_blocks(self) -> None:
+        self.change_line(5, "USER root")
+        code, report = self.gate({"findings": [{"code": "DL3002", "level": "error", "line": 5}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+        self.assertEqual([("hadolint", "DL3002", "Dockerfile", 5, 5)], [
+            (item["analyzer"], item["ruleId"], item["path"], item["startLine"], item["endLine"]) for item in self.hadolint_report(report)["findings"]
+        ])
+        self.assertEqual({"Dockerfile": {"exitCode": 1, "reported": 1}}, self.hadolint_report(report)["covered"])
+
+    def test_error_on_unchanged_line_does_not_block(self) -> None:
+        self.change_line(5, "USER nobody")
+        code, report = self.gate({"findings": [{"code": "DL3007", "level": "error", "line": 1}]})
+        self.assertEqual((0, "pass"), (code, report["status"]))
+        self.assertEqual(1, self.hadolint_report(report)["broaderRunOutOfScope"])
+
+    def test_warning_on_changed_line_blocks(self) -> None:
+        self.change_line(5, "USER nobody")
+        code, report = self.gate({"findings": [{"code": "DL3006", "level": "warning", "line": 5}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+
+    def test_warning_on_instruction_spanning_changed_continuation_line_blocks(self) -> None:
+        self.change_line(4, "    git=2.45.2-r0")
+        code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 2}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+        self.assertEqual((2, 4), (self.hadolint_report(report)["findings"][0]["startLine"], self.hadolint_report(report)["findings"][0]["endLine"]))
+
+    def test_info_and_style_on_changed_line_are_reported_without_blocking(self) -> None:
+        self.change_line(5, "USER nobody")
+        code, report = self.gate({"findings": [{"code": "DL3048", "level": "info", "line": 5}, {"code": "DL4000", "level": "style", "line": 5}]})
+        self.assertEqual((0, "pass"), (code, report["status"]))
+        analyzer = self.hadolint_report(report)
+        self.assertEqual([], analyzer["findings"])
+        self.assertEqual(["info", "style"], [item["level"] for item in analyzer["advisories"]])
+
+    def test_candidate_config_and_ignore_pragmas_are_not_trusted(self) -> None:
+        (self.root / ".hadolint.yaml").write_text("ignored: [DL3002]\n", encoding="utf-8")
+        self.change_line(5, "USER nobody")
+        code, report = self.gate({"findings": []})
+        self.assertEqual((0, "pass"), (code, report["status"]))
+        (argv,) = [json.loads(line) for line in (self.bin / "argv.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertIn("--disable-ignore-pragma", argv)
+        self.assertEqual(["--format", "json", "./Dockerfile"], argv[-3:])
+        config = Path(argv[argv.index("--config") + 1])
+        self.assertNotEqual(self.root.resolve(), config.resolve().parent)
+        self.assertFalse(str(config.resolve()).startswith(str(self.root.resolve())))
+
+    def test_missing_hadolint_blocks_with_reason(self) -> None:
+        self.change_line(5, "USER nobody")
+        real_which = shutil.which
+        stdout = io.StringIO()
+        with mock.patch.object(gate.shutil, "which", side_effect=lambda name, *a, **k: None if name == "hadolint" else real_which(name, *a, **k)), \
+                mock.patch.object(sys, "argv", ["gate", "--repo", str(self.root)]), contextlib.redirect_stdout(stdout):
+            code = gate.main()
+        report = json.loads(stdout.getvalue())
+        self.assertEqual((3, "blocked"), (code, report["status"]))
+        self.assertEqual("hadolint executable not found", self.hadolint_report(report)["reason"])
+
+    def test_malformed_output_blocks(self) -> None:
+        self.change_line(5, "USER nobody")
+        code, report = self.gate({"raw": "Dockerfile:5 DL3002 not json", "exit": 0})
+        self.assertEqual((4, "error"), (code, report["status"]))
+        self.assertIn("invalid hadolint JSON", self.hadolint_report(report)["reason"])
+
+    def test_non_findings_errors_block(self) -> None:
+        self.change_line(5, "USER nobody")
+        cases = (
+            ({"findings": [], "exit": 2}, "hadolint exited 2"),
+            ({"raw": "[]", "exit": 1}, "without findings"),
+            ({"findings": [{"code": "DL1000", "level": "error", "line": 1}]}, "could not parse"),
+            ({"findings": [{"code": "DL3002", "level": "fatal", "line": 5}]}, "finding level"),
+            ({"findings": [{"code": "DL3002", "level": "error", "line": 99}]}, "finding line"),
+            ({"raw": json.dumps([{"code": "DL3002", "level": "error", "line": 5, "file": "other/Dockerfile"}]), "exit": 1}, "unexpected path"),
+        )
+        for spec, reason in cases:
+            with self.subTest(reason=reason):
+                code, report = self.gate(spec)
+                self.assertEqual((4, "error"), (code, report["status"]))
+                self.assertIn(reason, self.hadolint_report(report)["reason"])
+
+    def test_non_dockerfile_change_is_unaffected(self) -> None:
+        (self.root / "Dockerfile.md").write_text("FROM alpine\n", encoding="utf-8")
+        code, report = self.gate({"findings": [], "exit": 2})
+        self.assertEqual((0, "not_applicable", "non-code file"), (code, report["status"], report["skipped"]["Dockerfile.md"]))
+        self.assertFalse((self.bin / "argv.jsonl").exists())
+
+    @unittest.skipUnless(shutil.which("bash"), "bash syntax parser is required for the shell adapter")
+    def test_shell_change_does_not_invoke_hadolint(self) -> None:
+        (self.root / "run.sh").write_text("echo new\n", encoding="utf-8")
+        code, report = self.gate({"findings": [], "exit": 2})
+        self.assertEqual((0, "pass"), (code, report["status"]))
+        self.assertEqual(["pass"], [item["status"] for item in report["analyzers"]])
+        self.assertFalse((self.bin / "argv.jsonl").exists())
 
 
 if __name__ == "__main__":

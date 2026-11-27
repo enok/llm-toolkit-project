@@ -32,7 +32,8 @@ push, PR readiness, or completion.
    suppression comments, minified formatting, and vendor/build path names did
    not reduce the scoped or analyzer-reported file set.
    The reference adapters support Java, Python, JavaScript, TypeScript
-   (including common module extensions), Bash, and PowerShell. Java uses the
+   (including common module extensions), Bash, PowerShell, and Dockerfile
+   (hadolint). Java uses the
    trusted Semgrep policy; shell scripts additionally require their platform
    syntax parser and changed-line policy checks. Other recognized languages,
    unrecognized file types, oversized source, and source-like symlinks exit

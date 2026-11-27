@@ -1,6 +1,6 @@
 ---
 name: changed-code-quality-gate
-description: Run a mandatory static-analysis gate for Java, Python, JavaScript, TypeScript, Bash, and PowerShell limited to code created or updated in Git. Use during validation, pre-PR checks, reviews, and before push; treat a blocked or failed gate as a code-validation blocker.
+description: Run a mandatory static-analysis gate for Java, Python, JavaScript, TypeScript, Bash, PowerShell, and Dockerfile limited to code created or updated in Git. Use during validation, pre-PR checks, reviews, and before push; treat a blocked or failed gate as a code-validation blocker.
 license: MIT
 metadata:
   author: llm-toolkit-project
@@ -23,8 +23,9 @@ commit, push, PR readiness, or completion.
 2. Run `scripts/changed_code_quality_gate.py`. The reference implementation
    invokes only fixed adapters: Semgrep with the reviewed local `.semgrep.yml`
    for Java, Python, JavaScript, and TypeScript, plus trusted syntax and policy
-   checks for Bash and PowerShell. Findings are filtered to changed files and
-   added/modified lines. The Semgrep path disables candidate-controlled ignore
+   checks for Bash and PowerShell, and hadolint (trusted config, ignore pragmas
+   disabled) for Dockerfiles. Findings are filtered to changed files and
+   added/modified lines; hadolint `info`/`style` findings are reported only. The Semgrep path disables candidate-controlled ignore
    and inline suppression mechanisms and verifies every scoped file was scanned.
 3. The shipped Semgrep adapter covers Java, Python, JavaScript, and TypeScript,
    including common module extensions. The script adapter covers `.sh` and
