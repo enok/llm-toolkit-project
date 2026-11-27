@@ -15,8 +15,8 @@
     "subagents:check": "node scripts/validate-specialist-agent.js --subagents-check",
     "llm-content:security-check": "node scripts/validate-specialist-agent.js --llm-security-scan",
     "code:quality:changed": "node scripts/validate-specialist-agent.js --changed-code-quality-gate",
-    "always-on:check": "python3 scripts/measure-always-on.py --check",
+    "always-on:check": "python3 scripts/measure-always-on.py --check --rules-budget 50000",
     "test": "python3 -m unittest discover -s tests",
-    "validate": "node scripts/validate-specialist-agent.js --all && python3 scripts/measure-always-on.py --check && python3 -m unittest discover -s tests"
+    "validate": "node scripts/validate-specialist-agent.js --all && python3 scripts/measure-always-on.py --check --rules-budget 50000 && python3 -m unittest discover -s tests"
   }
 }

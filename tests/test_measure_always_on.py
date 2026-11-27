@@ -102,6 +102,35 @@ class MeasureAlwaysOnTests(unittest.TestCase):
         self.assertLessEqual(result["agents_md_bytes"], measure_always_on.AGENTS_MAX_DEFAULT)
         self.assertIn("AGENTS.md", result["tools"]["Claude Code"]["files"])
 
+    def test_validate_script_enforces_rules_budget(self) -> None:
+        import json
+
+        scripts = json.loads((REPO_ROOT / "package.json").read_text(encoding="utf-8"))["scripts"]
+        self.assertIn("measure-always-on.py --check --rules-budget 50000", scripts["validate"])
+
+    def test_repository_always_on_rules_within_budget(self) -> None:
+        result = measure_always_on.measure(REPO_ROOT)
+        self.assertLessEqual(result["always_on_rules"]["bytes"], 50000)
+
+    def test_request_orchestration_core_keeps_mandatory_contract(self) -> None:
+        core = (REPO_ROOT / "rules" / "request-orchestration.md").read_text(encoding="utf-8")
+        self.assertIn("trigger: always_on", core)
+        for marker in (
+            "Before the first task runs, print",
+            "Reprint the full table",
+            "`Remaining SLA`",
+            "`light` -> `haiku`, `standard` -> `sonnet`, `deep` -> `opus`",
+            "the root owns user communication",
+            "The validator is never the producer",
+            "slim brief",
+            "`TASKS_TABLE.md` + `CONTEXT_STATE.md`",
+            "NOT POSTED",
+        ):
+            self.assertIn(marker, core)
+        detail = "skills/agent-orchestrator/references/request-orchestration-detail.md"
+        self.assertIn(detail, core)
+        self.assertTrue((REPO_ROOT / detail).is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

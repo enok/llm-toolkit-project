@@ -18,7 +18,8 @@ Use this workflow when the Model Selector specialist needs a durable improvement
 3. Classify the fix across the lookup table, the escalation triggers, the prompt
    (`tool-subagents/model-selector.md`; its Codex TOML is generated), the skill
    (`skills/model-selector/SKILL.md`), the model selection contract in
-   `rules/request-orchestration.md`, the client model map in
+   `rules/request-orchestration.md` (full text:
+   `skills/agent-orchestrator/references/request-orchestration-detail.md`), the client model map in
    `tool-subagents/agent-orchestrator.md`, or the companion workflows.
 4. Make the smallest generic update. Add a lookup row for a recurring task type
    rather than special-casing one request; keep the triggers a closed list so
