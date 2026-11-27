@@ -38,6 +38,10 @@ workflows/specialist-agent-factory.md
 workflows/specialist-agent-evolution.md
 workflows/context-compaction.md
 workflows/chat-knowledge-curation.md
+workflows/assistant-workspace-cleanup.md
+workflows/conversation-monitoring.md
+workflows/workspace-hygiene-auditor-validation.md
+workflows/workspace-hygiene-auditor-evolution.md
 workflows/automation-maintenance.md
 workflows/capture-learning.md
 workflows/self-improvement.md

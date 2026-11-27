@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: teach-by-building-asks-weekly-task
+expected_outcome: |
+  Uses the teach-by-building exercise: drafts a small example skill in front of the user, asks which task they repeat weekly offering three example shapes, and plans to rewrite and live-test before saving.

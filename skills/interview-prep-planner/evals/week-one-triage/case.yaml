@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: week-one-triage
+expected_outcome: |
+  Triage plan limited to blockers and signals, with the aptitude test practiced under time first, live-coding and system design tactics, eight STAR slots, one rehearsed system-design story, outputs per item, and missing metrics marked [FILL].

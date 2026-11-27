@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: modern-java-refresher
+expected_outcome: |
+  Gives the topic order from var through virtual threads and Spring Boot 3, plus one 60-minute drill rewriting an old class with records, sealed interface and switch patterns, with tests.

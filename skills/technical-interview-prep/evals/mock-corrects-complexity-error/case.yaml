@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: mock-corrects-complexity-error
+expected_outcome: |
+  The agent plays an interviewer in English with realistic pressure, lets the candidate finish each turn without interrupting, and scores only at the end. If the candidate claims O(1) space for a hash-map solution, the agent steps out of persona once, corrects it briefly, and resumes. Feedback is given in Portuguese.

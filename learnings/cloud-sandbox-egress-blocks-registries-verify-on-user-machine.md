@@ -48,6 +48,18 @@ mvn -v
 Unpack the Maven binary zip into `.m2\tools` the same way. The full `verify.ps1` loop
 (one `Step` per language, each logging its exit code) is in the durable reference.
 
+Vendor and portal hosts are blocked too, in the sandbox and in the device VM: the egress
+proxy answers CONNECT with 403. An automation that needs such a page (for example a
+payment portal for an invoice) must degrade to "download manually" with the link and the due
+date in its report, without retrying or working around the proxy.
+
+When the sandbox has no package registry at all, verify with a stand-in: compile with lint
+warnings at zero and a minimal stub of the test API, and label the results "sandbox only".
+Push early to a private repository so the first real CI run executes what the sandbox could
+not (full build with the real test framework, container images, native image, infrastructure
+validation). In one run the first CI run found a real defect (an option rejected by the
+native-image version) and two later runs found two more.
+
 Durable guidance: skills/multi-language-study-repo/references/toolchain-notes.md
 
 # Why

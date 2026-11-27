@@ -26,7 +26,11 @@ every mode. The operative duties:
   is pure conversation, one trivial tool call, or user-facing synthesis — and
   "the root already had the context" is not an exemption. If you execute a
   delegable task yourself, its tier still applies and you record which exemption
-  covers it.
+  covers it. A task that needs a tool or session no lane can reach (device-bridge
+  tools, a browser signed in as the user) is not delegable: run it under its own
+  acceptance criteria and validator, name the tool in `Complexity` (for example
+  `light (root inline: root-only tool, device bridge)`), and log the reason in
+  the ledger; work a lane can reach once you stage its inputs does not qualify.
 - **The session model is not a ceiling, and not a floor.** Tier assignment is a
   property of the task, decided independently of what the session is running.
   When the session is set to a cheaper model and a task's lookup row calls for a
@@ -80,6 +84,33 @@ budgeted resource in both directions:
    information: structured results, verdicts, and evidence pointers
    (paths/links/IDs) — never transcripts or raw dumps. The parent pulls
    detail through a pointer only when actually needed.
+5. **Context isolation per task: a mandatory step before every dispatch and
+   on every return.** Items 2-4 are not advice; a dispatch that skips this
+   step is a contract violation on the root, not a style issue.
+   - *Separate execution.* Each task row runs in its own lane, or its own
+     root step when it needs a root-only tool. A task never continues inside
+     another task's context, and independent tasks are never chained in one lane.
+   - *Slim brief.* The brief holds the goal (one or two sentences), exact
+     inputs as paths or IDs (a path, not pasted content), boundaries, the write
+     location and the return contract. Never the parent conversation, the whole
+     ledger or tasks table, or findings of unrelated tasks.
+   - *Leanest executor.* Pick the agent type with the smallest tool surface
+     that can do the task, then the cheapest model the tier allows. Measured: an
+     idle helper cost about 78k tokens with a full tool surface, 66k search-only,
+     14k with six tools (`learnings/subagent-fixed-context-cost-pick-leanest-agent-type.md`).
+     A narrow type brings its own role prompt; avoid it where that biases the result.
+   - *Slim return.* The lane returns only what the root needs to decide the next
+     step (the four-block return below, within its cap); detail goes to a file
+     and the return gives the path. The root never asks a lane to paste outputs.
+   - *Gate.* Before dispatching a wave, check every brief against the four
+     points above and rewrite any that forwards history or unrelated context.
+   - *Batches.* Where a lane can start lanes, use one coordinator per batch,
+     receiving only that batch's inputs and returning one verdict. Where it
+     cannot (check with one no-op dispatch; some platforms give helpers no
+     agent tool), the root dispatches the batch's tasks directly, one slim
+     brief each, and reads only their returns. When the owner tracks token
+     use, batches run one at a time and each lane's tokens go in its row's
+     Tokens cell.
 
 ## Thin orchestrator and the durable state ledger (MANDATORY)
 
@@ -117,7 +148,13 @@ bounded produce->validate->refine loops; it does not restate them.
    and (d) the ledger path. Nothing else. No campaign history, no other
    lanes' findings, no restatement of what the orchestrator already knows,
    no "for context" preamble. A fifth element is a defect, not thoroughness:
-   if the lane needs more, it reads the ledger. Constraint (c) is scoped to
+   if the lane needs more, it reads the ledger. A lane never reads the parent
+   conversation or chat history: it is out of scope and can carry personal
+   data, so a fact the lane needs and the ledger lacks is a blocker it reports.
+   A lane never calls scheduling tools (scheduled tasks, reminders): only the
+   root schedules. If a lane created one anyway, the root records it and the
+   owner removes it; the root does not delete it on the lane's behalf.
+   Constraint (c) is scoped to
    what that lane can actually breach — do not ship the full standing-rules
    list to a read-only mapping task.
 4. **Inbound returns are capped and structured.** Every dispatch states the
@@ -335,6 +372,14 @@ When the user asks to wait, hold, pause, or stop, in any wording, during a run:
 3. Snapshot uncommitted lane output as a patch (read-only `git diff`) into a scratch location outside the user's working folder; do not modify, revert, or commit anything else in that folder while paused (the untracked ledger files of item 2 excepted).
 4. Treat a lane stopped by the interrupt as dead, but keep its row `paused` (not breached). After the user explicitly lifts the hold, relaunch each paused row as a fresh lane from its resume action, applying its patch only if the tree does not already contain it.
 
+### Lane loss: usage limits, device drops, resumability (MANDATORY)
+
+Composes with "Delegation blocked by usage limits" in `rules/request-orchestration.md`; recipes in `skills/agent-orchestrator/references/fan-out-and-recovery.md`.
+
+1. **Usage-limit relaunch.** Before relaunching a lane stopped by a usage limit, inspect the files it already wrote. Relaunch on a model that still has capacity, at the row's tier or above (a lower tier is a recorded deviation), and tell the lane to resume from the existing files instead of restarting.
+2. **Resume or fresh.** A finished background lane may not be resumable while another background job runs; start a fresh lane pointed at its findings file instead of waiting.
+3. **Device offline.** Tools that reach the user's linked computer are root-only, and the computer can drop. After two failed attempts stop retrying, keep results in the cloud workspace (and in a pushed or bundled branch where one is reachable, per "Durable checkpoints and resume" item 2), state in the print what is not yet applied, and give the user resume options.
+
 ## Regression safety (MANDATORY)
 
 No change may break previously-working behavior, ever. This applies to every
@@ -443,6 +488,24 @@ exactly where it stands, with no access to the prior conversation.
   never regenerate that line from a fixed session list. Count the session
   headers before and after each write; if the count drops by more than the
   sections this run removed on purpose, discard the write and re-merge.
+- **Ledger merge helper (both files)**: where the host can run Python, write
+  a run's sections into the shared files with `python scripts/ledger_merge_sections.py --root <project-root> --stamp "<YYYY-MM-DD HH:MM>" --merge TASKS_TABLE.md=<part> [--merge CONTEXT_STATE.md=<part>]`.
+  It replaces only the run's own `## Session:` sections (or appends them),
+  refreshes only the timestamp of the `Last updated:` line, and writes
+  nothing when the section count would drop.
+- **Ledger compaction (both files)**: when `TASKS_TABLE.md` or
+  `CONTEXT_STATE.md` grows large (over ~25 KB) or on request, the single
+  writer runs `python scripts/ledger_compact.py --root <project-root> [--keep <session>]... [--dry-run]`
+  (dry run first). It moves each section whose
+  `Total (remaining/not completed)` row is 0, with its matching
+  `CONTEXT_STATE.md` section, to `ledger-archive/<FILE>.archive-<date>.md`,
+  excluded via `.git/info/exclude`. Select by that remaining-count row, never
+  by header wording (an "all waves complete" header can still hide open
+  rows); always keep the current session; append and merge, never clobber.
+  This is the only sanctioned removal of another session's sections: they
+  move intact to the archive, a section with open rows never moves, and the
+  archived sections count as removed on purpose for the session-header check
+  above.
 - Role separation: `TASKS_TABLE.md` is the at-a-glance task table,
   `CONTEXT_STATE.md` is the detailed narrative/resume state, and
   `LLM-STATE.md` stays the LOA-internal checkpoint — three files, three
@@ -574,6 +637,11 @@ and the three footer rows):
    blocked and what the human must decide;
 4. at the end, as the final table with the real model per row.
 
+Head each print with one line naming the session, the print number, the
+timestamp with timezone, and the trigger (`planning`, `row 4 completed`,
+`row 6 blocked`, `final`); after a resume the trigger is
+`resumed from <timestamp>`. A mirror carries the same header line.
+
 A delta ("row 4 done"), a summary sentence, or a partial table does not count
 as a print. Persist first, then print: write the values to `TASKS_TABLE.md`,
 then render the print from the persisted text (copy it, or let a script
@@ -607,14 +675,19 @@ note. So the ledger is written ahead of the work, never only after it.
    counts). A cloud sandbox, a chat scratchpad, or `/tmp` holds working
    copies only: at every completion checkpoint, and when the user pauses the
    run, copy or patch the run's work in progress out to the durable location
-   and record its path in the row's Evidence and in `CONTEXT_STATE.md`. A
+   and record its path in the row's Evidence and in `CONTEXT_STATE.md`. This
+   includes a ledger mirror and any helper or rebuild scripts the run wrote in
+   the container: a cloud container can be reclaimed between turns, so treat
+   such a script as disposable only when the user agrees. A
    resume action that reads "re-derive from the transcript" is a ledger
    defect. If the host offers no durable location at all, say so in the first
    print and keep the ledger in the chat: every print then also carries the
    resume action of each open row.
 3. **Resumable evidence.** A completed row's Evidence is enough to skip it on
    resume: a path, SHA, branch, PR link, or command plus exit code. "Done" is
-   not evidence.
+   not evidence. A run whose last step (push, PR, publish) is handed to the
+   user is not complete: keep that row open with its resume action and
+   re-check it against the remote in the next session.
 4. **Resume protocol, on every invocation.** Before planning, read both ledger
    files. If a section for the same objective is still open, resume it rather
    than starting over:
@@ -851,9 +924,9 @@ When invoked:
    - recurring gaps that should update an existing rule, workflow, skill, subagent, reference, script, template, or validation gate;
    - external skill or agent-pattern candidates that should go through `skills/external-skill-intake/SKILL.md`.
 10. Classify each evolution signal as `ignore`, `capture-learning`, `update-existing`, `propose-new-capability`, or `external-intake`, and include loop statistics (tasks needing >1 iteration, recurring defect classes, validator misses) as evolution input.
-11. Close with the retrospective, once per root run: the final wave ends, after its last validator verdict, with the root-owned `workflows/run-retrospective.md` per `rules/workflow-self-improvement.md` — the tasks table's first-pass evidence and the lanes' `mistake:` lines feed one run record, recurring signatures are promoted, and the final report carries the metrics line. Before splitting, fold the primary workflow's `preflight` pitfalls and `## Known pitfalls` into the acceptance criteria.
+11. Close with the retrospective, once per root run: the final wave ends, after its last validator verdict, with the root-owned `workflows/run-retrospective.md` per `rules/workflow-self-improvement.md` — the tasks table's first-pass evidence and the lanes' `mistake:` lines feed one run record, recurring signatures are promoted, and the final report carries the metrics line. Before the retrospective, reconcile the run against this contract (inline work outside an exemption, context pasted instead of a ledger pointer, over-cap returns, missed stamp refreshes) and log each of your own deviations in the ledger and as a `self-review` signal. Before splitting, fold the primary workflow's `preflight` pitfalls and `## Known pitfalls` into the acceptance criteria.
 
-Keep the critical path moving. Do not delegate tiny tasks, direct answers, or commands that need immediate parent judgment.
+Keep the critical path moving. Do not delegate tiny tasks, direct answers, or commands that need immediate parent judgment. A tiny deterministic transform that one tool call completes (for example converting a 2 KB CSV to TSV) runs inline, recorded as `one trivial tool call`: a lane's fixed start-up cost is many times the work.
 
 Complexity tiering (provider-agnostic):
 

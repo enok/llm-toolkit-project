@@ -132,7 +132,7 @@ gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input protection.i
 | `required_pull_request_reviews` present | A PR is required; direct pushes are rejected |
 | `required_approving_review_count: 0` | A sole owner cannot approve their own PR; 1 would deadlock |
 | `enforce_admins: true` | The owner is bound too; `gh pr merge --admin` cannot bypass |
-| `strict: true` | Head must be up to date with `main`; after merging one PR run `gh pr update-branch <n>` on the others |
+| `strict: true` | Head must be up to date with `main`; after merging one PR run `gh pr update-branch <n> --rebase` on the others |
 | `allow_force_pushes` / `allow_deletions: false` | `main` history is permanent |
 | `required_conversation_resolution: true` | Review threads must be resolved before merge |
 | `restrictions: null` | No push allow-list; PR-only is enforced by the review rule |
@@ -377,7 +377,7 @@ that shows removed languages is a separate, approval-gated edit.
 | Same wait after a language or job was removed | The removed job is still in the required contexts; apply `protection.json` without it (section 8) |
 | `GH006: protected branch update failed` on push | Correct behavior; use a branch and a PR |
 | Cannot merge own PR | A required approval count above 0; keep it 0 for a sole owner |
-| "Branch is out of date" | `strict: true`; run `gh pr update-branch <n>` and wait for CI again |
+| "Branch is out of date" | `strict: true`; run `gh pr update-branch <n> --rebase` and wait for CI again |
 | `--admin` merge refused | `enforce_admins: true` by design; fix the failing check instead |
 | `gh api ... --jq` fails in PowerShell | Use `| ConvertFrom-Json` |
 | PUT returns 422 | A required top-level key is missing; use the JSON above verbatim |

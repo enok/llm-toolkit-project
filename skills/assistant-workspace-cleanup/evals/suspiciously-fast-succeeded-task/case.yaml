@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: suspiciously-fast-succeeded-task
+expected_outcome: |
+  The agent treats the success status as a claim, compares the 5-second duration with the work required and opens the run session as evidence.
+  Merging is proposed as a consolidation: originals are paused (not deleted) until the new task proves itself, and the model question is asked inside the approval gate.

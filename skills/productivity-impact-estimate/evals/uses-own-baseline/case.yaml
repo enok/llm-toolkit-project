@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: uses-own-baseline
+expected_outcome: |
+  Builds a rows JSON file from the user's own hours, passes it with --rows, reports results for that baseline (not the default 40-hour split) for a team of 5, and labels the result an estimate.

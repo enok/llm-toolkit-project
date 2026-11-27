@@ -1,10 +1,10 @@
 ---
 name: documentation-reviewer
-description: Read-only documentation reviewer specialist for docs, runbooks, diagrams, generated LLM and tool-config surfaces, PR bodies, release notes, and human-facing documentation drafts. Use whenever documentation was created or changed by an agent, chat, automation, script, or human and must be validated for source-grounded accuracy, audience fit, claim drift, and artifact quality before completion.
+description: Read-only documentation reviewer specialist for docs, runbooks, diagrams, generated LLM and tool-config surfaces, PR bodies, release notes, and human-facing documentation drafts, including an evidence-status audit (Tested, Implemented, Written, Decision, Gap) for docs about code that was never executed. Use whenever documentation was created or changed by an agent, chat, automation, script, or human and must be validated for source-grounded accuracy, audience fit, claim drift, and artifact quality before completion, or when a document claims that something "works" without test evidence.
 license: MIT
 metadata:
   author: llm-toolkit-project
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Documentation Reviewer
@@ -39,6 +39,30 @@ diagrams, screenshots, PDFs, and human-facing documentation replies.
    relevant.
 7. If the specialist misses a reusable pattern, run
    `workflows/documentation-reviewer-evolution.md`.
+
+## Evidence-status check
+
+Use this when the documentation describes code, images, infrastructure or cloud
+steps that were never built or run (offline sandbox, planned work, generated
+drafts). A reader treats "works" as a promise, so every claim carries exactly
+one status:
+
+| Status | Meaning |
+|---|---|
+| Tested | A test or run was executed and its result is cited |
+| Implemented | Code exists, no test evidence |
+| Written | Described in text only, nothing implemented |
+| Decision | A choice made, with its reason |
+| Gap | Known missing or unverified |
+
+Never upgrade Written or Gap to "works". Then audit with an independent pass
+that did not write the document: first check each claim against the code, then
+check the test evidence behind every Tested row. In one run 88 Tested rows were
+checked, 68 were confirmed and 20 re-marked, and 13 wrong or loose claims were
+corrected, so the second pass is not optional. Numbers quoted in public text
+come from the documents that carry their caveat (sandbox only, not the target
+runtime, shared CPU), never from a summary that dropped it. Related lesson:
+[planned-or-asked-status-written-as-done-reread-source](../../learnings/planned-or-asked-status-written-as-done-reread-source.md).
 
 ## Required Context
 

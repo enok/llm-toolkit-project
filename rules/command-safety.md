@@ -63,6 +63,19 @@ curl -u "user:${API_TOKEN}" "https://.../api/json"
 
 Never split the export and the use across two separate tool invocations when the value matters (credentials, tokens, dynamic config). If a credential independently verified as correct still fails when used from inside a tool call, decode the literal bytes actually sent (e.g. `curl -v`, inspect the `Authorization` header) before assuming the credential itself is wrong — compare what was actually transmitted to what was intended.
 
+## Encoded commands and tool folder access
+
+- Write files as plain text through the file tool or a quoted heredoc, never
+  through encoded one-liners (gzip plus base64, `FromBase64String`): antivirus
+  and security filters flag them as malicious command lines, and such a filter
+  can fail closed on a mislabelled file too
+  (`learnings/av-false-positives-on-encoded-commands-and-scanner-fixtures.md`,
+  `learnings/security-filter-fail-closed-blocks-mislabelled-archive.md`).
+- Grant a tool folder access from evidence: allow only the folders its log
+  shows were actually used, and deliberately exclude credential and config
+  folders and the tool's own config folder (a session that can write there can
+  lift its own limits).
+
 ## Credential handoff and discovery
 
 When a task needs a credential the session does not already have:

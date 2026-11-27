@@ -2,7 +2,7 @@
 title: Cowork device bridge hides skills/ and tool-subagents/ - read via a cloud clone, push from a PC worktree
 category: toolchain
 created: 2026-10-22
-tags: [cowork, device-bridge, device_bash, permission-denied, add_repo, worktree, desktop-commander, push, security-scan]
+tags: [cowork, device-bridge, device_bash, permission-denied, add_repo, worktree, desktop-commander, push, security-scan, junction, symlink, git-bundle, lock-file]
 ---
 
 # Problem
@@ -42,6 +42,21 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
 - Run the PC security gates per `windows-security-gate-python-stub-and-committed-skills.md`.
 - The usual gates still apply on this path: present learnings before commit (capture-learning
   approval) and merge only on explicit approval (no blanket merge).
+- **Junction or symlinked folders:** a Windows junction or symlinked folder gives the same
+  `d?????????` / "Permission denied" symptom in the bridge's Linux shell. Read it through the
+  desktop (native) shell, or from a read-only clone of the public repo, and write natively.
+- **Git noise and residue:** `git status` through the bridge floods with warnings for the
+  unreadable folders; filter with `git status -- . ':!skills' ':!tool-subagents'`. Device-side
+  `git commit` via the bridge leaves `.lock` files that cannot be deleted, so run git natively
+  on the PC. Writes into `.git` are refused; use a folder that is not excluded. See also
+  `learnings/cloud-session-device-bridge-file-io.md`.
+- **Bundle clone pitfall:** a clone from `git bundle --all` maps `refs/heads`, so `origin/main`
+  may be missing or stale and a branch cut from it silently uses an old base. Fetch an explicit
+  mapping (`git fetch <bundle> refs/remotes/origin/main:refs/heads/upstream-main`) and verify
+  the base SHA before branching.
+- **Folders granted mid-session** may never mount in the sandbox: check with `ls` of the mount
+  root, fall back to the device bridge or Desktop Commander for those paths and say so; do not
+  loop on re-requesting.
 - **Variant - run a script that lives in a protected folder:** read it (cloud clone or Desktop
   Commander), copy it to a non-protected folder with the desktop shell, run the copy there, and
   park the copy in a folder the owner reviews for deletion.

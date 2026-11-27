@@ -104,6 +104,31 @@ goes first was not recorded; if one appears, or if the text was pasted before th
 the card with its x button. The URL stays in the text either way; re-verify the hash and the
 image afterwards.
 
+## Newer composer behaviour (observed 2026; verify first)
+
+LinkedIn changes the composer without notice. Before relying on a note below, check it against
+what the screen and the DOM show now.
+
+- **Editor engine.** The composer can be a TipTap/ProseMirror editor instead of Quill. DOM
+  selection and mouse clicks do not move its caret, and HTML paste collapses paragraphs and
+  drops apostrophes. Drive it with the editor's own commands (set the text selection, split the
+  block) through the element's editor handle, then read the text back and compare.
+- **Media.** The media button is hidden while a link-preview card shows: dismiss the card first.
+  Media added from the feed's Photo button starts a NEW post and does not carry draft text;
+  media added from the draft composer's own media button persists after the upload finishes
+  (allow about ten seconds).
+- **Bare file-name tokens auto-link.** A token such as `NAME.md` is turned into a link because
+  `.md` is a country domain. Avoid bare `X.md` in post text; put it in words or wrap the name
+  so it is not a bare token, then read the saved text back.
+- **Grammar browser extensions** can drop characters from fast synthetic typing in textareas.
+  Set the value with the native setter plus an input event and read it back.
+- **One draft.** The composer keeps a single saved draft and rewrites links to LinkedIn's short
+  links; compare the text ignoring those rewrites.
+- **Clipboard may be unavailable** to the desktop tool. Then compare the composer's DOM block
+  hashes against a validated snapshot of the approved text instead of pasting.
+- Drafting method for the text itself: `skills/technical-content-publishing/SKILL.md` (draft
+  here, publish there).
+
 ## Platform limits (verified 2026-10-01)
 
 Third-party figures unless marked primary (LinkedIn's member help pages could not be fetched).

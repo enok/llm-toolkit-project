@@ -87,6 +87,15 @@ The orchestrator's task table tracks the loop live: the row's Evidence cell show
 
 Per task, report to the run record built by `workflows/run-retrospective.md`: iterations used (summed into `iterations`), the first-pass flag (counted in `first_pass` unless the task is later reopened), and a mistake signature for each distinct root cause behind the blocking defects of its `fail` verdicts, classified per `skills/run-retrospective/references/mistake-taxonomy.md`. An in-loop tier escalation adds a `tier-misassignment/...` signature; an `escalated` task is never first-pass.
 
+## Reviewer reuse, allow-lists and caps
+
+- **Reviewer reuse vs fresh.** When the long-lived validator's context is large, start a fresh narrow reviewer given only the defect list and the diff; in one run this cost about half of resuming the old reviewer (about 125K versus 218K tokens). Record which you chose and why. If history matters for the verdict, pass the verdict history too (see the pitfall below).
+- **Allow-list after two deny-list failures.** When two fix rounds in a row each leave a new variant that a deny-list missed (hidden-text or carrier-character filters are the usual case), stop adding exclusions and switch to an allow-list of what is permitted.
+- **Cap reached: report the open item.** At the last allowed iteration, report the unresolved defect and its evidence to the root instead of looping again.
+- **Exact replacement text.** A validator that fails a draft returns the exact replacement text in a file, not prose, so the producer applies it without reinterpretation.
+
+See `learnings/review-loop-fresh-narrow-reviewer-and-allow-list-switch.md`.
+
 ## Known pitfalls
 
 - When a validator reports the same defect shape in several files, trace it to the shared generator or template and fix it there before refining the instances; a fix to the instances alone lets the generator emit the defect again. See `learnings/find-generator-not-just-instances.md`.

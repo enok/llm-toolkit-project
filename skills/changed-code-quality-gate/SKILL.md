@@ -78,7 +78,7 @@ branch, never from the candidate revision that is being evaluated.
 
 ## Known pitfalls
 
-- Store test fixtures the gate cannot classify (HTML, Mermaid `.mmd`) under a non-code suffix such as `.txt`, use a `{{SPACE}}` marker line that the test expands when a fixture needs significant whitespace, and avoid changing suffixless files such as `.gitattributes` in a change the gate scans: an unrecognized changed file type blocks the gate. When a change must touch `.gitattributes` (`rules/cross-platform-scripts.md` asks for it), report the gate block and propose adding the name to `NON_CODE_NAMES` in `scripts/changed_code_quality_gate.py` through `workflows/toolkit-maintenance.md` instead of working around it. See `learnings/quality-gate-blocks-unclassified-suffixes.md`. (sig: validation-gap/quality-gate-blocks-unclassified-suffixes)
+- Store test fixtures the gate cannot classify (HTML) under a non-code suffix such as `.txt`, use a `{{SPACE}}` marker line that the test expands when a fixture needs significant whitespace, and avoid changing suffixless files such as `.gitattributes` in a change the gate scans: an unrecognized changed file type blocks the gate. When a change must touch `.gitattributes` (`rules/cross-platform-scripts.md` asks for it), report the gate block and propose adding the name to `NON_CODE_NAMES` in `scripts/changed_code_quality_gate.py` through `workflows/toolkit-maintenance.md` instead of working around it. Classify diagram sources such as `.mmd` as non-code in the gate's `NON_CODE_SUFFIXES` list (check the list; add the suffix together with a test if it is missing). See `learnings/quality-gate-blocks-unclassified-suffixes.md`. (sig: validation-gap/quality-gate-blocks-unclassified-suffixes)
 
 ## Provenance
 

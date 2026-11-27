@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: debrief-turns-asked-problem-into-drill
+expected_outcome: |
+  The agent names the pattern (sliding window with a set or map), gives the skeleton and both a simple and an optimised solution with separate time and space complexity, adds the pattern family to a drill list, and acknowledges the result plainly without false reassurance.

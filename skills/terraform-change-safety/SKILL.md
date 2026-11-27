@@ -4,7 +4,7 @@ description: "Terraform/OpenTofu change-safety patterns: terraform_data provisio
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Terraform Change Safety
@@ -119,6 +119,10 @@ The mask keeps the gauge honest. Reach for it whenever a change asks for "no sta
 ## Metadata Hygiene
 
 No ticket numbers in resource tags, descriptions, code comments, file paths, or strings — tickets close, live cloud metadata and comments go stale. Use business/component language (`order-sync-mismatch-detector`, `warehouse-airflow-platform`). Route notifications to shared team topics, never stack-created topics with personal-email subscribers, and verify subscriber lists live before claiming routing works. When one instance of a metadata smell is found, sweep the whole change set (added diff lines and new file paths) for the class, not just the flagged line.
+
+## First Cloud Deploy and Demo Teardown
+
+A first deployment into a new cloud project has its own failure set (an API enabled seconds ago still answers PERMISSION_DENIED, quota and billing surprises), and a demo left running keeps costing money. Plan the teardown before the first apply and verify nothing billable remains afterwards. See `learnings/first-cloud-deploy-gotchas-and-demo-teardown.md`.
 
 ## Backup-Before-Apply, Fail-Closed
 

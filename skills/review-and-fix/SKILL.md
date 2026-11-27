@@ -1,6 +1,10 @@
 ---
 name: review-and-fix
-description: Review a diff, split independent investigation and fix work across subagents, apply scoped fixes, and converge on a verified result. Use when the user asks to review and fix code, address PR feedback end-to-end, or drive a branch to review-ready.
+description: Review a diff, split independent investigation and fix work across subagents, apply scoped fixes, and converge on a verified result; also handles "fix this and find all similar cases" requests by sweeping the whole data set for the same defect. Use when the user asks to review and fix code, address PR feedback end-to-end, drive a branch to review-ready, or says "fix this, look for all similar cases" about a list, plan, table or document.
+license: MIT
+metadata:
+  author: llm-toolkit-project
+  version: "1.1.0"
 ---
 
 # Review and Fix
@@ -42,6 +46,14 @@ Use this skill as a multi-agent orchestrator for high-signal review and remediat
    - In JS/TS repos that enforce dead-export or unused-export checks, do not export helper functions solely for testability. Test through public exports or run the repo’s dead-export signal before pushing.
 11. When the active repo family requires proof artifacts, do not stop at green tests. Ensure each UI-visible workflow has appropriate proof, finish with the repo-specific evidence package when one exists, and report whether evidence was attached or not applicable.
 12. When the diff touches shared BDD step definitions, shared test harness adapters, or other reused test helpers, explicitly scan committed consuming specs before treating the change as covered. Untracked scratch specs and temporary files do not count as validation or evidence.
+
+## Fix one, find all similar
+When the user points at one wrong item and says "fix this, look for all similar cases and fix them" (a step count, a date format, a missing field in one row of a list, plan or document), the single item is a sample of a defect class. Fixing only the example leaves the same defect in the rest and the user finds it later.
+1. Name the defect as a testable condition (for example "item has 6 steps, the rule is 5").
+2. Scan the whole data set programmatically with that condition, not by eye. A scan finds the cases a reader skims past; one run found 43 items with an extra step after a single example was reported.
+3. Fix every hit in one pass. Keep identity and state intact: ids, tick or completion state, ordering, links. Re-running the scan must report zero hits.
+4. Report the count (found, fixed, left alone with the reason) and re-render or re-open the final artifact to confirm it still builds.
+5. When the fix involves citing source locations such as printed page ranges, take them only from sample PDFs or tables of contents you actually read, and say "unknown" where no such source exists instead of estimating.
 
 ## Parallel safety rules
 - Do not parallelize edits to overlapping files.

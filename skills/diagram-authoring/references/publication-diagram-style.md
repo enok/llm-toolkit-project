@@ -216,6 +216,7 @@ if __name__ == "__main__":
 - The step is idempotent (the render overwrites the PNG before the margin is added), so re-running does not stack margins. The Pillow path and the ImageMagick 6 (`convert`) path were both run and gave the same dimensions; the ImageMagick 7 `magick` spelling takes the same arguments but was not run.
 - Confirm the swapped font exists where you render (`fc-list | grep -i <font>`); if it does not, the fallback is mis-measured exactly as on GitHub and labels clip in the PNG.
 - When the longest side is under the 2000 px floor of the image-quality gate, render at `-s 3` (and pad 72). Legibility does not change with scale (see `destination-legibility.md`); only sharpness improves.
+- Edge labels in Mermaid 11 flowcharts get a half-transparent background so lines show through the text: pass `--cssFile` to `mmdc` with an opaque label background (CSS in `learnings/mermaid-edge-label-background-half-transparent.md`); the `.mmd` source stays unchanged.
 - In a container or as root, pass a puppeteer config through `extra` (`-p puppeteer.json` with `--no-sandbox` and, if the bundled browser is missing, `executablePath`).
 - Render all publication PNGs in one environment and commit those files; hand them to an independent validator before use.
 
@@ -248,3 +249,5 @@ with sync_playwright() as p:
 ```
 
 An overflow exits non-zero before any PDF is written. Then run the PDF checks in `skills/image-quality-inspection/references/image-quality-gate.md` and inspect every page at phone width.
+
+Before delivery run the carousel gate (`skills/image-quality-inspection/scripts/check_carousel.py`; section "Carousel gate" in the same gate file): type floors, safe area, contrast and PDF text exactness against the source markdown.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: honest-bridge-no-invented-metrics
+expected_outcome: |
+  The agent refuses to invent a throughput metric and leaves a placeholder for the candidate to fill or drop. For Kubernetes and Kafka it writes honesty-bridge blocks (honest scope, concept mapping, how they would do it, how they would debug) and never claims production use. The intro and follow-up ammo are two separate blocks.

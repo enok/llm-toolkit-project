@@ -1,10 +1,10 @@
 ---
 name: chat-knowledge-curation
-description: Use when the user asks to mine prior chats, chat history, memory notes, rollout summaries, automation runs, or learning-inbox evidence into reusable LLM capabilities; curate prior-chat knowledge; choose a model tier for reviewed chats; or safely reduce proven-idle chat context.
+description: Turn prior chats, chat history, memory notes, rollout summaries, automation runs, and learning-inbox evidence into reusable toolkit assets (rules, workflows, skills, learnings), choose the model tier for reviewed chats, and safely reduce proven-idle chat context. Use when the user asks to mine, harvest, curate, or save what was learned in earlier chats, or to archive or clean up chats and wants unsaved knowledge rescued first, even if they never say "curation".
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Chat Knowledge Curation
@@ -45,10 +45,22 @@ durable toolkit knowledge instead of staying buried in raw history.
 2. Use `workflows/self-improvement.md` to judge whether each lesson is reusable.
 3. Use `workflows/capture-learning.md` only when the durable destination is not
    clear in the same run.
-4. Use `skills/external-skill-intake/SKILL.md` before importing, copying, or
+4. Before archiving or cleaning up any chat, run the unsaved-work sweep
+   (`workflows/automation-maintenance.md`, section "Unsaved-work sweep"):
+   a deleted chat takes its unsaved lessons with it. To inventory and clean
+   the workspace itself, hand over to `skills/assistant-workspace-cleanup/SKILL.md`.
+5. Close out with "did you push the new knowledge?" and answer it from a live
+   check, not from memory of the session: fetch, compare with the upstream
+   branch, count commits ahead, list uncommitted files. Report four groups:
+   pushed, committed but not merged, not pushed, and deliberately personal
+   (kept out of the shared toolkit on purpose). Users ask this at the end of
+   many sessions because an unpushed lesson is lost with the sandbox. Before
+   building on a consolidation branch, read
+   [consolidation-pr-is-the-harvest-base](../../learnings/consolidation-pr-is-the-harvest-base.md).
+6. Use `skills/external-skill-intake/SKILL.md` before importing, copying, or
    adapting patterns from public skill repositories.
-5. If documentation is created or changed, run the documentation-reviewer gate.
-6. If any skill is new or modified, run:
+7. If documentation is created or changed, run the documentation-reviewer gate.
+8. If any skill is new or modified, run:
 
    ```bash
    ./scripts/validate-skills-with-skillspector.sh
@@ -75,6 +87,8 @@ durable toolkit knowledge instead of staying buried in raw history.
 | Consumer-specific project detail | the consumer repo's `docs/llm/` or repo-local docs |
 | Temporary evidence awaiting triage | `learnings/` |
 | User preference or cross-run memory | ad-hoc memory note |
+| Standing preference ("always do X", "push every table to Y") | Save where it will bind and say so after saving: a rule given in one project chat applies only in that project unless it is also written to the user-level global instruction file; use project memory, the global file, or a toolkit rule as the user wants it to reach. The toolkit holds destinations (channels, folders) as consumer-configured values, never hardcoded |
+| Inventory or cleanup of an assistant workspace (chats, sessions, scheduled tasks, artifacts) | `skills/assistant-workspace-cleanup/SKILL.md` |
 
 ## Reporting
 

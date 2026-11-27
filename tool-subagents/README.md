@@ -35,6 +35,7 @@ Every agent is a pair: `<name>.md` (YAML frontmatter — `name`, `description`, 
 | `confluence-documentation-specialist` | Read-only Confluence page, hierarchy, attachment, comment, and source-to-wiki validation |
 | `prod-doc-promoter` | Read-only production documentation promotion planning for deployed-ticket wiki cleanup and canonical doc updates |
 | `release-coordinator` | Release order, verification, and rollback |
+| `workspace-hygiene-auditor` | Read-only auditor that classifies every item of an AI-assistant workspace inventory into a cleanup plan and flags stale-state, coverage-gap, and run-duration risks |
 | `verifier` | Final skeptical completion check and in-loop quality-loop validator |
 
 ## Delegation contract

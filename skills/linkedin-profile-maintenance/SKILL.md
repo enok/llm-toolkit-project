@@ -1,10 +1,10 @@
 ---
 name: linkedin-profile-maintenance
-description: Use when the owner says "remove these from my LinkedIn profile" or "update my LinkedIn skills/certifications/experience", or asks to clean up, correct, or update their own LinkedIn profile through browser automation in their already-signed-in browser - bulk-delete skills, certifications, or courses against a keep-list, add skills or projects, change an experience end date or highlights - with inventory, backup, owner-approved edit list, per-item verification, and a final re-read. Not for posting (use linkedin-publishing) or for rewriting the CV.
+description: Use when the owner says "remove these from my LinkedIn profile", "update my LinkedIn skills/certifications/experience", "audit my LinkedIn" or "align my profile with a new positioning", or asks to clean up, correct, audit, or update their own LinkedIn profile through browser automation in their already-signed-in browser - bulk-delete skills, certifications, or courses against a keep-list, reconcile the skills list against a target plan, add skills or projects, change an experience end date or highlights, rewrite About or role text from approved drafts, replace the profile photo, or write or re-request a recommendation - with read-only audit first, inventory, backup, owner-approved edit list, per-item verification, and a final re-read. Not for posting (use linkedin-publishing) or for rewriting the CV.
 license: MIT
 metadata:
   author: llm-toolkit-project
-  version: "1.0.0"
+  version: "1.2.0"
 ---
 
 # LinkedIn profile maintenance
@@ -15,10 +15,24 @@ target facts, dates) comes from the owner's request and files, never from this
 skill. The profile is an external, public record: every edit is an external
 write, and deletes cannot be undone.
 
-- Details-page mechanics, URL patterns, inventory, editors and forms:
-  `references/details-pages.md`.
-- Browser and session constraints (tool output limits, bot checks, which
+- Details-page mechanics, URL patterns, inventory, editors and forms (read before the first
+  inventory or edit): `references/details-pages.md`.
+- Browser and session constraints (read at session start: tool output limits, bot checks, which
   browser is signed in): `references/browser-session-notes.md`.
+- Skills list reconciliation (read when the task touches the skills list: inventory, replace, 100-skill cap, pins):
+  `references/skills-reconciliation.md`.
+- Replacing the profile photo (signed-in browser, hidden file input, rollback link, reload check):
+  `references/profile-photo.md`.
+- Writing a recommendation for someone, or re-requesting translated ones:
+  `references/recommendation-writing.md`.
+- Cached profile summary for fit scoring, used by job-search lanes (read when a
+  job-search run needs the owner's skills and years per technology):
+  `references/profile-summary-for-scoring.md`.
+- Browser editing pitfalls specific to audits (read when an edit or save does not stick: typeaheads, rich text, saves):
+  `references/browser-edit-pitfalls.md`.
+- Truthfulness and employment-status handling: `skills/job-search-pipeline/references/application-truthfulness.md`.
+- Other candidate portals and application-site profiles:
+  `workflows/job-portal-profile-sync.md`.
 - Posts and reposts are a different job: `skills/linkedin-publishing/SKILL.md`.
 - Keeping the CV and job-search files consistent with the profile afterwards:
   `workflows/career-profile-sync.md`.
@@ -70,6 +84,53 @@ write, and deletes cannot be undone.
    waits on the owner. If the CV or other files quote the same facts, continue
    with `workflows/career-profile-sync.md`.
 
+## Audit mode (inspect first, then apply)
+
+Use when the ask is "audit", "align with a new positioning" or "rewrite About"
+rather than a fixed keep-list.
+
+1. **Read-only audit first.** Read every section (top card, About, Experience
+   on its details page, Education, Certifications, Languages, Projects,
+   Courses, Recommendations, Services, Skills scrolled to the footer) and
+   report findings plus questions. Change nothing yet. Writing or requesting
+   recommendations is a separate, owner-approved job
+   (`references/recommendation-writing.md`).
+2. **Facts come from the owner.** Never invent a metric, title, date, employer
+   or credential; unknown facts become questions, one at a time. A draft needing
+   approval (About, a role text) is shown in full as its own plain message
+   first, with the question in a separate turn. Contradictions inside the
+   profile (two different years-of-experience figures) are findings; the owner
+   picks.
+3. **Employment status is the owner's call**, because the profile is checked against employer records. Do not change end dates,
+   current-role flags or employment claims unless told to; remind the owner
+   that background checks compare the profile with records
+   (`skills/job-search-pipeline/references/application-truthfulness.md`).
+4. **Apply in a fixed order** (so the cap and links are settled before text that refers to them): skills (add, link to roles, replace, delete, pin
+   the top five) -> structured fixes (dates, languages, company entity, field
+   of study, certificate dates, services) -> long text (About, role
+   descriptions). Skills first: the 100-skill cap needs planning and other edits
+   do not depend on them (`references/skills-reconciliation.md`).
+5. **Verify each save** by the confirmation toast, then read the value back; on
+   an error stop and report instead of retrying blindly.
+6. **Report** counts before and after, every substitution (requested name ->
+   name LinkedIn offers), no-ops, skills LinkedIn does not offer, and open items
+   such as a second-language profile still carrying the old text:
+
+   ```text
+   Section: <skills | about | role | ...>   Before: <n/value>   After: <n/value>
+   Substitutions: <requested -> offered>   No-ops: <list>   Not offered: <list>
+   Open items: <list for the owner>
+   ```
+
+Findings checklist: headline or About out of date with level or degree;
+inconsistent years of experience; employment type that does not match the work
+(ask before changing); company entity that is a foundation or wrong brand
+(offer the closest existing page); role texts with embedded legacy skills
+lists; stale end dates; certificates without an issue date; language names in
+the wrong UI language; services contradicting the positioning; skills with no
+role links; top-five pins off-target; the exported profile PDF is not a CV
+(build one with `skills/job-search-pipeline/references/cv-tailoring.md`).
+
 ## Hard rules
 
 - **Delete safety.** Open the item's edit dialog and read its heading: it must
@@ -89,6 +150,9 @@ write, and deletes cannot be undone.
   working in this role", then set the End month and End year selects (form input
   works on these React selects). Confirm "Notify network" is off before saving.
   Re-read the details page: the entry shows the start, the end, and the duration.
+- **Skill-name variants are one record.** Spelling or casing variants of a
+  skill resolve to the same LinkedIn record, so a "replace" can be a no-op:
+  see `learnings/linkedin-skill-name-variants-are-one-record.md`.
 - **Adding a skill.** Tick the roles or projects that evidence it and untick
   "Follow this skill" unless the owner asked; re-read the skills list afterwards
   (`references/details-pages.md`, section 4).

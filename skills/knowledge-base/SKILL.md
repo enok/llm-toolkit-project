@@ -4,7 +4,7 @@ description: Use when searching what the toolkit already knows (how do we do X, 
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Knowledge Base
@@ -87,10 +87,42 @@ python3 scripts/kb.py index
 python3 scripts/kb.py doctor
 ```
 
+## Ingesting from authenticated sources
+
+For "index everything from source X into the knowledge base" requests, agree
+the acceptance test before starting, because counts alone hide a source that
+was never reached:
+
+1. Declare each source's reach up front: signed-in browser profile, repository
+   clone, or connector, and which browser profile holds the sign-in. Password
+   entry is the user's step; ask, save partial progress, and continue when they
+   confirm.
+2. Export through the browser into the downloads folder, then move the files
+   into the knowledge-base folder (ask for folder access once, not per file).
+3. Acceptance is a named document found by `search`, its full-text size, and
+   counts (files, chunks). If the user named a mandatory document, check it
+   first and list it as the first row of the result table.
+4. A scheduled refresh states exactly which sources it cannot reach, so a
+   silent gap is not mistaken for "nothing new".
+
+## Scheduled-session limits
+
+A scheduled cloud session differs from an interactive one. Plan for it:
+
+- It may lack past-chat tools and connected folders; do not promise a harvest
+  that needs them.
+- Changes prepared in the sandbox reach the machine as zero-context patches
+  through the device bridge. The bridge can drop mid-run, so park finished work
+  that is not yet on the machine in a project document with checksums.
+- Pushing from the machine needs `gh auth login` and `gh auth setup-git`. If
+  that is missing, keep the commit in the worktree and report the compare link
+  as NOT POSTED rather than claiming a push.
+
 ## Known pitfalls
 
 - After any re-index or other bulk state change, restart the whole stack and read back a stored vector (`doctor --deep`) before calling it done; counts alone passed in the recorded case and the service crashed after its next restart. See `learnings/reindex-acceptance-needs-restart-and-stored-vector-read.md`. (sig: validation-gap/state-change-not-tested-across-restart)
 - Do not let a file-sync client manage the vector index files: in the recorded case it left the index link file at 0 bytes and the database exited with a segfault status once the index loaded. Keep `LLM_KB_SYNC_SAFE_INDEX=1` (index in memory, vectors in the SQLite log) whenever the data folder is synced, and rebuild an index copied between machines from the stored texts. See `learnings/vector-index-in-sync-folder-segfaults-keep-index-in-memory.md`. (sig: toolchain/vector-index-in-cloud-synced-folder)
+- Keep the vector database volumes outside synced folders (cloud-sync clients corrupt or lock them) and mount them from a local path. See `learnings/local-vector-db-volumes-outside-synced-folders.md`.
 - Bound the size of what a test writes and check free space before and after a test that writes large files; a huge sparse index file kept its space held by the container virtual machine after deletion until that machine restarted. See `learnings/unbounded-test-output-fills-disk-vm-holds-space-until-restart.md`. (sig: tool-misuse/unbounded-test-output-fills-disk)
 
 ## Related

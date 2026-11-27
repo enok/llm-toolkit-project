@@ -28,8 +28,8 @@ use `python3` where `python` is missing or is not Python 3 (Windows often has a
 | Plain text blocks (logs, expected output, unknown language) are `<pre data-code-block-mode="0">` | Mode 0 is plain text, no highlighting. | `build` |
 | Every empty line inside a `<pre>` becomes a single space (`learnings/medium-paste-splits-code-blocks-at-blank-lines.md`) | A truly empty line split one file into several code boxes; `<br>` instead of newlines did not help. Pasting back still yields valid code; Python ignores whitespace-only lines. | `build`; `check` flags remaining empty lines |
 | No `<table>`: convert to a bullet list (`Label: value`) or a mode-0 `<pre>` with aligned columns | Medium has no tables. | author; `check` flags |
-| No inline `<code>`: convert to plain text (use `<em>` or `<strong>` only when emphasis is wanted) | Medium has no inline-code style. | author; `check` flags |
-| No markdown left in the HTML: scan for `](http` (`learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md`) | A title like `[[x] y](url)` rendered as raw text. Scan the rendered HTML, not only the Markdown source. | author; `check` flags |
+| No inline `<code>` in the pasted HTML: convert to plain text (use `<em>` or `<strong>` only when emphasis is wanted). Where a flag or code token needs code styling, apply it in the editor after pasting (section 4) | A pasted `<code>` element is not carried over; the editor does have an inline-code style (the backtick shortcut produces a `markup--code` span), so the old note that Medium has no inline code is outdated. | author; `check` flags |
+| No markdown left in the HTML: scan for a closing bracket followed by `(http` (`learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md`) | A title like `[[x] y](url)` rendered as raw text. Scan the rendered HTML, not only the Markdown source. | author; `check` flags |
 | Images are absolute `https` URLs from `raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>` | Medium re-hosts pasted images, so the source must be fetchable by anyone; a SHA (not a branch) stops caching from serving a stale diagram. | author; `check` flags unpinned or foreign URLs |
 | Entity-encode every non-ASCII character as `&#NNN;` | See section 3. | `build`; `check` flags leftovers |
 | Start the document with the `<h1>` title | The title field is expected to take the first heading (untested); confirm it after pasting. | author |
@@ -108,3 +108,23 @@ a rich copy from a rendered page may drop the code-block attributes
 - The paste copy holds story content only: strip metadata, HTML comments and
   self-score or review lines (`check` does not flag them). Any block above the
   AI-assistance note can push it beyond the first two paragraphs (section 1).
+
+## 4. Smart typography and block-hash validation (observed 2026)
+
+- Medium rewrites typed or pasted `--flag` into an em dash and a digit-hyphen-digit pattern
+  (for example an ISO date) into an en-dash date. Put flags and code-like tokens in inline code
+  (type the closing backtick in the editor so the shortcut applies it), and write dates in words
+  in prose. Keep US spelling in prose only, never inside code.
+- In a paragraph that contains inline code Medium does not auto-curl quotes, leaving a mix of
+  straight and curly quotes. Pre-curl the prose quotes as entities (`&#8220;` `&#8221;` `&#8217;`)
+  in the paste file; do not touch quotes inside code (observed 2026-10-22).
+- A pasted figure keeps its image but loses the figcaption and the alt text, and `<h2>` and `<h3>`
+  both become the same large heading. Use `<h4>` for sub-heads, type the caption and alt text
+  through the image toolbar after pasting, and read both back (observed 2026-10-22).
+- Validate the pasted story by comparing every editor block's text hash against a validated
+  snapshot of the approved text, after normalising quotes and spaces (curly versus straight
+  quotes, non-breaking spaces). Compare code blocks separately. Then check the reader view:
+  figures, captions, alt text, and no stray language label such as "None" on a code block.
+  Hash recipe: [editor-verification.md](editor-verification.md).
+- The disclosure line stays body paragraph 2 after every edit.
+- For drafting the article itself, see `skills/technical-content-publishing/SKILL.md`.

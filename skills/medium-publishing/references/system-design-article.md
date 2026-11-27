@@ -74,7 +74,7 @@ citation rules). Mark readings the source does not state as "my reading".
 
 ## 6. Medium constraints
 
-Medium has no tables or inline code ([paste-recipe.md](paste-recipe.md)): write trade-offs as
+Medium has no tables, and a pasted inline `<code>` is dropped ([paste-recipe.md](paste-recipe.md)): write trade-offs as
 short paragraphs or `Label: value` list items. Keep the words that count (the body) under the
 budget; code blocks, image captions and the title do not count in the script's measure.
 

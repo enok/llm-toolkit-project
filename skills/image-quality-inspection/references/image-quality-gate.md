@@ -96,6 +96,31 @@ print(len(sizes), "pages;", "uniform" if len(set(sizes)) == 1 else "MIXED", sort
 - `pdftoppm` can print "Bad bounding box in Type 3 glyph" for such PDFs; the warning is harmless. Inspect the rendered pages as usual.
 - A check that cannot run is reported as "not run", never as passed.
 
+## Carousel gate
+
+A carousel (HTML slides rendered to PDF and PNG, see
+`skills/diagram-authoring/references/publication-diagram-style.md` section 9)
+is gated by one script before delivery, because phone-width legibility and
+text drift are invisible in a quick look:
+
+```bash
+python skills/image-quality-inspection/scripts/check_carousel.py \
+  --slides slides.html --pdf carousel.pdf --source carousel.md \
+  [--diagram-text 3="words that appear only inside the slide-3 diagram"]
+```
+
+- Font floors at 1080 px width: headline 64, body 36, footer 24, diagram text 30;
+  the last slide's disclosure line at least 32. Small text fails because a phone
+  shows the page at about 0.35x.
+- 96 px safe area on every side; SVG text must not touch its node's edge.
+- WCAG contrast of at least 4.5 against the effective background (the lightest
+  point of a gradient is the worst case for light text).
+- Text exactness: the PDF text (`pdftotext`) must equal the source markdown token
+  by token (exact multiset) and the page counts must match, so no word is lost,
+  doubled or reworded in rendering.
+- Exit 0 pass, 1 a check failed, 2 playwright, the inputs or `pdftotext` are missing
+  (report "not run", never "passed").
+
 ## Evidence to report
 
 Before closing the task, report a compact image QA summary:

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: empty-kind-is-coverage-gap
+expected_outcome: |
+  The plan classifies only the items present and reports that agent sessions and scheduled tasks are missing as a coverage gap in the risks, rather than treating them as an empty set.
+  Title-only evidence yields low confidence and the reversible action.
+context:
+  scaffold_script: place-files.sh

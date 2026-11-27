@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: next-does-nothing
+expected_outcome: |
+  Follows the time-boxed procedure: reads validation, captures network/console, instruments the page, repeats in a second session/private window, then concludes with evidence and lists workarounds, not submitting anything beyond the user's request.

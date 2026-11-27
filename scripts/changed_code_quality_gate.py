@@ -32,7 +32,7 @@ KNOWN_CODE_SUFFIXES = SUPPORTED_SUFFIXES | {
 }
 NON_CODE_SUFFIXES = {
     ".bmp", ".cfg", ".conf", ".csv", ".gif", ".ico", ".ini", ".jpeg", ".jpg",
-    ".json", ".jsonl", ".lock", ".md", ".pdf", ".png", ".pyc", ".svg", ".toml", ".tsv",
+    ".json", ".jsonl", ".lock", ".md", ".mmd", ".pdf", ".png", ".pyc", ".svg", ".toml", ".tsv",
     ".txt", ".webp", ".xml", ".yaml", ".yml",
 }
 CLASSIFIED_SUFFIXES = KNOWN_CODE_SUFFIXES | NON_CODE_SUFFIXES

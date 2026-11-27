@@ -1,10 +1,10 @@
 ---
 name: linkedin-publishing
-description: Use when the user asks to post, share, or repost an article, repository, or study write-up on LinkedIn through browser automation in the user's own logged-in browser, including attaching a diagram image to the post, verifying the composer text, cross-linking the post with the article, keeping the post a short teaser positioned by a publication profile, or replacing, or on request deleting, an earlier post (new post plus a pointer in the old one).
+description: Post, share, repost, edit, or replace a LinkedIn post about an article, repository, or study write-up by driving the user's own logged-in browser, with an approval gate before every write. Use when the user says "share this on LinkedIn", "post the link to my article", "attach the diagram to the post", "fix the typo in my LinkedIn post", "replace my old post", or "delete that post"; also for verifying composer text by hash, attaching a diagram image safely (never into the messaging overlay), cross-linking post and article, and keeping the post a short AIDA teaser positioned by a publication profile. LinkedIn is reached through the browser only, so use this skill whenever a LinkedIn post must be created or changed. Not for replies to comments, paid promotion, or Medium.
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # LinkedIn Publishing
@@ -14,17 +14,15 @@ by driving the user's own logged-in browser. There is no API path here: the comp
 reached through the browser, and every mutation is an external write that needs explicit
 approval.
 
-## When to Use
+## Scope
 
-- The user wants an article, repo, or write-up shared on LinkedIn and a browser tool
-  attached to their logged-in session is available.
-- A published post must change: text or alt text is edited in place; when the image must change
-  (for example it lacked one), publish a new post and point the old post to it.
-- Back-links between a LinkedIn post and its article need to be created or repointed.
+Edits to a published post change text and alt text in place; when the image must change (for
+example it lacked one), publish a new post and point the old one to it. Back-links between a post
+and its article are created or repointed here too.
 
-Do not use it for replies to other people's comments (follow
-`rules/human-comment-reply-gate.md`), for paid promotion, or for Medium (use
-`skills/medium-publishing/SKILL.md`).
+Out of scope: replies to other people's comments (follow `rules/human-comment-reply-gate.md`), paid
+promotion, Medium (use `skills/medium-publishing/SKILL.md`), and drafting the post and carousel from
+a fact sheet (`skills/technical-content-publishing/SKILL.md`).
 
 ## Standards
 
@@ -122,8 +120,16 @@ Do not use it for replies to other people's comments (follow
    paid "boost" prompt.
 7. Open `<post-url>` and verify text, image, and the article link render. If the Post result
    was ambiguous, check recent activity before retrying so a duplicate is not published.
-8. Report `<post-url>` to the user. Propose the back-link edits (article, repo README) as
+8. Report in this form, then propose the back-link edits (article, repo README) as
    separate drafts; each is its own external write with its own approval.
+
+   ```
+   Post: <post-url> | NOT POSTED (draft saved: yes|no)
+   Text hash: <sha256 prefix> matches approved text | Image: present, <w>x<h> | Link to article: ok
+   Checks: check_publication.py <result>, reviewer <verdict>
+   Pending: <back-link edits, approvals> or none
+   ```
+
 9. Only when an earlier post must change: follow
    [repost-and-delete.md](references/repost-and-delete.md). Text or alt text: edit in place.
    Image: new post, then a `More... <post-url>` line edited into the old post's text, then
@@ -133,12 +139,13 @@ Do not use it for replies to other people's comments (follow
 
 ## Hard Rules
 
-- Never click Send in LinkedIn messaging, and never upload into any messaging file input.
-  Scope every DOM query to the "Create post" dialog, and run
+- Do not click Send in LinkedIn messaging or upload into any messaging file input: the composer
+  and the messaging overlay share the page, and a stray send reaches a real person. Scope every DOM query to the "Create post" dialog, and run
   `scripts/check_upload_target.py` on every upload snippet before executing it.
-- Never click Post without explicit approval of the exact text shown (also in `drafts-only` mode);
-  never delete a post without a separate explicit approval naming that post. The editor of a published post
-  changes text and alt text only; never promise an in-place image swap.
+- Click Post only after explicit approval of the exact text shown (also in `drafts-only` mode), and
+  delete a post only after a separate approval naming that post, because both are public and
+  hard to undo. The editor of a published post changes text and alt text only, so do not promise
+  an in-place image swap.
 - Hand bot checks, CAPTCHAs, and login challenges to the user; never solve or bypass them.
 - Decline paid boost or promotion upsells ("No thanks"); never enter payment details.
 - Remove every temporary DOM element you injected (for example the upload proxy) when done.
@@ -149,7 +156,7 @@ Do not use it for replies to other people's comments (follow
 
 | File | Covers |
 | --- | --- |
-| [composer-automation.md](references/composer-automation.md) | Shadow-DOM composer, deep query helper, clipboard paste, SHA-256 verification, link-preview card, reading the post URL, declining boost |
+| [composer-automation.md](references/composer-automation.md) | Shadow-DOM composer and newer editor-engine behaviour (TipTap, media button, auto-linked file names), deep query helper, clipboard paste, SHA-256 verification, link-preview card, reading the post URL, declining boost |
 | [image-attach-recipe.md](references/image-attach-recipe.md) | Attaching the PNG through a proxy input and synthetic drop events; the messaging-overlay file-input hazard; staging pitfalls |
 | [repost-and-delete.md](references/repost-and-delete.md) | Changing a published post: edit in place, or new post plus `More...` pointer; optional delete with separate approval; repointing back-links |
 | `skills/medium-publishing/references/positioning-profile.md` | The publication profile: budgets, where the consumer keeps it, the json read by the checker, defaults |
@@ -203,3 +210,4 @@ Do not use it for replies to other people's comments (follow
   the draft.
 - `workflows/study-repo-to-publication.md` and `workflows/study-publication-medium-linkedin.md`
   for where this step sits in the full repo, article, post sequence.
+- `skills/technical-content-publishing/SKILL.md` — draft here, publish there: drafts the post and carousel from a fact sheet; this skill only pastes and publishes approved text

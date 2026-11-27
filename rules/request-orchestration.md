@@ -7,6 +7,8 @@ description: Automatic request routing into specialist agents and safe map-reduc
 
 Apply this rule at the start of every non-trivial chat request. The user does not need to ask for agents explicitly.
 
+Scheduled and recurring automation runs (digests, scans, syncs) are requests too and run under the same contract: a tier and an exact model per row, the root owns writes, and the tasks table is kept. When a scheduled task is created or updated, its standalone prompt names this rule and `tool-subagents/agent-orchestrator.md`; this holds for every such task, not only a flagship one (`workflows/automation-maintenance.md`).
+
 ## Default route
 
 1. Classify the request as trivial/local or multi-lane.
@@ -31,10 +33,21 @@ Apply this rule at the start of every non-trivial chat request. The user does no
 
 - Keep root context small. Load only the primary workflow or skill plus directly required helper rules, references, and subagents.
 - The root/orchestrator stays thin: it holds the durable state ledger, the open decisions awaiting the human, and the lanes in flight — everything else is read from disk on demand. Point lanes at the ledger instead of pasting context into their prompts, and record each finding once so no later lane re-derives it. See `tool-subagents/agent-orchestrator.md` "Thin orchestrator and the durable state ledger" for the binding contract.
+- Per-task context isolation is a mandatory step: see "Context isolation per task" below.
 - Knowledge base first: before splitting, query the toolkit knowledge base (`kb.py search`, `-k 5` or fewer, at most one refined query per question) and point lanes at the hits by path instead of re-reading catalogs or source; fall back to `learnings/INDEX.md` and direct reads when it is unreachable and say so (`rules/knowledge-base.md`, `tool-subagents/agent-orchestrator.md` "Knowledge base first and knowledge write-back").
 - Prefer single-responsibility skills, rules, workflows, and agents; compose them for larger tasks instead of duplicating or inlining long guidance.
 - If a workflow needs more detail than fits the size limit, split the reusable phase into another workflow and call it by path from the parent.
 - Do not load broad catalogs or entire reference trees unless the request needs them.
+
+## Context isolation per task (MANDATORY)
+
+Every task gets its own slim context. The root checks this before each wave; a failing brief is a contract violation.
+
+1. Separate execution: each task row runs in its own lane (or its own root step when it needs a root-only tool); a task never continues inside another task's context.
+2. Slim brief: goal (one or two sentences), exact inputs as paths or IDs (a path, not pasted content), boundaries, write location, return contract. Never the parent conversation, the whole ledger or tasks table, or findings of unrelated tasks.
+3. Leanest executor: the agent type with the smallest tool surface that can do the task, then the cheapest model the tier allows (`learnings/subagent-fixed-context-cost-pick-leanest-agent-type.md`).
+4. Slim return: only what the root needs to decide the next step, within the four-block cap; detail goes to a file and the return gives its path. Never ask a lane to paste outputs.
+5. Gate: before dispatching a wave, check every brief against 1-4 and rewrite any that forwards history or unrelated context (`tool-subagents/agent-orchestrator.md` "Context economy and parallel dispatch", item 5).
 
 ## Specialist selection
 
@@ -70,7 +83,8 @@ channel — first table, after each task completion, and immediately when a task
 becomes blocked, with the blocked send naming what is blocked and what the user
 must decide. The prints being mirrored are the full-table prints defined in
 `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets,
-tokens, prints, checkpoints": after planning, after every completion, failure,
+tokens, prints, checkpoints" (worked example of the full print:
+`docs/llm/tasks-table-example.md`): after planning, after every completion, failure,
 or escalation, on a block or SLA breach, and as the final table. The chat
 print carries the full table: manifest, every column (including `Vector DB
 used`, `Complexity` and the exact `Model/Effort`), every row, the footer rows
@@ -152,7 +166,13 @@ before the affected task can be marked done.
    inline does not exempt it from this contract: if the root does the work
    itself, the task's tier still applies and the root must either delegate it at
    its tier or record why one of the three exemptions covers it. "The root
-   already had the context" is not an exemption.
+   already had the context" is not an exemption. A task that needs a tool or
+   session no lane can reach (device-bridge tools, a browser signed in as the
+   user) is not delegable: the root runs it under the task's own acceptance
+   criteria and validator, names the tool in `Complexity` (for example
+   `light (root inline: root-only tool, device bridge)`), and logs the reason in
+   the ledger. Work a lane can reach once the root stages its inputs does not
+   qualify.
 
    **The session model is not a ceiling.** Tier assignment is a property of the
    task, decided independently of what the session happens to be running. When
@@ -174,6 +194,7 @@ before the affected task can be marked done.
    | Running a validation script or test and reporting pass/fail | `light` | `haiku` / low |
    | Path/name sync, formatting, mechanical find-and-replace | `light` | `haiku` / low |
    | Retrieval, file/symbol mapping, scanning output for a known pattern | `light` | `haiku` / medium |
+   | Browser/desktop UI automation executing a pre-approved, explicit ID list (open-ended UI exploration stays `standard`) | `light` | `haiku` / medium |
    | Doc drafting and updates, release notes, PR bodies; authoring learnings or skill references from a recorded facts ledger | `standard` | `sonnet` / medium |
    | Config/overlay sync review, generated-surface drift check | `standard` | `sonnet` / medium |
    | Standard code edits, ordinary bug fixes, ordinary code review | `standard` | `sonnet` / medium |
@@ -242,6 +263,23 @@ before the affected task can be marked done.
 - Lanes report reusable knowledge as `knowledge: <kind> - <one line>` in their Decisions block; the root runs the intake gate and is the single writer of `kb.py add` and of promotions (`rules/knowledge-base.md` duties 2-4).
 - Convert only validated, reusable lessons into durable toolkit assets through `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`, or `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
 
+## Linked-folder sessions
+
+Applies when a cloud session reaches the user's computer only through linked folders (a device bridge).
+
+- **Contract source.** If the toolkit root is not among the linked folders, request access to it once, at W0, for that folder only. If access is declined or unavailable, use the generated shared-rules block in the consumer repo's `AGENTS.md` as the contract summary and say so in the plan. A granted-but-refused bridge path ("Permission denied") is not a declined grant: use the cloud-clone route below. A grant the user declined is never worked around. That block omits `INTENTS.md` rows and the model lookup table, so name what is missing. If the folder is linked but the bridge refuses `tool-subagents/agent-orchestrator.md`, read it with a native file tool or from a staged copy (`learnings/cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md`); if no route works, apply this rule alone and record the routing deviation in the ledger.
+- **Clone as contract source.** When the contract files are read from a git clone or bundle clone in the container, run `scripts/sync-tool-configs.sh` on that clone (with `--skip-agents-md` for the toolkit itself) so its agents and skills become discoverable. A session with no folder access and no clone (a chat app) applies this contract from memory and says so in the plan header.
+- **Lane reach.** Lanes may not have the bridge tools the root has. Before dispatching a lane that must read linked files, the root stages them into the container: single files with the stage tool, a whole repo with `git bundle create` into a git-ignored folder of the linked repo, then stage it and clone it in the container. Point the lane at the copy. To read one path the bridge refuses, use `git cat-file -p <rev>:<path>`; `git show <rev>:<path>` can fail when git checks the path on disk first.
+- **Name the exemption.** When the root does a delegable read itself because staging would cost more than the read, record the exemption by its exact name (`one trivial tool call` or `user-facing synthesis`) in that row. "Small repo", "lookup", and "read-only" are not exemptions. Work that needs the bridge itself or a browser signed in as the user is root-only (Model selection contract, item 3). Any other inline run of a delegable row is recorded on that row as a deviation, never left silent.
+
+## Delegation blocked by usage limits
+
+- If a dispatch fails with a session or usage limit (HTTP 429), do not retry or re-dispatch in a loop. Set each affected row to `blocked` with `usage limit (resets <time>)` in Evidence and persist the ledger. Where the host can schedule a message back into the session, schedule one for the reset time.
+- A lane stopped by the limit may have written its files without returning. Check the files it owned on disk before redoing any of it; a lane with no final report is not `completed` until the root has read its output and its validator has passed.
+- Keep doing root-owned work: ledger, staging, deterministic scripts. If the user asks to continue now, the root may run the blocked producer rows inline at their tier's acceptance criteria and record `deviation: delegation blocked by usage limit (platform refusal, not a tier choice)` on each row. Such a run is not a clean run in the run record.
+- Independent validation stays pending. The root never reviews its own draft and records that as the independent validator. Leave the validator row open and keep pushes, PRs, and other external writes gated on it.
+- After the reset, resume each stopped lane by messaging the same agent where the host supports it (its work so far is saved) instead of starting a fresh one. A scheduled run stopped by a usage limit follows `learnings/scheduled-run-resumes-after-usage-limit.md` and "Catch-up runs and overlapping sessions" in `workflows/automation-maintenance.md`.
+
 ## Safety boundaries
 
 - Do not split overlapping writes across agents.
@@ -249,6 +287,7 @@ before the affected task can be marked done.
   isolated and approved them, or explicit LOA mode has verified they are inside
   the user's stated authority and assigned them to a bounded owner.
 - Do not use agents to bypass repo-local instructions, user constraints, auth boundaries, or required validation.
+- Lanes that drive a browser or desktop UI follow `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md`.
 - Do not use plugin capabilities to bypass these boundaries; adding, removing, or disabling a plugin is an owner-authorized action (`rules/plugin-governance.md`).
 - If the user says to avoid agents, run serially for that request.
 

@@ -79,6 +79,31 @@ the exact artifact/version and finding identifier, include a concrete
 justification and expiry or review date where supported, then rerun the scan
 without the suppression to preserve the original evidence.
 
+## Behaviour-preservation checklist
+
+Use when the goal is the same behaviour on a newer Java, for a poorly documented
+application:
+
+- **Jump straight to an LTS (17 or 21)** instead of walking 8, 11, 17; each
+  intermediate hop repeats the same fixes. Stop at an intermediate version only
+  when a framework forces it (below).
+- **Run `jdeps --jdk-internals` early** on the built artifacts, to list uses of
+  removed or encapsulated JDK internals before they fail at runtime.
+- **Upgrade the build tool separately** (Maven, plugins) from the JDK, in its
+  own commit, so a failure points to one cause.
+- **javax to jakarta** with the OpenRewrite migration recipes, with an
+  intermediate stop on Spring Boot 2.7 before 3.x, so framework and namespace
+  changes are not diagnosed together.
+- **Audit session clustering and classloading before leaving an application
+  server**: replicated sessions, shared libraries and server-provided classes
+  silently stop existing in an embedded setup.
+- **Expect weaker TLS defaults to break integrations**: old protocol versions
+  and cipher suites are disabled in newer JDKs; test every outbound connection.
+- Prove sameness with characterization tests that pass on the unmodified
+  baseline before the first change
+  (`skills/technical-interview-prep/references/legacy-migration-story-bank.md`
+  for how to tell this story).
+
 ## Completion gate
 
 Run the repository's full, no-skip build on JDK 17, including unit, integration,

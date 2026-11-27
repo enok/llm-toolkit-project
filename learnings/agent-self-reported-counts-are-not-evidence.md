@@ -40,6 +40,9 @@ Record the verification command and its output in the work log. Run the
 independent check before accepting any count that gates marking work complete,
 closing a ticket, or approving a PR.
 
+When two lanes report different counts using different counting methods, the root reconciles them
+to one reproducible command and records that command.
+
 # Why
 
 LLM agents miscount for several reasons: tokenization artifacts, context

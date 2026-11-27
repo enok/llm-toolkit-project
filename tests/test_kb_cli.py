@@ -480,6 +480,18 @@ class SyncStatusTests(KBTestCase):
         self.assertEqual([r["n"] for r in recs], [4])  # strictly newer
         self.assertEqual(kb.run_log_since(self.tmp / "missing.jsonl", None), ([], 0))
 
+    def test_run_log_date_only_record_counts_after_same_day_watermark(self):
+        self.write_log([{"ts": "2026-01-02", "n": 1}, {"ts": "2026-01-02T09:00:00Z", "n": 2},
+                        {"ts": "2026-01-01", "n": 3}, {"n": 4}])
+        log = Path(os.environ["LLM_RUN_LOG"])
+        recs, undated = kb.run_log_since(log, kb.parse_iso("2026-01-02T00:00:00Z"))
+        self.assertEqual([r["n"] for r in recs], [1, 2])  # date-only = end of day, newer than midnight
+        self.assertEqual(undated, 1)  # undated counting unchanged
+        recs, _ = kb.run_log_since(log, kb.parse_iso("2026-01-02T10:00:00Z"))
+        self.assertEqual([r["n"] for r in recs], [1])  # full timestamps unchanged
+        recs, _ = kb.run_log_since(log, kb.parse_iso("2026-01-03T00:00:00Z"))
+        self.assertEqual(recs, [])
+
     def test_sync_status_mark_persists_watermark(self):
         self.write_log([{"ts": "2026-01-01T10:00:00Z"}])
         with FakeService() as svc:

@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: live-debate-no-verdict-yet
+expected_outcome: |
+  The answer searches first, states the event has just ended and that no consolidated analyst or fact-check verdict exists yet, gives the main clashes for each side with equal length, and does not declare a winner from partisan sources.
+  It is short (one or two paragraphs), ends with sources, and offers at most one follow-up.

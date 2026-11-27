@@ -1,10 +1,10 @@
 ---
 name: image-quality-inspection
-description: Inspect every generated or exported image artifact and force a fix-and-rerender loop until quality is acceptable. Use for AI image generation or edits, diagram exports, screenshots, PDF page renders, document or slide renders, wiki attachments, and any PNG/JPG/SVG/PDF/WebP/GIF created or exported by an agent.
+description: Inspect every generated or exported image artifact and force a fix-and-rerender loop until quality is acceptable. Use for AI image generation or edits, diagram exports, screenshots, PDF page renders, document or slide renders, wiki attachments, and any PNG/JPG/SVG/PDF/WebP/GIF created or exported by an agent. Also use for carousel QA (type floors, safe area, contrast, PDF text exactness before delivery) and for phone photos in HEIC format that must be converted without a decoder.
 license: MIT
 metadata:
   author: llm-toolkit-project
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Image Quality Inspection
@@ -40,6 +40,8 @@ If an image is blurry, cropped, distorted, unreadable, low-resolution, stale, in
 - Use `references/image-quality-gate.md` for the detailed pass/fail gate.
 - Use `references/destination-legibility.md` for images published at a known width (effective text size, aspect ratio, margins, defect checklist, independent validator). For the diagram style that passes it, see `skills/diagram-authoring/references/publication-diagram-style.md`.
 - For a PDF that is the deliverable (page size within tolerance, text selectable, optional `pdfinfo` with a stdlib fallback), use the PDF section of `references/image-quality-gate.md`.
+- For a carousel (HTML slides to PDF and PNG), run `scripts/check_carousel.py` and read its section "Carousel gate" in `references/image-quality-gate.md`.
+- For a HEIC/HEIF photo with no decoder and no installs, read `references/heic-without-decoder.md`.
 - For diagram-specific export rules, use `skills/diagram-authoring/references/diagram-export-quality.md`.
 - For Markdown-to-PDF image intermediates and final PDF checks, use `workflows/markdown-pdf-export.md`.
 

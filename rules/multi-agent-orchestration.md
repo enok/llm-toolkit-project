@@ -13,6 +13,7 @@ description: Parallel subagents, safe fanout, and when to serialize work
 - Keep the immediate blocking step local so the critical path keeps moving.
 - Split only independent work: different subsystems, different files, different evidence sources.
 - Do not assign overlapping write ownership to more than one agent.
+- Lanes that drive a browser or desktop UI also follow `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md` (own tabs only, stable-ID allow-lists, disjoint ID sets per lane).
 - Use specialized agents for sidecar analysis, test mapping, docs drift, risk review, and other bounded tasks.
 - Merge findings locally before implementing broad fixes.
 - Carry the complexity tier (`light`/`standard`/`deep`) assigned at split time with each dispatched task, and set the dispatch tool's model/effort parameter from the client model map on every call where the platform exposes one — this is mandatory, not best-effort (Claude Code Agent tool: `light` -> `haiku`, `standard` -> `sonnet`, `deep` -> `opus`; see `rules/request-orchestration.md`). Only a platform with no per-task mechanism runs at the platform default, stated explicitly.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: stop-at-timebox
+expected_outcome: |
+  Concludes site defect from two independent failures, stops retrying, and hands over ordered workarounds (alternate portal, other device, support email with steps, record as not submitted).

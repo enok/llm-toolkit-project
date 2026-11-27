@@ -13,6 +13,9 @@ checked independently from the technical task.
 - Before every external mutation, bind the exact action and target to a current
   user instruction. "Finish", "do the same", or a ticket reference is not
   blanket permission to mutate every system associated with the ticket.
+  A status or clarifying question ("are the tasks in the calendar?") is
+  answered from what is there, not executed as a change
+  (`learnings/question-is-not-a-change-request.md`).
   An automated hook, scheduled prompt, or standing authorization (for example
   a stop hook that demands commit and push) never lifts an explicit user hold
   on that action or target: keep the hold, skip the write, and state the hold
@@ -20,7 +23,18 @@ checked independently from the technical task.
 - Deployment authority covers only the named environment, branch, pipeline, and
   validation work. It does not implicitly cover Jira, GitHub metadata (labels,
   state, reviews), Confluence, Slack, email, or other human-facing systems.
+- An approval binds the facts it was given. When a plan approved earlier (in a
+  past session, or before a pause) resumes, re-read the source its writes
+  depend on (row counts, statuses, dates) before executing; if they changed,
+  show the delta and ask again before writing.
 - Read-only inspection may continue whenever the authorized task needs it.
+  A review request ("check the cart, the checkout, the form before I send")
+  is read-only: report what the page shows, never submit, and say explicitly
+  that nothing was changed (`learnings/cart-review-read-only-never-submit.md`).
+- An authorized update of an existing record is a read-merge-write: read the
+  current value first and send the merged text, because some updates replace
+  whole fields such as an event description
+  (`learnings/calendar-event-update-replaces-description.md`).
 - For an unapproved external write, prepare the smallest draft or proposed
   delta, label it `NOT POSTED`, and ask for approval. If the write is required
   for full completion, report it as pending instead of silently expanding

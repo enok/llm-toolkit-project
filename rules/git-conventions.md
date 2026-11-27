@@ -106,6 +106,9 @@ same category contiguous, and skip categories with no legitimate changes.
   base-branch rebase, require both
   `git diff --quiet backup/<ticket>-before-regroup-<timestamp> HEAD` to exit
   zero and the two refs' `^{tree}` values to match exactly.
+- A rewrite that scrubs terms from a repository's whole history and is then
+  force-pushed follows `learnings/history-scrub-force-push-checklist.md`
+  (backup, every ref and tag, mirror re-scan) in addition to the steps above.
 
 ### Stacked-PR split safeguards
 
@@ -186,6 +189,13 @@ memory or a hand-maintained planning list.
   local builds, CI, deployment/live checks, and review automation as separate
   gates, and require the review evidence to identify the current head SHA.
 - If a Ready PR later gains an actionable finding, return it to Draft with `gh pr ready <PR_NUMBER> --undo`, fix, re-validate, then mark Ready again.
+- When branch protection refuses a merge (a required scanner, review, or
+  approval the agent cannot give itself), record the exact action the user must
+  take, verify the PR state live, and never report it as merged
+  (`learnings/pr-merge-blocked-by-protection-agent-cannot-self-merge.md`).
+- A stop-hook or review message about unsigned commits is feedback, not a
+  request to rewrite history: do not re-sign or force-push existing commits
+  unless the user asks (`learnings/stop-hook-unsigned-commits-feedback-is-not-a-rewrite-request.md`).
 
 ## Duplicate-File Gate (Mandatory — Pre-Push)
 
@@ -226,6 +236,18 @@ If locks persist, stop and report the exact locked path and operation. Do not
 delete `.git/objects/*`, remove index files, or run `git reset --hard` unless
 the user explicitly approves the destructive recovery step.
 
+## Accounts and Worktrees Across Machines
+
+- Several accounts on one machine: one key per account plus a host alias or an
+  `includeIf "hasconfig:remote.*.url:git@<host>:*/**"` block (`**` straight
+  after the colon never matches `owner/repo`; needs Git 2.36+). Check with
+  `git config --show-origin --get-regexp 'user\.|includeif'` inside the repo
+  (`learnings/git-includeif-hasconfig-ssh-url-needs-slash-glob.md`).
+- A worktree created inside a cloud VM stores VM paths: run
+  `git worktree repair` (or recreate it) on the device before running gates
+  there, and never report a gate as passed when a step was skipped
+  (`learnings/vm-created-worktree-paths-break-on-device.md`).
+
 ## Ticket/Feature Branch Rebase Before Push
 
 - For a user-authorized ticket or feature branch, rebase onto the PR base before
@@ -241,6 +263,11 @@ the user explicitly approves the destructive recovery step.
      `git push`.
 - **Never** push without rebasing first — even if the branch was recently created.
 - **Never** use `git merge` to integrate upstream changes — rebase only.
+- A PR that fell behind its base under strict required checks ("require
+  branches to be up to date") is caught up with
+  `gh pr update-branch <pr> --rebase`, never the default merge variant of that
+  command and never `git merge main`; then read the PR state back before
+  reporting it (`learnings/strict-required-checks-behind-main-use-update-branch.md`).
 
 ## Environment Branch Promotion
 

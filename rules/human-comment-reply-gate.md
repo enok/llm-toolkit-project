@@ -40,6 +40,11 @@ state:
 
 - original comment, prior replies, reviewer follow-ups, and linked docs,
   tickets, designs, or decisions;
+- when the conversation spans several channels (e.g. email plus chat or social
+  messaging or a ticket), the complete history on every involved channel, not
+  only the one being replied on; paginate or scroll to the first message,
+  because chat UIs often lazy-load only recent messages
+  (`learnings/linkedin-messaging-history-lazy-loads.md`);
 - relevant code, tests, docs, PR body, and latest diff/current head;
 - surrounding file or artifact context needed to understand the comment;
 - any prior automated replies from the agent or tooling.
@@ -69,6 +74,17 @@ or drafting another reply.
   - what code, docs, tests, PR body, or other artifacts changed, if anything
 - Start comment-processing work by auditing relevant human comments and showing
   the processing plan before any post, submit, resolve, delete, or send action.
+- Decisions that commit the user (prices or rates, acceptance, availability,
+  personal or financial data) are the user's. Drafts present options and
+  trade-offs; they do not decide.
+
+## Pre-Send Freshness Check
+
+- Immediately before sending an approved reply, re-read the latest messages on
+  every involved channel.
+- If the user already replied, or the counterpart sent something that changes
+  the premise, the draft is stale: do not send it. Show the delta and a revised
+  draft for new approval. Approval does not carry over to a stale draft.
 
 ## Closeout Table
 

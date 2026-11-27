@@ -28,6 +28,9 @@ A folder reorg renamed a folder that a computer-bound Claude scheduled task had 
   one-off `fire_trigger` catch-up. Check the run history before firing: see
   `learnings/scheduled-run-resumes-after-usage-limit.md`.
 
+Related: `learnings/scheduled-task-create-cannot-set-model.md` (folders fixed at create time,
+model, and a denied run-now).
+
 # Why
 Folder attachments are approved by the user on the device and are not editable through the
 scheduling API; enabling or creating device-bound tasks may need a human decision.

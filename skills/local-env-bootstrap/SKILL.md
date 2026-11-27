@@ -1,13 +1,15 @@
 ---
 name: local-env-bootstrap
 description: >
-    Bootstrap or repair a local development environment across one or more repos. Trigger
+    Bootstrap or repair a local development environment across one or more repos, including
+    writing an idempotent onboarding script with a --doctor check for other developers. Trigger
     when the user asks to set up a project locally, fix onboarding/setup issues, align
-    runtime versions, configure secrets/bootstrap steps, or make sibling repos run together.
+    runtime versions, configure secrets/bootstrap steps, make sibling repos run together, or
+    asks for a script that sets up a whole dev environment for teammates.
 license: MIT
 metadata:
   author: dev-tools
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Local Environment Bootstrap
@@ -47,7 +49,10 @@ Use this skill for onboarding, setup repair, and environment alignment.
 6. **Reuse the toolkit bootstrap where it fits.** `scripts/bootstrap-dev.sh` (PowerShell:
    `scripts/bootstrap-dev.ps1`) installs and verifies the shared developer toolchain;
    keep repo-specific steps in the consumer repo instead of forking the shared script.
-7. **Document the result** as a README section or local setup guide.
+7. **When the ask is "a script that sets up 100% of the environment for other developers",**
+   follow `references/onboarding-script-contract.md` (parameters, idempotence,
+   `--doctor` mode, what the script cannot reach).
+8. **Document the result** as a README section or local setup guide.
 
 ## Output
 
