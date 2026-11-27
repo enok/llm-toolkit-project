@@ -253,6 +253,111 @@
       "file": "metadata.json",
       "pattern": "Credential Access",
       "reason": "Skill abstract mentions keeping SDK credentials in .env files server-side; guidance only, no file access."
+    },
+    {
+      "skill": "diagram-authoring",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the lines point to references/publication-diagram-style.md, a Markdown style reference that ships in this skill and is scanned with it."
+    },
+    {
+      "skill": "diagram-authoring",
+      "id": "P2",
+      "file": "references/publication-diagram-style.md",
+      "pattern": "Hidden Instructions",
+      "reason": "False positive: an HTML comment inside a hand-authored SVG example that labels a drawing region (adapter and outside system); it carries no instruction to an agent."
+    },
+    {
+      "skill": "jenkins-to-github-actions",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the line points to references/mapping.md, a Markdown mapping table that ships in this skill and is scanned with it."
+    },
+    {
+      "skill": "js-ts-best-practices",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
+    },
+    {
+      "skill": "python-best-practices",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
+    },
+    {
+      "skill": "security",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
+    },
+    {
+      "skill": "shell-scripting",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the lines point to this skill's own compiled AGENTS.md and standalone rules/ files, which exist in the skill folder and are scanned with it; nothing is fetched or executed."
+    },
+    {
+      "skill": "medium-publishing",
+      "id": "AE1",
+      "file": "SKILL.md",
+      "pattern": "Incomplete referenced artifact analysis",
+      "reason": "False positive: the line is a file-index table row for scripts/medium_paste_html.py, a stdlib-only local helper that ships in this skill and is covered by tests/test_medium_paste_html.py."
+    },
+    {
+      "skill": "security",
+      "id": "PE3",
+      "file": "AGENTS.md",
+      "pattern": "Credential Access",
+      "reason": "Documented vulnerable-code example: the path-traversal sample (../../../etc/passwd) is labelled as the pattern to avoid and is followed by the safe version."
+    },
+    {
+      "skill": "security",
+      "id": "SSRF1",
+      "file": "AGENTS.md",
+      "pattern": "Cloud Metadata Access",
+      "reason": "Documented vulnerable-code example: the SSRF sample naming the cloud metadata address is labelled as the pattern to avoid and is followed by the safe version."
+    },
+    {
+      "skill": "terraform",
+      "id": "PE3",
+      "file": "references/security-compliance.md",
+      "pattern": "Credential Access",
+      "reason": "False positive: '.env' is an entry in a recommended .gitignore listing that keeps secret files out of version control; nothing reads the file."
+    },
+    {
+      "skill": "jupyter-notebook",
+      "id": "AR2",
+      "file": "SKILL.md",
+      "pattern": "Anti-Refusal Statement",
+      "reason": "False positive: 'do not judge by git diff --stat counts' is review guidance for notebook diffs, not an instruction to override a refusal or a safety check."
+    },
+    {
+      "skill": "local-env-bootstrap",
+      "id": "AR2",
+      "file": "SKILL.md",
+      "pattern": "Anti-Refusal Statement",
+      "reason": "False positive: 'Do not modify global configurations without warning' is a safety constraint on the agent, the opposite of an anti-refusal statement."
+    },
+    {
+      "skill": "terraform-change-safety",
+      "id": "AR2",
+      "file": "SKILL.md",
+      "pattern": "Anti-Refusal Statement",
+      "reason": "False positive: the line tells the agent to verify a resource name is unused before a rename; it adds a check and removes none."
+    },
+    {
+      "skill": "terraform-specialist",
+      "id": "AR2",
+      "file": "references/validation-checklist.md",
+      "pattern": "Anti-Refusal Statement",
+      "reason": "False positive: 'never warning-only check blocks' asks for stricter checksum validation; it adds a check and removes none."
     }
   ]
 }

@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -27,18 +28,29 @@ KNOWN_CODE_SUFFIXES = SUPPORTED_SUFFIXES | {
     ".kt", ".kts", ".lua", ".m", ".mm", ".php", ".pl", ".ps1", ".r", ".rb",
     ".rs", ".scala", ".sh", ".sol", ".sql", ".svelte", ".swift", ".vb", ".vbs",
     ".vue", ".zsh",
+    ".bash", ".bat", ".cmd", ".csh", ".fish", ".ksh", ".psd1", ".psm1", ".pyw", ".tcsh",
 }
 NON_CODE_SUFFIXES = {
     ".bmp", ".cfg", ".conf", ".csv", ".gif", ".ico", ".ini", ".jpeg", ".jpg",
     ".json", ".jsonl", ".lock", ".md", ".pdf", ".png", ".pyc", ".svg", ".toml", ".tsv",
     ".txt", ".webp", ".xml", ".yaml", ".yml",
 }
+CLASSIFIED_SUFFIXES = KNOWN_CODE_SUFFIXES | NON_CODE_SUFFIXES
+HADOLINT_BLOCKING_LEVELS = {"error", "warning"}
+HADOLINT_LEVELS = HADOLINT_BLOCKING_LEVELS | {"info", "style"}
+# Trusted hadolint configuration: replaces any candidate .hadolint.yaml so a
+# change cannot ignore rules or downgrade their severity.
+HADOLINT_CONFIG = "ignored: []\n"
 KNOWN_CODE_NAMES = {"dockerfile", "gemfile", "makefile", "rakefile"}
 NON_CODE_NAMES = {
     ".cursorignore", ".cursorindexingignore", "agents", "claude", "license",
     "readme", "rules", "skills", "workflows",
 }
+BACKSLASH_PATH_REASON = "changed path contains a backslash"
+LONE_CR_REASON = "Dockerfile contains a carriage return not followed by a newline"
 BLOCKING_SKIP_REASONS = {
+    BACKSLASH_PATH_REASON,
+    LONE_CR_REASON,
     "binary file",
     "source file exceeds 10 MiB",
     "unrecognized changed file type",
@@ -157,6 +169,15 @@ def changed_paths(root: Path, base: str | None, head: str) -> set[str]:
     return paths
 
 
+def is_dockerfile(path: str) -> bool:
+    """Dockerfile, *.Dockerfile, or Dockerfile.* whose suffix is not already classified."""
+    name = Path(path).name.lower()
+    suffix = Path(name).suffix
+    if name == "dockerfile" or suffix == ".dockerfile":
+        return True
+    return name.startswith("dockerfile.") and suffix not in CLASSIFIED_SUFFIXES
+
+
 def safe_code_file(root: Path, relative: str, patterns: tuple[str, ...]) -> tuple[Path | None, str | None]:
     if Path(relative).is_absolute() or ".." in Path(relative).parts:
         raise GateError(f"changed path escapes repository: {relative}")
@@ -180,12 +201,14 @@ def safe_code_file(root: Path, relative: str, patterns: tuple[str, ...]) -> tupl
         return None, "unsupported code language"
     if suffix in NON_CODE_SUFFIXES or name in NON_CODE_NAMES:
         return None, "non-code file"
-    if suffix not in SUPPORTED_SUFFIXES:
+    if suffix not in SUPPORTED_SUFFIXES and not is_dockerfile(relative):
         return None, "unrecognized changed file type"
     with resolved.open("rb") as source:
         sample = source.read(8192)
     if b"\0" in sample:
         return None, "binary file"
+    if is_dockerfile(relative) and re.search(rb"\r(?!\n)", resolved.read_bytes()):
+        return None, LONE_CR_REASON
     return resolved, None
 
 
@@ -219,11 +242,20 @@ def build_scope(root: Path, args: argparse.Namespace, config: dict[str, Any]) ->
     lines: dict[str, tuple[tuple[int, int], ...]] = {}
     skipped: dict[str, str] = {}
     for relative in sorted(changed_paths(root, base, head)):
+        if os.name != "nt" and "\\" in relative:
+            # On POSIX a backslash is part of the file name; normalizing it to
+            # "/" would analyze a different file than the one that changed.
+            skipped[relative] = BACKSLASH_PATH_REASON
+            continue
         _, reason = safe_code_file(root, relative, patterns)
         if reason:
             skipped[relative] = reason
             continue
         file_ranges = added_ranges(root, relative, base, head)
+        if not file_ranges and is_dockerfile(relative):
+            # Whole-file rule: a deletion- or mode-only Dockerfile change is
+            # still judged (removing a line can create a finding elsewhere).
+            file_ranges = ((1, 1),)
         if not file_ranges:
             skipped[relative] = "no added or modified lines"
             continue
@@ -238,6 +270,11 @@ def overlaps(ranges: tuple[tuple[int, int], ...], finding_start: int, finding_en
 
 def subscope(scope: Scope, suffixes: set[str]) -> Scope:
     files = tuple(path for path in scope.files if Path(path).suffix.lower() in suffixes)
+    return Scope(scope.base, scope.head, files, {path: scope.lines[path] for path in files}, {})
+
+
+def dockerfile_subscope(scope: Scope) -> Scope:
+    files = tuple(path for path in scope.files if is_dockerfile(path))
     return Scope(scope.base, scope.head, files, {path: scope.lines[path] for path in files}, {})
 
 
@@ -381,6 +418,90 @@ def run_script_policy(root: Path, scope: Scope) -> dict[str, Any]:
     return {"status": "findings" if findings else "pass", "required": "always", "reason": "", "findings": findings, "broaderRunOutOfScope": 0}
 
 
+def dockerfile_lines(path: Path) -> list[str]:
+    """Lines numbered as Git and hadolint number them: split on LF only."""
+    data = path.read_bytes()
+    if re.search(rb"\r(?!\n)", data):
+        raise ValueError(LONE_CR_REASON)
+    lines = [line.decode("utf-8", errors="replace") for line in data.split(b"\n")]
+    return lines[:-1] if lines and lines[-1] == "" else lines
+
+
+def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
+    """Judge each changed Dockerfile as a whole file.
+
+    hadolint reports one line per instruction, and an instruction's extent
+    (continuations, heredocs, escape directives) is easy to misjudge, so any
+    error/warning anywhere in a changed Dockerfile blocks, even when the
+    change only deletes lines.
+    """
+    covered: dict[str, dict[str, int]] = {}
+
+    def failed(reason: str) -> dict[str, Any]:
+        return {"analyzer": "hadolint", "status": "error", "required": "always", "reason": reason, "findings": [], "covered": covered}
+
+    executable = shutil.which("hadolint")
+    if not executable:
+        return {"analyzer": "hadolint", "status": "unavailable", "required": "always", "reason": "hadolint executable not found", "findings": []}
+    findings: list[dict[str, Any]] = []
+    advisories: list[dict[str, Any]] = []
+    with tempfile.TemporaryDirectory(prefix="changed-code-hadolint-") as config_dir:
+        config = Path(config_dir) / "hadolint.yaml"
+        config.write_text(HADOLINT_CONFIG, encoding="utf-8")
+        for relative in scope.files:
+            command = [executable, "--config", str(config), "--disable-ignore-pragma", "--format", "json", f"./{relative}"]
+            try:
+                result = subprocess.run(command, cwd=root, env=sanitized_env(), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120, check=False, shell=False)
+            except subprocess.TimeoutExpired:
+                return failed(f"hadolint timed out for {relative}")
+            except OSError as exc:
+                return failed(f"hadolint could not run: {exc}")
+            if len(result.stdout) > MAX_OUTPUT_BYTES or len(result.stderr) > MAX_OUTPUT_BYTES:
+                return failed("hadolint output exceeded 4 MiB")
+            if result.returncode not in {0, 1}:
+                return failed(f"hadolint exited {result.returncode} for {relative}")
+            try:
+                payload = json.loads(result.stdout.decode("utf-8"))
+            except (UnicodeError, json.JSONDecodeError) as exc:
+                return failed(f"invalid hadolint JSON for {relative}: {exc}")
+            if not isinstance(payload, list):
+                return failed(f"invalid hadolint result structure for {relative}")
+            if result.returncode == 1 and not payload:
+                return failed(f"hadolint exited 1 without findings for {relative}")
+            try:
+                lines = dockerfile_lines(root / relative)
+            except (OSError, ValueError) as exc:
+                return failed(f"cannot read Dockerfile source {relative}: {exc}")
+            for finding in payload:
+                if not isinstance(finding, dict) or not isinstance(finding.get("code"), str) or not isinstance(finding.get("file"), str):
+                    return failed(f"invalid hadolint finding structure for {relative}")
+                level, line = finding.get("level"), finding.get("line")
+                if level not in HADOLINT_LEVELS:
+                    return failed(f"invalid hadolint finding level for {relative}")
+                if not isinstance(line, int) or isinstance(line, bool) or line <= 0 or line > len(lines):
+                    return failed(f"invalid hadolint finding line for {relative}")
+                path = finding["file"].replace("\\", "/")
+                while path.startswith("./"):
+                    path = path[2:]
+                if path != relative:
+                    return failed(f"hadolint reported an unexpected path for {relative}")
+                if finding["code"] == "DL1000":
+                    return failed(f"hadolint could not parse {relative}")
+                item = {
+                    "analyzer": "hadolint", "ruleId": finding["code"], "level": level,
+                    "path": relative, "startLine": line, "endLine": line,
+                    "messageHash": hashlib.sha256(str(finding.get("message", "")).encode()).hexdigest()[:16],
+                }
+                if level in HADOLINT_BLOCKING_LEVELS:
+                    findings.append(item)
+                else:
+                    advisories.append(item)
+            covered[relative] = {"exitCode": result.returncode, "reported": len(payload), "judged": "whole-file"}
+    if set(covered) != set(scope.files):
+        return failed("hadolint did not cover every scoped Dockerfile")
+    return {"analyzer": "hadolint", "status": "findings" if findings else "pass", "required": "always", "reason": "", "findings": findings, "advisories": advisories, "broaderRunOutOfScope": 0, "covered": covered}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", help="Trusted base ref/SHA for committed branch changes")
@@ -416,10 +537,13 @@ def main() -> int:
             return 0
         semgrep_scope = subscope(scope, SEMGREP_SUFFIXES)
         script_scope = subscope(scope, SCRIPT_SUFFIXES)
+        docker_scope = dockerfile_subscope(scope)
         if semgrep_scope.files:
             report["analyzers"].append(run_semgrep(root, policy_root, semgrep_scope))
         if script_scope.files:
             report["analyzers"].append(run_script_policy(root, script_scope))
+        if docker_scope.files:
+            report["analyzers"].append(run_hadolint(root, docker_scope))
         findings = [item for analyzer in report["analyzers"] for item in analyzer.get("findings", [])]
         blocking_unavailable = any(item["status"] == "unavailable" and item["required"] in {"always", "ci"} for item in report["analyzers"])
         errors = any(item["status"] == "error" for item in report["analyzers"])
