@@ -242,7 +242,9 @@ if ($Rtk) {
             $rtkVersionOk = $true
             $skipped.Add("rtk $rtkReviewedVersion (already installed)")
         } else {
-            $manual.Add("rtk is installed but is not the reviewed $rtkReviewedVersion ($($rtkOut.Trim())); replace it with the reviewed version before use")
+            # Same as bootstrap-dev.sh: refuse an unreviewed version instead of continuing.
+            Write-Error "rtk is installed but is not the reviewed $rtkReviewedVersion ($($rtkOut.Trim())). Replace it, then rerun." -ErrorAction Continue
+            exit 3
         }
     }
     if (-not $rtkVersionOk -and -not (Test-Command 'rtk')) {
@@ -259,7 +261,12 @@ if ($Rtk) {
             $rtkExit = $LASTEXITCODE
             if ($rtkExit -eq 0) {
                 winget pin add --id rtk-ai.rtk --version $rtkReviewedVersion
-                $installed.Add("rtk $rtkReviewedVersion (pinned)")
+                if ($LASTEXITCODE -eq 0) {
+                    $installed.Add("rtk $rtkReviewedVersion (pinned)")
+                } else {
+                    $installed.Add("rtk $rtkReviewedVersion")
+                    $manual.Add("rtk: winget pin add failed (exit $LASTEXITCODE); run: winget pin add --id rtk-ai.rtk --version $rtkReviewedVersion")
+                }
                 $manual.Add('rtk: open a new shell, verify the installer SHA-256 against the release checksums.txt, then run the smoke test in skills/token-efficiency/references/rtk-reviewed-deployment.md')
             } else {
                 $manual.Add("rtk $rtkReviewedVersion (winget exit $rtkExit; install manually)")
