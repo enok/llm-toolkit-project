@@ -87,4 +87,4 @@ the shared toolkit rules (`rules/request-orchestration.md`) and does not replace
 4. **Knowledge base first, write back.** Per toolkit `rules/knowledge-base.md`,
    run `python3 <toolkit>/scripts/kb.py search "<topic>"` before planning and
    `python3 <toolkit>/scripts/kb.py add` for reusable lessons. If the knowledge
-   base is unreachable, fall back to `learnings/INDEX.md` and say so.
+   base is unreachable, fall back to the owning assets' `## Known pitfalls` (`learnings/INDEX.md` lists only pending intake) and say so.

@@ -81,6 +81,10 @@ redacted cookies and query strings; tab handles from an earlier turn were
 reported "not in the tab group"; a screenshot right after navigating to a heavy
 app failed with a zero-width error.
 
+- A custom (React-style) widget that ignores a plain `click` (dropdown stays
+  closed): dispatch on the trigger `pointerdown`, `mousedown`, `pointerup`,
+  `mouseup`, `click`, in that order, and pick the option the same way. Do not
+  assign `.value`; the framework tracks its own state.
 - Start each browser turn with the tab-context call and use the ids it returns;
   do not reuse tab ids across turns.
 - Chain waits of 10 seconds or less instead of one long wait; retry a failed

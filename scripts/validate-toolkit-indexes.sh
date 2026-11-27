@@ -335,7 +335,7 @@ check_learning_categories() {
 }
 
 check_learning_index() {
-  # learnings/INDEX.md is the canonical one-line-per-learning index; fall back to README.md
+  # Lessons live in owning assets' Known pitfalls; learnings/INDEX.md lists only pending intake (fall back to README.md)
   local file name referenced index_file
   index_file="learnings/INDEX.md"
   [ -f "$index_file" ] || index_file="learnings/README.md"
