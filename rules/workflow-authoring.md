@@ -32,7 +32,7 @@ Rules for writing and maintaining workflow files in `workflows/`.
 - The extracted file must be self-contained — it should work if invoked directly.
 - The parent file keeps the high-level flow and delegates to the extracted file by path reference.
 - Both files must independently stay ≤ 12K characters.
-- Update `workflows/README.md`, `AGENTS.md`, `README.md`, and `INTENTS.md` when a new reusable workflow becomes user-addressable.
+- Update `workflows/README.md`, `README.md`, and `INTENTS.md` when a new reusable workflow becomes user-addressable; update `AGENTS.md` only when the workflow carries a mandatory route or gate (it points to `workflows/README.md` instead of listing workflows).
 
 ## Single Responsibility
 

@@ -461,7 +461,7 @@ Use this skill to route work through the ${title} specialist.
   console.log(`
 Next checklist for ${name}:
 - Add routing to INTENTS.md.
-- Add index entries to AGENTS.md, README.md, workflows/README.md, and tool-subagents/README.md.
+- Add index entries to skills/README.md, README.md, workflows/README.md, and tool-subagents/README.md (AGENTS.md only if the agent adds a mandatory route).
 - Run: npm run tool-configs:sync
 - Run: npm run subagents:apply -- codex .
 - Run: node scripts/validate-specialist-agent.js ${name}

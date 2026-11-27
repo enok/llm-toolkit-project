@@ -12,7 +12,7 @@
 #   .claude/agents -> canonical shared tool-subagents
 #
 # Generates repo-local exports:
-#   CLAUDE.md                        - Claude Code pointer to AGENTS.md
+#   CLAUDE.md                        - Claude Code import of AGENTS.md (@AGENTS.md)
 #   .github/copilot-instructions.md  - GitHub Copilot (shared selection + LLM config content)
 #   AGENTS.md                        - primary LLM surface (preserves existing content + refreshes sync block)
 #   .cursorignore / .cursorindexingignore managed blocks (repo-local, optional)
@@ -566,9 +566,9 @@ generate_claude_pointer() {
   {
     echo "# Claude Code instructions ($DOC_TITLE)"
     echo ""
-    echo "This repository uses [AGENTS.md](./AGENTS.md) as the primary LLM instruction surface."
+    echo "@AGENTS.md"
     echo ""
-    echo "Read \`AGENTS.md\` for repo-specific guidance, selected shared toolkit rules, workflows, and validation expectations. This file intentionally stays a thin pointer to avoid content duplication across LLM tools."
+    echo "Claude Code loads \`AGENTS.md\` through the import above, so every tool reads the same guidance; edit \`AGENTS.md\`, not this file."
   } > "$dest"
 }
 
@@ -917,7 +917,7 @@ fi
 
 CLAUDE_FILE="$PROJECT/CLAUDE.md"
 generate_claude_pointer "$CLAUDE_FILE"
-echo "  OK CLAUDE.md linked to AGENTS.md"
+echo "  OK CLAUDE.md imports AGENTS.md"
 
 GITHUB_DIR="$PROJECT/.github"
 if [[ "$SKIP_GITHUB" -eq 1 ]]; then
@@ -1011,7 +1011,7 @@ Canonical shared content lives in toolkit \`skills/\`, \`rules/\`, \`workflows/\
 | Antigravity | \`.agent/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; provider skill paths stay thin links to the shared skill catalog |
 | Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/workflows/\`, \`.cursor/agents/\` | Symlinked compatibility surfaces that point to canonical shared files; project filtering happens via local ignore files |
-| Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` is a thin pointer to \`AGENTS.md\`; shared skills and agents are links |
+| Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` imports \`AGENTS.md\` (\`@AGENTS.md\`); shared skills and agents are links |
 | Gemini CLI | \`.gemini/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus resolved LLM config docs |
 | OpenCode | \`.opencode/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
@@ -1112,7 +1112,7 @@ fi
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   echo "Selection file:   $SELECTION_FILE_LABEL"
 fi
-GENERATED_LIST="CLAUDE.md pointer"
+GENERATED_LIST="CLAUDE.md import"
 [[ "$SKIP_GITHUB" -eq 0 ]] && GENERATED_LIST="$GENERATED_LIST, .github/copilot-instructions.md"
 [[ "$SKIP_AGENTS_MD" -eq 0 ]] && GENERATED_LIST="$GENERATED_LIST, AGENTS.md (sync section)"
 echo "Generated:        $GENERATED_LIST"

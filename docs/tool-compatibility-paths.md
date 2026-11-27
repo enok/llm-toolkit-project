@@ -28,7 +28,7 @@ verified against this toolkit's own `setup-repo.*`, `ensure-symlinks.*`, and
 | Antigravity | `.agent/skills/` | Thin skill compatibility link to `.agents/skills/` |
 | Codex / generic | `AGENTS.md`, `.agents/skills/`, optional `.codex/skills/`, optional `.codex/agents/` | `AGENTS.md` is primary; provider skill paths stay thin links to the shared skill catalog |
 | Cursor | `.cursor/skills/`, `.cursor/rules/`, `.cursor/workflows/`, `.cursor/agents/` | Symlinked compatibility surfaces that point to the canonical shared files |
-| Claude Code | `CLAUDE.md`, `.claude/skills/`, `.claude/agents/` | `CLAUDE.md` is a thin pointer to `AGENTS.md`; shared skills and agents are links |
+| Claude Code | `CLAUDE.md`, `.claude/skills/`, `.claude/agents/` | `CLAUDE.md` imports `AGENTS.md` (`@AGENTS.md`); shared skills and agents are links |
 | Gemini CLI | `.gemini/skills/` | Thin skill compatibility link to `.agents/skills/` |
 | GitHub Copilot | `.github/copilot-instructions.md` | Concatenated repo-local export from the shared selection plus resolved LLM config docs - not a skills directory; the toolkit creates no Copilot skills link (see below) |
 | OpenCode | `.opencode/skills/` | Thin skill compatibility link to `.agents/skills/` |

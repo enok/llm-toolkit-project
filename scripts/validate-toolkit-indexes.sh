@@ -105,14 +105,22 @@ check_workflow_indexes() {
   local expected actual actual_readme index_file f
   expected="$(find workflows -maxdepth 1 -type f -name '*.md' ! -name 'README.md' -exec basename {} \; | LC_ALL=C sort)"
 
+  # README.md lists every workflow; AGENTS.md is an index that points to
+  # workflows/README.md (checked in full below), so for AGENTS.md only the
+  # pointer and the existence of each workflow it names are enforced.
+  if ! grep -qF '`workflows/README.md`' AGENTS.md; then
+    fail "AGENTS.md must point to the workflow catalog: \`workflows/README.md\`"
+  fi
   for index_file in AGENTS.md README.md; do
     actual="$(grep -hEo '`workflows/[^`]+\.md`' "$index_file" 2>/dev/null | sed 's#`workflows/##; s#`##' | grep -v '^README\.md$' | LC_ALL=C sort -u || true)"
-    while IFS= read -r f; do
-      [ -n "$f" ] || continue
-      if ! list_contains "$f" "$actual"; then
-        fail "workflow missing from $index_file index: workflows/$f"
-      fi
-    done <<< "$expected"
+    if [ "$index_file" != "AGENTS.md" ]; then
+      while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        if ! list_contains "$f" "$actual"; then
+          fail "workflow missing from $index_file index: workflows/$f"
+        fi
+      done <<< "$expected"
+    fi
 
     while IFS= read -r f; do
       [ -n "$f" ] || continue
@@ -232,6 +240,10 @@ check_skill_names() {
 
 check_skill_indexes() {
   local expected actual skill_file skill_dir
+  # The per-skill catalog lives in skills/README.md; AGENTS.md only points to it.
+  if ! grep -qF '`skills/README.md`' AGENTS.md; then
+    fail "AGENTS.md must point to the skill catalog: \`skills/README.md\`"
+  fi
   expected="$(
     while IFS= read -r -d '' skill_file; do
       skill_dir="$(dirname "$skill_file")"
@@ -240,7 +252,7 @@ check_skill_indexes() {
   )"
   actual="$(
     {
-      awk '/^## Skills$/,/^---$/' AGENTS.md
+      awk '/^## Catalog$/ { f = 1; next } /^## / { f = 0 } f' skills/README.md
       awk '/^## Skills at a Glance$/,/^---$/' README.md
     } | grep -Eo '^\| \*\*[a-z0-9][a-z0-9-]+\*\* \|' | sed 's/^| \*\*//; s/\*\* |$//' | LC_ALL=C sort -u
   )"
@@ -248,14 +260,14 @@ check_skill_indexes() {
   while IFS= read -r skill; do
     [ -n "$skill" ] || continue
     if ! list_contains "$skill" "$actual"; then
-      fail "skill missing from AGENTS.md/README.md indexes: skills/$skill/SKILL.md"
+      fail "skill missing from skills/README.md/README.md indexes: skills/$skill/SKILL.md"
     fi
   done <<< "$expected"
 
   while IFS= read -r skill; do
     [ -n "$skill" ] || continue
     if ! list_contains "$skill" "$expected"; then
-      fail "AGENTS.md/README.md reference non-existent skill: skills/$skill/SKILL.md"
+      fail "skills/README.md/README.md reference non-existent skill: skills/$skill/SKILL.md"
     fi
   done <<< "$actual"
 }
