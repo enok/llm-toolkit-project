@@ -62,6 +62,10 @@ class MeasureAlwaysOnTests(unittest.TestCase):
         self.assertEqual(listings["skill_description_chars"], len("first line second"))
         self.assertEqual(listings["agent_description_chars"], 3)
 
+    def test_check_fails_when_agents_md_is_missing(self) -> None:
+        (self.root / "AGENTS.md").unlink()
+        self.assertEqual(measure_always_on.main(["--root", str(self.root), "--check"]), 1)
+
     def test_codex_truncation_reported(self) -> None:
         write(self.root, "AGENTS.md", "a" * 33000)
         tools = measure_always_on.measure(self.root)["tools"]

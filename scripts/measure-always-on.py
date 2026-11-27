@@ -184,6 +184,8 @@ def render(result: dict) -> str:
 
 def check(result: dict, agents_max: int, rules_budget: int | None) -> list[str]:
     problems = []
+    if result["agents_md_bytes"] == 0:
+        problems.append("AGENTS.md is missing or empty")
     if result["agents_md_bytes"] > agents_max:
         problems.append(f"AGENTS.md is {result['agents_md_bytes']:,} B; limit is {agents_max:,} B")
     if rules_budget is not None and result["always_on_rules"]["bytes"] > rules_budget:
