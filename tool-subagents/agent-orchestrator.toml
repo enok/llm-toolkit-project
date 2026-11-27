@@ -380,7 +380,8 @@ against one shared task state. This is mandatory in every mode, not optional:
   rows another session wrote. Refresh the last-updated stamp on every write.
 - **Exact schema** — the 15-column table, assets manifest, and three footer
   rows defined in "Tasks table contract" below; the same table serves chat
-  prints, this file, and every notification mirror. `SLA` and `Remaining SLA` are time allotments (HH:MM), not
+  prints and this file; a notification mirror carries what the route's
+  approval names (the full table only when that is what was approved). `SLA` and `Remaining SLA` are time allotments (HH:MM), not
   deadlines.
 - **The file stays untracked and uncommitted — never commit or push it.**
   Verify exclusion before any commit/push; if the repo does not ignore it,
@@ -460,7 +461,8 @@ and ends with the same three footer rows.
 ### Columns: all of them, every print
 
 The table has exactly these 15 columns, in this order, in every normal-mode
-chat print, in every notification mirror, and in `TASKS_TABLE.md`. The only
+chat print, in `TASKS_TABLE.md`, and in a notification mirror whose approval
+names the full table. The only
 exception is the LOA chat print (above):
 
 | # | Wave | Task | Assets | Vector DB used | Complexity | Model/Effort | Status | Evidence | PR link(s) | CI/CD run link(s) | Tokens | % Complete | SLA | Remaining SLA |
