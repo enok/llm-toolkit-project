@@ -1146,10 +1146,16 @@ class InitToolkitDirTests(KBTestCase):  # D4
         (self.other / "scripts" / "kb.py").write_text("")
         (self.other / "kb" / "docker-compose.yml").write_text("")
 
+    def _no_host_schedule(self):
+        # Without this, init --toolkit-dir reads and rewrites the real crontab or
+        # Windows scheduled task of whoever runs the tests.
+        return mock.patch.object(kb, "schedule_state", lambda: None)
+
     def test_toolkit_dir_is_repointed_and_others_kept(self):
         (self.tmp / "kb.env").write_text("LLM_KB_COLLECTION=keep\n")
         self.run_main("init", "--data-dir", str(self.data))
-        self.run_main("init", "--toolkit-dir", str(self.other))
+        with self._no_host_schedule():
+            self.run_main("init", "--toolkit-dir", str(self.other))
         values = kb.read_env_file(self.tmp / "kb.env")
         self.assertEqual(values["LLM_KB_TOOLKIT_DIR"], self.other.as_posix())
         self.assertEqual(values["LLM_KB_COLLECTION"], "keep")
@@ -1158,7 +1164,8 @@ class InitToolkitDirTests(KBTestCase):  # D4
         self.assertIn(f"KB_CORPUS_DIR={self.other.as_posix()}", compose)  # corpus defaults to the toolkit checkout
 
     def test_first_init_honours_toolkit_dir(self):
-        self.run_main("init", "--data-dir", str(self.data), "--toolkit-dir", str(self.other))
+        with self._no_host_schedule():
+            self.run_main("init", "--data-dir", str(self.data), "--toolkit-dir", str(self.other))
         self.assertEqual(kb.read_env_file(self.tmp / "kb.env")["LLM_KB_TOOLKIT_DIR"], self.other.as_posix())
 
     def test_installed_schedule_is_reinstalled_with_same_times_and_new_path(self):
