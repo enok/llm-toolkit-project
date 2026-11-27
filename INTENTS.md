@@ -64,7 +64,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | export Markdown to PDF / ticket-ready PDF | `markdown-pdf-export` | workflow + skill | - |
 | convert PDF / DOCX / XLSX / Markdown | `document-conversion` | skill | `markdown-pdf-export` |
 | publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `diagram-authoring`, `rules/external-write-authorization.md` |
-| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `scripts/check_publication.py`, `scripts/check_upload_target.py`, `rubrics/technical-content.md` (if present) |
+| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `scripts/check_publication.py`, `scripts/check_upload_target.py`, `scripts/medium_paste_html.py`, `rubrics/technical-content.md` (if present) |
 | write a technical article / LinkedIn post or carousel about my project (draft only) | `technical-content-publishing` | workflow + skill | `rules/publication-positioning.md`, `diagram-authoring` |
 | what is the analysis of last night's debate / hearing / ruling / what do the polls and fact-checkers say | `current-events-briefing` | skill | - |
 

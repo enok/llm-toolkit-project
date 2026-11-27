@@ -29,7 +29,7 @@ Build from the merged repo content, never from memory, as a short system-design 
 - 2-3 diagrams led by the hero system-design diagram, pinned to the merged commit SHA; when the repo lacks it, add it through a pull request first;
 - at most one short snippet, a "Your next step" section, then the repo, post, and video links.
 
-A profile that asks for a full tutorial keeps the tutorial order the profile names. Build paste-ready HTML from the draft and check it until clean.
+A profile that asks for a full tutorial keeps the tutorial order the profile names. Build paste-ready HTML with `python3 scripts/medium_paste_html.py build <draft.html> -o <draft.paste.html>`, then `python3 scripts/medium_paste_html.py check <draft.paste.html> --repo-raw-prefix <commit-pinned raw URL prefix>` (exit 0 required before anything is pasted).
 
 1. Run the Validation Gate. `gated`: show title, subtitle, topics, preview image, stage map, and the full article text, labelled `NOT POSTED`, in its own message; ask for approval in a separate turn before creating anything. `drafts-only`: creating the draft is pre-approved; the same package goes in the report with the draft.
 2. Paste into a new story and verify in the editor DOM: image count, code-block count and languages, SHA-256 of each block against its repo file, no Markdown leftovers.

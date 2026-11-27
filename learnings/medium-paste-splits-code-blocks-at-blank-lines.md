@@ -27,8 +27,8 @@ def space_blank_lines(code: str) -> str:
     return "\n".join(line if line else " " for line in lines)
 ```
 
-Apply it while building the paste HTML (with the language attributes), then check the
-result before pasting.
+Apply it while building the paste HTML (with the language attributes): `scripts/medium_paste_html.py build`,
+then `scripts/medium_paste_html.py check` must exit 0 before pasting.
 
 After pasting, confirm the editor's `pre` count equals the number of `<pre>` tags in the
 paste HTML. Keep the byte-identity hash check: it normalises trailing whitespace on both

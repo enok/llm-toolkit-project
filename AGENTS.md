@@ -128,7 +128,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Architecture docs" / "diagrams" / "C4" / "PlantUML" | **diagram-authoring** skill, **diagram-creation-specialist-validation** |
 | "Confluence" / "wiki page" / "promote deployed docs" | **confluence-documentation** workflow + skill; **prod-doc-promoter-validation** |
 | "Verify the UI" / "compare with Figma" / "check exported images" | **ui-verify** skill |
-| "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill |
+| "Export Markdown to PDF" | **markdown-pdf-export** workflow + skill |
 | "Write / replace / review a publication (article or post)" / "position this article for my target role" / "replace the published story and post" | **study-publication-medium-linkedin** workflow; **publication-positioning** rule |
 | "Security review" / "OWASP audit" / "threat model" | **security-report** workflow |
 | "Cut a release" / "Maven release" / "E2E for release" | **maven-release** skill |

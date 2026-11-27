@@ -1,0 +1,28 @@
+<h1>Strategy Pattern in Practice</h1>
+<p>It’s “quoted” text with a dash — and a café.</p>
+<figure><img src="https://raw.githubusercontent.com/example-owner/example-repo/0123456789abcdef0123456789abcdef01234567/docs/diagrams/class-diagram.png" alt="Class diagram"></figure>
+<h2>Code by language</h2>
+<p><strong>src/Duck.java</strong></p>
+<pre>public class Duck {
+
+    void quack() {
+        System.out.println("Quack");
+    }
+}
+</pre>
+<p><strong>duck.py</strong></p>
+<pre><code class="language-python">def quack():
+
+    print("Quack ✓")
+</code></pre>
+<p><strong>duck.js:</strong></p>
+<pre>export const quack = () =&gt; "Quack";
+
+
+export default quack;</pre>
+<pre class="highlight language-typescript">export const quack = (): string =&gt; "Quack";</pre>
+<p><strong>notes.txt</strong></p>
+<pre>plain text, no language
+</pre>
+<pre class="highlight">unlabelled block</pre>
+<p>Closing paragraph with <em>emphasis</em> and a <a href="https://example.com/post">link</a>.</p>

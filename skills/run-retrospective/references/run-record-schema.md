@@ -173,6 +173,6 @@ high-severity escaped defect:
    {"signature": "platform-quirk/editor-paste-splits-code-block-at-blank-line",
     "level": "learning", "asset": "learnings/medium-paste-splits-code-blocks-at-blank-lines.md"},
    {"signature": "validation-gap/rendered-html-not-scanned-for-markdown",
-    "level": "checklist", "asset": "workflows/study-publication-medium-linkedin.md"}],
+    "level": "guard", "asset": "scripts/medium_paste_html.py"}],
  "notes": "escape: the leftover markdown was found by the user after the draft was marked ready"}
 ```
