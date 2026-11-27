@@ -8,6 +8,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 - Keep the frontmatter `description` short and trigger-rich (what it does AND when to use it) so agents can select the skill from metadata alone.
 - Keep the `SKILL.md` body under ~5,000 tokens; put depth in `references/*.md` (frontmatter `title` and `tags`) and fine-grained checks in `rules/*.md`.
 - Put broad always-on behavior in top-level `rules/`; put specialized procedures inside the skill; do not duplicate rule text into skills.
+- Author a new skill through the skill-creator tool published for the skill format, and review existing skills against that tool's standards (owner preference; untested as a written step). The value gate in `workflows/resource-value-check.md` still applies, and specialist agents still follow `workflows/specialist-agent-factory.md`.
 - Read-only specialists (`*-specialist`, `*-validator`, `*-reviewer`, `*-investigator`) never edit or post; the root agent owns writes and human-facing replies.
 - Keep project-specific details out of shared skills unless they are explicitly scoped to this toolkit's data-science/thesis context (marked "toolkit-local context" below).
 - New or modified skills must pass `scripts/validate-skills-with-skillspector.sh --changed` and `scripts/scan-llm-surface-security.py` before commit (`rules/security-check-required.md`).

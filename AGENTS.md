@@ -34,7 +34,7 @@ Apply these to every task.
 - Documentation created or changed by agents, chats, automations, scripts, or humans requires `documentation-reviewer` before completion (`rules/documentation-review-required.md`).
 - Workflow files must stay under 12,000 characters (`rules/workflow-authoring.md`); split reusable phases instead of deleting detail.
 - Created or updated source code passes the changed-code quality gate against the trusted Git base before validation passes (`rules/changed-code-quality-gate-required.md`).
-- If verification cannot run here, say explicitly what was not checked and what the user should run.
+- If verification, or any other step, cannot run here, say explicitly what was not checked and give the user the commands to run in a terminal.
 
 ### 6. Multi-Agent Execution
 
