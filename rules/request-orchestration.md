@@ -86,9 +86,10 @@ must decide. The prints being mirrored are the full-table prints defined in
 tokens, prints, checkpoints" (worked example of the full print:
 `docs/llm/tasks-table-example.md`): after planning, after every completion, failure,
 or escalation, on a block or SLA breach, and as the final table. The chat
-print and every mirrored message carry the same full table: manifest, every
-column (including `Vector DB used`, `Complexity` and the exact
-`Model/Effort`), every row, the footer rows and the closing line.
+print carries the full table: manifest, every column (including `Vector DB
+used`, `Complexity` and the exact `Model/Effort`), every row, the footer rows
+and the closing line. A mirrored message carries what the route's approval
+names (see below).
 
 - **The route and its authorization are configuration, not defaults.** They live
   with the consumer as a consumer-configured notification route (for example
