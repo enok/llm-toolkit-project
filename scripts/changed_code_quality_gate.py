@@ -413,11 +413,6 @@ def run_script_policy(root: Path, scope: Scope) -> dict[str, Any]:
     return {"status": "findings" if findings else "pass", "required": "always", "reason": "", "findings": findings, "broaderRunOutOfScope": 0}
 
 
-DOCKER_DIRECTIVE_RE = re.compile(r"^\s*#\s*([A-Za-z]+)\s*=\s*(\S+)\s*$")
-DOCKER_DIRECTIVES = {"syntax", "escape", "check"}
-HEREDOC_RE = re.compile(r"<<(-?)\s*([\"']?)([A-Za-z_][A-Za-z0-9_]*)\2")
-
-
 def dockerfile_lines(path: Path) -> list[str]:
     """Lines numbered as Git and hadolint number them: split on LF only."""
     data = path.read_bytes()
@@ -427,50 +422,13 @@ def dockerfile_lines(path: Path) -> list[str]:
     return lines[:-1] if lines and lines[-1] == "" else lines
 
 
-def dockerfile_escapes(lines: list[str]) -> set[str]:
-    """Escape character(s) a span must honour; when unsure, include both candidates."""
-    escape, seen = "\\", set()
-    for line in lines:
-        match = DOCKER_DIRECTIVE_RE.match(line)
-        if not match or match.group(1).lower() not in DOCKER_DIRECTIVES or match.group(1).lower() in seen:
-            break
-        seen.add(match.group(1).lower())
-        if match.group(1).lower() == "escape":
-            escape = match.group(2)[0]
-    escapes = {escape}
-    # A later "# escape=" comment is not a directive for Docker; if another
-    # parser honoured it the span would differ, so keep the longer span.
-    for line in lines:
-        if line.strip() and not line.lstrip().startswith("#"):
-            break
-        match = DOCKER_DIRECTIVE_RE.match(line)
-        if match and match.group(1).lower() == "escape":
-            escapes.add(match.group(2)[0])
-    return escapes
-
-
-def instruction_end(lines: list[str], start: int) -> int:
-    """Last line of the instruction that starts at ``start`` (continuations and heredocs)."""
-    longest = start
-    for escape in dockerfile_escapes(lines):
-        end = start
-        continuing = lines[start - 1].rstrip().endswith(escape)
-        while continuing and end < len(lines):
-            end += 1
-            text = lines[end - 1].strip()
-            if text and not text.startswith("#"):
-                continuing = lines[end - 1].rstrip().endswith(escape)
-        for dash, _, word in HEREDOC_RE.findall("\n".join(lines[start - 1:end])):
-            # The terminator is the exact word; <<- also strips leading tabs.
-            end = next((
-                number for number in range(end + 1, len(lines) + 1)
-                if (lines[number - 1].lstrip("\t") if dash else lines[number - 1]) == word
-            ), len(lines))
-        longest = max(longest, end)
-    return longest
-
-
 def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
+    """Judge each changed Dockerfile as a whole file.
+
+    hadolint reports one line per instruction, and an instruction's extent
+    (continuations, heredocs, escape directives) is easy to misjudge, so any
+    error/warning anywhere in a Dockerfile with a changed line blocks.
+    """
     covered: dict[str, dict[str, int]] = {}
 
     def failed(reason: str) -> dict[str, Any]:
@@ -481,7 +439,6 @@ def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
         return {"analyzer": "hadolint", "status": "unavailable", "required": "always", "reason": "hadolint executable not found", "findings": []}
     findings: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
-    broader = 0
     with tempfile.TemporaryDirectory(prefix="changed-code-hadolint-") as config_dir:
         config = Path(config_dir) / "hadolint.yaml"
         config.write_text(HADOLINT_CONFIG, encoding="utf-8")
@@ -524,22 +481,19 @@ def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
                     return failed(f"hadolint reported an unexpected path for {relative}")
                 if finding["code"] == "DL1000":
                     return failed(f"hadolint could not parse {relative}")
-                end_line = instruction_end(lines, line)
                 item = {
                     "analyzer": "hadolint", "ruleId": finding["code"], "level": level,
-                    "path": relative, "startLine": line, "endLine": end_line,
+                    "path": relative, "startLine": line, "endLine": line,
                     "messageHash": hashlib.sha256(str(finding.get("message", "")).encode()).hexdigest()[:16],
                 }
-                if not overlaps(scope.lines[relative], line, end_line):
-                    broader += 1
-                elif level in HADOLINT_BLOCKING_LEVELS:
+                if level in HADOLINT_BLOCKING_LEVELS:
                     findings.append(item)
                 else:
                     advisories.append(item)
-            covered[relative] = {"exitCode": result.returncode, "reported": len(payload)}
+            covered[relative] = {"exitCode": result.returncode, "reported": len(payload), "judged": "whole-file"}
     if set(covered) != set(scope.files):
         return failed("hadolint did not cover every scoped Dockerfile")
-    return {"analyzer": "hadolint", "status": "findings" if findings else "pass", "required": "always", "reason": "", "findings": findings, "advisories": advisories, "broaderRunOutOfScope": broader, "covered": covered}
+    return {"analyzer": "hadolint", "status": "findings" if findings else "pass", "required": "always", "reason": "", "findings": findings, "advisories": advisories, "broaderRunOutOfScope": 0, "covered": covered}
 
 
 def parse_args() -> argparse.Namespace:

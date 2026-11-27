@@ -484,24 +484,38 @@ class DockerfileGateTests(unittest.TestCase):
         self.assertEqual([("hadolint", "DL3002", "Dockerfile", 5, 5)], [
             (item["analyzer"], item["ruleId"], item["path"], item["startLine"], item["endLine"]) for item in self.hadolint_report(report)["findings"]
         ])
-        self.assertEqual({"Dockerfile": {"exitCode": 1, "reported": 1}}, self.hadolint_report(report)["covered"])
+        self.assertEqual({"Dockerfile": {"exitCode": 1, "reported": 1, "judged": "whole-file"}}, self.hadolint_report(report)["covered"])
 
-    def test_error_on_unchanged_line_does_not_block(self) -> None:
+    def test_warning_on_unchanged_line_of_changed_dockerfile_blocks(self) -> None:
+        # Whole-file rule: any error/warning in a Dockerfile with a changed line blocks.
         self.change_line(5, "USER nobody")
+        code, report = self.gate({"findings": [{"code": "DL3007", "level": "warning", "line": 1}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+        self.assertEqual(["DL3007"], [item["ruleId"] for item in self.hadolint_report(report)["findings"]])
+
+    def test_unchanged_dockerfile_is_not_analysed(self) -> None:
+        (self.root / "other.Dockerfile").write_text("FROM alpine:latest\n", encoding="utf-8")
+        run_git(self.root, "add", "other.Dockerfile")
+        run_git(self.root, "commit", "-qm", "second dockerfile")
         code, report = self.gate({"findings": [{"code": "DL3007", "level": "error", "line": 1}]})
+        self.assertEqual((0, "not_applicable"), (code, report["status"]))
+        self.assertFalse((self.bin / "argv.jsonl").exists())
+        self.change_line(5, "USER nobody")
+        code, report = self.gate({"findings": []})
         self.assertEqual((0, "pass"), (code, report["status"]))
-        self.assertEqual(1, self.hadolint_report(report)["broaderRunOutOfScope"])
+        self.assertEqual({"Dockerfile"}, set(self.hadolint_report(report)["covered"]))
+        argv = [json.loads(line) for line in (self.bin / "argv.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertEqual([["./Dockerfile"]], [args[-1:] for args in argv])
 
     def test_warning_on_changed_line_blocks(self) -> None:
         self.change_line(5, "USER nobody")
         code, report = self.gate({"findings": [{"code": "DL3006", "level": "warning", "line": 5}]})
         self.assertEqual((1, "fail"), (code, report["status"]))
 
-    def test_warning_on_instruction_spanning_changed_continuation_line_blocks(self) -> None:
+    def test_warning_on_instruction_start_blocks_when_continuation_line_changed(self) -> None:
         self.change_line(4, "    git=2.45.2-r0")
         code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 2}]})
         self.assertEqual((1, "fail"), (code, report["status"]))
-        self.assertEqual((2, 4), (self.hadolint_report(report)["findings"][0]["startLine"], self.hadolint_report(report)["findings"][0]["endLine"]))
 
     def test_info_and_style_on_changed_line_are_reported_without_blocking(self) -> None:
         self.change_line(5, "USER nobody")
@@ -562,29 +576,34 @@ class DockerfileGateTests(unittest.TestCase):
         run_git(self.root, "commit", "-qm", "new base")
 
     def test_lone_carriage_return_blocks_instead_of_shifting_lines(self) -> None:
-        # Git and hadolint count LF only; a lone CR must not add a line and cut a span short.
+        # Earlier bypass: a lone CR shifted line numbers. Git and hadolint count LF only.
         self.commit_dockerfile(b"FROM alpine:3.20\n# note\rmore\nRUN apk add \\\n    curl\n")
         (self.root / "Dockerfile").write_bytes(b"FROM alpine:3.20\n# note\rmore\nRUN apk add \\\n    git\n")
         code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 3}]})
         self.assertEqual((3, "blocked"), (code, report["status"]))
         self.assertEqual(gate.LONE_CR_REASON, report["skipped"]["Dockerfile"])
 
-    def test_indented_heredoc_word_does_not_end_heredoc(self) -> None:
-        self.commit_dockerfile(b"FROM alpine:3.20\nRUN <<EOF\napk add curl\n  EOF\napk add git\nEOF\nUSER app\n")
-        (self.root / "Dockerfile").write_bytes(b"FROM alpine:3.20\nRUN <<EOF\napk add curl\n  EOF\napk add git bash\nEOF\nUSER app\n")
-        code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 2}]})
-        self.assertEqual((1, "fail"), (code, report["status"]))
-        self.assertEqual(6, self.hadolint_report(report)["findings"][0]["endLine"])
-        self.assertEqual(3, gate.instruction_end(["RUN <<-EOF", "x", "\tEOF", "USER a"], 1))
-        self.assertEqual(4, gate.instruction_end(["RUN <<-EOF", "x", "  EOF", "USER a"], 1))
-
-    def test_escape_after_unknown_directive_is_not_a_directive(self) -> None:
-        base = b"# syntax=docker/dockerfile:1\n# foo=bar\n# escape=`\nFROM alpine:3.20\nRUN apk add \\\n    curl\n"
-        self.commit_dockerfile(base)
-        (self.root / "Dockerfile").write_bytes(base.replace(b"    curl", b"    git"))
-        code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 5}]})
-        self.assertEqual((1, "fail"), (code, report["status"]))
-        self.assertEqual(6, self.hadolint_report(report)["findings"][0]["endLine"])
+    def test_earlier_span_bypasses_now_block(self) -> None:
+        # Each case changes a line inside an instruction whose finding is reported
+        # on another line; a partial span once let these pass.
+        cases = {
+            "indented heredoc word": b"FROM alpine:3.20\nRUN <<EOF\napk add curl\n  EOF\n@@\nEOF\nUSER app\n",
+            "hyphenated heredoc name": b"FROM alpine:3.20\nRUN <<E-O-F\n@@\nE-O-F\nUSER app\n",
+            "digit-first heredoc name": b"FROM alpine:3.20\nRUN <<1EOF\n@@\n1EOF\nUSER app\n",
+            "quoted heredoc name with spaces": b'FROM alpine:3.20\nRUN <<"E O F"\n@@\nE O F\nUSER app\n',
+            "unknown directive before escape": b"# syntax=docker/dockerfile:1\n# foo=bar\n# escape=`\nFROM alpine:3.20\nRUN apk add \\\n@@\n",
+            "BOM before escape": b"\xef\xbb\xbf# escape=`\nFROM alpine:3.20\nRUN apk add `\n@@\n",
+        }
+        for name, template in cases.items():
+            with self.subTest(case=name):
+                self.commit_dockerfile(template.replace(b"@@", b"    apk add curl"))
+                (self.root / "Dockerfile").write_bytes(template.replace(b"@@", b"    apk add curl git"))
+                lines = template.split(b"\n")
+                changed = lines.index(b"@@") + 1
+                run = next(number for number, text in enumerate(lines, start=1) if text.startswith(b"RUN"))
+                code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": run}]})
+                self.assertEqual([[changed, changed]], report["lines"]["Dockerfile"])
+                self.assertEqual((1, "fail"), (code, report["status"]))
 
     @unittest.skipIf(os.name == "nt", "a backslash cannot be part of a Windows file name")
     def test_backslash_in_changed_path_blocks_every_file_type(self) -> None:

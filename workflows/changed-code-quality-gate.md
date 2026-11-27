@@ -33,11 +33,14 @@ push, PR readiness, or completion.
    not reduce the scoped or analyzer-reported file set.
    The reference adapters support Java, Python, JavaScript, TypeScript
    (including common module extensions), Bash, PowerShell, and Dockerfile
-   (hadolint). Java uses the
-   trusted Semgrep policy; shell scripts additionally require their platform
-   syntax parser and changed-line policy checks. Other recognized languages,
-   unrecognized file types, oversized source, and source-like symlinks exit
-   blocked until project-native results are normalized to the same scope.
+   (hadolint). Java uses the trusted Semgrep policy; shell scripts additionally
+   require their platform syntax parser and changed-line policy checks. A
+   changed Dockerfile is judged whole-file: any hadolint error/warning in it
+   blocks, because hadolint reports one line per instruction and a partial span
+   is easy to fool. Other recognized languages, unrecognized file types,
+   oversized source, and source-like symlinks exit blocked until project-native
+   results are normalized to the same scope. On POSIX, a changed path with a
+   backslash blocks, even for non-code files.
 5. Stop on exit 1-4. Do not convert unavailable, malformed, timed-out, broader
    unfiltered, or stale analyzer evidence into a pass.
 6. Continue with unit, integration, build, dependency, documentation, and

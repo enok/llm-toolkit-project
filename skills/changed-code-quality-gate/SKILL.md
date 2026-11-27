@@ -25,8 +25,11 @@ commit, push, PR readiness, or completion.
    for Java, Python, JavaScript, and TypeScript, plus trusted syntax and policy
    checks for Bash and PowerShell, and hadolint (trusted config, ignore pragmas
    disabled) for Dockerfiles. Findings are filtered to changed files and
-   added/modified lines; hadolint `info`/`style` findings are reported only. The Semgrep path disables candidate-controlled ignore
-   and inline suppression mechanisms and verifies every scoped file was scanned.
+   added/modified lines, except that a changed Dockerfile is judged whole-file
+   (hadolint reports per instruction; a partial span is easy to fool), and
+   hadolint `info`/`style` findings are reported only. The Semgrep path
+   disables candidate-controlled ignore and inline suppression mechanisms and
+   verifies every scoped file was scanned.
 3. The shipped Semgrep adapter covers Java, Python, JavaScript, and TypeScript,
    including common module extensions. The script adapter covers `.sh` and
    `.ps1` and fails closed when the corresponding syntax parser is unavailable.
