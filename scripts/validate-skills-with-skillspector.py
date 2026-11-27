@@ -162,7 +162,12 @@ def explicit_skill_dirs(repo_root: Path, skills_root: Path, names: list[str]) ->
     return sorted(set(dirs))
 
 
-def scanner_command(skill_dir: Path, report_path: Path, with_llm: bool) -> list[str]:
+UNSUPPORTED_OUTPUT_MARKER = "Safe file output is unsupported"
+
+
+def scanner_command(
+    skill_dir: Path, report_path: Path, with_llm: bool, use_output_flag: bool = True
+) -> list[str]:
     command = [
         sys.executable,
         "-c",
@@ -171,12 +176,77 @@ def scanner_command(skill_dir: Path, report_path: Path, with_llm: bool) -> list[
         str(skill_dir),
         "--format",
         "json",
-        "--output",
-        str(report_path),
     ]
+    if use_output_flag:
+        command += ["--output", str(report_path)]
     if not with_llm:
         command.append("--no-llm")
     return command
+
+
+def extract_json_document(text: str) -> str | None:
+    """Return the JSON object embedded in text (first "{" to last "}"), or None."""
+    start = text.find("{")
+    end = text.rfind("}")
+    if start < 0 or end < start:
+        return None
+    candidate = text[start : end + 1]
+    try:
+        json.loads(candidate)
+    except ValueError:
+        return None
+    return candidate
+
+
+class ScanState:
+    """Remembers across skills whether `--output` must be avoided."""
+
+    def __init__(self) -> None:
+        self.stdout_mode = False
+
+
+def run_scan(
+    skill_dir: Path,
+    report_path: Path,
+    with_llm: bool,
+    runner,
+    state: ScanState,
+) -> tuple[int, str, str | None]:
+    """Scan one skill. Returns (returncode, output, error).
+
+    runner(command, capture_separately) -> (returncode, stdout, stderr); when
+    capture_separately is False, stderr is merged into stdout. error is a
+    one-line failure reason, or None when a report file is ready (or the
+    scanner exited non-zero with a report, left for the caller to parse).
+    """
+    if not state.stdout_mode:
+        code, out, _ = runner(scanner_command(skill_dir, report_path, with_llm), False)
+        if code == 0 or report_path.is_file() or UNSUPPORTED_OUTPUT_MARKER not in out:
+            return code, out, None
+        state.stdout_mode = True
+
+    code, out, err = runner(
+        scanner_command(skill_dir, report_path, with_llm, use_output_flag=False), True
+    )
+    document = extract_json_document(out)
+    if document is None:
+        detail = f"exit {code}" if code else "exit 0"
+        return code or 1, (err or out), (
+            f"scanner stdout fallback produced no valid JSON ({detail})"
+        )
+    report_path.write_text(document, encoding="utf-8")
+    return 0, out, None
+
+
+def subprocess_runner(command: list[str], capture_separately: bool) -> tuple[int, str, str]:
+    result = subprocess.run(
+        command,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE if capture_separately else subprocess.STDOUT,
+        timeout=180,
+    )
+    return result.returncode, result.stdout or "", result.stderr or ""
 
 
 def load_allowlist(path: Path) -> list[dict[str, object]]:
@@ -319,6 +389,7 @@ def main() -> int:
     total_failures = 0
     total_allowlisted = 0
     failed_scans: list[str] = []
+    scan_state = ScanState()
 
     print(
         "SkillSpector validation: "
@@ -330,19 +401,19 @@ def main() -> int:
     try:
         for skill in skills:
             report_path = report_dir / f"{skill.name}.json"
-            result = subprocess.run(
-                scanner_command(skill, report_path, args.with_llm),
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                timeout=180,
+            returncode, output, error = run_scan(
+                skill, report_path, args.with_llm, subprocess_runner, scan_state
             )
-            if result.returncode != 0:
+            if error:
+                failed_scans.append(f"{skill.name}: {error}")
+                print(output.rstrip())
+                continue
+            if returncode != 0:
                 if not report_path.is_file():
-                    failed_scans.append(f"{skill.name}: scanner exited {result.returncode}")
-                    print(result.stdout.rstrip())
+                    failed_scans.append(f"{skill.name}: scanner exited {returncode}")
+                    print(output.rstrip())
                     continue
-                print(f"NOTE: {skill.name} scanner exited {result.returncode}; parsing report")
+                print(f"NOTE: {skill.name} scanner exited {returncode}; parsing report")
 
             issue_count, fail_count, allowlisted_count, warnings = report_findings(
                 skill.name, report_path, fail_severities, allowlist
