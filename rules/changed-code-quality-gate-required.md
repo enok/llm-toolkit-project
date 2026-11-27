@@ -24,8 +24,9 @@ The gate is blocking before commit, push, PR readiness, or completion.
   unusable, times out, emits malformed output or analysis errors, or cannot
   cover applicable code. Optional unavailable analyzers are `SKIP`/`WARN`,
   never `PASS`.
-- The reference adapters cover Java, Python, JavaScript, TypeScript, Bash, and
-  PowerShell. Java is analyzed by the same trusted Semgrep invocation and
+- The reference adapters cover Java, Python, JavaScript, TypeScript, Bash,
+  PowerShell, and Dockerfile (hadolint, whole-file: per-instruction lines are
+  easy to fool). Java is analyzed by the same trusted Semgrep invocation and
   changed-line mapping as the other Semgrep languages. Bash and PowerShell use
   trusted syntax parsers plus changed-line policy checks. Changed code in
   another recognized language, an unrecognized file type, an oversized

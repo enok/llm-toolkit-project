@@ -77,6 +77,19 @@ jobs:
         run: >-
           python -m pip install --require-hashes
           -r .quality-gate-runner/.github/requirements/semgrep.lock
+      - name: Install pinned Dockerfile analyzer
+        env:
+          HADOLINT_VERSION: v2.15.1
+          HADOLINT_SHA256: c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507
+        run: |
+          set -euo pipefail
+          hadolint_dir="$(mktemp -d "$RUNNER_TEMP/hadolint.XXXXXX")"
+          curl -fsSL -o "$hadolint_dir/hadolint" \
+            "https://github.com/hadolint/hadolint/releases/download/${HADOLINT_VERSION}/hadolint-linux-x86_64"
+          printf '%s  %s\n' "$HADOLINT_SHA256" "$hadolint_dir/hadolint" |
+            sha256sum -c -
+          chmod +x "$hadolint_dir/hadolint"
+          printf '%s\n' "$hadolint_dir" >> "$GITHUB_PATH"
       - name: Analyze pull-request changes with trusted policy
         if: github.event_name == 'pull_request_target'
         env:

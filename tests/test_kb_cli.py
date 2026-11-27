@@ -1014,9 +1014,17 @@ class SchedulerPathTests(KBTestCase):  # D1
     def test_build_path_adds_existing_dirs_and_dedupes(self):
         home_docker = os.path.expanduser("~/.docker/bin")
         present = {home_docker, "/usr/local/bin", "/usr/bin", "/bin"}
-        got = kb.build_path("/usr/bin:/usr/local/bin:/bin", exists=lambda p: p in present)
+        # Isolate from the host: some CI runners make /usr/local/bin world-writable.
+        with mock.patch.object(kb, "world_writable", return_value=False):
+            got = kb.build_path("/usr/bin:/usr/local/bin:/bin", exists=lambda p: p in present)
         self.assertEqual(got.split(os.pathsep), ["/usr/bin", "/usr/local/bin", "/bin", home_docker])
         self.assertNotIn("/opt/homebrew/bin", got)
+
+    def test_build_path_drops_world_writable_dirs(self):
+        present = {"/usr/bin", "/shared/bin"}
+        with mock.patch.object(kb, "world_writable", side_effect=lambda p: p == "/shared/bin"):
+            got = kb.build_path("/usr/bin:/shared/bin", exists=lambda p: p in present)
+        self.assertEqual(got.split(os.pathsep), ["/usr/bin"])
 
     def test_plist_has_environment_path_and_out_log(self):
         env = {"PATH": "/usr/bin:/opt/homebrew/bin"}
