@@ -314,7 +314,7 @@ class SecretTests(ScanCase):
         root = self.plugin()
         write(root, "skills/a/SKILL.md", "---\nname: a\ndescription: d\n---\n"
               'password = "replace-with-a-32-byte-random-value"\n'
-              '"access_token": "eyJhbGciOiJIUzI1NiIs..."\n')
+              '"access_token": "eyJhbGciOiJIUzI1NiIs..."\n')  # gitleaks:allow
         write(root, "scripts/config.py", f'API_KEY = "{REAL_VALUE}"\n')
         write(root, "tests/test_auth.py", f'TOKEN = "{REAL_VALUE}"\n')
         result = self.scan(root)
