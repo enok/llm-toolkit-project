@@ -3,6 +3,8 @@
 PyMuPDF==1.26.3
 python-docx==1.2.0
 python-pptx==1.0.2
+# Pillow comes in through python-pptx; pinned so the dependency scan sees a patched release.
+Pillow==13.0.0
 pandas==2.3.1
 openpyxl==3.1.5
 tabulate==0.9.0
