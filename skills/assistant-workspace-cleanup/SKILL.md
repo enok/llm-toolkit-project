@@ -51,7 +51,8 @@ and the cost of a wrong guess falls on the owner, not on the agent.
 1. **Approval is per group and per list.** Archive, delete, pause, create, and
    reconfigure only after the owner approved that group; a lane touches only
    IDs on its approved allow-list. This keeps a safe approval from covering a
-   destructive step.
+   destructive step. If the owner edits a list, revalidate the edited rows. Run ledger
+   compaction with `--dry-run` first and show what would move.
 2. **Plan, then question.** Show the full plan in its own plain message, then
    ask the multi-select question in a separate turn, because text placed
    before a question widget may not be visible to the owner.

@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: duplicate-and-unread
-expected_outcome: |
-  Marks the repost as duplicate/superseded rather than apply, reports the unreadable posting as 'not read' with the reason instead of guessing its contents.
