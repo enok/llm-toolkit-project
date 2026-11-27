@@ -93,3 +93,5 @@ Observed once: git over SSH run from a process started by a desktop automation t
 ```bash
 export SSH_AUTH_SOCK=$(launchctl getenv SSH_AUTH_SOCK)
 ```
+
+Use it only in a session where the owner asked for git over SSH from that process. It grants no push authorization: never use it in a scheduled or unattended run, and never to get past a failed push probe (`workflows/knowledge-base-sync.md` says to report NOT POSTED and never look for other credentials).
