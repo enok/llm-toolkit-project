@@ -15,7 +15,7 @@ Pick the lightest local tool that keeps the structure the reader needs, run it i
 
 | Goal | First choice | Detail |
 | --- | --- | --- |
-| Any of PDF, DOCX, PPTX, XLSX to Markdown | `scripts/convert_to_markdown.py <file> [out.md]` (MarkItDown or PyMuPDF/python-docx/python-pptx/pandas under it) | [conversion-recipes.md](references/conversion-recipes.md): read it when the script is not enough or you need Pandoc, tables, or a single format |
+| Any of PDF, DOCX, PPTX, XLSX to Markdown | `scripts/convert_to_markdown.py <file> [out.md]` (PyMuPDF, python-docx, python-pptx or pandas; pinned in `scripts/requirements.txt`, installed by `scripts/setup_document_conversion.sh`; exits 1 when a library is missing) | [conversion-recipes.md](references/conversion-recipes.md): read it when the script is not enough or you need Pandoc, tables, or a single format |
 | Markdown to DOCX, PDF, HTML | Pandoc | [conversion-recipes.md](references/conversion-recipes.md) |
 | Create a PDF, DOCX, PPTX, XLSX or Markdown file from code | ReportLab or WeasyPrint, python-docx, python-pptx, openpyxl | [creation-recipes.md](references/creation-recipes.md): read it before writing generation code; it has a table of contents |
 | Scanned PDF (no text layer) | MinerU with OCR | [conversion-recipes.md](references/conversion-recipes.md) |

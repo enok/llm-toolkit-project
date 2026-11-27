@@ -46,7 +46,7 @@ def convert_pdf(input_path, output_path):
         print(f"Converted: {input_path} -> {output_path}")
         return True
     except ImportError:
-        print("PyMuPDF not installed. Run: pip install PyMuPDF")
+        print("PyMuPDF not installed. Run scripts/setup_document_conversion.sh", file=sys.stderr)
         return False
 
 def convert_docx(input_path, output_path):
@@ -66,7 +66,7 @@ def convert_docx(input_path, output_path):
         print(f"Converted: {input_path} -> {output_path}")
         return True
     except ImportError:
-        print("python-docx not installed. Run: pip install python-docx")
+        print("python-docx not installed. Run scripts/setup_document_conversion.sh", file=sys.stderr)
         return False
 
 def convert_pptx(input_path, output_path):
@@ -86,7 +86,7 @@ def convert_pptx(input_path, output_path):
         print(f"Converted: {input_path} -> {output_path}")
         return True
     except ImportError:
-        print("python-pptx not installed. Run: pip install python-pptx")
+        print("python-pptx not installed. Run scripts/setup_document_conversion.sh", file=sys.stderr)
         return False
 
 def convert_xlsx(input_path, output_path):
@@ -103,7 +103,7 @@ def convert_xlsx(input_path, output_path):
         print(f"Converted: {input_path} -> {output_path}")
         return True
     except ImportError:
-        print("pandas not installed. Run: pip install pandas openpyxl tabulate")
+        print("pandas not installed. Run scripts/setup_document_conversion.sh", file=sys.stderr)
         return False
 
 if __name__ == "__main__":
@@ -114,4 +114,4 @@ if __name__ == "__main__":
     input_file = sys.argv[1]
     output_file = sys.argv[2] if len(sys.argv) > 2 else None
     
-    convert_file(input_file, output_file)
+    sys.exit(0 if convert_file(input_file, output_file) else 1)

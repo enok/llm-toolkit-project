@@ -222,7 +222,7 @@ const re = /(on-?site|hybrid|relocat|visa|citizen|residen|contract(or)?|salary|U
 const hits = {};
 for (const m of text.matchAll(re)) {
   const h = (hits[m[0].toLowerCase()] ||= {n: 0, ctx: []});
-  if (h.n++ < 2) h.ctx.push(text.slice(Math.max(0, m.index - 50), m.index + 50).replace(/[\s?&=]+/g, ' '));
+  if (h.n++ < 2) h.ctx.push(text.slice(Math.max(0, m.index - 50), m.index + 50).replace(/\s+/g, ' '));
 }
 JSON.stringify(hits).slice(0, 900)
 ```

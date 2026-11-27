@@ -1,30 +1,21 @@
-#!/bin/bash
-# Setup script for document conversion tools
+#!/usr/bin/env bash
+# Create an isolated environment for scripts/convert_to_markdown.py and install the pinned
+# libraries from requirements.txt. Works in bash on Linux, macOS and Git Bash on Windows.
+set -euo pipefail
 
-set -e
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+venv="${DOCS_VENV:-.venv-docs}"
 
-echo "Setting up document conversion tools..."
+python_bin="$(command -v python3 || command -v python || true)"
+[[ -n "$python_bin" ]] || { echo "python3 not found" >&2; exit 1; }
 
-# Create virtual environment (recommended)
-if [ ! -d ".venv-docs" ]; then
-    python3 -m venv .venv-docs
+[[ -d "$venv" ]] || "$python_bin" -m venv "$venv"
+if [[ -x "$venv/bin/python" ]]; then
+  venv_python="$venv/bin/python"          # Linux, macOS
+else
+  venv_python="$venv/Scripts/python.exe"  # Windows (Git Bash)
 fi
 
-source .venv-docs/bin/activate
+"$venv_python" -m pip install --require-virtualenv -r "$here/requirements.txt"
 
-# Install secure, vetted packages
-echo "Installing packages..."
-pip install --upgrade pip
-
-# Core conversion libraries
-pip install PyMuPDF        # PDF handling
-pip install python-docx    # Word documents
-pip install python-pptx    # PowerPoint
-pip install pandas         # Excel/data
-pip install openpyxl       # Excel engine
-pip install tabulate       # Markdown tables
-pip install markitdown     # Microsoft tool (optional)
-
-echo "Setup complete!"
-echo "Activate environment: source .venv-docs/bin/activate"
-echo "Usage: python scripts/convert_to_markdown.py <file>"
+echo "Done. Run: $venv_python $here/convert_to_markdown.py <file> [out.md]"

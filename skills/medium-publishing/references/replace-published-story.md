@@ -37,7 +37,7 @@ can only be written after the publish steps; do not put placeholders in anything
 
 1. Read the profile; build the new article and post to its budgets
    ([system-design-article.md](system-design-article.md)); run `check_publication.py` on both and the
-   `publication-reviewer` agent; show the drafts with the stage map.
+   profile check (`rules/publication-positioning.md` rule 6); show the drafts with the stage map.
 2. Repo prerequisites go through pull requests on the protected default branch (for example the
    hero system-design diagram). Image URLs in the article are pinned to the merged commit SHA.
 3. Draft the three follow-up texts now so they can be approved together, with their URL fields
