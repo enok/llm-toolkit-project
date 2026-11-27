@@ -21,7 +21,7 @@ Pick the lightest local tool that keeps the structure the reader needs, run it i
 | Scanned PDF (no text layer) | MinerU with OCR | [conversion-recipes.md](references/conversion-recipes.md) |
 | Real check boxes on an exported PDF, table checklists, file-locked PDFs, recalculation pitfalls | Overlay on the exported file | [pdf-checkbox-overlay.md](references/pdf-checkbox-overlay.md): read it before editing a PDF a user exported from a document editor |
 
-Set up the tools once with `bash scripts/setup_document_conversion.sh`; it creates `.venv-docs` and installs the packages used above. Use `python3` where `python` is missing or is a stub (some Windows machines).
+Set up the tools once with `bash scripts/setup_document_conversion.sh`; it needs Python 3.11 or newer, creates `.venv-docs` and installs the packages used above. Use `python3` where `python` is missing or is a stub (some Windows machines).
 
 ## Workflow
 
