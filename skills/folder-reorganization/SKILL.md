@@ -15,7 +15,7 @@ names in their prompts or attachments, scripts with relative paths, spreadsheets
 and documents that store paths, and cloud-sync links that depend on file and
 folder IDs.
 
-- Run procedure (phases, gates, lanes): `workflows/folder-reorganization.md`.
+- Run procedure: the contract, process, and phase gates below (`workflows/folder-reorganization.md` is only the entry point).
 - Approval proposal and resume ledger skeletons: `references/proposal-template.md`.
 - File formats, options, and a worked example for the scripts: `references/data-formats.md`.
 - Automation pause and resume details: `workflows/automation-maintenance.md`.
@@ -71,7 +71,22 @@ LIST automations (read-only), INSPECT (inventory, reference scan, parallel
 read-only lanes), PROPOSE (tree, path map, edits, the pause with its recovery
 record, new automation prompts, independent validation against the scan), STOP
 for approval, EXECUTE (pause automations, preflight, snapshot, run, edits),
-VERIFY (including the live consumers), RESUME automations, REPORT. Details and gates: `workflows/folder-reorganization.md`.
+VERIFY (including the live consumers), RESUME automations, REPORT.
+
+## Phase gates
+
+- **Propose:** a read-only lane that did not write the proposal re-derives the
+  consumer list from the reference scan, confirms each hit is edited,
+  whitelisted with a reason, or listed as an owner action, and rechecks the
+  counts before approval.
+- **Verify:** run the live consumers against scratch outputs (each script,
+  query, or prompt command that used the old paths, output redirected to a
+  temporary location); a grep alone does not prove a path resolves. Confirm
+  cloud folder and file IDs are unchanged when the cloud API is reachable.
+- **Rollback after resume:** if automations were already resumed, pause them
+  again and revert their prompts to the old paths before rolling back.
+- **Resume:** update each paused automation's prompt through the scheduling API
+  and re-read it; re-enable it only when every path it uses resolves.
 
 ## Scripts
 
@@ -167,8 +182,8 @@ and read only their output files (see the pitfalls below).
   a catch-up (overlap observed, cause inferred from timing). Check the run history before firing, fire at most once, and audit
   shared files afterwards. See `learnings/scheduled-run-resumes-after-usage-limit.md`.
 - When moving a folder that tools or agents reference, search references read-only first, back up the tool's config file next to the moved data, and update only live pointers, including symlinks for agent and skill directories. Leave dated backups and web URLs as they are, and report stored memory paths that belong to another machine instead of editing them. See `learnings/relocate-repo-update-claude-config-paths.md`.
-- When the user suspects files were deleted, list the folder from the device first, compare with the last saved listing or ledger and hash the files, then report facts only (nothing deleted, N files renamed at time T, content byte-identical, actor unknown) without speculating. Flag when a new name now collides with a different file that must not be sent and say which copy to attach. See `learnings/folder-reported-deleted-check-listing-and-hashes-before-restoring.md`.
-- Keep separate spreadsheet ledgers separate and link by cell reference; write a new version and keep the old as a backup. For a bulk rename, derive the new period from the data (month to quarter), apply it to the whole set, and list the gaps found (missing documents). See `learnings/spreadsheet-backup-version-and-bulk-rename-gap-report.md`.
+- When the user suspects files were deleted, list the folder from the device first, compare with the last saved listing or ledger and hash the files, then report facts only (nothing deleted, N files renamed at time T, content byte-identical, actor unknown) without speculating. Flag when a new name now collides with a different file that must not be sent and say which copy to attach.
+- Keep separate spreadsheet ledgers separate and link by cell reference; write a new version and keep the old as a backup. For a bulk rename, derive the new period from the data (month to quarter), apply it to the whole set, and list the gaps found (missing documents).
 - `rollback` restores edited files from their backups, so it overwrites any
   change made to those files after the edit. Check them first. If automations
   were already resumed, pause them again and revert their prompts before rolling

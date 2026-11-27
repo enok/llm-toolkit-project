@@ -124,8 +124,7 @@ later, run `schedule remove`, `hook remove` and `down` (see
 `docs/knowledge-base.md`).
 
 If a CLI session does not see the app-level global instructions, copy the
-directive into the user-level instruction file
-(`learnings/global-instructions-not-visible-to-cli-session-copy-to-user-level-file.md`).
+directive into the user-level instruction file.
 
 ## Refreshing after `git pull`
 

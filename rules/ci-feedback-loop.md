@@ -20,11 +20,11 @@ When validating a PR pipeline execution and encountering a failure:
 3. **Identify the prevention rule** — ask: *"What rule or checklist item, if it existed during the code review phase, would have caught this error before the PR was opened?"*
 
 4. **Update the appropriate rule or workflow file:**
-   - SQL/migration errors → update the review workflow or create a dedicated rule.
-   - Lint/style errors → update the review workflow's code standards checklist.
-   - Missing permissions → update security rules or review workflow.
-   - Test failures → update testing rules or review workflow.
-   - Build/compile errors → update code rules or backend/frontend rules.
+   - SQL/migration errors → update the review categories in `skills/ticket-review/SKILL.md` or create a dedicated rule.
+   - Lint/style errors → update `workflows/pre-pr-check.md` (its lint and format steps).
+   - Missing permissions → update `rules/security-check-required.md` or the ticket-review categories.
+   - Test failures → update testing rules or `workflows/pre-pr-check.md`.
+   - Build/compile errors → update `rules/git-conventions.md` (pre-push build) or backend/frontend rules.
    - New category → create a new rule file if no existing file covers the error class.
 
 5. **Propagate the change** — if the rule applies to multiple repositories, update the rule in ALL relevant repos.

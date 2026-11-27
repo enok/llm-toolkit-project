@@ -11,8 +11,7 @@ automation needs an evidence-backed approve-ready, blocked, or monitor call.
 
 1. Establish repo, PR, ticket key, base/head, live head SHA, local checkout
    freshness, dirty-tree ownership, and allowed actions.
-2. Load only relevant context: `workflows/ticket-pr-validation-loop.md`,
-   `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`,
+2. Load only relevant context: `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`,
    `rules/human-comment-reply-gate.md`, CI/test logs, PR body, ticket data, and
    linked docs.
 3. Stop before edits, pushes, comments, or approvals if freshness, permissions,

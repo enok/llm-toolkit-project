@@ -90,8 +90,7 @@ aws logs get-query-results \
 
 On Windows Git Bash, run these with `MSYS_NO_PATHCONV=1` (or `export` it for
 the session) when `$log_group` starts with `/`; otherwise the name is rewritten
-into a Windows path before the CLI sees it. See
-`learnings/git-bash-path-conversion-breaks-aws-cli-args.md`.
+into a Windows path before the CLI sees it.
 
 ## Query patterns
 

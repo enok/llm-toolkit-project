@@ -11,7 +11,7 @@ Use these when creating architecture or flow diagrams for the destination projec
 
 - Use **Mermaid** (flowchart, sequenceDiagram, etc.) in markdown code blocks so they render in GitHub and common editors when the destination repo is Markdown-first. For C4 component and AWS architecture diagrams, prefer the destination repo's existing PlantUML standard when one exists.
 - Prefer committed paths under `docs/`: e.g. `docs/architecture.md` for system/component overview, `docs/flows/<name>.md` for specific flows (request-flow, deployment, data-flow).
-- When exporting diagrams to images, follow `skills/diagram-authoring/references/diagram-export-quality.md` and `skills/image-quality-inspection/references/image-quality-gate.md`: prefer SVG/PDF, verify dimensions for required PNG/JPG output, inspect every generated/exported image after export, and fix/re-render until acceptable. This post-export quality-control step is mandatory.
+- When exporting diagrams to images, follow `skills/diagram-authoring/references/diagram-export-quality.md` and the image quality check: prefer SVG/PDF, verify dimensions for required PNG/JPG output, inspect every generated/exported image after export, and fix/re-render until acceptable. This post-export quality-control step is mandatory.
 - For AWS architecture diagrams, follow `skills/diagram-authoring/references/aws-architecture-quality-control.md`: keep the view topology-first, avoid numbered runtime arrows, and move ordered behavior to sequence diagrams.
 
 ## Mermaid syntax rules

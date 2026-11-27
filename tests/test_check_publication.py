@@ -15,7 +15,7 @@ from typing import Dict, List, Optional
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "medium-publishing" / "scripts" / "check_publication.py"
+SCRIPT = ROOT / "scripts" / "check_publication.py"
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "check-publication"
 PROFILE = FIXTURES / "profile-example.md.txt"
 BAD_PROFILE = FIXTURES / "profile-malformed.md.txt"

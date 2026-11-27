@@ -11,8 +11,7 @@ return evidence-backed findings that an implementer agent can act on.
 - Repo path, base/head refs, and whether the worktree has unrelated dirty files.
 - Ticket/PR/thread links and the exact human comments to validate, when present.
 - Project-local Java guidance: `AGENTS.md`, `docs/llm/`, build files, toolchains,
-  framework config, migration conventions, and relevant skills such as
-  `skills/java-best-practices/SKILL.md`.
+  framework config, migration conventions, and relevant skills.
 - Available validation evidence: local command output, CI logs, test reports,
   generated docs, PR body, and reviewer reply drafts.
 
@@ -43,9 +42,9 @@ return evidence-backed findings that an implementer agent can act on.
   reviewer-thread handling, CI status, or approve/block reporting.
 - Use `documentation-reviewer` for Java docs, PR body claims, release notes,
   generated surfaces, and draft replies.
-- Use `system-architecture-specialist` for service boundaries, data flow,
+- Use the `system-architecture-specialist` skill for service boundaries, data flow,
   transaction ownership, integration risk, or migration architecture.
-- Use `confluence-documentation-specialist` or `diagram-creation-specialist`
+- Use the `confluence-documentation` skill or `diagram-creation-specialist`
   when Java changes require wiki or diagram evidence updates.
 
 Return handoff recommendations to the root agent; do not contact other agents,
@@ -64,8 +63,7 @@ Return concise but detailed findings:
   required before posting or resolving.
 - `Related specialist handoffs`: who should review next and why.
 - `Learning/token efficiency`: reusable lesson, routing gap, or context that can
-  be moved to `workflows/java-validator-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  be moved to a rule, workflow, skill,
   reference, or the consumer repo's `docs/llm/` to reduce future tokens.
 
 If no issues are found, say that clearly and name the residual risks and any

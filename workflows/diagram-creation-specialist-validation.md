@@ -14,10 +14,9 @@ PDF, slide, or PR diagrams need specialist creation guidance or validation.
    versioned.
 2. Load only relevant context: `skills/diagram-authoring/SKILL.md`,
    `skills/diagram-authoring/references/deterministic-diagram-system.md`,
-   `workflows/document-creation.md`, `skills/image-quality-inspection/SKILL.md`,
    existing diagrams, source files, configs, tickets, PRs, wiki pages, and any
    checked-in diagram standard in the consumer repo's `docs/llm/`.
-3. Identify whether `system-architecture-specialist` should first validate
+3. Identify whether the `system-architecture-specialist` skill should first validate
    boundaries, ownership, or quality attributes.
 
 ## Phase 2 - Specialist Pass
@@ -49,7 +48,7 @@ Run the narrowest relevant checks:
 - export/re-export commands for tracked generated artifacts;
 - deterministic style review against
   `skills/diagram-authoring/references/deterministic-diagram-system.md`;
-- actual image/PDF/wiki/render inspection through `image-quality-inspection`;
+- actual image/PDF/wiki/render inspection: each image opened in its real render path and fixed and re-rendered until it is sharp, uncropped, legible at its destination size and current;
 - `npm run workflows:size:check`, index checks, and security scan when toolkit
   LLM surfaces changed.
 

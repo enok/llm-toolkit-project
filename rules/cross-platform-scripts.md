@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Scripts created or changed by agents must be portable across Windows, Linux, and macOS unless a platform-specific wrapper is intentional
+trigger: model_decision
+description: Load when creating or editing a script, wrapper, hook or CLI helper that must run on Windows, Linux and macOS, including PowerShell sources, line endings, SHA256 pins or Git Bash quirks.
 ---
 
 # Cross-platform scripts
@@ -27,7 +27,7 @@ Checksums used as contract pins (SHA256 of a shipped file, fixture, or template)
 
 ## Windows notes
 
-- Keep PowerShell sources ASCII-only, or save them as UTF-8 with a BOM: Windows PowerShell 5.1 reads a BOM-less file in the ANSI code page, where an em dash decodes to a typographic quote that ends the string literal (`learnings/powershell-5-1-bomless-utf8-dash-ends-string-literal.md`).
+- Keep PowerShell sources ASCII-only, or save them as UTF-8 with a BOM: Windows PowerShell 5.1 reads a BOM-less file in the ANSI code page, where an em dash decodes to a typographic quote that ends the string literal.
 - Use PowerShell-safe quoting for Maven, Git, AWS CLI, and path arguments. Windows PowerShell 5 strips embedded double quotes from arguments passed to native executables (for example `bash.exe`); pass them after `--%` or through a script file.
 - Git Bash can resolve `python` to the WindowsApps store stub; put the real interpreter directory first on `PATH`.
 - Avoid destructive filesystem operations composed across shells.
@@ -38,4 +38,4 @@ Checksums used as contract pins (SHA256 of a shipped file, fixture, or template)
 - Use `#!/usr/bin/env bash` only when Bash features are required.
 - Keep scripts executable when committed from POSIX environments.
 - Quote paths and variables because workspace paths may contain spaces.
-- Under zsh (the macOS default shell) quote glob patterns and do not rely on unquoted command variables splitting into words; put multi-step logic in a bash or python script. See `learnings/zsh-unquoted-glob-and-unsplit-variable-fail.md`.
+- Under zsh (the macOS default shell) quote glob patterns and do not rely on unquoted command variables splitting into words; put multi-step logic in a bash or python script.

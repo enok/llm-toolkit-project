@@ -19,4 +19,4 @@ Use when changing Jupyter notebooks, exploratory analysis, statistical tests, vi
 
 ## Known pitfalls
 
-- Before committing, apply the output hygiene in `skills/jupyter-notebook/SKILL.md` `## Known pitfalls`: strip heavy Plotly or rich outputs so the notebook stays under the push limit (learnings/notebook-embedded-plotly-output-size.md) and revert notebooks whose only diff is `ExecuteTime` metadata (learnings/notebook-timestamp-noise-in-diff.md).
+- Before committing, apply the output hygiene in `skills/jupyter-notebook/SKILL.md` `## Known pitfalls`: strip heavy Plotly or rich outputs so the notebook stays under the push limit and revert notebooks whose only diff is `ExecuteTime` metadata.

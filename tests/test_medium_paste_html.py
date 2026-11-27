@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "medium-publishing" / "scripts" / "medium_paste_html.py"
+SCRIPT = ROOT / "scripts" / "medium_paste_html.py"
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "medium-publishing"
 SPEC = importlib.util.spec_from_file_location("medium_paste_html", SCRIPT)
 assert SPEC and SPEC.loader

@@ -17,8 +17,7 @@ with unsupported comments, routes poorly, or wastes context.
    - workflow procedure: `workflows/pr-validator-validation.md`;
    - trigger/routing: `INTENTS.md`, `rules/request-orchestration.md`;
    - skill entrypoint: `skills/pr-validator/SKILL.md`;
-   - broader loop: `workflows/ticket-pr-validation-loop.md`,
-     `workflows/gh-address-comments.md`, `skills/ci-watcher/SKILL.md`, or the
+   - broader loop: `workflows/gh-address-comments.md`, or the
      consumer repo's `docs/llm/`.
 3. Make the smallest generic update and keep PR/ticket-specific facts out of
    shared assets.

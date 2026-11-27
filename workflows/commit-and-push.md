@@ -4,7 +4,7 @@ description: Semantic commit organization, validation, rebase, and safe push pro
 
 # Commit and Push
 
-Reusable commit/push procedure used by `ticket-review-and-fix`, `ticket-implementation`, and any workflow that ends with committing changes. Follow every step in order.
+Reusable commit/push procedure used by `ticket-implementation` and any workflow that ends with committing changes. Follow every step in order.
 
 ---
 
@@ -203,12 +203,12 @@ For each addressed PR comment (S2 fixes), reply with what changed and where.
 
 ## Known pitfalls
 
-- Probe push access with `git push --dry-run` and the pull-request tool's auth status at the start of the run, not with `git ls-remote`: a successful anonymous read of a public repository proves no write credential, and when none exists ask the owner to sign in before planning on a push. See `learnings/public-repo-read-does-not-prove-push-access.md`. (sig: wrong-assumption/anonymous-read-taken-as-push-credentials)
+- Probe push access with `git push --dry-run` and the pull-request tool's auth status at the start of the run, not with `git ls-remote`: a successful anonymous read of a public repository proves no write credential, and when none exists ask the owner to sign in before planning on a push. (sig: wrong-assumption/anonymous-read-taken-as-push-credentials)
 - When committing on a device a change prepared in a sandbox with no connected folder, send a `git diff --cached -U0` patch via the remote file-write tool, run `git apply --unidiff-zero --check`, then `git apply --unidiff-zero --index`, and compare per-file SHA-256 prefixes with the sandbox values. See `learnings/sandbox-to-device-zero-context-patch-with-checksums.md`.
-- If a personal skills folder is one directory link into the checkout, run `git status --short -- skills` (untested) before syncing or committing; avoid stage-everything commands (reasoned). See `learnings/foreign-files-written-into-toolkit-skills-dir-via-user-level-link.md`. (sig: env-constraint/foreign-files-written-through-user-level-skills-link)
+- If a personal skills folder is one directory link into the checkout, run `git status --short -- skills` (untested) before syncing or committing; avoid stage-everything commands (reasoned). (sig: env-constraint/foreign-files-written-through-user-level-skills-link)
 
 ---
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

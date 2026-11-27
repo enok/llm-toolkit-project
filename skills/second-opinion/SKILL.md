@@ -126,6 +126,6 @@ The "where we agree" and "where we diverge" sections are the real value. Agreeme
 
 ## Related Skills
 
-- **ticket-review** (or **review**) — in-agent AI diff review
+- **ticket-review** — in-agent AI diff review
 - **pre-pr-check** — full pre-PR validation
 - **pathfinder** — decompose plans into slices before review

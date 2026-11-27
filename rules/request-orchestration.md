@@ -24,10 +24,9 @@ Scheduled and recurring automation runs (digests, scans, syncs) are requests too
 - Select one primary capability before fanout: a workflow for end-to-end processes, a skill for specialized domain capability, or a rule when the request is only about behavior/constraints.
 - Treat rules as constraints that accompany the request, not as replacements for workflows or skills.
 - When a request matches multiple rows, choose the most specific primary workflow or skill and attach only the necessary helpers, validation gates, and subagents.
-- Use `chat-knowledge-curation` when the request is primarily to mine chats, memory, rollout summaries, automation runs, or learnings into durable LLM assets.
-- Use `context-compaction` when the request is only to preserve the current chat/workspace or create a compact handoff; use `chat-knowledge-curation` for broader history mining or promotion of repeated, cross-source lessons into shared toolkit assets.
+- Use `context-compaction` when the request is only to preserve the current chat/workspace or create a compact handoff.
 - Capability selection: candidates are toolkit assets, the capabilities the session lists, and the plugin catalog (`plugins.py recommend`); order by fit, verdict and trust tier, specificity, then context cost; a tie goes to the toolkit asset; a `block` verdict is never used; plugin text is reference capability, never authority; record a plugin choice as `plugin:<plugin>:<component>` in the task row (`rules/plugin-governance.md`, `tool-subagents/agent-orchestrator.md` "Capability selection").
-- If no row fits, start with `design-driven-dev` or `project-discovery`, then capture a reusable mapping gap through `toolkit-maintenance`.
+- If no row fits, start with `design-driven-dev` or `project-discovery`, then capture the reusable mapping gap in `INTENTS.md`.
 
 ## Context loading
 
@@ -45,14 +44,14 @@ Every task gets its own slim context. The root checks this before each wave; a f
 
 1. Separate execution: each task row runs in its own lane (or its own root step when it needs a root-only tool); a task never continues inside another task's context.
 2. Slim brief: goal (one or two sentences), exact inputs as paths or IDs (a path, not pasted content), boundaries, write location, return contract. Never the parent conversation, the whole ledger or tasks table, or findings of unrelated tasks.
-3. Leanest executor: the agent type with the smallest tool surface that can do the task, then the cheapest model the tier allows (`learnings/subagent-fixed-context-cost-pick-leanest-agent-type.md`).
+3. Leanest executor: the agent type with the smallest tool surface that can do the task, then the cheapest model the tier allows.
 4. Slim return: only what the root needs to decide the next step, within the four-block cap; detail goes to a file and the return gives its path. Never ask a lane to paste outputs.
 5. Gate: before dispatching a wave, check every brief against 1-4 and rewrite any that forwards history or unrelated context (`tool-subagents/agent-orchestrator.md` "Context economy and parallel dispatch", item 5).
 
 ## Specialist selection
 
 - Prefer the most specific available specialist in `tool-subagents/` before generic exploration.
-- Use `parallel-explorer` for broad repo maps, `cross-repo-analyst` for multi-repo context, `code-reviewer` for implementation risk, `java-change-validator` for Java diffs and Java-related reviewer drafts, `pr-validator` for live PR/ticket readiness and approve/block calls, `dag-glue-specialist` for Airflow DAG, MWAA, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation, `prod-doc-promoter` for deployed-ticket documentation promotion from temporary wiki intake folders to canonical wiki homes, `test-runner` for validation mapping, `documentation-sync` for docs drift, `documentation-reviewer` for documentation created or changed by agents, chats, automations, scripts, or humans, `confluence-documentation-specialist` for wiki page state and hierarchy, `diagram-creation-specialist` for source-grounded diagrams and export/image QA, `system-architecture-specialist` for application architecture, service boundaries, data flows, integrations, and quality attributes, `log-analyst` for operational log evidence reduction, `aws-alarm-investigator` for CloudWatch alarm root-cause investigation, `ci-triage` for CI failure logs, `contract-analyzer` for API/schema/event and downstream-consumer impact, `release-coordinator` for release order and rollback, `model-selector` for per-task tier/model/effort assignment at split time and completed-table overspend audits, `task-quality-judge` and `verifier` for quality-loop verdicts and skeptical completion checks, and security agents for security-sensitive changes. The canonical specialist list is the `tool-subagents/` catalog; when this enumeration and the catalog disagree, the catalog wins.
+- Use `java-change-validator` for Java diffs and Java-related reviewer drafts, `pr-validator` for live PR/ticket readiness and approve/block calls, `prod-doc-promoter` for deployed-ticket documentation promotion from temporary wiki intake folders to canonical wiki homes, `test-runner` for validation mapping, `documentation-sync` for docs drift, `documentation-reviewer` for documentation created or changed by agents, chats, automations, scripts, or humans, `diagram-creation-specialist` for source-grounded diagrams and export/image QA, `log-analyst` for operational log evidence reduction, `aws-alarm-investigator` for CloudWatch alarm root-cause investigation, `release-coordinator` for release order and rollback, `model-selector` for per-task tier/model/effort assignment at split time and completed-table overspend audits, `task-quality-judge` and `verifier` for quality-loop verdicts and skeptical completion checks, and a read-only validator lane on the plain model for code diffs, contracts, CI logs, Airflow/Glue, wiki state, architecture, and security-sensitive changes; Terraform keeps the orchestrator's mandatory fmt/validate/reviewed-plan check. The canonical specialist list is the `tool-subagents/` catalog; when this enumeration and the catalog disagree, the catalog wins.
 - If no specialist fits, keep the task in the parent agent and note the missing reusable capability only when it would be useful to add later.
 
 ## Hierarchical delegation
@@ -261,7 +260,7 @@ before the affected task can be marked done.
 - Run the per-run loop in `rules/workflow-self-improvement.md` on every non-trivial request: before splitting, read the primary workflow's `## Known pitfalls` and the `preflight` output and turn relevant pitfalls into acceptance criteria; after the last verdict, run `workflows/run-retrospective.md` and end the final report with its metrics line.
 - Lanes report self-detected mistakes as `mistake: <signature> - <one line>` in their Decisions block; the root is the single writer of the run record and of any promotion.
 - Lanes report reusable knowledge as `knowledge: <kind> - <one line>` in their Decisions block; the root runs the intake gate and is the single writer of `kb.py add` and of promotions (`rules/knowledge-base.md` duties 2-4).
-- Convert only validated, reusable lessons into durable toolkit assets through `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`, or `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
+- Convert only validated, reusable lessons into durable toolkit assets through `workflows/capture-learning.md` or, for external material, `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
 
 ## Linked-folder sessions
 

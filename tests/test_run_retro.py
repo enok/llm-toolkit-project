@@ -220,7 +220,7 @@ class RecordValidationTests(RetroCase):
         self.assertHasError(retro.validate_record(record), "mistakes[0].signature: must be at most 80")
 
     def test_run_id_format(self):
-        self.assertEqual(retro.validate_record(make_record(run_id="2026-10-07-study-repo-to-publication-1a2b3c")), [])
+        self.assertEqual(retro.validate_record(make_record(run_id="2026-10-07-study-publication-medium-linkedin-1a2b3c")), [])
         for value in ("Has-Upper", "has space", "", "-lead", 5, None, "a" * 129):
             with self.subTest(value=value):
                 self.check(lambda r, v=value: r.update(run_id=v), "run_id:")

@@ -77,7 +77,7 @@ Keep `breaching` (correct steady state) and neutralize the one-time deploy artif
 2. Seed one synthetic success datapoint (`aws cloudwatch put-metric-data`) as a post-apply step.
 3. At minimum, document in the stack README that exactly one false alarm + recovery pair is expected within the first day, so on-call does not chase it.
 
-General lesson: `breaching` missing-data handling and "metric is new" are inherently in conflict for the first evaluation window — every alarm on a newly created sparse custom metric needs a deliberate first-datapoint plan in the same change, not just correct steady-state settings. Investigation-side triage of this pattern lives in `tool-subagents/aws-alarm-investigator.md`.
+General lesson: `breaching` missing-data handling and "metric is new" are inherently in conflict for the first evaluation window — every alarm on a newly created sparse custom metric needs a deliberate first-datapoint plan in the same change, not just correct steady-state settings. Investigation-side triage of this pattern lives in `skills/aws-alarm-investigator/SKILL.md`.
 
 Alarm sensitivity choices (`treat_missing_data = "breaching"` on liveness metrics) must be justified with real traffic evidence documented in a comment above the resource — e.g. the metric's actual datapoint history over a representative window — plus a revisit condition. When a reviewer challenges the evidence, re-query it fresh; never cite the numbers from a prior review.
 
@@ -109,7 +109,7 @@ A dashboard metric that holds its last observed value through idle periods misre
 
 Separate the two metric kinds:
 
-- **Counts and rates** — fill missing with zero (`FILL(m1, 0)`). Do not stack a `TIME_SERIES(0)` scaffold on top: the `FILL(m,0)+TIME_SERIES(0)` hybrid caused rendering gaps instead of fixing them (see `learnings/no-data-and-zero-are-different-in-monitoring.md`; a contract test on dashboard bodies and a lint on the template that emits them should reject `TIME_SERIES(0)`, per `learnings/find-generator-not-just-instances.md`).
+- **Counts and rates** — fill missing with zero (`FILL(m1, 0)`). Do not stack a `TIME_SERIES(0)` scaffold on top: the `FILL(m,0)+TIME_SERIES(0)` hybrid caused rendering gaps instead of fixing them (see `learnings/no-data-and-zero-are-different-in-monitoring.md`; a contract test on dashboard bodies and a lint on the template that emits them should reject `TIME_SERIES(0)`).
 - **Latencies and other gauges** — mask by traffic instead of filling: publish the value only where the corresponding count is above zero, so idle periods render as genuine gaps. This needs an explicit reference from the gauge to its governing count metric, carried as a named field in the widget inventory.
 
 A window with no datapoints at all (a metric that has never been emitted, or a fully idle one) leaves `FILL` nothing to fill around and may still render an empty widget with no axis. Verify this case with the post-apply synthetic-stimulus check; if the widget is blank, give the metric a datapoint (see First-Datapoint Planning above) instead of re-adding `TIME_SERIES(0)`.
@@ -152,22 +152,21 @@ Shared modules compose canonical resource names internally (`coalesce(var.name, 
 
 The override is all-or-nothing by design: callers take the composed convention or supply the complete final name. Do not add prefix/suffix knobs — they multiply naming variants and defeat the convention.
 
-Renaming via the override plans as **1 add + 1 destroy** (name is the resource identity), so treat a rename like any replacement: confirm the plan shape is exactly the expected pair, and for `Put*`-style APIs that overwrite silently (PutDashboard, PutMetricAlarm, PutRule), verify the target name is unused in **every** account the root will ever apply to before the first apply — an existing same-name resource is clobbered without warning, including in environments applied later (see `learnings/putmetricalarm-putdashboard-silently-overwrite-same-name.md`).
+Renaming via the override plans as **1 add + 1 destroy** (name is the resource identity), so treat a rename like any replacement: confirm the plan shape is exactly the expected pair, and for `Put*`-style APIs that overwrite silently (PutDashboard, PutMetricAlarm, PutRule), verify the target name is unused in **every** account the root will ever apply to before the first apply — an existing same-name resource is clobbered without warning, including in environments applied later.
 
 ## Alias-Qualified Lambda Permissions
 
-`aws_lambda_permission` for an alias-fronted integration must use the **bare** `function_name` plus an explicit `qualifier`; baking `name:alias` into `function_name` plans as a perpetual replacement on every run (see `learnings/lambda-permission-alias-belongs-in-qualifier.md`).
+`aws_lambda_permission` for an alias-fronted integration must use the **bare** `function_name` plus an explicit `qualifier`; baking `name:alias` into `function_name` plans as a perpetual replacement on every run.
 
-The Lambda console's function-level **Triggers** tab reads only the *unqualified* function resource policy, so a correctly alias-scoped permission shows nothing there — the trigger is visible under **Aliases → \<alias\> → Configuration → Permissions**, and that is the correct place to verify it. Do **not** "fix" the empty Triggers tab by adding an unqualified twin permission: the row appears, but the console cross-checks it against the integration URI (which targets the alias) and permanently flags a resource/path mismatch warning on the trigger. The twin is an anti-pattern — revert it if found; document the alias-page verification path in the stack README instead (see `learnings/apigw-trigger-tab-cannot-represent-alias-scoped-permissions.md`).
+The Lambda console's function-level **Triggers** tab reads only the *unqualified* function resource policy, so a correctly alias-scoped permission shows nothing there — the trigger is visible under **Aliases → \<alias\> → Configuration → Permissions**, and that is the correct place to verify it. Do **not** "fix" the empty Triggers tab by adding an unqualified twin permission: the row appears, but the console cross-checks it against the integration URI (which targets the alias) and permanently flags a resource/path mismatch warning on the trigger. The twin is an anti-pattern — revert it if found; document the alias-page verification path in the stack README instead.
+
+## Known pitfalls
+
+- Before a parallel-stack cutover flips shared config, grant the new target's IAM through its own Terraform change first. See learnings/parallel-stack-parity-env-flip-needs-iam-first.md.
+- In a stack kept in several copies, reconcile applied but uncommitted drift between the copies before committing. See learnings/reconcile-applied-drift-before-committing-in-multi-copy-stacks.md.
+- On Windows, when `terraform init` of git-sourced modules fails on a deep path, validate from a short-path copy. See learnings/terraform-init-git-modules-fail-on-deep-windows-paths.md.
 
 ## Related
 
-- `skills/terraform-specialist/SKILL.md` — mandatory routing for all Terraform requests
-- `skills/terraform-specialist/references/validation-checklist.md` — full detection-rule checklist (style, pinning, state safety, multi-env, secrets, testing)
-- `skills/terraform-specialist/references/stack-inventory.md` — what to establish about a consumer's shared modules, environment roots, and backends before judging a change
-- `skills/terraform/SKILL.md` — general Terraform/OpenTofu authoring, testing, and CI/CD guidance
-- `tool-subagents/terraform-specialist.md` — the read-only specialist that enforces these patterns
 - `rules/release-safety.md` — deploy order, verification, and rollback discipline
-- `skills/shell-scripting/SKILL.md` — the scripts that provisioners and wrappers invoke
-- `skills/dag-glue-specialist/references/validation-checklist.md` — IaC checks for data pipelines
-- `tool-subagents/aws-alarm-investigator.md` — known false-positive alarm patterns
+- `skills/aws-alarm-investigator/SKILL.md` — known false-positive alarm patterns

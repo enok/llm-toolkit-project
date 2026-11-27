@@ -830,5 +830,4 @@ if os.environ.get("DEBUG_LOGGING") == "true":
 ## Related Skills
 
 - **best-practices** — SOLID principles, layered architecture, resilience patterns (language-agnostic foundations that Python implements)
-- **security** — Injection prevention (parameterized queries), auth, secrets management, PII — applies to all Python endpoints handling user data
 - **testing** — AC-to-test traceability, test pyramid, coverage checklist — universal testing discipline beyond Python-specific pytest patterns

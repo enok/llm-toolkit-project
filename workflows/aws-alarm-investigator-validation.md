@@ -23,7 +23,8 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
    - investigation window before/during/after the state change
    - allowed read-only tools and any forbidden data sources
 2. Load only needed guidance:
-   - `tool-subagents/aws-alarm-investigator.md`
+   - `skills/aws-alarm-investigator/SKILL.md` (procedure, probe hints,
+     false-positive patterns, output contract)
    - `rules/log-analysis-safety.md` when logs are involved
    - `integrations/aws-cli.md` when AWS CLI commands are the available tool path
    - `skills/incident-ops/SKILL.md` for active incidents or mitigation planning
@@ -51,7 +52,8 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
    - state what would prove or disprove each hypothesis
    - correlate metric breach, log onset, resource events, deploy/config changes,
      and dependency symptoms
-   - check the specialist's known false-positive patterns (first-deploy
+   - check the known false-positive patterns in
+     `skills/aws-alarm-investigator/SKILL.md` (first-deploy
      `breaching` missing-data alarms, dimension-mismatch empty data) before
      ranking failure hypotheses
    - separate immediate trigger from likely deeper cause
@@ -68,19 +70,19 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
      session identifiers, and full payloads
    - mark uncertain owner-level causes as likely or needs-owner-verification
 8. Route the fix lane when the alarm is IaC-provisioned: authoring-side
-   remediation goes through `skills/terraform-change-safety/SKILL.md` and
-   `workflows/terraform-specialist-validation.md`, never through this workflow.
+   remediation goes through `skills/terraform-change-safety/SKILL.md` with
+   `terraform fmt -check`, `terraform validate`, and a reviewed plan per touched
+   root (apply only on explicit user authorization), never through this workflow.
 9. Capture reusable learning:
    - if the alarm exposed a recurring pattern, update a runbook, the consumer
      repo's `docs/llm/`, a rule, or run
-     `workflows/aws-alarm-investigator-evolution.md` through the normal
-     toolkit-maintenance path
+     `workflows/aws-alarm-investigator-evolution.md`
 
 ## Known pitfalls
 
-- When `aws sts get-caller-identity` or `aws configure export-credentials` reports an expired SSO token, hand the login to the user at once (`aws sso login --profile <profile>`), continue every task that needs no AWS access, and park the AWS reads in a named resume list; never complete the browser approval yourself, and if you start a login for the user to claim, write its output to a file (not a pipe) and say the window expires in about ten minutes. See learnings/aws-sso-device-login-cannot-run-unattended.md.
-- Prove the alarm's metric exists before ranking hypotheses: run `aws cloudwatch get-metric-data` over a window where sibling metrics (`Invocations`, `Errors`, `Duration`) return datapoints; an empty result for the target metric, with its dimension set confirmed from the emitter or alarm block, is the defect signal that the metric is not published and the alarm cannot fire (`AWS/Lambda` publishes no `Timeouts` metric; recommend a Logs metric filter on `"Task timed out"`, or an alarm on `Duration` Maximum >= the configured function timeout). See learnings/aws-lambda-timeouts-metric-does-not-exist.md.
-- Take metric dimensions from the emitter, the alarm block, or the dashboard template, never from naming conventions; if an alarm on the same metric transitions while your query returns empty, your dimensions are wrong, not the traffic (`list-metrics --namespace <namespace>` enumerates the real sets). See learnings/verify-metric-dimensions-from-source-before-reconciling.md.
+- When `aws sts get-caller-identity` or `aws configure export-credentials` reports an expired SSO token, hand the login to the user at once (`aws sso login --profile <profile>`), continue every task that needs no AWS access, and park the AWS reads in a named resume list; never complete the browser approval yourself, and if you start a login for the user to claim, write its output to a file (not a pipe) and say the window expires in about ten minutes.
+- Prove the alarm's metric exists before ranking hypotheses: run `aws cloudwatch get-metric-data` over a window where sibling metrics (`Invocations`, `Errors`, `Duration`) return datapoints; an empty result for the target metric, with its dimension set confirmed from the emitter or alarm block, is the defect signal that the metric is not published and the alarm cannot fire (`AWS/Lambda` publishes no `Timeouts` metric; recommend a Logs metric filter on `"Task timed out"`, or an alarm on `Duration` Maximum >= the configured function timeout).
+- Take metric dimensions from the emitter, the alarm block, or the dashboard template, never from naming conventions; if an alarm on the same metric transitions while your query returns empty, your dimensions are wrong, not the traffic (`list-metrics --namespace <namespace>` enumerates the real sets).
 - When an alarm sits in INSUFFICIENT_DATA during an outage or an idle period, check `treat_missing_data` against the metric kind: failure counts `notBreaching`, latencies and event-driven silence-detection alarms `breaching`; `missing` on a sparse alarm defeats N-of-N evaluation. See learnings/no-data-and-zero-are-different-in-monitoring.md.
 
 ---

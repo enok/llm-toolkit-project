@@ -69,26 +69,25 @@ deployment state, permissions, source ownership, or content safety is unclear.
    attachments, archiving or purging folders, or posting explanatory comments
    requires explicit user approval of the exact target and text.
 7. Require `documentation-reviewer` for promoted/merged documentation content
-   and `image-quality-inspection` for every generated/exported image,
-   screenshot, PDF page render, slide/document render, or Confluence-processed
-   attachment.
+   and an image quality check for every generated/exported image, screenshot,
+   PDF page render, slide/document render, or Confluence-processed attachment:
+   each one opened in its real render path and fixed and re-rendered until it
+   is sharp, uncropped, legible at its destination size and current.
 8. After execution by the root automation, require live read-back of final
    hierarchy, page versions, labels, attachments, rendered content, links, and
    the emptied or intentionally retained intake folder state.
 
 ## Related Specialists
 
-- Use `confluence-documentation-specialist` for page/folder state, hierarchy,
+- Use the `confluence-documentation` skill for page/folder state, hierarchy,
   attachment, comment, permission, and source-to-wiki drift validation.
 - Use `documentation-reviewer` for final documentation quality, audience fit,
   generated LLM surfaces, and draft-only human-facing documentation replies.
 - Use `pr-validator` when Jira/PR/live-head readiness or ticket-to-evidence
   trace affects the production deployment gate.
-- Use `release-manager` when release/deployment evidence, rollback state, or
-  production rollout sequencing is unclear.
 - Use `diagram-creation-specialist` when promoted docs include diagrams,
   exported artifacts, or rendered diagram attachments.
-- Use `system-architecture-specialist` when destination choice depends on
+- Use the `system-architecture-specialist` skill when destination choice depends on
   service boundaries, data flows, integrations, ownership, or architecture docs.
 
 Return handoff recommendations to the root agent; do not contact other agents,
@@ -117,7 +116,7 @@ tools, or humans directly.
 - `Learning/token efficiency`: reusable promotion lesson, routing gap, repeated
   destination-map issue, automation guard, or context that belongs in
   `workflows/prod-doc-promoter-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  a rule, workflow, skill,
   integration guide, or the consumer repo's `docs/llm/`.
 
 If promotion is not safe, block clearly and name the smallest evidence or

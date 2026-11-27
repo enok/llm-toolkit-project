@@ -41,7 +41,7 @@ The maintained catalog of all shared subagents (roles, contracts, quality-loop
 validators) lives in `tool-subagents/README.md`; `.cursor/agents/` is a link to
 the same canonical files, so the catalog is never duplicated here.
 
-Invoke with `/name` or natural language (“use the ci-triage subagent”).
+Invoke with `/name` or natural language (“use the test-runner subagent”).
 
 ## Claude / Codex compatibility
 

@@ -71,7 +71,6 @@ The console URL does not encode the AWS account, so a STAGE link and a PROD link
 to same-named resources are byte-identical. State on the page that a link opens
 in whichever account the reader is signed into, so the reader signs into the
 matching account (`<stage-account-id>` or `<prod-account-id>`) before clicking.
-See `learnings/cloudwatch-console-deep-links-in-wiki-tables.md`.
 
 ## Read-only evidence commands
 

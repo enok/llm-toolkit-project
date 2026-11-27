@@ -6,11 +6,9 @@ Guides for connecting LLM agents to external tools and services. These integrati
 
 | Integration | File | Purpose |
 |-------------|------|---------|
-| **Jira** | `jira.md` | Fetch ticket details, search issues, manage sprints |
+| **Jira** | `jira.md` | acli syntax, safe REST upload fallback, local-path leak check, MCP alternative |
 | **Confluence** | `confluence.md` | Search and read documentation, project wikis |
-| **GitHub** | `github.md` | Read code, PRs, branches, issues across repos |
 | **AWS CLI** | `aws-cli.md` | Manage cloud infrastructure, deploy, inspect resources |
-| **Jenkins** | `jenkins.md` | Check job/build status, read console logs, trigger builds |
 | **Slack CLI** | `slack-cli.md` | Build and deploy Slack apps with a pinned, checksum-verified CLI |
 
 ## Client Preference Order
@@ -27,16 +25,11 @@ Detect before falling back: run the CLI's version/auth check first (e.g. `acli -
 
 Workflows reference integrations when they need external context:
 
-- **ticket-research** → Jira (ticket details) + Confluence (documentation) + GitHub (PRs, branches)
-- **review** → Jira (ticket ACs) + GitHub (PR comments, CI status)
-- **task-starter** → Jira (ticket details) + Confluence (related docs)
 - **project-discovery** → Confluence (architecture docs) + GitHub (repo structure)
 
 ## Setup Priority
 
-1. **Jira** — required for ticket-based workflows (task-starter, ticket-research, review)
+1. **Jira** — required for ticket-based workflows
 2. **Confluence** — recommended for documentation-aware workflows
-3. **GitHub** — recommended for multi-repo projects and PR workflows
-4. **AWS CLI** — optional, for infrastructure and deployment tasks
-5. **Jenkins** — optional, for CI/CD status checks and build automation
-6. **Slack CLI** — optional, for Slack application development; not general message-posting authorization
+3. **AWS CLI** — optional, for infrastructure and deployment tasks
+4. **Slack CLI** — optional, for Slack application development; not general message-posting authorization

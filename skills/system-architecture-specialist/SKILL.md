@@ -9,9 +9,8 @@ metadata:
 
 # System Architecture Specialist
 
-Use this skill to route architecture review, discovery, or design validation
-through the System Architecture Specialist. The specialist is read-only: it
-grounds every claim in code, config, docs, tickets, logs, or metrics and returns
+Use this skill for architecture review, discovery, or design validation. The
+review is read-only: it grounds every claim in code, config, docs, tickets, logs, or metrics and returns
 findings, tradeoffs, and handoffs; the root agent owns every change.
 
 Trigger examples:
@@ -24,21 +23,18 @@ Trigger examples:
 
 ## Workflow
 
-1. Load `workflows/system-architecture-specialist-validation.md`.
-2. Invoke or follow `tool-subagents/system-architecture-specialist.md`.
-3. Keep root-agent ownership for edits, docs, diagrams, validation, commits,
+1. Run the review read-only (as a validator lane on the plain model when
+   delegated) and return findings, tradeoffs, and handoffs.
+2. Keep root-agent ownership for edits, docs, diagrams, validation, commits,
    pushes, and user-facing communication.
-4. Compose with `skills/best-practices/SKILL.md`,
-   `skills/llm-application-architecture/SKILL.md`,
-   `workflows/project-discovery.md`, `workflows/document-creation.md`,
-   `diagram-creation-specialist`, `confluence-documentation-specialist`,
+3. Compose with `skills/best-practices/SKILL.md`,
+   `workflows/project-discovery.md`,
+   `diagram-creation-specialist`, `confluence-documentation`,
    `documentation-reviewer`, `pr-validator`, and language/security/contract/log
    specialists only when their evidence lanes are relevant.
-5. Keep product-specific architecture facts (service inventories, hostnames,
+4. Keep product-specific architecture facts (service inventories, hostnames,
    account layouts) in the consumer repo's `docs/llm/`, not in this skill.
-6. If the specialist misses a reusable pattern, run
-   `workflows/system-architecture-specialist-evolution.md`.
 
 ## Known pitfalls
 
-- Before reporting an absent architecture element (for example a gateway in front of a function) as a gap, look for evidence the absence is deliberate: caller configuration (timeout budgets, hard-coded function or queue names), git history of the caller and infrastructure repos, and the owning team asked directly; when the element is added or removed, record the negative decision (reason plus the condition that would justify revisiting) in the docs. See learnings/architecture-absence-may-be-a-deliberate-decision.md.
+- Before reporting an absent architecture element (for example a gateway in front of a function) as a gap, look for evidence the absence is deliberate: caller configuration (timeout budgets, hard-coded function or queue names), git history of the caller and infrastructure repos, and the owning team asked directly; when the element is added or removed, record the negative decision (reason plus the condition that would justify revisiting) in the docs.

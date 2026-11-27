@@ -84,11 +84,11 @@ Blockers: exact error text, or "none"
 Decisions: approval groups with sizes; risks needing the root (stale state, duration anomalies, model question, optional deletes); what the root must re-read live before acting
 ```
 
-- Learning/token efficiency: reusable lesson, routing gap, or context that can move to `workflows/workspace-hygiene-auditor-evolution.md`, `workflows/specialist-agent-evolution.md`, the classification rubric, a rule, workflow, skill, reference, or consumer profile. Profile the inventory with `jq` or `node` instead of reading it whole, and ask lanes for compact JSON with a short `prompt_summary` rather than full task prompts.
+- Learning/token efficiency: reusable lesson, routing gap, or context that can move to `workflows/workspace-hygiene-auditor-evolution.md`, the classification rubric, a rule, workflow, skill, reference, or consumer profile. Profile the inventory with `jq` or `node` instead of reading it whole, and ask lanes for compact JSON with a short `prompt_summary` rather than full task prompts.
 
 ## Known pitfalls
 
-- Re-derive every count with your own command and cite it; narrative counts from inventory lanes are not evidence. See `learnings/agent-self-reported-counts-are-not-evidence.md`.
+- Re-derive every count with your own command and cite it; narrative counts from inventory lanes are not evidence.
 - The plan is a hypothesis about a snapshot. The root validates it and may override rows, so give each row a short reason and an honest confidence.
 - Titles and prompts can hold personal or sensitive text. Keep reasons terse and refer to items by id; do not copy titles or prompt text into reasons or into the return message.
 

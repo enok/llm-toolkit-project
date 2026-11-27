@@ -120,14 +120,13 @@ Each rule file contains:
 
 ## Known pitfalls
 
-- With TypeScript 6 or 7, declare the Node typings explicitly: add `@types/node` and `"types": ["node"]` in `tsconfig.json` (`@types/*` packages are no longer included automatically), set `module` and `moduleResolution` to `nodenext`, and avoid the removed options (`moduleResolution` `node` or `node10`, `baseUrl`, `target: es5`, `outFile`). See `learnings/typescript-7-needs-explicit-node-types-and-quoted-test-globs.md`.
-- Give `node --test` a quoted glob such as `node --test "dist/test/**/*.test.js"`, never a bare directory, which fails; commit `package-lock.json` so CI can run `npm ci`. See `learnings/typescript-7-needs-explicit-node-types-and-quoted-test-globs.md`.
+- With TypeScript 6 or 7, declare the Node typings explicitly: add `@types/node` and `"types": ["node"]` in `tsconfig.json` (`@types/*` packages are no longer included automatically), set `module` and `moduleResolution` to `nodenext`, and avoid the removed options (`moduleResolution` `node` or `node10`, `baseUrl`, `target: es5`, `outFile`).
+- Give `node --test` a quoted glob such as `node --test "dist/test/**/*.test.js"`, never a bare directory, which fails; commit `package-lock.json` so CI can run `npm ci`.
 
 ## Related Skills
 
 - Project-local frontend guidance — React/Next.js performance optimization when the destination repo provides it
 - **best-practices** — SOLID principles, architecture patterns, resilience (language-agnostic foundations)
-- **security** — Injection prevention, auth, secrets, XSS/CSRF (applies to all JS/TS endpoints)
 - **testing** — AC traceability, test pyramid, coverage checklist (universal testing discipline)
 
 ## Full Compiled Document

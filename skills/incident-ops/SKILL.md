@@ -60,13 +60,11 @@ Return:
 
 ## Known pitfalls
 
-- When a wiki or runbook table links CloudWatch dashboards, alarms, or metrics, author the page in HTML content format (escape `&` as `&amp;` in hrefs), not Markdown, use the link shapes in `references/cloudwatch-observability-recovery.md`, and state on the page that each link opens in whichever AWS account the reader is signed into. See learnings/cloudwatch-console-deep-links-in-wiki-tables.md.
+- When a wiki or runbook table links CloudWatch dashboards, alarms, or metrics, author the page in HTML content format (escape `&` as `&amp;` in hrefs), not Markdown, use the link shapes in `references/cloudwatch-observability-recovery.md`, and state on the page that each link opens in whichever AWS account the reader is signed into.
 
 ## Related Skills
 
 - **runbook-authoring** — Convert incident learnings into operational runbooks
-- **release-manager** — If the incident requires a hotfix release
-- **security** — If the incident has security implications
 - **log-analysis** — Read-only operational log investigation and evidence reduction
 - **aws-alarm-investigator** — When the entry point is a specific alarm rather than a reported outage
 

@@ -53,7 +53,7 @@ Run this classification before proposing a migration. An inventory of dozens of 
 
 An extension directory that is a symlink or junction into a git working copy is not workstation state — it is a checkout of a repository that already has history. Record the repository and revision it points to and stop there; copying through the link duplicates tracked content into a second place, and following it during a recursive delete destroys the target.
 
-Check for reparse points before any recursive removal (on PowerShell 5.1, `Remove-Item -Recurse -Force` on a junction deletes the target directory's contents; see `learnings/powershell-remove-item-recurse-deletes-junction-targets.md`), and resolve links before computing sizes so shared targets are not counted repeatedly.
+Check for reparse points before any recursive removal (on PowerShell 5.1, `Remove-Item -Recurse -Force` on a junction deletes the target directory's contents), and resolve links before computing sizes so shared targets are not counted repeatedly.
 
 ## Normalize Aliases Across Config Layers
 
@@ -98,7 +98,7 @@ This skill answers what is installed and enabled; deciding which plugins should 
 - Some security-scanner packages the toolkit gates depend on are not published on PyPI. Install them from the vendor's git tag (pin the tag in the setup notes) instead of searching for a package-index name that does not exist.
 - Run the toolkit's own scripts and tests on a pinned interpreter (Python 3.12). The newest interpreter release failed three tests in a recorded run; treat that as an environment mismatch to pin away, not as three regressions to chase.
 - Endpoint antivirus can quarantine scanner test fixtures (they contain attack samples as plain text) from a tool cache and report the scanner as broken. Verify with the commit tag, `git fsck`, a diff showing only those test files differ, and an intact installed package; do not disable the antivirus. See [av-false-positives-on-encoded-commands-and-scanner-fixtures](../../learnings/av-false-positives-on-encoded-commands-and-scanner-fixtures.md).
-- Local voice-message transcription (a dedicated virtual environment for faster-whisper) hits a PyAV keyword-argument bug on Windows; decode with ffmpeg to float32 mono and pass the array to the model. See [faster-whisper-pyav-kwarg-bug-decode-with-ffmpeg](../../learnings/faster-whisper-pyav-kwarg-bug-decode-with-ffmpeg.md).
+- Local voice-message transcription (a dedicated virtual environment for faster-whisper) hits a PyAV keyword-argument bug on Windows; decode with ffmpeg to float32 mono and pass the array to the model.
 
 ## Related
 

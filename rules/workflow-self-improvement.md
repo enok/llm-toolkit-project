@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Close a measurable learn-from-mistakes loop on every non-trivial LLM or agent run - preflight known pitfalls, capture mistakes by signature, record the run, promote recurring lessons to verified guards, and report trend metrics
+trigger: model_decision
+description: Load when a workflow, skill or orchestrated run with 3+ steps, a validator fail, a forced change of approach or a user correction needs its preflight, run record, retrospective, promotion or trend line.
 ---
 
 # Workflow Self-Improvement
@@ -11,7 +11,7 @@ Run this loop on every non-trivial run; the user never has to ask, and no workfl
 
 Every non-trivial workflow run, skill-driven task, orchestrated lane set, and scheduled or automated agent run: 3+ steps, or any validator `fail`, tool error that forced a different approach, user correction, or escaped defect. A trivial run with zero signals needs no record.
 
-One record per root run: the outermost workflow, or the orchestrator root, runs the retrospective once, at its very end, under the outermost (routed primary) workflow's name, never the agent's name. A nested workflow's `Final Step — Self-improvement`, a lane, and any workflow invoked by the retrospective itself (`capture-learning`, `toolkit-maintenance`) skip `workflows/self-improvement.md` entirely (its Phase 0 retrospective and the harvest) and hand their signals up as `mistake:` lines; the root's single pass covers them.
+One record per root run: the outermost workflow, or the orchestrator root, runs the retrospective once, at its very end, under the outermost (routed primary) workflow's name, never the agent's name. A nested workflow's `Final Step — Self-improvement`, a lane, and any workflow invoked by the retrospective itself (`capture-learning`) skip the retrospective and hand their signals up as `mistake:` lines; the root's single pass covers them.
 
 ## The loop
 

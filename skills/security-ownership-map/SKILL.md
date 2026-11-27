@@ -91,9 +91,3 @@ Run these to answer common security ownership questions:
 - `bus_factor_hotspots` in `summary.json` lists sensitive files with low bus factor; `orphaned_sensitive_code` is the stale subset.
 - If `git log` is too large, narrow with `--since` or `--until`.
 - Compare `summary.json` against CODEOWNERS to highlight ownership drift.
-
-## Related Skills
-
-- **security** — general application security principles
-- **security-threat-model** — architectural threat modeling
-- **owasp-security-review** — codebase findings report

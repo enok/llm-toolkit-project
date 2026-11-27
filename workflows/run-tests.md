@@ -83,7 +83,12 @@ npm test -- --coverage                       # Node
 - **All tests must pass** before proceeding.
 - If a test fails, diagnose the root cause and fix before continuing.
 - Re-run after every fix to confirm.
-- In a cloud sandbox a pass is partial: run the definitive suite on the user's machine (see `## Known pitfalls` in `skills/run-tests/SKILL.md`).
+- In a cloud sandbox a pass is partial (registries may return 403, the toolchain may lag the target versions): run the definitive suite on the user's machine and log each step's name, exit code and toolchain versions as evidence. (sig: env-constraint/sandbox-egress-blocks-registries)
+
+### Failure classification
+- Separate the product verdict from the environment or harness verdict in the final report.
+- If scenario assertions pass and cleanup or teardown fails later, report the behavioral proof and the cleanup blocker separately.
+- If a shared setup step such as a global `before all` fails before scenarios execute, report the run as environment-blocked, not feature-failed.
 
 ---
 
@@ -104,10 +109,10 @@ npm test -- --coverage                       # Node
 
 ## Known pitfalls
 
-- Run the tests of a script that guards against hostile input (deeply nested JSON) on the newest interpreter as well as the oldest supported one, and do not trust a green run on one version: the run-retrospective nesting guard waits for `RecursionError` and three of its tests failed on a newer Python while passing on an older one; the cause is not yet known and the explicit-depth fix is untested. See `learnings/deep-json-nesting-guard-depends-on-interpreter.md`.
+- Run the tests of a script that guards against hostile input (deeply nested JSON) on the newest interpreter as well as the oldest supported one, and do not trust a green run on one version: the run-retrospective nesting guard waits for `RecursionError` and three of its tests failed on a newer Python while passing on an older one; the cause is not yet known and the explicit-depth fix is untested.
 
 ---
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

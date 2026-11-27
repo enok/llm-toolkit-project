@@ -84,7 +84,7 @@ Print the tasks table first (wave, task, tier, explicit model, validator, SLA).
 | Wave | Task | Tier | Validator |
 | --- | --- | --- | --- |
 | W0 | Lock, read profile and sheet, build the dedup set, retry `pending_moves` | root | none |
-| W1 | Profile summary refresh when due ([profile-summary-for-scoring](../../linkedin-profile-maintenance/references/profile-summary-for-scoring.md)) | light | root reduce |
+| W1 | Profile summary refresh when due | light | root reduce |
 | W1 | Search collect, all queries and pages, with dedup marks | light | root count check |
 | W1 | Board status read for rows Applied or Interviewing | light | root cross-check |
 | W1 | Mail evidence since the last run | standard | root reduce |
@@ -97,9 +97,5 @@ Print the tasks table first (wave, task, tier, explicit model, validator, SLA).
 ## Reading and writing the sheet
 
 Order of preference: a Sheets connector (read and write); the Drive connector
-for reading only; the owner's signed-in browser for cell edits. The browser
-recipe, read-back and the connector limits are in
-[google-sheets-browser-cell-editing-recipe](../../../learnings/google-sheets-browser-cell-editing-recipe.md)
-and
-[drive-connector-reads-sheets-cannot-write-cells](../../../learnings/drive-connector-reads-sheets-cannot-write-cells.md).
+for reading only; the owner's signed-in browser for cell edits.
 Always read back every written row and compare before reporting success.

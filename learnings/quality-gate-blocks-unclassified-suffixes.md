@@ -10,8 +10,7 @@ tags: [quality-gate, ci, fixtures, html, mermaid, gitattributes, suffix, unrecog
 CI blocked a change because the changed-code quality gate could not classify some of the
 files in it: HTML test fixtures and a `.gitattributes` change. The
 session recorded this as a medium-severity validation-gap mistake, found by CI. The gate
-treats an unrecognized changed file type as a blocker (`skills/changed-code-quality-gate/SKILL.md`,
-`rules/changed-code-quality-gate-required.md`).
+treats an unrecognized changed file type as a blocker (`rules/changed-code-quality-gate-required.md`).
 
 # Failed Approaches
 
@@ -23,13 +22,12 @@ under their natural suffixes, and the gate blocked the change.
 - Store HTML and other fixtures under a non-code suffix, `.txt`, and have the test
   read them as text.
 - When a fixture needs significant whitespace, put a `{{SPACE}}` marker on its own line and
-  have the test expand it to a single space, as `tests/test_medium_paste_html.py` does.
+  have the test expand it to a single space.
 - Avoid changes to files without a suffix (such as `.gitattributes`) in a change that the
   gate scans; the recorded fix was to avoid suffixless file changes. When a change must
   touch `.gitattributes` (`rules/cross-platform-scripts.md` asks for it), report the gate
   block and propose adding the name to `NON_CODE_NAMES` in
-  `scripts/changed_code_quality_gate.py` through `workflows/toolkit-maintenance.md`
-  instead of working around it.
+  `scripts/changed_code_quality_gate.py` instead of working around it.
 - The gate is already required before commit and push
   (`rules/changed-code-quality-gate-required.md`); running
   `python scripts/changed_code_quality_gate.py --base <trusted-base>` on a change that adds
@@ -37,7 +35,7 @@ under their natural suffixes, and the gate blocked the change.
 
 - Classify diagram sources such as `.mmd` as non-code in the gate's `NON_CODE_SUFFIXES` list
   (check the list; add the suffix together with a test if it is missing). Every other new
-  suffix needs the same `NON_CODE_SUFFIXES` change through `workflows/toolkit-maintenance.md`.
+  suffix needs the same `NON_CODE_SUFFIXES` change.
 
 # Why
 

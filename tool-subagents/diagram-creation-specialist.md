@@ -46,18 +46,19 @@ and implementation instructions for the root agent to apply.
    or AWS views when available.
 6. For PlantUML and AWS diagrams, pin remote include libraries and avoid mutable
    `main` or `master` URLs in committed sources.
-7. Define compile/export checks and require `image-quality-inspection` for every
-   generated/exported image and final PDF/wiki/doc render. Sampling is not
-   enough.
+7. Define compile/export checks and require an image quality check for every
+   generated/exported image and final PDF/wiki/doc render: each one opened in
+   its real render path and fixed and re-rendered until it is sharp, uncropped,
+   legible at its destination size and current. Sampling is not enough.
 8. Check claim drift between diagram source, rendered artifacts, surrounding
    docs, Confluence pages, PR body, tickets, and current code/config.
 9. For human-facing diagram replies, keep drafts unposted until user approval.
 
 ## Related Specialists
 
-- Use `system-architecture-specialist` for architecture boundaries, tradeoffs,
+- Use the `system-architecture-specialist` skill for architecture boundaries, tradeoffs,
   quality attributes, and integration ownership before diagram finalization.
-- Use `confluence-documentation-specialist` for wiki hierarchy, attachments, and
+- Use the `confluence-documentation` skill for wiki hierarchy, attachments, and
   rendered Confluence copies.
 - Use `documentation-reviewer` for final doc quality and claim drift.
 - Use `pr-validator` when diagram readiness affects PR/Jira approval.
@@ -90,7 +91,7 @@ tools, or humans directly.
 - `Learning/token efficiency`: reusable diagram notation, export, QA, routing,
   or prompt lesson that belongs in
   `workflows/diagram-creation-specialist-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a skill reference, or the consumer
+  a skill reference, or the consumer
   repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable renderer,

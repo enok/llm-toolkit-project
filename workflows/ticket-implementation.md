@@ -4,7 +4,7 @@ description: Implement a ticket using its research output as input
 
 # Implement Ticket Workflow
 
-Implement a Jira ticket guided by its research documentation. Expects the **ticket-research** workflow to have already run, producing `docs/jira/<TICKET>/README.md` (implementation plan, files to modify, testing plan) and optionally `architecture.md`.
+Implement a Jira ticket guided by its research documentation. Expects ticket research to have already produced `docs/jira/<TICKET>/README.md` (implementation plan, files to modify, testing plan) and optionally `architecture.md`.
 
 The user will provide a **ticket ID** (e.g., `ABC-1234`). Replace `<TICKET>` below with that ID.
 
@@ -16,7 +16,7 @@ The user will provide a **ticket ID** (e.g., `ABC-1234`). Replace `<TICKET>` bel
 
 - Read `docs/jira/<TICKET>/README.md` and `docs/jira/<TICKET>/architecture.md` (if present).
 - Extract: acceptance criteria, implementation plan, files to modify, testing plan, open questions.
-- If research docs are missing or stale, tell the user and suggest running `ticket-research` first.
+- If research docs are missing or stale, tell the user and suggest researching the ticket first (Part 1 of `workflows/ticket-research-and-implementation-and-validation.md`).
 
 ### 2. Validate prerequisites
 
@@ -165,7 +165,7 @@ generic placeholder.
 
 ### 14. Run pre-PR check
 
-Suggest running the **pre-pr-check** workflow or the **ticket-review-and-fix** workflow to catch anything missed before marking the PR ready.
+Suggest running the **pre-pr-check** workflow to catch anything missed before marking the PR ready.
 
 ### 15. Update the research docs
 
@@ -194,4 +194,4 @@ If the implementation deviated from the original plan (different files, differen
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

@@ -27,8 +27,7 @@ left running after the work ended.
 - A scale-to-zero service stays up while a tab polls it; poll only while the page is visible.
 - Multi-container billing reserves the sum of containers' vCPU and memory. Compute the hourly
   cost first, keep max instances at 1 for a demo, and say "check the pricing page on the day".
-- Parallel image builds sharing a cache collide
-  (`docker-build-pitfalls-copy-chmod-dirs-parallel-cache-lock.md`).
+- Parallel image builds sharing a cache collide.
 - When a user-only step blocks (sign-in, billing), state it once and re-check state on resume;
   a repeated user instruction authorizes the actions the plan already lists.
 - Plan teardown up front: delete the billed service, keep registry images and a one-command

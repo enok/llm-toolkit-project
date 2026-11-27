@@ -9,10 +9,10 @@ metadata:
 
 # Run Retrospective
 
-Tooling for the always-on loop in `rules/workflow-self-improvement.md`:
+Tooling for the loop in `rules/workflow-self-improvement.md`:
 preflight -> capture -> retrospective + record -> promote -> verify -> measure.
-The procedure is `workflows/run-retrospective.md`; this skill is the quick
-start and the reference set.
+This skill holds the procedure, quick start, and reference set;
+`workflows/run-retrospective.md` is only the routing entry.
 
 ## When to use
 
@@ -24,8 +24,7 @@ start and the reference set.
   existing signatures, classify, record, promote (`signatures`, `append`,
   `candidates`).
 - **Periodic review:** trend per workflow, recurring signatures, and the
-  promotion backlog (`summary`, `candidates`), as in the self-improvement
-  review step of `workflows/toolkit-maintenance.md`.
+  promotion backlog (`summary`, `candidates`).
 - **Log hygiene:** check every stored record (`validate`).
 
 One record per root run, written by the root/parent agent. Lanes, nested
@@ -133,6 +132,24 @@ kebab name of the owning workflow (<= 80 chars). Signatures are
 (`signatures`) when the root cause matches.
 Full field rules and a complete example: `references/run-record-schema.md`.
 
+## Root cause (per mistake)
+
+Answer two questions per mistake, one line each:
+
+1. **Why did it happen?** The mechanism (wrong flag, unverified belief,
+   platform behaviour, missing criterion).
+2. **Why was it not caught earlier?** Which preflight item, acceptance
+   criterion, validator, or test should have stopped it; this usually names the
+   missing guard and becomes the promotion target.
+
+Write the fix applied in this run to `fix`. Set `prevented_by` to the asset
+that prevents recurrence: the existing one that should have caught it, the one
+this run's promotion creates, or `null` when none exists yet. If the mistake
+happened although its `prevented_by` asset already existed, that prevention was
+ineffective: climb one level when promoting. When that existing prevention was
+never recorded in the log, backfill it in this record's `promotions` at its
+actual level, and also record the higher level you land.
+
 ## Rules that keep the numbers honest
 
 - Metrics are diagnostic only (Goodhart guard in
@@ -156,7 +173,6 @@ Full field rules and a complete example: `references/run-record-schema.md`.
 
 ## Related
 
-- `workflows/run-retrospective.md` - the seven-phase per-run procedure.
-- `workflows/self-improvement.md` - broader harvest across sessions.
+- `workflows/run-retrospective.md` - routing entry for this skill.
 - `rules/error-driven-learning.md` and `workflows/capture-learning.md` - the `learning` rung.
 - `workflows/task-quality-loop.md` - per-task iterations, first-pass flags, defect lists.

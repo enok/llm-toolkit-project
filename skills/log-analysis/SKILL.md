@@ -90,11 +90,5 @@ change code or infrastructure.
   triage, mitigation, or communications.
 - `skills/aws-alarm-investigator/SKILL.md` - Use when the entry point is a
   CloudWatch alarm rather than a log question.
-- `skills/jmeter-performance-testing/SKILL.md` - Use for load-test log and
-  metric analysis.
-- `skills/java-best-practices/SKILL.md` - Use when a Java/Log4j/SLF4J code
-  change is needed after diagnosis.
 - `skills/python-best-practices/SKILL.md` and `skills/js-ts-best-practices/SKILL.md` -
   Use when log format or application logging changes are needed in those stacks.
-- `skills/security/SKILL.md` - Use when logs may expose secrets, PII, or abuse
-  evidence.

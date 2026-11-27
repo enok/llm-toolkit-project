@@ -4,7 +4,7 @@ description: Run validation, review, and docs pass before opening or updating a 
 
 # Pre-PR check workflow
 
-Use when the user is ready for a PR, wants a full branch check, or wants a review-ready summary before pushing. Prefer the **pre-pr-check** skill when it matches the IDE.
+Use when the user is ready for a PR, wants a full branch check, or wants a review-ready summary before pushing. This file holds the procedure the **pre-pr-check** skill runs.
 
 ## Steps
 
@@ -20,7 +20,7 @@ Use when the user is ready for a PR, wants a full branch check, or wants a revie
    - docs or config drift
    - security or release-impact checks when relevant
 4. Do not pause before internal fanout unless there is a user-visible tradeoff, risky external side effect, or overlapping write ownership.
-5. Run the smallest safe validation set, then broaden only when needed.
+5. Run the repo's lint and tests (infer from `package.json`, `Makefile`, `pom.xml`, or ask); on failure report and stop. Run the smallest safe set, then broaden only when needed.
 6. If source code was created or updated, run the blocking
    **changed-code-quality-gate** workflow with the trusted PR base. A
    worktree-only scope run cannot validate committed branch changes.
@@ -33,7 +33,10 @@ Use when the user is ready for a PR, wants a full branch check, or wants a revie
    ```bash
    python3 scripts/check_value_checks.py --base origin/<base>
    ```
-9. Produce one summary with blockers, warnings, follow-up fixes, and readiness status.
+9. Optional Snyk: if the user wants security scanning and `snyk` is available, run `snyk test`; report critical findings, block on non-critical only when the user asks.
+10. UI verification, when the diff touches front-end UI and the user has not waived browser verification: read `docs/jira/<TICKET>/ui-verify-report.md`. `pass` continues; `fail` or `blocked` is a pre-PR blocker unless waived. UI changed with no report: Yellow finding recommending **ui-verify** before merge.
+11. In-agent review of the branch diff per `skills/ticket-review/SKILL.md` (rubrics, Red/Yellow/Green findings, `review.md` and `review-report.json` under `docs/jira/<TICKET>/`). Result: fail on any Red finding or blocking gate failure, neutral on Yellow/Green only, pass with no findings.
+12. Produce one summary with blockers, warnings, follow-up fixes, and readiness status.
 
 See `rules/multi-agent-orchestration.md`.
 
@@ -41,4 +44,4 @@ See `rules/multi-agent-orchestration.md`.
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

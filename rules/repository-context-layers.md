@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: How to merge toolkit rules with repo-local AGENTS.md, CLAUDE.md, and thin provider compatibility surfaces
+trigger: model_decision
+description: Load when toolkit rules conflict with or overlap a repo-local AGENTS.md, CLAUDE.md or IDE rule, or when refreshing symlinks, thin provider pointers or generated exports in a consumer repo.
 ---
 
 # Repository context layers

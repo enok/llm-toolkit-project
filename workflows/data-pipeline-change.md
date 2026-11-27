@@ -20,4 +20,4 @@ Use when modifying ingestion, normalization, aggregation, storage layout, featur
 
 ## Known pitfalls
 
-- When a Gold (or other consumed) dataset changes schema (for example a column rename), update every notebook that reads it, English and pt-BR pairs alike. Also search for dynamically built names (for example `f'{col}_norm'` over a `raw_features` list), which a grep for explicit names misses, and check the pt-BR translation map for renamed columns and update it. See learnings/gold-schema-drift-breaks-notebooks.md.
+- When a Gold (or other consumed) dataset changes schema (for example a column rename), update every notebook that reads it, English and pt-BR pairs alike. Also search for dynamically built names (for example `f'{col}_norm'` over a `raw_features` list), which a grep for explicit names misses, and check the pt-BR translation map for renamed columns and update it.

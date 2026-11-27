@@ -29,8 +29,7 @@ a heavy app failed with a zero-width error.
 - When a file must be attached from the owner's disk and the tool cannot read the
   path, ask the owner to click the page's upload control and continue after.
 - Expect redaction in script results; log what you need in short fields. Query-string-like
-  returned text is blocked outright; see
-  `browser-tool-blocks-urls-with-query-strings-in-returned-text.md`.
+  returned text is blocked outright.
 - A "not connected" message from the extension is often transient: retry once,
   then tell the owner how to reconnect.
 

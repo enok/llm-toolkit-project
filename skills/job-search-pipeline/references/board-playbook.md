@@ -83,8 +83,7 @@ Gotchas:
   opening any posting; opening known postings is the main time cost of a scan.
 - The browser tool blocks returned text that looks like a query string or a
   cookie, and an auto-mode safety layer may refuse reading session cookies for
-  private API calls. Chunking, `<pre>` reads and the UI fallback:
-  [browser-tool-blocks-urls-with-query-strings-in-returned-text](../../../learnings/browser-tool-blocks-urls-with-query-strings-in-returned-text.md).
+  private API calls.
   Extraction from portals that hook XHR or use React widgets:
   [browser-portal-extraction-xhr-hook-and-react-widgets](../../../learnings/browser-portal-extraction-xhr-hook-and-react-widgets.md).
 - Search is semantic: about 25 results per query, and queries overlap heavily.

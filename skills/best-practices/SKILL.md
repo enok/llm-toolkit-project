@@ -101,7 +101,7 @@ rules/handler-lifecycle-cleanup.md
 
 Each rule file contains a brief explanation of why it matters, an incorrect example, a correct example, and key rules.
 
-`references/rules.md` is a compact always-on summary suitable for consumer repos that want the whole baseline in one short file. Toolkit-wide coding discipline, orchestration, and learning-capture constraints live in the canonical top-level rules (`rules/code-rules.md`, `rules/multi-agent-orchestration.md`, `rules/error-driven-learning.md`), not in this skill.
+`references/rules.md` is a compact always-on summary suitable for consumer repos that want the whole baseline in one short file. Toolkit-wide coding discipline, orchestration, and learning-capture constraints live in the canonical top-level rules (`rules/multi-agent-orchestration.md`, `rules/error-driven-learning.md`), not in this skill.
 
 Use `references/source-review.md` when evaluating external material for inclusion in this generic skill.
 
@@ -109,10 +109,8 @@ Use `references/source-review.md` when evaluating external material for inclusio
 
 This skill provides **language-agnostic foundations**. Pair it with language-specific implementations:
 
-- **java-best-practices** — Java implementation of SOLID, DI, concurrency, error handling
 - **python-best-practices** — Python implementation of SOLID, DI, concurrency, error handling
 - **js-ts-best-practices** — TypeScript/JavaScript implementation of DI, async patterns, error handling, and Node.js runtime resilience
-- **security** — Security-specific rules (injection, auth, secrets) that complement the defensive programming section
 - **testing** — Testing discipline (AC traceability, test pyramid) that validates architecture and code quality
 
 ## Full Compiled Document

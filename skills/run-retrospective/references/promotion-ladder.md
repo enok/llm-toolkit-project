@@ -12,7 +12,7 @@ toolkit at most a few occurrences, then becomes impossible to repeat silently.
 | `learning` | 1st win that took trial and error | `learnings/<name>.md` + one `learnings/INDEX.md` line + a link to it from the owning asset, via `workflows/capture-learning.md` | quality check and approval gate passed; `tests/test_learning_promotion_coverage.py` passes |
 | `checklist` | 2nd run with the signature, not yet promoted to `checklist` or above | one bullet in the owning workflow's or skill's `## Known pitfalls` section, or a preflight / acceptance criterion | bullet present with `(sig: ...)` suffix |
 | `guard` | 3rd+ run with the signature, recurrence after a checklist, or any `high` / `critical` / `safety-near-miss`, not yet promoted to `guard` or above | an executable check: script, validator, test, CI gate, lint | the check fails on the original mistake and passes on the fix |
-| `rule` | recurrence after a guard, or one pattern seen in 3+ workflows | a `rules/` change through `workflows/toolkit-maintenance.md`, or human escalation when redesign is needed | maintenance validation passed |
+| `rule` | recurrence after a guard, or one pattern seen in 3+ workflows | a `rules/` change, or human escalation when redesign is needed | maintenance validation passed |
 
 `run_retro.py candidates` proposes `checklist`, `guard`, and `rule` from the
 log; counts are distinct runs. A count-based rung (`checklist` at 2, `guard`
@@ -20,7 +20,7 @@ at 3+) is proposed while the signature is not yet promoted to that level or
 above, so a recorded `learning` does not hide a due checklist, and a deferral
 keeps showing until a later run records it. `--threshold 1` also proposes
 `learning` for single occurrences; otherwise `learning` is decided by the
-trial-and-error triggers in `rules/error-driven-learning.md`. Levels can be
+trial-and-error triggers in `skills/error-driven-learning/SKILL.md`. Levels can be
 skipped upward (a `critical` mistake goes straight to `guard`), never
 downward.
 
@@ -40,8 +40,7 @@ run's `promotions` at its actual level (for example `learning` for a
 
 - **Agent-attributable** (a specialist subagent's recurring miss): also feed
   `workflows/<agent>-evolution.md` (for example
-  `workflows/agent-orchestrator-evolution.md`) or
-  `workflows/specialist-agent-evolution.md`.
+  `workflows/agent-orchestrator-evolution.md`).
 - **`tier-misassignment`**: correct the task-type row of the lookup table in
   `rules/request-orchestration.md` or the `tool-subagents/model-selector.md`
   guidance, via `workflows/model-selector-evolution.md`.
@@ -93,7 +92,7 @@ A promotion is recorded only after it is verified in the same run:
 - **checklist:** bullet present, imperative, suffixed, and the owning file
   still passes its size and index checks.
 - **learning:** `workflows/capture-learning.md` quality check and approval, and the owning asset links the file (`tests/test_learning_promotion_coverage.py`).
-- **rule:** `workflows/toolkit-maintenance.md` validation phase.
+- **rule:** `scripts/validate-toolkit-indexes.sh` and the toolkit validation commands pass.
 
 An unverified promotion is a deferral: leave it out of `promotions` and name
 it in the final report; `candidates` keeps proposing it.

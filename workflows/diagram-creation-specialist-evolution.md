@@ -18,8 +18,7 @@ issue, produces noisy findings, routes poorly, or wastes context.
    - workflow procedure: `workflows/diagram-creation-specialist-validation.md`;
    - trigger/routing: `INTENTS.md`, `rules/request-orchestration.md`;
    - skill entrypoint: `skills/diagram-creation-specialist/SKILL.md`;
-   - notation/export detail: `skills/diagram-authoring/references/` or
-     `skills/image-quality-inspection/references/`;
+   - notation/export detail: `skills/diagram-authoring/references/`;
    - deterministic rendering/style miss:
      `skills/diagram-authoring/references/deterministic-diagram-system.md`;
    - project-specific renderer fact: the consumer repo's `docs/llm/` or other

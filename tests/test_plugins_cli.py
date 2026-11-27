@@ -506,7 +506,7 @@ class RecommendTests(PluginsCase):
                 "heading": f"skill {plugin}:reviewer", "distance": distance, "text": "t"}
 
     def test_merge_margin_and_verdicts(self):
-        assets = [{"source": "repo", "path": "skills/review/SKILL.md", "kind": "skill", "heading": "Review",
+        assets = [{"source": "repo", "path": "skills/ticket-review/SKILL.md", "kind": "skill", "heading": "Ticket Review",
                    "distance": 0.30, "text": "t"}]
         caps = [self.cap("good", 0.27), self.cap("bad", 0.01), self.cap("meh", 0.40)]
         with FakeKB(assets, caps) as svc:
@@ -514,7 +514,7 @@ class RecommendTests(PluginsCase):
         self.assertEqual(rc, 0)
         rows = json.loads(out)["results"]
         self.assertEqual([r.get("handle") or r.get("path") for r in rows],
-                         ["skills/review/SKILL.md", "good:reviewer", "meh:reviewer"])  # asset wins inside the margin
+                         ["skills/ticket-review/SKILL.md", "good:reviewer", "meh:reviewer"])  # asset wins inside the margin
         self.assertEqual(rows[2]["verdict"], "review")
         sources = [p.get("source") for path, p in svc.requests if path == "/search"]
         self.assertEqual(sources, [None, "plugins"])

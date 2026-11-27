@@ -29,28 +29,28 @@ HOURS_PER_FTE_WEEK = D(40)
 # activity, manual hours per week, conservative %, likely %, assets behind it
 DEFAULT_ROWS = [
     ("Ticket research & context gathering", 3.5, 10, 25,
-     "skills/task-starter, skills/ticket-research, skills/design-driven-dev, skills/cross-repo-impact"),
+     "skills/design-driven-dev"),
     ("Coding + tests", 9.0, 8, 20,
-     "workflows/ticket-implementation.md, workflows/new-backend-feature.md, "
-     "skills/java-best-practices, skills/python-best-practices, skills/js-ts-best-practices, skills/test-plan"),
+     "workflows/ticket-implementation.md, "
+     "skills/python-best-practices, skills/js-ts-best-practices"),
     ("Pre-PR self-checks", 1.5, 10, 30,
-     "skills/pre-pr-check, skills/changed-code-quality-gate, skills/run-tests"),
+     "skills/pre-pr-check, workflows/changed-code-quality-gate.md, skills/run-tests"),
     ("Reviewing teammates' PRs", 3.0, 0, 15,
      "skills/ticket-review, skills/pr-validator, skills/java-change-validator"),
     ("Addressing review comments", 2.0, 10, 25,
-     "workflows/gh-address-comments.md, workflows/pr-automation-review.md, skills/fix"),
+     "workflows/gh-address-comments.md, workflows/pr-automation-review.md"),
     ("CI failure triage & fix", 1.5, 5, 20,
-     "workflows/gh-fix-ci.md, skills/ci-watcher, tool-subagents/ci-triage.md, skills/maven-build-troubleshooting"),
+     "workflows/gh-fix-ci.md, skills/maven-build-troubleshooting"),
     ("Ops: logs, alarms, incidents", 4.0, 3, 15,
      "workflows/log-investigation.md, skills/aws-alarm-investigator, skills/incident-ops"),
     ("Documentation (wiki, runbooks, diagrams)", 1.5, 20, 40,
      "skills/update-docs, skills/doc-delta, skills/confluence-documentation, "
      "skills/runbook-authoring, skills/diagram-authoring"),
     ("Infra (Terraform) & data-pipeline changes", 2.0, 3, 12,
-     "skills/terraform-specialist, skills/terraform-change-safety, skills/dag-glue-specialist, "
+     "skills/terraform-change-safety, "
      "workflows/data-pipeline-change.md"),
     ("Releases & verification", 1.0, 3, 10,
-     "skills/release-manager, tool-subagents/release-coordinator.md, skills/e2e-release-verification"),
+     "tool-subagents/release-coordinator.md"),
     ("Env setup & onboarding", 1.0, 15, 30,
      "scripts/bootstrap-dev.sh, skills/local-env-bootstrap, skills/environment-diagnose, skills/project-discovery"),
     ("Meetings & other", 10.0, 0, 2, "(little toolkit effect)"),

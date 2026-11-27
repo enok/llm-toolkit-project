@@ -47,6 +47,5 @@ When the candidate says "I did until item 8" or "starting earlier tomorrow":
    post links, each verified.
 4. **Verify every link opens in the candidate's own browser** (a course deep
    link can fail in one browser and work in another) and offer the working
-   variant. Link-audit procedure:
-   `skills/youtube-video-curation/references/link-audit.md`.
+   variant.
 5. End with the updated total time and the next three items.

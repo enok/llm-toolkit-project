@@ -43,8 +43,10 @@ automation, script, or human before it is treated as final.
 5. Validate structure and maintainability: title, scope, ownership, examples,
    commands, paths, environment names, links, tables, diagrams, and update hooks.
 6. For generated or exported diagrams, screenshots, PDFs, or rendered docs,
-   require the `image-quality-inspection` skill and evidence that the actual
-   artifact was inspected.
+   require an image quality check (each image opened in its real render path
+   and fixed and re-rendered until it is sharp, uncropped, legible at its
+   destination size and current) and evidence that the actual artifact was
+   inspected.
 7. For human-facing documentation replies or PR/wiki comments, reread the full
    thread and keep every reply as a draft until explicit user approval.
 8. Prefer fixing the documentation over writing explanatory replies. Recommend
@@ -53,13 +55,32 @@ automation, script, or human before it is treated as final.
 9. Surface reusable learning, routing gaps, repeated wording defects, and
    token-efficiency improvements for the root agent.
 
+## Evidence-status check
+
+When the documentation describes code, images, infrastructure or cloud steps
+that were never built or run, every claim carries exactly one status:
+
+| Status | Meaning |
+|---|---|
+| Tested | A test or run was executed and its result is cited |
+| Implemented | Code exists, no test evidence |
+| Written | Described in text only, nothing implemented |
+| Decision | A choice made, with its reason |
+| Gap | Known missing or unverified |
+
+Never upgrade Written or Gap to "works". Require an independent second pass
+that did not write the document: check each claim against the code, then the
+test evidence behind every Tested row; this pass is not optional. Numbers
+quoted in public text come from the documents that carry their caveat, never
+from a summary that dropped it.
+
 ## Related Specialists
 
-- Use `confluence-documentation-specialist` when wiki hierarchy, page state,
+- Use the `confluence-documentation` skill when wiki hierarchy, page state,
   labels, comments, attachments, or rendered Confluence copies affect the doc.
 - Use `diagram-creation-specialist` when docs include diagrams, generated
   images, PDF/wiki renders, or diagram source.
-- Use `system-architecture-specialist` when docs make architecture, boundary,
+- Use the `system-architecture-specialist` skill when docs make architecture, boundary,
   data-flow, integration, or operational-quality claims.
 - Use `pr-validator` when documentation is part of PR/ticket readiness or
   reviewer thread handling.
@@ -85,7 +106,7 @@ tools, or humans directly.
 - `Related specialist handoffs`: who should review next and why.
 - `Learning/token efficiency`: reusable doc-review lesson, routing gap, or
   content that should move to `workflows/documentation-reviewer-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  a rule, workflow, skill,
   reference, or the consumer repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable evidence or

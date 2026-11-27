@@ -30,13 +30,11 @@ This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
 |-----------|-------------|--------------|
 | **Writing new chapter** | `workflows/thesis-chapter-writing.md` | Chapter-type guidance |
 | **Adding citations** | This workflow §Phase 3 | Citation integration |
-| **Method selection** | `workflows/research-analysis-cycle.md` | Method framework |
-| **Formatting check** | `skills/abnt-formatting/SKILL.md` | ABNT vs institutional manual |
+| **Formatting check** | This workflow §Phase 4 | ABNT vs institutional manual |
 | **Plagiarism scan** | `workflows/thesis-plagiarism-check.md` | Originality check |
-| **Bilingual sync** | `workflows/bilingual-notebook-sync.md` | EN ↔ pt-BR |
-| **Analysis→Thesis sync** | `workflows/research-analysis-cycle.md` | Evidence flow |
-| **Advisor submission** | `workflows/thesis-submission-preparation.md` | Submission prep |
-| **Final formatting** | `skills/abnt-formatting/SKILL.md` | ABNT compliance |
+| **Analysis→Thesis sync** | This workflow §Step 10 | Evidence flow |
+| **Advisor submission** | This workflow §Phase 6 | Submission prep |
+| **Final formatting** | This workflow §Phase 4 | ABNT compliance |
 
 ### Step 2: Load Thesis Knowledge Base
 
@@ -48,15 +46,14 @@ This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
 - [ ] The project's current findings summary (e.g., `docs/<findings-summary>.md`)
 
 **For methods/methodology:**
-- [ ] `workflows/research-analysis-cycle.md` — Method framework
 - [ ] The project's reference database — Method references
 
 **For formatting:**
-- [ ] `skills/abnt-formatting/SKILL.md` — ABNT vs the institution's manual
+- [ ] ABNT NBR 14724:2011 — compared with the institution's manual (Step 7)
 - [ ] The institution's thesis manual — Deliverable expectations
 
 **For bibliography:**
-- [ ] `skills/abnt-formatting/SKILL.md` — NBR 6023 reference format
+- [ ] ABNT NBR 6023:2023 — reference format (Step 6)
 - [ ] The project's reference database — Complete list of sources
 
 ### Step 3: Determine Language Scope
@@ -108,7 +105,7 @@ Run the **thesis-chapter-writing** workflow (`workflows/thesis-chapter-writing.m
 5. Build reference list alphabetically
 ```
 
-**Reference format:** `skills/abnt-formatting/SKILL.md`
+**Reference format:** ABNT NBR 6023:2023 (Step 6)
 
 ### Step 6: Reference List Compilation
 
@@ -135,7 +132,7 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `skills/abnt-formatting/SKILL.md` and `skills/abnt-formatting/references/abnt-nbr-14724-core-requirements.md`
+1. Read the institution's thesis manual
 2. Compare the institution's thesis manual vs ABNT NBR 14724:2011
 3. Check page setup:
    - Margins: Left 3cm, Right 2cm, Top 3cm, Bottom 2cm (verify the institution's manual)
@@ -207,41 +204,33 @@ WOOLDRIDGE, J. M. Introductory econometrics: a modern approach. 7th ed. Boston: 
 
 **Execute:**
 ```
-1. Read `workflows/research-analysis-cycle.md` and `workflows/analysis-validation.md`
-2. Verify evidence traceability:
+1. Verify evidence traceability:
    - Every claim → notebook/script reference
    - Every statistic → source data
    - Every figure → generation code
-3. Check validity:
+2. Check validity:
    - No data leakage claims
    - Causality not overstated
    - Limitations acknowledged
-4. Verify bilingual sync:
+3. Verify bilingual sync:
    - Same numbers in PT and EN
    - Same interpretations
    - Equivalent phrasing
-5. Regenerate presentation assets (figures, tables, slides) if needed
+4. Regenerate presentation assets (figures, tables, slides) if needed
 ```
 
 ---
 ## Phase 6: Final Preparation & Submission
 
-Run the **thesis-submission-preparation** workflow (`workflows/thesis-submission-preparation.md`) in full: Step 11 pre-submission checklist, Step 12 final review, Step 13 submission packaging. Do not start it until every Phase 5 validation (plagiarism check, analysis-thesis alignment) has passed.
+Do not start until every Phase 5 validation (plagiarism check, analysis-thesis alignment) has passed. Then, for both language versions: Step 11 pre-submission checklist (chapters, abstracts, formatting against the institution's manual, references, figures and tables, similarity under the institution's limit, bilingual consistency, reproducible supporting materials), Step 12 final review (cross-references, spelling, headings, every statistic matching its source), and Step 13 submission packaging per the institution's manual, with submission metadata copied from the file's own text.
 
 ## Related Workflows & Skills
 
 ### Workflows (in execution order)
-1. `workflows/research-analysis-cycle.md` — Method framework and evidence flow
-2. `workflows/thesis-chapter-writing.md` — Chapter-type guidance
-3. `workflows/analysis-validation.md` — Analysis validation
-4. `workflows/thesis-plagiarism-check.md` — Originality
-5. `workflows/thesis-plagiarism-prevention.md` — Prevention habits
-6. `workflows/thesis-submission-preparation.md` — Submission
-7. `workflows/bilingual-notebook-sync.md` — Bilingual sync
-8. `workflows/bilingual-doc-sync.md` — Document sync
+1. `workflows/thesis-chapter-writing.md` — Chapter-type guidance
+2. `workflows/thesis-plagiarism-check.md` — Originality
 
 ### Skills (for guidance)
-- `skills/abnt-formatting/SKILL.md` — ABNT formatting
 - `skills/document-conversion/SKILL.md` — File handling
 
 ---
@@ -252,11 +241,9 @@ Run the **thesis-submission-preparation** workflow (`workflows/thesis-submission
 What thesis task?
 ├── Writing chapter → workflows/thesis-chapter-writing.md
 ├── Adding citations → This workflow §Phase 3
-├── Method selection → workflows/research-analysis-cycle.md
-├── Formatting check → skills/abnt-formatting/SKILL.md
+├── Formatting check → This workflow §Phase 4
 ├── Plagiarism scan → workflows/thesis-plagiarism-check.md
-├── Bilingual sync → bilingual-notebook-sync.md / bilingual-doc-sync.md
-└── Final submission → workflows/thesis-submission-preparation.md
+└── Final submission → This workflow §Phase 6
 ```
 
 ---

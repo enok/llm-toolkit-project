@@ -118,7 +118,7 @@ If no ticket context exists, use a descriptive prefix:
 git commit -m "docs: Add learning — <short description>"
 ```
 
-The **toolkit-maintenance** workflow promotes at most 5 learning files per run; promoted files and their `learnings/INDEX.md` lines stay (`rules/error-driven-learning.md`).
+Promotion handles at most 5 learning files per run; promoted files and their `learnings/INDEX.md` lines stay (`rules/error-driven-learning.md`).
 
 ## Known pitfalls
 
@@ -128,4 +128,4 @@ The **toolkit-maintenance** workflow promotes at most 5 learning files per run; 
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

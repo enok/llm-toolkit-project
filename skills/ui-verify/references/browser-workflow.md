@@ -48,7 +48,7 @@ Capture at minimum:
 2. A screenshot of the success state (`browser_take_screenshot` or equivalent).
 3. On failure: a screenshot or snapshot showing actual versus expected.
 
-Record **which MCP server** was used in the report header. Screenshots that become report or wiki evidence must pass the `image-quality-inspection` gate.
+Record **which MCP server** was used in the report header. Screenshots that become report or wiki evidence must pass an image quality check (opened as rendered; sharp, uncropped, legible at the destination size, current).
 
 ## Common blockers
 
@@ -62,4 +62,4 @@ Record **which MCP server** was used in the report header. Screenshots that beco
 
 ## Parallel with Figma
 
-When **figma-compare** runs next, capture a **full-viewport screenshot** at the Figma breakpoint. Use `browser_resize` (Playwright) or the provider equivalent; not all servers expose CDP emulation.
+When a Figma comparison runs next, capture a **full-viewport screenshot** at the Figma breakpoint. Use `browser_resize` (Playwright) or the provider equivalent; not all servers expose CDP emulation.

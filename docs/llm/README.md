@@ -40,11 +40,11 @@ Or, in Git Bash:
 
 Keep generic guidance in the shared toolkit. Add repo-only guidance here when it would be incorrect or too specific for other projects, for example:
 
-- repository-specific data contracts and staging conventions (via `data-pipeline-boundaries` skill)
-- notebook conventions that depend on this repo's folders, datasets, or outputs (via `notebook-analysis` skill)
+- repository-specific data contracts and staging conventions
+- notebook conventions that depend on this repo's folders, datasets, or outputs
 - AWS orchestration guidance that reflects this repo's current shell-script ETL and minimal `infra/` baseline (via `aws-airflow-terraform-project` skill)
-- documentation expectations tied to the thesis deliverables (via `documentation-governance` skill)
-- mandatory local security-check gates (via `security-checkpoint` skill)
+- documentation expectations tied to the thesis deliverables
+- mandatory local security-check gates
 - trial-and-error discoveries captured as committed learnings for cross-session, cross-tool reuse
 
 ## Learnings
@@ -57,11 +57,9 @@ The `learnings/` directory at the repo root captures trial-and-error discoveries
 
 ## Rubrics
 
-The shared toolkit includes structured review rubrics for architecture, security, and holistic code review. These are referenced by the `review` and `review-and-fix` workflows:
+The shared toolkit includes a structured review rubric for architecture severity calls:
 
 - `rubrics/architecture.md`
-- `rubrics/code-review-checklist.md`
-- `rubrics/security.md`
 
 ## Mandatory Security Gate
 
@@ -79,9 +77,7 @@ PowerShell:
 .\scripts\security-check-toolkit.ps1
 ```
 
-See:
-
-- `security-checkpoint` skill — Repository-specific security requirements
+See `rules/security-check-required.md`.
 
 ## Example Templates
 
@@ -106,10 +102,7 @@ All workflows are now in the shared toolkit under `workflows/` and accessible vi
 
 Start with these skills for repository-specific support (activate via your LLM tool):
 
-- `security-checkpoint` — Mandatory security review
-- `data-pipeline-boundaries` — Bronze/Silver/Gold boundaries
 - `aws-airflow-terraform-project` — Infrastructure guidance
-- `documentation-governance` — Documentation and data governance
 
 ## Recommended Workflows (via Shared Toolkit)
 
@@ -126,7 +119,5 @@ Skill-specific references live under `.agents/skills/*/references/`. Repository-
 
 **Complete workflow list:**
 - `data-source-ingestion.md` — Bronze layer data ingestion
-- `pipeline-change-project.md` — Project-specific pipeline changes
-- `bilingual-notebook-sync.md` — EN/pt-BR notebook synchronization
 - `aws-airflow-terraform-project.md` — Project-specific infrastructure guidance
 - `thesis-plagiarism-check.md` — Originality verification

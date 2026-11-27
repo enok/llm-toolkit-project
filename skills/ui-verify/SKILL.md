@@ -14,8 +14,8 @@ Verify that implemented UI **actually works in a browser** before telling the us
 
 - After implementing or fixing React/UI code (feature, bug fix, styling that affects behavior)
 - User says "verify in browser", "check the UI", "test the interface", or "make sure it works"
-- At the end of a **task-starter** plan when steps touch UI (run before saying "done")
-- After **fix** when findings were UI-related
+- At the end of a plan when steps touch UI (run before saying "done")
+- After review fixes when findings were UI-related
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ Verify that implemented UI **actually works in a browser** before telling the us
 | Dev server URL or way to start one | Infer from repo (see [dev-server.md](references/dev-server.md)); ask user if ambiguous |
 | Acceptance criteria | Read from the ticket, `docs/jira/<TICKET>/implementation-plan.md`, the user message, or derive minimal checks from the change |
 
-Optional: if a Figma URL exists for the story, run **figma-compare** after functional checks pass.
+Optional: if a Figma URL exists for the story, compare the screen with the Figma frame after functional checks pass.
 
 ## Workflow
 
@@ -66,7 +66,7 @@ Save the checklist in the report under **Checks**.
 3. If not running, start the dev server in the background from the project root; wait until HTTP responds.
 4. Note auth requirements (login route, test user, env vars). If blocked, ask the user once with the exact steps needed; do not skip silently.
 
-**Dev server lifecycle:** Leave a background dev server running after verification so the user can continue manual testing or a follow-up **figma-compare**. Do not stop it unless the user asks, the process is clearly orphaned from a prior session, or you need the port for a different command.
+**Dev server lifecycle:** Leave a background dev server running after verification so the user can continue manual testing or a follow-up Figma comparison. Do not stop it unless the user asks, the process is clearly orphaned from a prior session, or you need the port for a different command.
 
 ### 4. Browser session (browser MCP)
 
@@ -77,7 +77,7 @@ Typical sequence (map to your provider's tool names):
 1. Navigate to the target URL.
 2. Snapshot; confirm structure and labels before interacting.
 3. For each acceptance check: click, fill, type, select, scroll as needed; re-snapshot after state changes.
-4. Screenshot the final state for the report (and for **figma-compare** if needed).
+4. Screenshot the final state for the report (and for a Figma comparison if needed).
 5. Close or leave the session per provider docs if cleanup is required.
 
 Provider-specific notes:
@@ -96,7 +96,7 @@ Rules:
 
 | Result | Action |
 |--------|--------|
-| **Pass** (all checks behaved as expected) | Write report with status `pass`; suggest **figma-compare** if a design link exists; then **pre-pr-check** or **review** |
+| **Pass** (all checks behaved as expected) | Write report with status `pass`; suggest a Figma comparison if a design link exists; then **pre-pr-check** or **ticket-review** |
 | **Fail** (wrong behavior, errors visible, blocked flow) | Fix the code, re-run this skill; do **not** tell the user the task is done |
 | **Blocked** (needs credentials, API down, no browser MCP) | Report the blocker clearly; recommend Playwright MCP install for non-Cursor hosts |
 
@@ -125,7 +125,7 @@ Write **`docs/jira/<TICKET>/ui-verify-report.md`** when a ticket key exists (inf
 
 ## Next steps
 
-- (fix and re-verify | figma-compare | pre-pr-check)
+- (fix and re-verify | Figma comparison | pre-pr-check)
 ```
 
 Optionally mirror the status in `ui-verify-report.json` next to the Markdown report:
@@ -138,11 +138,9 @@ Optionally mirror the status in `ui-verify-report.json` next to the Markdown rep
 
 | Skill | When |
 |-------|------|
-| **figma-compare** | Ticket or plan includes a Figma URL; run after functional pass |
-| **pre-pr-check** / **review** | After UI verify (and optional figma-compare) pass |
-| **fix** | If pre-pr-check finds issues after verify |
-| **task-starter** | Plans should list `-> verify: ui-verify` on UI steps |
-| **image-quality-inspection** | Screenshots that become report or wiki evidence must pass the image quality gate |
+| **pre-pr-check** / **ticket-review** | After UI verify (and an optional Figma comparison) pass |
+
+Screenshots that become report or wiki evidence must pass an image quality check: each one opened as rendered and sharp, uncropped, legible at its destination size and current.
 
 ## Non-goals
 

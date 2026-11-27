@@ -4,101 +4,50 @@ description: Reusable per-task produce-validate-refine loop with a hard iteratio
 
 # Task Quality Loop
 
-Reusable per-task produce->validate->refine loop for orchestrated delegation. `agent-orchestrator` applies this loop to every delegated task; other workflows may call it by path for any bounded task that has verifiable acceptance criteria.
+Produce->validate->refine loop that `agent-orchestrator` applies to every delegated task; other workflows may call it for any bounded task with verifiable acceptance criteria. Hard limit: **max 5 iterations per task**; deterministic `light` tasks get budget 1. Never loop silently or accept a failed result.
 
-Hard limit: **max 5 iterations per task.** Never loop indefinitely and never silently accept a failed result.
+## Before the first iteration
 
-## Inputs (per task)
-
-- Task objective and scope (from the orchestrator's task table row).
-- Acceptance criteria: verifiable, written before the first iteration. Each criterion is mandatory or advisory. At least one criterion must be checkable by evidence (command output, file content, rendered artifact), not by opinion.
-  - **Ticket-driven work:** when the task comes from a ticket (Jira or similar), the ticket's acceptance criteria are the mandatory criteria — the loop passes only when every AC is demonstrably met. If the ticket is a subtask, also check the result stays aligned with the parent ticket's goal and does not contradict sibling subtasks; misalignment is a mandatory-criterion failure.
-  - **Unclear goal gate:** if the goal or ACs cannot be turned into verifiable criteria (ambiguous wording, missing AC section, conflicting parent/subtask goals), do not start the loop. Ask the user for clarification first — burning iterations against a guessed goal wastes the budget and validates the wrong thing.
-- Producer agent + complexity tier (`light`/`standard`/`deep`).
-- Validator assignment (see selection map below).
-- Loop budget: default 5; deterministic `light` tasks (single command, mechanical edit, exact lookup) get budget 1 — one production pass plus one validation pass, no refinement loop.
+- Write verifiable acceptance criteria, each mandatory or advisory, at least one checkable by evidence. A ticket's ACs are the mandatory criteria; a subtask must also stay aligned with its parent and siblings.
+- **Unclear goal gate:** if the goal or ACs cannot become verifiable criteria, ask the user before starting.
+- Assign producer + tier and a validator from the map.
 
 ## Validator selection map
 
-Match the validator to the task's evidence type; use `task-quality-judge` when no domain specialist fits:
-
 | Task output type | Validator |
 | --- | --- |
-| Code change / diff | `code-reviewer` (+ `test-runner` when tests exist) |
+| Code change / diff | read-only validator lane on the plain model for behavior and regression risk (+ `test-runner` when tests exist) |
 | Test selection / build evidence | `test-runner` |
 | Documentation, runbooks, generated LLM surfaces | `documentation-reviewer` |
-| CV / career-profile claims | `cv-truthfulness-reviewer` |
-| Public article and social post drafts | Read-only validator lane checking the consumer's publication profile and `rubrics/technical-content.md` if that file exists (with `skills/medium-publishing/scripts/check_publication.py`); the draft stays `NOT POSTED` until the owner approves |
+| CV / career-profile claims | read-only validator lane on the plain model checking each claim, date, and title against its evidence |
+| Public article and social post drafts | read-only lane on the publication profile and `rubrics/technical-content.md` if present (shape check of `workflows/study-publication-medium-linkedin.md`); draft stays `NOT POSTED` until the owner approves |
 | Java changes | `java-change-validator` |
-| Security-sensitive work | `security-auditor` or `owasp-security-auditor` |
+| Security-sensitive work | read-only validator lane on the plain model with `skills/security-best-practices` |
 | Diagrams / exported images | `diagram-creation-specialist` |
 | PR / ticket readiness | `pr-validator` |
-| Airflow/Glue/ETL | `dag-glue-specialist` |
-| Architecture claims | `system-architecture-specialist` |
+| Airflow/Glue/ETL | read-only validator lane on the plain model |
+| Architecture claims | read-only validator lane on the plain model with `skills/system-architecture-specialist` |
 | Log/evidence reduction | `log-analyst` |
-| Web research findings / advisory synthesis | `verifier` at `light` as a claim check: the root lists the load-bearing claims with their source URLs; the verdict per claim is PASS / FAIL / UNVERIFIED with a short quote (template: `skills/credential-evaluation/references/lane-prompts.md`) |
+| Web research findings | `verifier` at `light`: per-claim PASS / FAIL / UNVERIFIED with a short quote (`skills/credential-evaluation/references/lane-prompts.md`) |
 | Alarm RCA / hypotheses | `aws-alarm-investigator` |
 | Completion claims, mixed or generic output | `task-quality-judge` or `verifier` |
 
-Rules:
+The validator is a different invocation than the producer, read-only (verdicts and defect lists, never edits), at the minimum sufficient tier, with its model set from the client model map in `tool-subagents/agent-orchestrator.md` like any dispatch.
 
-- The validator must be a different agent invocation than the producer. A producer never self-validates.
-- Validators are read-only: they return verdicts and defect lists, never edits.
-- Run the validator at the minimum sufficient tier (usually `light` or `standard`); the validator tier never needs to match the producer tier. Validator dispatches follow the same mandatory model selection as producer dispatches: set the delegation tool's model parameter from the client model map in `tool-subagents/agent-orchestrator.md` on every call where the platform exposes one.
-
-## Loop procedure
+## Loop
 
 For iteration `i` in 1..budget:
 
-1. **Produce.** The producer executes the task at its assigned tier. On iterations after the first, the producer receives only: the original task, the acceptance criteria, and the previous verdict's defect list. Refinement is targeted — fix listed defects; do not restart from scratch or expand scope.
-2. **Validate.** The validator checks every acceptance criterion with evidence and returns the structured verdict (`pass` | `fail` | `escalate`, criteria checklist, numbered defects each classed `mechanical` or `reasoning`, regressions vs previous iteration, loop recommendation).
-3. **Decide.**
-   - `pass` -> task done. Record iterations used in the task table, and mark the task first-pass when `i = 1`.
-   - `fail` and `i < budget` -> feed the defect list to the producer and continue.
-   - `fail` and `i = budget` -> stop; mark the task `escalated` and hand the last output + full verdict history to the root agent.
-   - `escalate` (any iteration) -> stop immediately; the task is mis-scoped, criteria are contradictory, or the same reasoning defect survived two consecutive iterations.
+1. **Produce.** After the first pass the producer gets only the task, the criteria, and the last defect list; fix the listed defects, do not restart or widen scope.
+2. **Validate.** Verdict `pass` | `fail` | `escalate`, criteria checklist, numbered defects classed `mechanical` or `reasoning`, regressions, loop recommendation. One failed mandatory criterion means `fail`.
+3. **Decide.** `pass`: done (first-pass when `i = 1`). `fail` and `i < budget`: refine. `fail` at budget: mark `escalated`, hand the last output and verdict history to the root. `escalate`: stop (mis-scoped task, contradictory criteria, or the same reasoning defect in two consecutive iterations).
 
-## Tier escalation inside the loop
+After 2 consecutive `fail` verdicts with blocking `reasoning` defects, raise the producer one tier (`light` -> `standard` -> `deep`) through a platform-confirmed mechanism and note it in the task table; `mechanical` defects never raise the tier. A refine re-validation resumes the same validator or gives a fresh one the verdict history.
 
-- After 2 consecutive `fail` verdicts whose blocking defects are classed `reasoning`, escalate the producer one tier (`light` -> `standard` -> `deep`) for the next iteration and say so in the task table.
-- `mechanical` defects never escalate tier; they indicate instructions, not capability, were the gap.
-- Raising effort within the current tier is a cheaper first move than jumping a tier; try it when the defects are borderline.
-- Tier escalation follows the standard rule: apply it only through a platform-confirmed mechanism; otherwise continue at platform default and state that.
+## Escalated tasks (root agent)
 
-## Escalation handling (root agent)
-
-When a task arrives `escalated`, the root agent chooses explicitly — never silently:
-
-- **accept-with-risk**: use the best iteration's output and record the unmet criteria as risks in the final report;
-- **re-scope**: rewrite the task or its criteria and restart the loop (this is a new task row, fresh budget);
-- **reassign**: give the task to a different specialist or take it locally;
-- **ask the user**: when the gap is a product/scope decision.
-
-## Anti-patterns
-
-- Re-running the identical prompt hoping for a different result — every iteration must consume the defect list.
-- Validator drift — validators judge only the stated criteria; new requirements discovered mid-loop go to the root agent as scope findings, not silent additions.
-- Loop inflation — do not apply the full loop to trivial deterministic tasks; budget 1 exists for those.
-- Verdict averaging — one failed mandatory criterion means `fail`, regardless of how many others passed.
+Choose explicitly: **accept-with-risk** (unmet criteria become reported risks), **re-scope** (new row, fresh budget), **reassign**, or **ask the user**.
 
 ## Reporting
 
-The orchestrator's task table tracks the loop live: the row's Evidence cell shows `iter used/budget` (e.g. `iter 2/5`), `Status` gains `validating` and `refining` states, and escalated rows keep their full verdict history available for the root agent's final report. After the run, feed loop statistics (tasks that needed >1 iteration, recurring defect classes, validator misses) into `workflows/self-improvement.md` as evolution signals.
-
-Per task, report to the run record built by `workflows/run-retrospective.md`: iterations used (summed into `iterations`), the first-pass flag (counted in `first_pass` unless the task is later reopened), and a mistake signature for each distinct root cause behind the blocking defects of its `fail` verdicts, classified per `skills/run-retrospective/references/mistake-taxonomy.md`. An in-loop tier escalation adds a `tier-misassignment/...` signature; an `escalated` task is never first-pass.
-
-## Reviewer reuse, allow-lists and caps
-
-- **Reviewer reuse vs fresh.** When the long-lived validator's context is large, start a fresh narrow reviewer given only the defect list and the diff; in one run this cost about half of resuming the old reviewer (about 125K versus 218K tokens). Record which you chose and why. If history matters for the verdict, pass the verdict history too (see the pitfall below).
-- **Allow-list after two deny-list failures.** When two fix rounds in a row each leave a new variant that a deny-list missed (hidden-text or carrier-character filters are the usual case), stop adding exclusions and switch to an allow-list of what is permitted.
-- **Cap reached: report the open item.** At the last allowed iteration, report the unresolved defect and its evidence to the root instead of looping again.
-- **Exact replacement text.** A validator that fails a draft returns the exact replacement text in a file, not prose, so the producer applies it without reinterpretation.
-
-See `learnings/review-loop-fresh-narrow-reviewer-and-allow-list-switch.md`.
-
-## Known pitfalls
-
-- When a validator reports the same defect shape in several files, trace it to the shared generator or template and fix it there before refining the instances; a fix to the instances alone lets the generator emit the defect again. See `learnings/find-generator-not-just-instances.md`.
-- Compile-check Python in a clean-tree gate or read-only review in memory (`compile(open(path, 'rb').read(), path, 'exec')` or `ast.parse`), not with `python -m py_compile`, which writes a `__pycache__` file even under `-B` or `PYTHONDONTWRITEBYTECODE`; if it was run, remove the folder and confirm the tree is clean. See `learnings/py-compile-writes-bytecode-despite-no-bytecode-flag.md`. (sig: tool-misuse/compile-check-wrote-bytecode-into-reviewed-tree)
-- When a second review finds a new variant of a class after a point fix, stop adding exclusions: describe the class, invert the rule to an allow-list where possible, and test the class, not the reported sample. See `learnings/detection-rule-point-exclusions-reopened-use-allow-list.md`. (sig: quality-defect/exclusion-list-fix-reopened-by-next-variant)
-- When a refine round re-validates, resume the validator that issued the defect list, or give a fresh validator the verdict history and the root's rulings; a fresh one with no history failed a label an earlier verdict had prescribed. Cite in the brief the workflow section for any prescribed wording (untested as a rule). (sig: validation-gap/revalidation-without-verdict-history)
+The task table's Evidence cell shows `iter used/budget`; `Status` gains `validating` and `refining`. Per task, the run record (`workflows/run-retrospective.md`) gets iterations used, the first-pass flag, and one mistake signature per root cause of blocking defects (`skills/run-retrospective/references/mistake-taxonomy.md`); an in-loop tier raise adds `tier-misassignment/...`, and an `escalated` task is never first-pass.

@@ -8,10 +8,8 @@ Use when a career fact changes ("I left that employer", "set the end date",
 "add this skill and project", "I earned this certification", "drop the old
 courses") or when asked to "sync my CV with LinkedIn", and the same fact appears
 in more than one place. The recurring
-job-search runs are `workflows/job-search-pipeline.md` and
-`workflows/job-search-setup.md`; they read the files this workflow keeps in
-step. Public-profile mechanics live in
-`skills/linkedin-profile-maintenance/SKILL.md`.
+job-search run is `workflows/job-search-pipeline.md`; it reads the files this workflow keeps in
+step.
 
 Everything personal (employers, dates, titles, handles, file locations) comes
 from the owner and their files, never from this workflow. Every edit to a
@@ -72,15 +70,14 @@ not others is the failure this workflow exists to prevent.
    standard answers, targeting, and job-scan profile files. Update source and
    HTML comments as well as visible text: a stale comment can contradict the
    page.
-2. **Public profile.** Use `skills/linkedin-profile-maintenance/SKILL.md`:
-   inventory, backup, owner approval, one item at a time, re-read. The owner's
+2. **Public profile.** Inventory, backup, owner approval, one item at a time,
+   re-read. The owner's
    signed-in browser is used; the agent never signs in or passes a bot check.
 3. **Applicant portals.** Each portal is an external write in the owner's
    account. Prepare the exact values per portal and hand them to the owner, or
    edit only where the owner has an open session and approved that portal.
 4. **Counts and derived numbers** quoted in any document are recomputed from the
-   source they summarise, not copied from a README or an earlier draft. See
-   `learnings/readme-catalog-counts-drift-from-disk.md`.
+   source they summarise, not copied from a README or an earlier draft.
 
 ## Phase 4 - Re-render the CV to its page budget
 
@@ -89,8 +86,7 @@ When the CV changed, regenerate it with the CV project's own render script
 check the result; do not assume the edit left the layout intact.
 
 1. Re-render, then read the page count and any "N of M" footer.
-2. Inspect the page images (`skills/image-quality-inspection/SKILL.md`), not
-   only the text: look for overflow, orphaned headings, and blank bands.
+2. Inspect the page images as rendered, not only the text: look for overflow, orphaned headings, and blank bands.
 3. Keep-with-next rules can leave several blank lines at the bottom of a page.
    Levers that worked:
    - merge skill-group lines;
@@ -100,8 +96,8 @@ check the result; do not assume the edit left the layout intact.
 
 ## Phase 5 - Truthfulness review
 
-Dispatch `tool-subagents/cv-truthfulness-reviewer.md` (read-only; `standard`
-tier, explicit model per the orchestrator's client map) with the CV, the master
+Dispatch a read-only validator lane on the plain model (`standard` tier,
+explicit model per the orchestrator's client map) with the CV, the master
 CV, the profile export or read-back, and the repository facts the CV cites. It
 compares the text with the evidence: claims, dates and titles, verb strength,
 open-source wording, counts from disk, stale comments, and employment status
@@ -115,8 +111,7 @@ When files travel between a cloud session and the owner's machine:
 
 1. Stage every commit in a fresh staging subfolder, never re-commit under a
    path already used, and verify the SHA-256 on the machine through the device
-   shell before trusting the file. See
-   `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`.
+   shell before trusting the file.
 2. If `skills/` or `tool-subagents/` is unreadable through the bridge, read
    through a cloud clone; to run a script from a protected folder, copy it to a
    non-protected folder first and park the copy for deletion afterwards. See
@@ -143,7 +138,5 @@ When files travel between a cloud session and the owner's machine:
   (sig: spec-gap/employment-fact-updated-in-one-place)
 - CV layout not checked on the page images: Phase 4.
   (sig: validation-gap/cv-layout-not-visually-checked)
-- Catalog counts drift from disk. See
-  `learnings/readme-catalog-counts-drift-from-disk.md`.
-- A re-committed staged path can keep old bytes. See
-  `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`.
+- Catalog counts drift from disk.
+- A re-committed staged path can keep old bytes.

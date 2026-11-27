@@ -1,6 +1,6 @@
 # Technical Content Rubric
 
-Score drafted technical content - a long-form article, a social post, a document carousel, and their cover/diagram visuals - before it is handed to a human for posting. Use this rubric as the scoring step of `workflows/technical-content-publishing.md` (Phase 5); platform specifics (limits, truncation, formatting, sizes) come from `skills/technical-content-publishing/references/` and are checked there, not restated here. For image inspection details see `skills/image-quality-inspection/references/image-quality-gate.md`.
+Score drafted technical content - a long-form article, a social post, a document carousel, and their cover/diagram visuals - before it is handed to a human for posting. Use this rubric as the scoring step of `workflows/technical-content-publishing.md` (Phase 5); platform specifics (limits, truncation, formatting, sizes) come from `skills/technical-content-publishing/references/` and are checked there, not restated here.
 
 The validator is read-only and must not be the producer of the content it scores (`workflows/task-quality-loop.md`).
 

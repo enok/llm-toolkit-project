@@ -102,9 +102,9 @@ Apply `rules/knowledge-base.md` duty 3 to every candidate.
 
 ## Phase 4 - Classify
 
-Choose each item's destination with the Destination Guide in
-`skills/chat-knowledge-curation/SKILL.md`. Prefer extending the smallest
-existing asset. Learnings follow `workflows/capture-learning.md`; workflow
+Choose each item's destination: the smallest existing asset that owns it
+(rule, workflow, skill, subagent, script, the consumer's `docs/llm/`, or a
+learning). Learnings follow `workflows/capture-learning.md`; workflow
 edits follow `rules/workflow-authoring.md`; checklist bullets follow the
 `## Known pitfalls` convention there. Keep a mapping table:
 inbox name -> destination path -> action (new, extended, merged, rejected).

@@ -115,8 +115,6 @@ git show <commit>:<path>
 
 ## How Workflows Use GitHub
 
-- **ticket-research** — search for existing PRs and branches related to a ticket
-- **review** — read PR comments, check CI status, push changes
 - **project-discovery** — explore repo structure, read key files across repos
 
 ---

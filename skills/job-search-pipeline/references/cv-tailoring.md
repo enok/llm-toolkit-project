@@ -265,7 +265,7 @@ policy, links) and say the form was not read.
 ## Related
 
 - Independent check that the CV states nothing the master CV does not support:
-  `tool-subagents/cv-truthfulness-reviewer.md`.
+  a read-only validator lane on the plain model (`workflows/task-quality-loop.md`).
 - Keeping CV, profile and portals consistent after a change:
   `workflows/career-profile-sync.md`.
 - Rendering the DOCX: `scripts/render_cv.py` (exit code 2 while any `[FILL`

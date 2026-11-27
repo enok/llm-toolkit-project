@@ -15,14 +15,11 @@ Guides for connecting LLM agents to external tools and services. These integrati
 
 Workflows reference integrations when they need external context:
 
-- **ticket-research** → Jira (ticket details) + Confluence (documentation) + GitHub (PRs, branches)
-- **review** → Jira (ticket ACs) + GitHub (PR comments, CI status)
-- **task-starter** → Jira (ticket details) + Confluence (related docs)
 - **project-discovery** → Confluence (architecture docs) + GitHub (repo structure)
 
 ## Setup Priority
 
-1. **Jira** — required for ticket-based workflows (task-starter, ticket-research, review)
+1. **Jira** — required for ticket-based workflows
 2. **Confluence** — recommended for documentation-aware workflows
 3. **GitHub** — recommended for multi-repo projects and PR workflows
 4. **AWS CLI** — optional, for infrastructure and deployment tasks

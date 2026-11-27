@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Review shell commands for destructive, exfiltration, or injection risk before execution
+trigger: model_decision
+description: Load when about to run a shell command that downloads, pipes, installs, deletes, rewrites Git history, touches secrets or uses sudo, or when quoting regex patterns or PowerShell and bash arguments.
 ---
 
 # Command safety
@@ -69,8 +69,7 @@ Never split the export and the use across two separate tool invocations when the
   through encoded one-liners (gzip plus base64, `FromBase64String`): antivirus
   and security filters flag them as malicious command lines, and such a filter
   can fail closed on a mislabelled file too
-  (`learnings/av-false-positives-on-encoded-commands-and-scanner-fixtures.md`,
-  `learnings/security-filter-fail-closed-blocks-mislabelled-archive.md`).
+  (`learnings/av-false-positives-on-encoded-commands-and-scanner-fixtures.md`).
 - Grant a tool folder access from evidence: allow only the folders its log
   shows were actually used, and deliberately exclude credential and config
   folders and the tool's own config folder (a session that can write there can

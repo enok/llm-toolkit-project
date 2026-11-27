@@ -95,7 +95,7 @@ Every workflow that acts on code, data, or infra MUST:
 - Begin with: *"Consult `learnings/INDEX.md` for prior discoveries relevant to this task."*
 - End with: *"If this session produced a new learning per the capture triggers above, run `capture-learning`."*
 
-The main orchestration workflows (`project-execution-main.md`, `thesis-writing-main.md`, `review-and-fix.md`, `ticket-implementation.md`) enforce this bookend explicitly.
+The main orchestration workflows (`project-execution-main.md`, `thesis-writing-main.md`, `ticket-implementation.md`) enforce this bookend explicitly.
 
 ## Index Hygiene
 

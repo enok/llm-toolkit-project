@@ -282,11 +282,18 @@ function checkSpecialist(agent) {
     fail(`agent name must be kebab-case: ${agent}`);
     return;
   }
+  // A missing skill twin passes only when the value-check ledger records its
+  // removal; otherwise the twin and its index entries are required.
+  const removed = removedLedgerPaths();
+  const twinRemoved = !exists(`skills/${agent}`)
+    && (removed.has(`skills/${agent}`) || removed.has(`skills/${agent}/SKILL.md`));
   const required = [
     `tool-subagents/${agent}.md`,
     `tool-subagents/${agent}.toml`,
-    `skills/${agent}/SKILL.md`,
   ];
+  if (!twinRemoved) {
+    required.push(`skills/${agent}/SKILL.md`);
+  }
   for (const file of required) {
     if (!exists(file)) {
       fail(`${file} missing`);
@@ -309,26 +316,66 @@ function checkSpecialist(agent) {
     assertContains(`tool-subagents/${agent}.md`, "## Related Specialists", `related specialist handoffs for ${agent}`);
     assertContains(`tool-subagents/${agent}.md`, "Learning/token efficiency", `learning/token efficiency output for ${agent}`);
   }
+  // A missing companion workflow passes only when the ledger records the
+  // removal of that workflow; when one exists it must be indexed and linked.
   const validationWorkflow = findCompanionWorkflow(agent, "validation");
   const evolutionWorkflow = findCompanionWorkflow(agent, "evolution");
-  if (!validationWorkflow) {
+  if (!validationWorkflow && !companionRemoved(agent, "validation", removed)) {
     fail(`validation workflow missing for ${agent}`);
   }
-  if (!evolutionWorkflow) {
+  if (!evolutionWorkflow && !companionRemoved(agent, "evolution", removed)) {
     fail(`evolution workflow missing for ${agent}`);
   }
   assertContains("INTENTS.md", agent, `routing for ${agent}`);
-  assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
-  assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
+  if (!twinRemoved) {
+    assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
+    assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
+  }
   if (validationWorkflow) {
     assertContains("workflows/README.md", path.basename(validationWorkflow), `workflow index for ${agent}`);
   }
   if (evolutionWorkflow) {
     assertContains("workflows/README.md", path.basename(evolutionWorkflow), `evolution workflow index for ${agent}`);
-    assertContains(`tool-subagents/${agent}.md`, evolutionWorkflow, `self-improvement workflow link for ${agent}`);
+    assertContains(`tool-subagents/${agent}.md`, evolutionWorkflow, `evolution workflow link for ${agent}`);
   }
   assertContains("tool-subagents/README.md", `\`${agent}\``, `subagent index for ${agent}`);
   pass(`specialist ${agent} check completed`);
+}
+
+const LEDGER = "docs/llm/value-checks.csv";
+let cachedRemoved;
+
+// Paths whose ledger decision is `remove`. The resource is the first CSV field
+// and the decision the tenth; the note field may hold quoted commas, so only
+// the unquoted leading fields are split.
+function removedLedgerPaths() {
+  if (cachedRemoved !== undefined) {
+    return cachedRemoved;
+  }
+  cachedRemoved = new Set();
+  if (!exists(LEDGER)) {
+    return cachedRemoved;
+  }
+  const lines = read(LEDGER).split(/\r?\n/).slice(1);
+  for (const line of lines) {
+    const fields = line.split(",");
+    if (fields.length >= 10 && !fields.slice(0, 10).some((field) => field.startsWith('"')) && fields[9] === "remove") {
+      cachedRemoved.add(fields[0]);
+    }
+  }
+  return cachedRemoved;
+}
+
+// Companion workflows whose file name does not follow `<agent>-<kind>.md`.
+const COMPANION_ALIASES = {
+  "java-change-validator/evolution": "workflows/java-validator-evolution.md",
+};
+
+// A missing companion passes only when the ledger has a `remove` row for its
+// exact path: `workflows/<agent>-<kind>.md`, or the alias listed above.
+function companionRemoved(agent, kind, removed) {
+  const target = COMPANION_ALIASES[`${agent}/${kind}`] || `workflows/${agent}-${kind}.md`;
+  return removed.has(target) && !exists(target);
 }
 
 function findCompanionWorkflow(agent, kind) {

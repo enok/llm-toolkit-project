@@ -90,5 +90,4 @@ this skill.
 
 - "Accredited" on a program page says nothing about licence scope, QA-agency
   status, or home-country recognition; open the regulator's register and
-  announcements page. See
-  `learnings/degree-accreditation-claims-need-regulator-check.md`.
+  announcements page.

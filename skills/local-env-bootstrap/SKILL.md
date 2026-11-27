@@ -70,12 +70,11 @@ Return:
 
 ## Known pitfalls
 
-- When a consumer repo links toolkit directories through Windows junctions, anchor every linked path in its `.gitignore` with a leading `/` (a bare `workflows/` also ignores `docs/llm/workflows/`), and in the toolkit repo ignore the agent-side skill junction directories, because Git on Windows traverses junctions as real directories and duplicates their content. Do not commit LLM content to both repos. See `learnings/llm-toolkit-junction-architecture.md`.
+- When a consumer repo links toolkit directories through Windows junctions, anchor every linked path in its `.gitignore` with a leading `/` (a bare `workflows/` also ignores `docs/llm/workflows/`), and in the toolkit repo ignore the agent-side skill junction directories, because Git on Windows traverses junctions as real directories and duplicates their content. Do not commit LLM content to both repos.
 
 ## Related Skills
 
 - **runbook-authoring** — Formalize the setup as a reusable runbook
 - **onboarding** — Broader project onboarding; local-env-bootstrap focuses on the environment
-- **shell-scripting** — Setup scripts follow shell best practices
 - **llm-toolchain-provisioning** — Installing and verifying the LLM/agent toolchain on a new machine
 - **environment-diagnose** — Diagnosing an environment that used to work

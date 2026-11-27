@@ -55,7 +55,7 @@ If a node cannot be proven, omit it or label the uncertainty in the surrounding 
 - Relationships should be verb-based: `invokes`, `publishes`, `subscribes`, `reads`, `writes`, `emits`, `redirects`.
 - Include a legend when notation, icons, colors, or relationship styles are not obvious.
 - Compile/export the diagram, inspect every generated/exported image after export, and iterate until labels, spacing, grouping, and arrow direction are readable. This post-export quality-control step is mandatory.
-- Generated images must follow `skills/diagram-authoring/references/diagram-export-quality.md` and `skills/image-quality-inspection/references/image-quality-gate.md`: prefer vector output, verify dimensions for required raster output, and fix/re-render until acceptable.
+- Generated images must follow `skills/diagram-authoring/references/diagram-export-quality.md` and pass the image quality check: prefer vector output, verify dimensions for required raster output, and fix/re-render until acceptable.
 
 ## External patterns reviewed
 

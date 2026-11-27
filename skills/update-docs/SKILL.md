@@ -10,8 +10,6 @@ license: MIT
 
 Keep documentation in sync with code and configuration changes.
 
-> **Reference**: For complete workflow, see `workflows/update-docs.md`
-
 ## Quick Reference
 
 ### Identify Doc Impact
@@ -26,6 +24,10 @@ Keep documentation in sync with code and configuration changes.
 2. Update corresponding documentation
 3. Verify examples in docs still work
 4. Cross-reference related docs for consistency
+5. Apply the smallest doc delta that keeps committed docs truthful
+6. Run `documentation-reviewer` on created or changed docs, PR body text,
+   release notes, wiki drafts, diagrams, and rendered artifacts before
+   reporting completion (`rules/documentation-review-required.md`)
 
 ### Common Doc Locations
 - `README.md` — quick start, examples
@@ -50,5 +52,4 @@ Keep documentation in sync with code and configuration changes.
 
 ## Related
 
-- `workflows/update-docs.md` — Complete workflow
-- `skills/document-creation` — Creating new docs
+- `workflows/update-docs.md` — entry point; this skill holds the procedure

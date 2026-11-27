@@ -10,8 +10,8 @@ owner's behalf and checked later (verification calls, background checks,
 contracts). A dishonest answer can be discovered late and cost an offer; a
 neutral true answer never does. Apply this rule whenever an agent drafts or
 fills an application, a CV, a profile, or a screening answer; the procedures
-are `skills/job-search-pipeline/SKILL.md` and its references, and
-`tool-subagents/cv-truthfulness-reviewer.md` checks tailored CVs against it.
+are `skills/job-search-pipeline/SKILL.md` and its references, and a
+read-only validator lane on the plain model checks tailored CVs against it.
 
 - **Employment status.** Never state or imply a current job the owner does not
   have. The owner may choose not to volunteer a separation; offer a neutral, true

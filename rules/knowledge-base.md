@@ -18,7 +18,7 @@ The toolkit knowledge base (KB) is a local vector index over this repository plu
 
 - Anything a run learns that is reusable beyond this run (a happy path after trial and error, a tool gotcha, a routing gap, a better procedure) goes to both the KB and the repository, after the intake gate (duty 3):
   1. `python3 scripts/kb.py add <file|-> --title "<title>" --kind <kind> --origin <origin>` puts it in the pending inbox at once, so the next search finds it.
-  2. The existing promotion workflows carry it into the right asset on a pull request: `workflows/knowledge-base-sync.md` when an agent run is scheduled for it, or `workflows/capture-learning.md`, `workflows/chat-knowledge-curation.md`, and `workflows/toolkit-maintenance.md` when the run promotes it itself. The sync archives the inbox item after the merge.
+  2. The existing promotion workflows carry it into the right asset on a pull request: `workflows/knowledge-base-sync.md` when an agent run is scheduled for it, or `workflows/capture-learning.md` when the run promotes it itself. The sync archives the inbox item after the merge.
 - In an orchestrated run the root is the single writer of `kb.py add` and of promotions; lanes report candidates as `knowledge: <kind> - <one line>` in their Decisions block (`tool-subagents/agent-orchestrator.md`).
 - **Never stored, in the KB or the repository:** raw session transcripts (only distilled, generic summaries are), secrets and credentials, personal data, company, product, person, host, or ticket names, and machine-specific paths. Consumer-specific facts go to the consumer repository's `docs/llm/`.
 
@@ -37,7 +37,7 @@ Run all four steps before anything is saved to the repository or the KB:
    | 6 | service unreachable | not a pass: search the catalog and `learnings/INDEX.md` by hand for duplicates, run step 2, and retry `add` once the service is back |
 
 2. **Security check.** Anything entering the repository passes `rules/security-check-required.md`, including the LLM-surface scan; anything entering the KB passes the secret quarantine that `check` runs. A file with a secret is quarantined, never indexed.
-3. **Classification.** Choose the asset type with the Destination Guide in `skills/chat-knowledge-curation/SKILL.md`; treat the destination `check` suggests as input, not a verdict. Pass the matching `--kind` to `add`, and prefer extending the smallest existing asset over creating a new one.
+3. **Classification.** Choose the smallest existing asset that owns the lesson (rule, workflow, skill, subagent, script, the consumer's `docs/llm/`, or a learning); treat the destination `check` suggests as input, not a verdict. Pass the matching `--kind` to `add`, and prefer extending the smallest existing asset over creating a new one.
 4. **Indexes and docs in the same change.** Update every index the change touches (AGENTS.md "After Completing Tasks", `learnings/INDEX.md`), route the documentation through `rules/documentation-review-required.md`, and run the AGENTS.md "Validation" commands.
 
 ## 4. Improvement check

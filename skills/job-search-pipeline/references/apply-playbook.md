@@ -96,8 +96,7 @@ Work in a visible browser tab. Before typing, confirm the posting is open and
 the job is not already applied (board applied list, inbox, or a reload that
 shows "already applied"). Fill, read every field back, compare with the
 approved batch, then submit only if the OK covers the form and no consent box
-is left for the owner. Typeaheads, rich-text fields and lazy lists on other
-single-page apps: `skills/linkedin-profile-maintenance/references/browser-edit-pitfalls.md`.
+is left for the owner.
 
 | Control | What works | What fails |
 | --- | --- | --- |
@@ -126,8 +125,7 @@ single-page apps: `skills/linkedin-profile-maintenance/references/browser-edit-p
 - **Per-form OK.** Each named form needs its own OK in chat; a changed answer
   needs a new one.
 - **Cookie-read refusal.** If auto mode refuses to read session cookies for a
-  private API call, do not argue with it: use the page UI instead
-  ([learning](../../../learnings/browser-tool-blocks-urls-with-query-strings-in-returned-text.md)).
+  private API call, do not argue with it: use the page UI instead.
 
 ## 5. LinkedIn Easy Apply
 

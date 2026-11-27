@@ -205,7 +205,7 @@ java -DPLANTUML_SECURITY_PROFILE=INTERNET -DPLANTUML_LIMIT_SIZE=32768 -jar "$PLA
 
 When PNG is required, use `skinparam dpi 300` or the destination repo's equivalent renderer scaling if it does not distort layout.
 
-After export, open every rendered PNG/SVG/PDF and inspect the actual visual output. This post-export quality-control step is mandatory. Do not rely on compilation success alone. Apply `skills/image-quality-inspection/references/image-quality-gate.md` to all generated/exported images and `skills/diagram-authoring/references/aws-architecture-quality-control.md` to AWS architecture PNG exports. Improve/re-export when:
+After export, open every rendered PNG/SVG/PDF and inspect the actual visual output. This post-export quality-control step is mandatory. Do not rely on compilation success alone. Apply the image quality check (sharp, uncropped, legible at the destination size, current) to all generated/exported images and `skills/diagram-authoring/references/aws-architecture-quality-control.md` to AWS architecture PNG exports. Improve/re-export when:
 
 - labels overlap or are too small to read,
 - arrows cross excessively or imply the wrong direction,

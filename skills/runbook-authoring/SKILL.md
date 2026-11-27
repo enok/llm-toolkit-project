@@ -54,7 +54,6 @@ Return:
 ## Related Skills
 
 - **incident-ops** — Runbooks often come from incident learnings
-- **release-manager** — Release runbooks are a common use case
 - **best-practices** — Operational doc patterns
 
 ## Related Rules

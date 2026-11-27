@@ -11,7 +11,7 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "image-quality-inspection" / "scripts" / "check_carousel.py"
+SCRIPT = ROOT / "scripts" / "check_carousel.py"
 SPEC = importlib.util.spec_from_file_location("check_carousel", SCRIPT)
 assert SPEC and SPEC.loader
 cc = importlib.util.module_from_spec(SPEC)

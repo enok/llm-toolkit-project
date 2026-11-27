@@ -156,6 +156,54 @@ class TestRedaction(ToolchainTestCase):
         self.assertEqual(redacted["nested"]["safe"], "keep")
         self.assertEqual(redacted["list"][0]["password"], toolchain_lib.REDACTED)
 
+    def test_credentials_inside_values_are_replaced(self) -> None:
+        fake = "FAKEVALUE0123"
+        payload = {
+            "url": f"https://user:{fake}@registry.example.invalid/repo.git",
+            "bare": f"https://{fake}@git.example.invalid/org/repo",
+            "query": f"https://example.invalid/m.json?ref=main&access_token={fake}&page=2",
+            "signed": f"https://bucket.example.invalid/o?X-Amz-Signature={fake}",
+            "header": f"Authorization: Bearer {fake}",
+            "basic": "Basic dXNlcjpwYXNzd29yZA==",
+            "message": f"source https://u:{fake}@host.example.invalid/x is registered twice",
+        }
+        redacted = toolchain_lib.redact(payload)
+
+        for key, value in redacted.items():
+            self.assertNotIn(fake, value, key)
+            self.assertIn(toolchain_lib.REDACTED, value, key)
+        self.assertNotIn("dXNlcjpwYXNzd29yZA", redacted["basic"])
+        self.assertEqual(
+            redacted["url"], f"https://{toolchain_lib.REDACTED}@registry.example.invalid/repo.git"
+        )
+        self.assertEqual(
+            redacted["query"],
+            f"https://example.invalid/m.json?ref=main&access_token={toolchain_lib.REDACTED}&page=2",
+        )
+
+    def test_non_secret_values_are_kept_intact(self) -> None:
+        payload = {
+            "url": "https://example.invalid/official.git",
+            "ssh": "ssh://git@github.example.invalid/org/repo.git",
+            "scp": "git@github.example.invalid:org/repo.git",
+            "query": "https://example.invalid/list?page=2&sort=name",
+            "prose": "Basic authentication is not configured",
+            "version": "1.0.0",
+            "count": 3,
+        }
+        self.assertEqual(toolchain_lib.redact(payload), payload)
+
+    def test_export_manifest_redacts_marketplace_url_credentials(self) -> None:
+        fake = "FAKEVALUE0123"
+        _write(
+            self.home / ".claude" / "plugins" / "known_marketplaces.json",
+            {"private": {"source": {"source": "git",
+                                    "url": f"https://ci:{fake}@example.invalid/p.git"}}},
+        )
+        text = json.dumps(toolchain_lib.build_manifest())
+        self.assertNotIn(fake, text)
+        self.assertIn("example.invalid/p.git", text)
+
 
 class TestTransientExclusion(unittest.TestCase):
     def test_install_scratch_directories_are_transient(self) -> None:

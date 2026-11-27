@@ -1,10 +1,10 @@
 ---
-description: Research a Jira ticket, implement it, then ticket-review-and-fix until CI is green
+description: Research a Jira ticket, implement it, then review, fix, and validate until CI is green
 ---
 
 # Ticket Research, Implementation, and Validation Workflow
 
-End-to-end workflow that **researches** a Jira ticket, **implements** it, and then **reviews, fixes, and validates** the result in a single session. This is a composition of the **ticket-research**, **ticket-implementation**, and **ticket-review-and-fix** workflows.
+End-to-end workflow that **researches** a Jira ticket, **implements** it, and then **reviews, fixes, and validates** the result in a single session. It wraps the **ticket-implementation** workflow with research before it and a review-fix-validate loop after it.
 
 The user will provide a **ticket ID** (e.g., `ABC-1234`).
 
@@ -12,7 +12,7 @@ The user will provide a **ticket ID** (e.g., `ABC-1234`).
 
 ## Part 1 — Research
 
-Run the **ticket-research** workflow (`workflows/ticket-research.md`) in full:
+Research the ticket, in full:
 
 1. Gather context (Jira, linked tickets, duplicates, PRs, Confluence, classification).
 2. Deep code analysis (read files, trace flows, check git history).
@@ -45,10 +45,10 @@ Run the **ticket-implementation** workflow (`workflows/ticket-implementation.md`
 
 ## Part 3 — Review, Fix, and Validate
 
-Run the **ticket-review-and-fix** workflow (`workflows/ticket-review-and-fix.md`) in full:
+Review, fix, and validate, in full:
 
 1. **Scope and Context** — determine branch, base, ticket ID, and PR metadata.
-2. **Three-Signal Inspection** — inspect against ACs (S1), unresolved PR comments (S2), and rules/skills (S3).
+2. **Three-Signal Inspection** — inspect against ACs (S1), unresolved PR comments (S2), and rules/skills (S3) as defined in `skills/ticket-review/SKILL.md`.
 3. **Present Findings** — categorize and present all findings.
 4. **Fix All Issues** — fix every Blocker and actionable finding (S1 → S2 → S3).
 5. **Update PR and Documentation** — update PR description and related docs.
@@ -67,12 +67,8 @@ Run the **ticket-review-and-fix** workflow (`workflows/ticket-review-and-fix.md`
 
 | Scenario | Workflow |
 |----------|----------|
-| Research now, implement later (or in another session) | `ticket-research` alone |
 | Research already done, ready to code | `ticket-implementation` alone |
-| Research and implement, review later | `ticket-research-and-implementation` |
-| Code already written, need review + fix loop | `ticket-review-and-fix` alone |
 | Full end-to-end: research → implement → validate | **This workflow** |
-| Quick task with clear scope, no deep research needed | `task-starter` skill → implement directly |
 
 ---
 
@@ -89,4 +85,4 @@ Run the **ticket-review-and-fix** workflow (`workflows/ticket-review-and-fix.md`
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

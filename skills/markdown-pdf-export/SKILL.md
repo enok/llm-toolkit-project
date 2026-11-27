@@ -36,7 +36,7 @@ Follow **`skills/markdown-pdf-export/rules/pdf-export-security.md`**: Kroki send
 
 For diagrams, prefer SVG intermediates so exported PDFs stay sharp. Use PNG only when a destination rejects SVG, and then render from source at high resolution per `skills/diagram-authoring/references/diagram-export-quality.md`.
 
-Every generated SVG/PNG/JPG/WebP diagram intermediate and every final PDF page containing generated images must pass `skills/image-quality-inspection/references/image-quality-gate.md`. If a rendered page or embedded image is blurry, cropped, unreadable, stale, or mis-scaled, fix the source/export settings and rebuild until acceptable.
+Every generated SVG/PNG/JPG/WebP diagram intermediate and every final PDF page containing generated images must pass the image quality check (opened as rendered; sharp, uncropped, legible at the destination size, current). If a rendered page or embedded image is blurry, cropped, unreadable, stale, or mis-scaled, fix the source/export settings and rebuild until acceptable.
 
 For Jira-facing PDFs, run text extraction verification with forbidden local-path
 markers such as `file:///`, `C:/Users`, and `C:\Users`. Chrome print footers can

@@ -21,7 +21,7 @@ Before running this prompt, ensure the following:
 
 3. **The project must already have an `AGENTS.md`** with project-specific content (architecture, stack, conventions). If it does not exist yet, create one describing the project before running this prompt.
 
-4. **Tooling for ticket workflows** — the `ticket-research` workflow requires all three:
+4. **Tooling for ticket workflows** — the ticket workflows require all three:
 
    **a) Atlassian CLI (`acli`)** — Jira ticket fetching, search, and linked issue traversal:
    - macOS: `brew tap atlassian/homebrew-acli && brew install acli`

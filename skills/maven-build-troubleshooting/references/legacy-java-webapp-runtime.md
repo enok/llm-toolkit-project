@@ -299,7 +299,3 @@ Log4j, or Quartz fixes:
 - When the local container runtime will not start, verify the build on GitHub
   Actions and report the CI run as evidence; "it should build" is a claim, a CI
   result is evidence.
-- Container build defects found only by running the image (directory
-  permissions from `COPY --chmod`, parallel builds sharing a cache, registry
-  rate limits):
-  `learnings/docker-build-pitfalls-copy-chmod-dirs-parallel-cache-lock.md`.
