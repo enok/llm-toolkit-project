@@ -36,9 +36,6 @@ logs/
 * (*).ps1
 * (*).toml
 
-# Generated Codex agent TOML (rendered from tool-subagents/*.md; never committed)
-tool-subagents/.generated/
-
 # Anthropic source-available skills (import locally; do NOT redistribute)
 # Import via: scripts/import-anthropic-skills.sh
 skills/pdf/

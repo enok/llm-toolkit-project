@@ -75,6 +75,23 @@ function listAgentSources(sourceRoot) {
 }
 
 // Renders every agent into outDir. Returns { rendered, changed, errors }.
+// A ".generated" folder ignores itself: a one-line .gitignore inside it keeps
+// the rendered files out of git without a root .gitignore entry.
+function ignoreGeneratedDir(outDir) {
+  let dir = path.resolve(outDir);
+  while (path.basename(dir) !== ".generated") {
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      return;
+    }
+    dir = parent;
+  }
+  const marker = path.join(dir, ".gitignore");
+  if (!fs.existsSync(marker)) {
+    fs.writeFileSync(marker, "*\n");
+  }
+}
+
 // Writes only files whose content changes. With dryRun nothing is written.
 function renderCodexDir(sourceRoot, outDir, options = {}) {
   const errors = [];
@@ -82,6 +99,7 @@ function renderCodexDir(sourceRoot, outDir, options = {}) {
   let changed = 0;
   if (!options.dryRun) {
     fs.mkdirSync(outDir, { recursive: true });
+    ignoreGeneratedDir(outDir);
   }
   for (const entry of listAgentSources(sourceRoot)) {
     const name = entry.replace(/\.md$/, "");
