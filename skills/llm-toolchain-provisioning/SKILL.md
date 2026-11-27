@@ -97,7 +97,7 @@ This skill answers what is installed and enabled; deciding which plugins should 
 
 - Some security-scanner packages the toolkit gates depend on are not published on PyPI. Install them from the vendor's git tag (pin the tag in the setup notes) instead of searching for a package-index name that does not exist.
 - Run the toolkit's own scripts and tests on a pinned interpreter (Python 3.12). The newest interpreter release failed three tests in a recorded run; treat that as an environment mismatch to pin away, not as three regressions to chase.
-- Endpoint antivirus can quarantine scanner test fixtures (they contain attack samples as plain text) from a tool cache and report the scanner as broken. Verify with the commit tag, `git fsck`, a diff showing only those test files differ, and an intact installed package; do not disable the antivirus. See [av-false-positives-on-encoded-commands-and-scanner-fixtures](../../learnings/av-false-positives-on-encoded-commands-and-scanner-fixtures.md).
+- Endpoint antivirus can quarantine scanner test fixtures (they contain attack samples as plain text) from a tool cache and report the scanner as broken. Verify with the commit tag, `git fsck`, a diff showing only those test files differ, and an intact installed package; do not disable the antivirus. Folder allowlist and restore steps: [references/antivirus-false-positives.md](references/antivirus-false-positives.md).
 - Local voice-message transcription (a dedicated virtual environment for faster-whisper) hits a PyAV keyword-argument bug on Windows; decode with ffmpeg to float32 mono and pass the array to the model.
 
 ## Related

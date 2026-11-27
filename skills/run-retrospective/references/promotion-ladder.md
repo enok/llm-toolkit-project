@@ -9,7 +9,7 @@ toolkit at most a few occurrences, then becomes impossible to repeat silently.
 | Level | Trigger | Lands in | Done when |
 | --- | --- | --- | --- |
 | record | 1st occurrence, `low`/`medium` | the run log only | the record validates |
-| `learning` | 1st win that took trial and error | `learnings/<name>.md` + one `learnings/INDEX.md` line + a link to it from the owning asset, via `workflows/capture-learning.md` | quality check and approval gate passed; `tests/test_learning_promotion_coverage.py` passes |
+| `learning` | 1st win that took trial and error | the lesson written into its owning asset (a `## Known pitfalls` bullet, reference or rule line), or, only when the owner is unclear, a short-lived `learnings/<name>.md` intake item + its `learnings/INDEX.md` line, migrated and deleted later; via `workflows/capture-learning.md` | quality check and approval gate passed; `tests/test_learning_promotion_coverage.py` passes |
 | `checklist` | 2nd run with the signature, not yet promoted to `checklist` or above | one bullet in the owning workflow's or skill's `## Known pitfalls` section, or a preflight / acceptance criterion | bullet present with `(sig: ...)` suffix |
 | `guard` | 3rd+ run with the signature, recurrence after a checklist, or any `high` / `critical` / `safety-near-miss`, not yet promoted to `guard` or above | an executable check: script, validator, test, CI gate, lint | the check fails on the original mistake and passes on the fix |
 | `rule` | recurrence after a guard, or one pattern seen in 3+ workflows | a `rules/` change, or human escalation when redesign is needed | maintenance validation passed |
@@ -34,7 +34,7 @@ level above the highest recorded one (`learning` -> `checklist` -> `guard` ->
 **Prevention older than the log:** when a mistake recurs although an asset
 already prevented it but no record names that promotion, backfill it in this
 run's `promotions` at its actual level (for example `learning` for a
-`learnings/` file), and also record the higher level you land.
+lesson its owner already carries), and also record the higher level you land.
 
 ## Routing beyond the owning asset
 
@@ -67,10 +67,9 @@ or "Related" section. One bullet per signature:
 - Imperative and checkable: say what to do or verify, not what went wrong.
 - The suffix `(sig: <signature>)` is mandatory so recurrence stays traceable
   between the asset and the log.
-- A bullet that carries a learning with no run-log signature ends with
-  `See learnings/<slug>.md.` instead of the suffix;
-  `tests/test_learning_promotion_coverage.py` checks that every learning has such
-  a link.
+- A bullet for a lesson with no run-log signature omits the suffix. It never
+  links a learning file: migrated learnings are deleted, and
+  `tests/test_learning_promotion_coverage.py` fails on a dangling reference.
 - Preflight reads this section; the orchestrator turns relevant bullets into
   acceptance criteria.
 - When a guard lands for the signature, replace the bullet's text with a
@@ -91,7 +90,7 @@ A promotion is recorded only after it is verified in the same run:
   nothing.
 - **checklist:** bullet present, imperative, suffixed, and the owning file
   still passes its size and index checks.
-- **learning:** `workflows/capture-learning.md` quality check and approval, and the owning asset links the file (`tests/test_learning_promotion_coverage.py`).
+- **learning:** `workflows/capture-learning.md` quality check and approval, and `tests/test_learning_promotion_coverage.py` passes.
 - **rule:** `scripts/validate-toolkit-indexes.sh` and the toolkit validation commands pass.
 
 An unverified promotion is a deferral: leave it out of `promotions` and name

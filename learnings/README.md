@@ -1,20 +1,20 @@
 # Learnings
 
-Shared knowledge captured from trial-and-error during LLM-assisted development. Each file documents a problem, the approaches that failed, and the correct solution — so any future LLM session skips directly to the happy path.
+Short-lived intake for trial-and-error lessons whose owning skill, rule or workflow is not yet clear. A lesson whose owner is clear is written straight into that owner (a skill `## Known pitfalls` bullet or reference, one workflow bullet, or one rule line) and gets no file here. This directory therefore normally holds only this README and [`INDEX.md`](./INDEX.md).
 
-> **Entry point:** read [`INDEX.md`](./INDEX.md) first for a one-line summary of every learning. Governance is in `skills/error-driven-learning/SKILL.md` (always-on). Capture is via `workflows/capture-learning.md`.
+> **Entry point:** [`INDEX.md`](./INDEX.md) lists the pending intake items (normally none). Governance is in `rules/error-driven-learning.md` and `skills/error-driven-learning/SKILL.md` (always-on). Capture is via `workflows/capture-learning.md`.
 
 ## How it works
 
 1. An LLM (any tool) hits a problem and recovers after multiple attempts.
-2. Instead of losing that knowledge when the session ends, it writes a learning file here.
-3. Next time any LLM encounters a similar task, it checks this directory first and uses the documented solution.
+2. It writes the lesson into the asset that owns it; only when no owner is clear does it capture an intake file here, with its `INDEX.md` line.
+3. The intake file is migrated into its owner and deleted, together with its `INDEX.md` line, in the change that migrates it — at the latest in the next toolkit maintenance pass. A migrated learning never keeps its file, and nothing may reference a learning file that does not exist.
 
-**This is not tool-specific.** Windsurf, Cursor, Claude Code, Codex, ChatGPT — any LLM that can read files benefits from these learnings.
+**This is not tool-specific.** Any LLM that can read files benefits.
 
-## File format
+## Intake file format
 
-Each learning is a standalone markdown file with YAML frontmatter:
+Each intake item is a standalone markdown file with YAML frontmatter:
 
 ```markdown
 ---
@@ -39,25 +39,13 @@ Root cause explanation.
 
 ## Naming
 
-Use lowercase kebab-case that summarizes the topic:
-
-- `cloud-session-device-bridge-file-io.md`
-- `tracker-sync-refuses-guessing.md`
+Use lowercase kebab-case that summarizes the topic, for example `example-tool-flag-order` (a made-up name) as `learnings/<kebab-topic>.md`.
 
 ## Rules
 
-- **One problem per file.** Keep each learning focused.
+- **One problem per file.** Keep each item focused.
 - **Include failed approaches.** This prevents LLMs from repeating the same dead ends.
 - **Explain the root cause.** Solutions without context break when conditions change.
 - **Keep it concise.** Target 20–60 lines per file.
-- **Commit to version control.** These are shared team knowledge, not personal notes.
-
-## Promotion
-
-Every learning ships in the same change as a link from the skill, rule,
-workflow, or agent definition that owns its lesson (`learnings/<slug>.md`;
-`tests/test_learning_promotion_coverage.py` enforces it). The
-toolkit periodically promotes learnings that keep recurring into stronger checks; the
-file and its `INDEX.md` line stay as the evidence those assets link. Only a
-superseded learning's `INDEX.md` line is marked `~~strikethrough~~`, with the
-replacement named.
+- **No ticket IDs, customer names, hostnames or credentials.**
+- **Short-lived.** Migrate and delete; git history keeps the record.

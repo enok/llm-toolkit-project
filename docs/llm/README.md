@@ -13,7 +13,7 @@ Do not place repo-only customizations inside those linked directories. Doing so 
 ## Local Layout
 
 - `docs/llm/toolkit-selection.txt`: curated shared-toolkit profile for this repo
-- `learnings/`: committed trial-and-error knowledge (see `skills/error-driven-learning/SKILL.md`)
+- `learnings/`: short-lived intake for trial-and-error lessons whose owner is not yet clear (see `skills/error-driven-learning/SKILL.md`)
 
 ## Shared Toolkit Selection
 
@@ -44,13 +44,13 @@ Keep generic guidance in the shared toolkit. Add repo-only guidance here when it
 - AWS orchestration guidance that reflects this repo's current shell-script ETL and minimal `infra/` baseline (via `aws-airflow-terraform-project` skill)
 - documentation expectations tied to the thesis deliverables
 - mandatory local security-check gates
-- trial-and-error discoveries captured as committed learnings for cross-session, cross-tool reuse
+- trial-and-error discoveries written into the owning skill, rule or workflow for cross-session, cross-tool reuse
 
 ## Learnings
 
-The `learnings/` directory at the repo root captures trial-and-error discoveries as committed markdown files. Any LLM tool can read these files to skip directly to the correct solution.
+Trial-and-error discoveries are written into the skill, rule or workflow that owns them. The `learnings/` directory at the repo root is only a short-lived intake for a lesson whose owner is not yet clear; each item is migrated into its owner and deleted.
 
-- Before starting a task, check `learnings/` for relevant prior discoveries.
+- Before starting a task, read the owning assets' known pitfalls and `learnings/INDEX.md` (pending items).
 - When recovering from trial-and-error, use the `capture-learning` workflow to save the knowledge.
 - See `skills/error-driven-learning/SKILL.md` for the governance rule.
 

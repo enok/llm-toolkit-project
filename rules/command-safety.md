@@ -68,8 +68,7 @@ Never split the export and the use across two separate tool invocations when the
 - Write files as plain text through the file tool or a quoted heredoc, never
   through encoded one-liners (gzip plus base64, `FromBase64String`): antivirus
   and security filters flag them as malicious command lines, and such a filter
-  can fail closed on a mislabelled file too
-  (`learnings/av-false-positives-on-encoded-commands-and-scanner-fixtures.md`).
+  can fail closed on a mislabelled file too.
 - Grant a tool folder access from evidence: allow only the folders its log
   shows were actually used, and deliberately exclude credential and config
   folders and the tool's own config folder (a session that can write there can

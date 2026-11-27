@@ -25,7 +25,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest; plugin catalog via `scripts/plugins.py` |
 | **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories; plugin-specific checks for the intake procedure in `docs/plugins.md` |
-| **error-driven-learning** | Always-on discipline: read `learnings/INDEX.md` before work and capture trial-and-error discoveries after it |
+| **error-driven-learning** | Always-on discipline: check the owning asset's known pitfalls and `learnings/INDEX.md` (pending intake) before work; write discoveries into the owning asset after it |
 | **onboarding** | Get started with this toolkit in a repo, or add it to one |
 | **project-discovery** | Understand a project: structure, architecture, flows, how-tos, related projects |
 | **design-driven-dev** | Investigation-first Socratic design process before coding |

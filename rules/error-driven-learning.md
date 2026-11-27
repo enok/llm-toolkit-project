@@ -1,11 +1,11 @@
 ---
 trigger: always_on
-description: Capture trial-and-error wins as indexed learnings, consult learnings/ before starting a task, and migrate reusable lessons into durable toolkit assets
+description: Write trial-and-error wins into the skill, rule or workflow that owns them; a learning file is only a short-lived intake, migrated and deleted
 ---
 
 # Error-Driven Learning
 
-- Before a non-trivial task, read `learnings/INDEX.md` and the files that match the task, and follow their solution.
-- A learning is one file `learnings/<kebab-topic>.md` (frontmatter `title`, `category`, `created`, `tags`), captured through `workflows/capture-learning.md`, with no ticket IDs, customer names, hostnames or credentials.
-- Every learning has a one-line entry under its category in `learnings/INDEX.md`, committed with the file and with its link from the owning skill, rule, workflow or agent (a `## Known pitfalls` bullet, or the path in text that already states the lesson). `tests/test_learning_promotion_coverage.py` fails on an unlinked learning or a missing INDEX line.
-- Migrate learnings into durable assets at most 5 files per batch. A migrated learning keeps its file and INDEX line (owners and run records link it; `scripts/validate-toolkit-indexes.sh` fails on a missing target). Strike an INDEX line through only when the learning is superseded, naming the replacement, and link both from the owner. A learning that cannot be migrated safely stays, with the blocker reported.
+- Before a non-trivial task, read `learnings/INDEX.md` (pending intake items only, normally none) and the owning assets' `## Known pitfalls`, and follow their solution.
+- After trial-and-error, write the lesson into the asset that owns it: a skill `## Known pitfalls` bullet or reference, one workflow bullet, or one rule line (`workflows/capture-learning.md`). No ticket IDs, customer names, hostnames or credentials.
+- Only when the owner is unclear, capture `learnings/<kebab-topic>.md` (frontmatter `title`, `category`, `created`, `tags`) plus its line in `learnings/INDEX.md`. Migrate it into its owner and delete the file and its INDEX line in that change, at the latest in the next toolkit maintenance pass; a migrated learning never keeps its file.
+- Never reference `learnings/<slug>.md` for a file that does not exist. `tests/test_learning_promotion_coverage.py` fails on a dangling reference or a missing INDEX line.

@@ -116,4 +116,17 @@ print(len(sizes), "pages;", "uniform" if len(set(sizes)) == 1 else "MIXED", sort
 
 ## Related
 
-- For a narrated video built from a storyboard (JSON scenes, one audio file per beat, rendered with captions), see [storyboard-to-video-pipeline-design-notes](../../../learnings/storyboard-to-video-pipeline-design-notes.md). Design notes only: the scripts are not in the toolkit.
+- Narrated video from a storyboard: see "Storyboard-to-video pipeline (design notes)" below. Design notes only: the scripts are not in the toolkit; treat as a specification.
+
+## Storyboard-to-video pipeline (design notes)
+
+Documentation had to become narrated explainer videos. Do not write narration free-form (timing and fact checks cannot be automated); do not fact-check with prose feedback (refinement needs exact replacement text).
+
+- A JSON storyboard: scenes of kind title, bullets, diagram, code, image or qa; beats with a voice (narrator, interviewer, candidate, coach), spoken text of 12 to 45 words, an optional on-screen line and a tag (point, pitfall, tip, number).
+- A TTS step writes one WAV per beat and `timings.json` with frame counts at 30 fps.
+- A render step produces 1920x1080, 30 fps H.264 plus AAC and an SRT file.
+- On Windows use SAPI through pywin32 (SpFileStream, 22050 Hz mono); elsewhere ffmpeg's flite source.
+- Planning figures: about 10 to 12 seconds of render per video minute, about 160 words per minute at rate 0.
+- The fact-check lane returns defects as exact replacement text in a file, so a refinement pass takes about 90 seconds.
+- Every claim comes from repository documents; never invent experience.
+- Why: a schema with per-beat audio gives deterministic timing, and sourcing every claim from the repository keeps the video verifiable.

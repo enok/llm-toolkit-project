@@ -163,7 +163,7 @@ high-severity escaped defect:
     "category": "platform-quirk", "severity": "medium", "source": "self-review",
     "summary": "blank lines inside pre split one code listing into several boxes after paste",
     "fix": "replace blank lines inside pre with a single space before paste",
-    "prevented_by": "learnings/medium-paste-splits-code-blocks-at-blank-lines.md"},
+    "prevented_by": "skills/technical-content-publishing/references/publishing-platform-quirks.md"},
    {"signature": "validation-gap/rendered-html-not-scanned-for-markdown",
     "category": "validation-gap", "severity": "high", "source": "user",
     "summary": "literal markdown markers reached the draft; the validator only checked the source",
@@ -171,7 +171,7 @@ high-severity escaped defect:
     "prevented_by": "workflows/study-publication-medium-linkedin.md"}],
  "promotions": [
    {"signature": "platform-quirk/editor-paste-splits-code-block-at-blank-line",
-    "level": "learning", "asset": "learnings/medium-paste-splits-code-blocks-at-blank-lines.md"},
+    "level": "learning", "asset": "skills/technical-content-publishing/references/publishing-platform-quirks.md"},
    {"signature": "validation-gap/rendered-html-not-scanned-for-markdown",
     "level": "guard", "asset": "scripts/medium_paste_html.py"}],
  "notes": "escape: the leftover markdown was found by the user after the draft was marked ready"}

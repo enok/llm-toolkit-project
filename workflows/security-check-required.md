@@ -25,4 +25,4 @@ Never ignore: hardcoded credentials, tokens or passwords, private keys, `.env` f
 values, notebook outputs showing credentials, unvalidated input in shell scripts, SQL injection,
 or unsafe deserialization.
 
-On Windows, run the bash gate through Git Bash and confirm each scanner resolves in that shell. See learnings/windows-security-gate-python-stub-and-committed-skills.md.
+On Windows, run the bash gate through Git Bash and confirm each scanner resolves in that shell. Command and failure mode: `skills/environment-diagnose/references/device-bridge.md` › "Windows security gate".

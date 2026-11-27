@@ -14,7 +14,7 @@ description: Orchestrate thesis writing, formatting, bibliography, validation, a
 
 ## Phase 0: Consult Learnings (ALWAYS-ON)
 
-**Before any other step, scan `learnings/INDEX.md`** for entries whose tags, title, or category match the current writing task (formatting rules, citation gotchas, platform quirks, etc.). Follow prior solutions; avoid approaches already documented as failures.
+**Before any other step, read the `## Known pitfalls` of the skills and workflows this task uses and scan `learnings/INDEX.md`** (pending intake items) for entries that match the current writing task (formatting rules, citation gotchas, platform quirks, etc.). Follow prior solutions; avoid approaches already documented as failures.
 
 This phase is non-negotiable — see `skills/error-driven-learning/SKILL.md`.
 

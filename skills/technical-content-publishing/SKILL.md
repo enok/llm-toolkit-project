@@ -112,6 +112,7 @@ Platform numbers are time-sensitive: each carries a source URL and verification 
 
 - `references/medium-article.md` - before drafting `article.md`: Medium specs, anatomy (1,100-2,000 words, up to five tags), craft, SEO, disclosure.
 - `references/linkedin-post-and-carousel.md` - before drafting `post.md` and `carousel.md`: LinkedIn specs; claim in the first ~140 characters, one call to action shared by all assets, at most three hashtags, no engagement bait, no tagging without approval; carousel 8-10 slides, one page size, at most ~35 words per slide.
+- `references/publishing-platform-quirks.md` - before pasting into Medium, attaching a LinkedIn image or editing a published piece: no media after LinkedIn publishing and the `More...` pointer, composer file inputs (messaging overlay), Medium Change topics popover, code boxes split at empty lines, study-article positioning (system design first, short teaser).
 - `references/visual-assets.md` - at step 6: cover, diagram, slide design, rendering, inspection. Reuse `skills/diagram-authoring` and `skills/markdown-pdf-export`; inspection of every generated image and PDF page is mandatory. A check that cannot run is reported as not run, never as passed; never state a visual passed inspection unless the rendered file was opened and checked.
 - `scripts/render_assets.py` - renders `slides.html` to the carousel PDF and PNGs, or a cover HTML to `cover.png`.
 - `references/package-templates.md` - package tree, skeletons, hook-pattern table.

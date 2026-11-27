@@ -109,12 +109,16 @@ A dashboard metric that holds its last observed value through idle periods misre
 
 Separate the two metric kinds:
 
-- **Counts and rates** — fill missing with zero (`FILL(m1, 0)`). Do not stack a `TIME_SERIES(0)` scaffold on top: the `FILL(m,0)+TIME_SERIES(0)` hybrid caused rendering gaps instead of fixing them (see `learnings/no-data-and-zero-are-different-in-monitoring.md`; a contract test on dashboard bodies and a lint on the template that emits them should reject `TIME_SERIES(0)`).
+- **Counts and rates** — fill missing with zero (`FILL(m1, 0)`). Do not stack a `TIME_SERIES(0)` scaffold on top: the `FILL(m,0)+TIME_SERIES(0)` hybrid caused rendering gaps instead of fixing them (a contract test on dashboard bodies and a lint on the template that emits them should reject `TIME_SERIES(0)`).
 - **Latencies and other gauges** — mask by traffic instead of filling: publish the value only where the corresponding count is above zero, so idle periods render as genuine gaps. This needs an explicit reference from the gauge to its governing count metric, carried as a named field in the widget inventory.
 
 A window with no datapoints at all (a metric that has never been emitted, or a fully idle one) leaves `FILL` nothing to fill around and may still render an empty widget with no axis. Verify this case with the post-apply synthetic-stimulus check; if the widget is blank, give the metric a datapoint (see First-Datapoint Planning above) instead of re-adding `TIME_SERIES(0)`.
 
-The mask keeps the gauge honest. Reach for it whenever a change asks for "no stale flat lines" — filling the gauge is the intuitive move and the wrong one. Alarms follow the same split through `treat_missing_data` (rules in the validation checklist's `## Known pitfalls`; see `learnings/no-data-and-zero-are-different-in-monitoring.md`).
+The mask keeps the gauge honest. Reach for it whenever a change asks for "no stale flat lines" — filling the gauge is the intuitive move and the wrong one. Alarms follow the same split through `treat_missing_data`, because CloudWatch keeps "value 0" and "no datapoint" distinct and only counts have a true zero:
+
+- Counts and rates may be zero-filled in widgets and use `notBreaching` alarms.
+- Latency widgets (p99 and other percentiles): no `FILL(m1, 0)`; leave gaps unfilled, because a filled gap asserts 0 ms and drags the percentile down.
+- Latency alarms: `treat_missing_data` = `"missing"`, `"ignore"` or `"breaching"` (`"breaching"` when traffic is always expected), never `"notBreaching"`, because `notBreaching` scores an empty bucket as healthy, the same false 0 ms claim.
 
 ## Metadata Hygiene
 
@@ -122,7 +126,7 @@ No ticket numbers in resource tags, descriptions, code comments, file paths, or 
 
 ## First Cloud Deploy and Demo Teardown
 
-A first deployment into a new cloud project has its own failure set (an API enabled seconds ago still answers PERMISSION_DENIED, quota and billing surprises), and a demo left running keeps costing money. Plan the teardown before the first apply and verify nothing billable remains afterwards. See `learnings/first-cloud-deploy-gotchas-and-demo-teardown.md`.
+A first deployment into a new cloud project has its own failure set (an API enabled seconds ago still answers PERMISSION_DENIED, quota and billing surprises), and a demo left running keeps costing money. Plan the teardown before the first apply and verify nothing billable remains afterwards. Details (retry after about 45 seconds, reserved health paths, scale-to-zero polling, multi-container billing, teardown checklist): `references/first-cloud-deploy-and-demo-teardown.md`.
 
 ## Backup-Before-Apply, Fail-Closed
 
@@ -162,9 +166,9 @@ The Lambda console's function-level **Triggers** tab reads only the *unqualified
 
 ## Known pitfalls
 
-- Before a parallel-stack cutover flips shared config, grant the new target's IAM through its own Terraform change first. See learnings/parallel-stack-parity-env-flip-needs-iam-first.md.
-- In a stack kept in several copies, reconcile applied but uncommitted drift between the copies before committing. See learnings/reconcile-applied-drift-before-committing-in-multi-copy-stacks.md.
-- On Windows, when `terraform init` of git-sourced modules fails on a deep path, validate from a short-path copy. See learnings/terraform-init-git-modules-fail-on-deep-windows-paths.md.
+- Before a parallel-stack cutover flips a legacy service's shared config, grant the new target's IAM through Terraform only, as its own change (no console or CLI grant): a `.tf` that looks up the legacy role by name (data source) and attaches the new stack's access policy. The plan shows exactly one add; apply, then re-plan to a clean no-op. Mark it temporary with a header comment saying TEMPORARY plus a tracked removal at cutover, so the grant is reviewable and removed by one revert-and-apply.
+- In a stack kept in several copies, reconcile applied but uncommitted drift between the copies before committing: explain every changed file, `diff -rq` the copies to see which side is ahead, and commit already-applied drift separately instead of reverting it. See `references/multi-copy-and-short-path-stacks.md` › "Reconcile applied-but-uncommitted drift before committing".
+- On Windows, when `terraform init` of git-sourced modules fails on a deep path, validate from a short-path copy (`terraform init -backend=false` + `terraform validate`; error such as "$GIT_DIR too big"). See `references/multi-copy-and-short-path-stacks.md` › "Deep Windows paths break `terraform init` of git-sourced modules".
 
 ## Related
 

@@ -69,7 +69,7 @@ hooks or an upload comparison (ready-to-paste JavaScript).
 
 ## Related lessons
 
-- When the click sends only an analytics request and no call to the product API, the page never submitted: treat it as a site defect and stop. See `learnings/dead-submit-button-analytics-only-request.md`.
+- When the click sends only an analytics request and no call to the product API, the page never submitted: treat it as a site defect and stop. The handler runs (hence the analytics event) and returns early on a state check the user cannot see; neither the server nor the user input is at fault, so more retries cannot fix it. Do not re-enter values and reload, assume a server error (there is no call to the product API), or rely on the console (it was empty).
 
 ## Report
 

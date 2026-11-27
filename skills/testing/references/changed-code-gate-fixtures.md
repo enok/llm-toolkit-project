@@ -1,0 +1,9 @@
+# Changed-Code Quality Gate and Fixture Suffixes
+
+The changed-code quality gate (`scripts/changed_code_quality_gate.py`, required before commit and push by `rules/changed-code-quality-gate-required.md`) derives its scope from Git and fails closed: a changed file that is neither a supported language nor a known non-code type is reported as an unrecognized changed file type and blocks. In the gate's code, `.txt` is a known non-code suffix, while `.html` and a suffixless name like `.gitattributes` are not listed, so they fall into the blocking case. CI blocked a change containing HTML test fixtures and a `.gitattributes` change (recorded as a medium-severity validation-gap mistake, found by CI); the fixtures had been committed under their natural suffixes.
+
+- Store HTML and other fixtures under a non-code suffix, `.txt`, and have the test read them as text. This moves the fixture out of the gate's code scope without weakening the gate.
+- When a fixture needs significant whitespace, put a `{{SPACE}}` marker on its own line and have the test expand it to a single space.
+- Avoid changes to files without a suffix (such as `.gitattributes`) in a change the gate scans; the recorded fix was to avoid suffixless file changes. When a change must touch `.gitattributes` (`rules/cross-platform-scripts.md` asks for it), report the gate block and propose adding the name to `NON_CODE_NAMES` in `scripts/changed_code_quality_gate.py` instead of working around it.
+- Classify diagram sources such as `.mmd` as non-code in the gate's `NON_CODE_SUFFIXES` list (check the list; add the suffix together with a test if it is missing). Every other new suffix needs the same `NON_CODE_SUFFIXES` change.
+- Run `python scripts/changed_code_quality_gate.py --base <trusted-base>` on a change that adds fixtures to see the block before CI does.

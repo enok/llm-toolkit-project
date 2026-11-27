@@ -116,7 +116,7 @@ When files travel between a cloud session and the owner's machine:
    through a cloud clone. Work only in allowed folders: never copy a file out
    of a protected folder to run or edit it elsewhere; when another folder is
    needed, ask the owner for approval first. See
-   `learnings/cowork-bridge-hides-skills-dirs-read-via-cloud-clone.md`.
+   `skills/environment-diagnose/references/device-bridge.md` › "Cowork bridge hides `skills/` and `tool-subagents/`".
 
 ## Phase 7 - Cross-check and report
 

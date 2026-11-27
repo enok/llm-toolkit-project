@@ -84,8 +84,14 @@ Gotchas:
 - The browser tool blocks returned text that looks like a query string or a
   cookie, and an auto-mode safety layer may refuse reading session cookies for
   private API calls.
-  Extraction from portals that hook XHR or use React widgets:
-  [browser-portal-extraction-xhr-hook-and-react-widgets](../../../learnings/browser-portal-extraction-xhr-hook-and-react-widgets.md).
+  Limits of the browser tools themselves (waits, result size, uploads,
+  several browsers): `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md` > "Browser tool limits".
+- To set a filter in a custom (React-style) dropdown, open it by dispatching on
+  the trigger the full sequence `pointerdown`, `mousedown`, `pointerup`,
+  `mouseup`, `click`, in that order, then pick the option the same way. Do not
+  use a lone `click` (the widget listens for the pointer sequence and stays
+  closed) or assign `.value` (the framework tracks its own state and ignores it).
+  Framework widgets change state only through the events they listen for.
 - Search is semantic: about 25 results per query, and queries overlap heavily.
   Run all LinkedIn queries in one lane, or split lanes by result page, not by
   query; two lanes splitting the queries mostly read the same postings.
@@ -99,11 +105,13 @@ Gotchas:
   context snippets per posting, then read the passages around them.
 - "Easy Apply" can be a partner flow; confirm on the page before treating it as
   a board quick-apply.
-- Job-view pages can render skeletons first: wait, and re-read once when "About
-  the job" is missing. Never fall back to internal endpoints; if the view URL keeps
-  hanging on the skeleton, open the same posting through
-  `/jobs/search-results/?currentJobId=<id>` and read the page text there
-  (`learnings/linkedin-job-page-view-url-hangs-on-skeleton.md`).
+- Open a posting through `/jobs/search-results/?currentJobId=<id>` (the
+  `/jobs/search/?currentJobId=<id>` form redirects there) as the primary and
+  only route, and read the page text there. Treat `/jobs/view/<id>/` as
+  known-bad, neither a first try nor a fallback: it stays on loading skeletons
+  in automation and costs about 60 s per id for nothing. The page can still
+  render skeletons first: wait, and re-read once when "About the job" is
+  missing. Never fall back to internal endpoints.
 
 ## Indeed
 
