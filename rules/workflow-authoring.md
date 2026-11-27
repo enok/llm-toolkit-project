@@ -7,6 +7,10 @@ description: Size limits and structure rules for workflow files
 
 Rules for writing and maintaining workflow files in `workflows/`.
 
+## Value Gate
+
+- A new workflow (like any new skill, agent or rule) MUST pass `workflows/resource-value-check.md` before it is added; splitting an existing workflow is not a new resource.
+
 ## Size Limit
 
 - Every workflow file MUST be **≤ 12,000 characters**.

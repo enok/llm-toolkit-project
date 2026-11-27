@@ -25,6 +25,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `toolkit-maintenance.md` | Maintain the shared LLM toolkit — mine feedback, de-duplicate guidance, add generic skills/workflows, validate indexes, and sync clients |
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
 | `knowledge-base-sync.md` | Scheduled knowledge-base sync: gather new knowledge, run the intake gate, promote it on one rolling pull request, archive inbox items after the merge |
+| `resource-value-check.md` | Mandatory gate before adding a skill, workflow, agent or rule: blind race against the plain model, CSV record, `scripts/check_value_checks.py` |
 | `assistant-workspace-cleanup.md` | Inventory, classify, approve, execute, and verify a cleanup of an AI-assistant workspace (chats, agent sessions, projects, scheduled tasks, artifacts, orchestration ledgers) with a reversibility-grouped approval gate, ID allow-listed lanes, and live-state verification |
 | `conversation-monitoring.md` | Watch named conversations (inbox, chat, messaging threads) on a fixed interval until a stop time, alert the user only on new external messages, never reply, and pause or stop safely |
 | `workspace-hygiene-auditor-validation.md` | Run the Workspace Hygiene Auditor specialist validation workflow |
