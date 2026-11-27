@@ -14,81 +14,93 @@ To implement the storage mode selection in code:
 
 ```python
 # src/ingestion/storage_backend.py
+import json
+import logging
 import os
-from typing import Optional, List
-import boto3
 from pathlib import Path
 
+import boto3
+from botocore.exceptions import BotoCoreError, ClientError
+
+log = logging.getLogger(__name__)
+
 class StorageBackend:
-    """Abstracts S3 and local filesystem storage."""
-    
+    """Abstracts S3 and local filesystem storage.
+
+    `path` is relative to the layer (e.g. `source/data.csv`); the prefix is
+    added once, here, never by callers.
+    """
+
     def __init__(self, mode: str = None):
         self.mode = mode or os.getenv('STORAGE_MODE', 's3-only')
         self.local_dir = os.getenv('LOCAL_DATA_DIR', './data')
         self.s3_bucket = os.getenv('S3_BUCKET', '<your-bucket>')
         self.s3_prefix = os.getenv('S3_PREFIX', 'bronze/')
-        
-        if self.mode == 's3-only':
-            self.s3_client = boto3.client('s3')
-    
+        self.s3_client = boto3.client('s3') if self.mode in ('s3-only', 'both') else None
+
+    def _key(self, path: str) -> str:
+        path = path.lstrip('/')
+        return path if path.startswith(self.s3_prefix) else f"{self.s3_prefix}{path}"
+
     def write(self, path: str, data: bytes, metadata: dict = None) -> bool:
-        """Write data to configured storage(s)."""
+        """Write to every configured storage; False if any write failed."""
         success = True
-        
+        key = self._key(path)
+
         if self.mode in ('local-only', 'both'):
-            local_path = Path(self.local_dir) / path
-            local_path.parent.mkdir(parents=True, exist_ok=True)
-            local_path.write_bytes(data)
-            if metadata:
-                (local_path.parent / '.metadata.json').write_text(
-                    json.dumps(metadata)
-                )
-        
-        if self.mode in ('s3-only', 'both'):
-            s3_key = f"{self.s3_prefix}{path}"
-            self.s3_client.put_object(
-                Bucket=self.s3_bucket,
-                Key=s3_key,
-                Body=data,
-                Metadata=metadata or {}
-            )
-        
-        return success
-    
-    def read(self, path: str) -> bytes:
-        """Read data from storage (local preferred if both)."""
-        if self.mode in ('local-only', 'both'):
-            local_path = Path(self.local_dir) / path
-            if local_path.exists():
-                return local_path.read_bytes()
-        
-        if self.mode in ('s3-only', 'both'):
-            s3_key = f"{self.s3_prefix}{path}"
-            response = self.s3_client.get_object(
-                Bucket=self.s3_bucket,
-                Key=s3_key
-            )
-            return response['Body'].read()
-        
-        raise FileNotFoundError(f"Path not found: {path}")
-    
-    def exists(self, path: str) -> bool:
-        """Check if path exists in storage."""
-        if self.mode in ('local-only', 'both'):
-            if (Path(self.local_dir) / path).exists():
-                return True
-        
+            try:
+                local_path = Path(self.local_dir) / key
+                local_path.parent.mkdir(parents=True, exist_ok=True)
+                local_path.write_bytes(data)
+                if metadata:  # one sidecar per object, never shared
+                    local_path.with_name(local_path.name + '.metadata.json').write_text(
+                        json.dumps(metadata)
+                    )
+            except OSError as exc:
+                log.error("local write failed for %s: %s", key, exc)
+                success = False
+
         if self.mode in ('s3-only', 'both'):
             try:
-                s3_key = f"{self.s3_prefix}{path}"
-                self.s3_client.head_object(
-                    Bucket=self.s3_bucket,
-                    Key=s3_key
+                self.s3_client.put_object(
+                    Bucket=self.s3_bucket, Key=key, Body=data, Metadata=metadata or {}
                 )
+            except (ClientError, BotoCoreError) as exc:
+                log.error("S3 write failed for %s: %s", key, exc)
+                success = False
+
+        return success
+
+    def read(self, path: str) -> bytes:
+        """Read data from storage (local preferred if both)."""
+        key = self._key(path)
+        if self.mode in ('local-only', 'both'):
+            local_path = Path(self.local_dir) / key
+            if local_path.exists():
+                return local_path.read_bytes()
+
+        if self.mode in ('s3-only', 'both'):
+            response = self.s3_client.get_object(Bucket=self.s3_bucket, Key=key)
+            return response['Body'].read()
+
+        raise FileNotFoundError(f"Path not found: {path}")
+
+    def exists(self, path: str) -> bool:
+        """True if present; only a "not found" answer means False."""
+        key = self._key(path)
+        if self.mode in ('local-only', 'both'):
+            if (Path(self.local_dir) / key).exists():
                 return True
-            except:
-                return False
-        
+
+        if self.mode in ('s3-only', 'both'):
+            try:
+                self.s3_client.head_object(Bucket=self.s3_bucket, Key=key)
+                return True
+            except ClientError as exc:
+                if exc.response.get('Error', {}).get('Code') in ('404', 'NoSuchKey', 'NotFound'):
+                    return False
+                raise  # permissions, throttling, network: not an answer
+
         return False
 ```
 
@@ -96,6 +108,8 @@ class StorageBackend:
 
 ```python
 # src/ingestion/source_client.py (example)
+from datetime import datetime
+
 from .storage_backend import StorageBackend
 
 class SourceClient:
@@ -169,7 +183,7 @@ from src.ingestion.storage_backend import StorageBackend
 
 # Explicit mode
 storage = StorageBackend(mode='local-only')  # or 's3-only', 'both'
-storage.write('bronze/source/data.csv', b'...')
+storage.write('source/data.csv', b'...')  # stored under S3_PREFIX, e.g. bronze/source/data.csv
 
 # From environment
 storage = StorageBackend()  # reads STORAGE_MODE env var

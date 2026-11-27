@@ -26,6 +26,47 @@ _SECRET_KEY_PATTERN = re.compile(
 )
 REDACTED = "<redacted>"
 
+# Credentials embedded inside otherwise ordinary values (URLs, headers).
+# Userinfo in a URL: scheme://user:pass@host or scheme://TOKEN@host.
+_URL_USERINFO_PATTERN = re.compile(
+    r"(?P<scheme>\b[a-z][a-z0-9+.-]*://)(?P<userinfo>[^/\s@?#]+)@", re.IGNORECASE
+)
+# A bare SSH user name (ssh://git@host) is an account, not a secret.
+_SSH_SCHEMES = {"ssh://", "git+ssh://", "ssh+git://"}
+# Query or fragment parameters whose name marks the value as a credential.
+_SECRET_PARAM_PATTERN = re.compile(
+    r"(?P<prefix>[?&#;](?P<name>[^=&#;\s]*?)=)(?P<value>[^&#;\s]+)", re.IGNORECASE
+)
+_SECRET_PARAM_NAME = re.compile(
+    r"token|secret|passw|pwd|api[-_]?key|signature|credential|^(?:key|sig|auth|code)$",
+    re.IGNORECASE,
+)
+# HTTP auth schemes: "Bearer <token>" / "Basic <base64>". The lookahead keeps
+# ordinary prose ("Basic authentication") intact.
+_AUTH_SCHEME_PATTERN = re.compile(
+    r"(?P<scheme>\b(?i:bearer|basic))\s+(?=\S*[A-Z0-9+/=_~.-])[A-Za-z0-9\-._~+/]{8,}=*"
+)
+
+
+def _redact_userinfo(match: re.Match[str]) -> str:
+    scheme, userinfo = match.group("scheme"), match.group("userinfo")
+    if ":" not in userinfo and scheme.lower() in _SSH_SCHEMES:
+        return match.group(0)
+    return f"{scheme}{REDACTED}@"
+
+
+def _redact_param(match: re.Match[str]) -> str:
+    if _SECRET_PARAM_NAME.search(match.group("name")):
+        return f"{match.group('prefix')}{REDACTED}"
+    return match.group(0)
+
+
+def redact_text(text: str) -> str:
+    """Replace credentials embedded in a string, keeping the rest intact."""
+    text = _URL_USERINFO_PATTERN.sub(_redact_userinfo, text)
+    text = _SECRET_PARAM_PATTERN.sub(_redact_param, text)
+    return _AUTH_SCHEME_PATTERN.sub(lambda m: f"{m.group('scheme')} {REDACTED}", text)
+
 # Install scratch directories an interrupted install leaves behind.
 _TRANSIENT_PATTERN = re.compile(r"^temp_(git|subdir)_\d+", re.IGNORECASE)
 
@@ -37,7 +78,12 @@ def home() -> Path:
 
 
 def redact(value: Any) -> Any:
-    """Recursively replace secret-looking values, preserving structure."""
+    """Recursively replace secret-looking values, preserving structure.
+
+    A value under a secret-named key is replaced whole; any other string has
+    credentials embedded in it (URL userinfo, secret query parameters,
+    Bearer/Basic auth) replaced in place.
+    """
     if isinstance(value, dict):
         return {
             key: (REDACTED if _SECRET_KEY_PATTERN.search(str(key)) else redact(item))
@@ -45,6 +91,8 @@ def redact(value: Any) -> Any:
         }
     if isinstance(value, list):
         return [redact(item) for item in value]
+    if isinstance(value, str):
+        return redact_text(value)
     return value
 
 
