@@ -91,6 +91,20 @@ if [[ -e "$TMP_DIR/.github/copilot-instructions.md" ]]; then
   exit 1
 fi
 
+for root in .agents .claude; do
+  if [[ ! -e "$TMP_DIR/$root/skills/example-skill/SKILL.md" ]]; then
+    echo "FAIL: $root/skills does not resolve to the shared skills." >&2
+    exit 1
+  fi
+done
+
+for root in .codex .cursor .windsurf; do
+  if [[ -e "$TMP_DIR/$root/skills" || -L "$TMP_DIR/$root/skills" ]]; then
+    echo "FAIL: $root/skills was created although skill roots are .agents and .claude only." >&2
+    exit 1
+  fi
+done
+
 # Consumer with its own tool-subagents/: hand-written *.toml stay visible to Codex.
 for kind in toml md; do
   C="$TMP_DIR/consumer-$kind"

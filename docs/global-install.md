@@ -69,19 +69,23 @@ inspection at any time (for example in a script or CI step).
 | Tool | Skills | Agents | Global instruction file |
 | --- | --- | --- | --- |
 | Claude Code | `~/.claude/skills` -> `skills/` | `~/.claude/agents` -> `tool-subagents/` | `~/.claude/CLAUDE.md` (managed block) |
-| Codex | `~/.codex/skills/<name>` -- one link per skill directory | `~/.codex/agents` -> `tool-subagents/.generated/codex/` (rendered from the `.md` by the installer; a legacy link to `tool-subagents/` is re-pointed) | `~/.codex/AGENTS.md` (managed block; created if missing or empty) |
-| Cursor | `~/.cursor/skills` -> `skills/` | `~/.cursor/agents` -> `tool-subagents/` | None -- Cursor has no global rules file. The script prints the directive text to paste into **Cursor Settings > Rules > User Rules**. |
-| Windsurf | `~/.codeium/windsurf/skills` -> `skills/` | -- | `~/.codeium/windsurf/memories/global_rules.md` (managed block; directories created if missing) |
+| Codex | `~/.agents/skills/<name>` -- one link per skill directory (shared with Cursor and Windsurf) | `~/.codex/agents` -> `tool-subagents/.generated/codex/` (rendered from the `.md` by the installer; a legacy link to `tool-subagents/` is re-pointed) | `~/.codex/AGENTS.md` (managed block; created if missing or empty) |
+| Cursor | `~/.agents/skills/<name>` (shared; no `~/.cursor/skills` link) | `~/.cursor/agents` -> `tool-subagents/` | None -- Cursor has no global rules file. The script prints the directive text to paste into **Cursor Settings > Rules > User Rules**. |
+| Windsurf | `~/.agents/skills/<name>` (shared; no `~/.codeium/windsurf/skills` link) | -- | `~/.codeium/windsurf/memories/global_rules.md` (managed block; directories created if missing) |
 | Gemini CLI | `~/.gemini/skills` -> `skills/` | -- | `~/.gemini/GEMINI.md` (managed block) |
 | OpenCode | `~/.config/opencode/skills` -> `skills/` | -- | -- |
 | Antigravity | `~/.gemini/antigravity/skills` -> `skills/` | -- | -- |
 
-Codex enumerates skill directories directly rather than following a
-nested link, so it gets one link per skill (`~/.codex/skills/<name>` ->
-`skills/<name>`) instead of a single `skills/` link. An existing real
+Codex, Cursor and Windsurf share one user-level root, `~/.agents/skills`.
+It gets one link per skill (`~/.agents/skills/<name>` -> `skills/<name>`)
+instead of a single `skills/` link, because Codex enumerates skill
+directories directly rather than following a nested link. The installer no
+longer creates `~/.codex/skills`, `~/.cursor/skills` or
+`~/.codeium/windsurf/skills`; it never deletes them, and prints one
+`legacy skills` row per old one it finds saying it can be removed. An existing real
 (non-symlink) directory with the same name as a toolkit skill is
 preserved unless `--force`/`-Force` is given, and entries under
-`~/.codex/skills/` that don't match a toolkit skill are never touched or
+`~/.agents/skills/` that don't match a toolkit skill are never touched or
 removed.
 
 On Windows, a link is a directory junction (`New-Item -ItemType
@@ -165,7 +169,8 @@ rm -f ~/.claude/skills ~/.claude/agents \
       ~/.codex/agents ~/.cursor/skills ~/.cursor/agents \
       ~/.codeium/windsurf/skills ~/.gemini/skills \
       ~/.config/opencode/skills ~/.gemini/antigravity/skills
-find ~/.codex/skills -maxdepth 1 -type l -delete   # per-skill Codex links
+find ~/.agents/skills -maxdepth 1 -type l -delete   # per-skill shared links
+find ~/.codex/skills -maxdepth 1 -type l -delete   # legacy per-skill Codex links
 ```
 
 **Links** (PowerShell): a junction/symlink is safe to remove with
@@ -178,7 +183,8 @@ Remove-Item ~/.claude/skills, ~/.claude/agents, ~/.codex/agents, `
     ~/.cursor/skills, ~/.cursor/agents, ~/.codeium/windsurf/skills, `
     ~/.gemini/skills, ~/.config/opencode/skills, `
     ~/.gemini/antigravity/skills -Force
-Get-ChildItem ~/.codex/skills | Where-Object LinkType | Remove-Item -Force
+Get-ChildItem ~/.agents/skills | Where-Object LinkType | Remove-Item -Force
+Get-ChildItem ~/.codex/skills | Where-Object LinkType | Remove-Item -Force   # legacy
 ```
 
 **Managed instruction blocks** -- strip the block from each file the

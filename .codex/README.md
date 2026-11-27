@@ -39,7 +39,7 @@ npm run subagents:render
 
 (`npm run subagents:apply -- all .` also refreshes `.cursor/agents/` and `.claude/agents/` renders; sync, setup, and global-install run the render before linking.)
 
-`sync-shared-skills.sh` remains available for the additional workflow of mirroring the shared skill catalog into a global `~/.codex/skills/` for system-wide Codex sessions. It refuses to replace non-symlink provider directories:
+`sync-shared-skills.sh` remains available for the additional workflow of mirroring the shared skill catalog into a global `~/.codex/skills/` for system-wide Codex sessions. This older script is separate from the installer, which no longer creates `~/.codex/skills` (Codex reads `~/.agents/skills`); an existing `~/.codex/skills` can be removed. It refuses to replace non-symlink provider directories:
 
 ```bash
 ./.codex/sync-shared-skills.sh             # local repair + global mirror

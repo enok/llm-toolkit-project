@@ -344,6 +344,40 @@ managed_block_apply() {
 
 CURSOR_SELECTED=0
 CURSOR_RULES_TEXT=""
+AGENTS_SKILLS_DONE=0
+
+# Shared user-level skill root read by Codex, Cursor and Windsurf: one link per
+# skill under ~/.agents/skills (never a link to the whole catalog, and entries
+# that are not toolkit skills are left alone).
+install_agents_skills() {
+  (( AGENTS_SKILLS_DONE )) && return 0
+  AGENTS_SKILLS_DONE=1
+  local base="$HOME_DIR/.agents"
+  if [[ -d "$TOOLKIT_ROOT/skills" ]]; then
+    local skill_dir name
+    for skill_dir in "$TOOLKIT_ROOT/skills"/*/; do
+      [[ -f "${skill_dir}SKILL.md" ]] || continue
+      name="$(basename "$skill_dir")"
+      plan_link_surface "agents" "skills/$name" "$base/skills/$name" "$TOOLKIT_ROOT/skills/$name"
+    done
+  fi
+}
+
+# Old per-tool skill roots are no longer created. Existing links are never
+# removed here; one row says each one can be removed by hand.
+note_legacy_skill_root() {
+  local tool="$1" root="$2" entry found=0
+  if [[ -L "$root" ]]; then
+    found=1
+  elif [[ -d "$root" ]]; then
+    for entry in "$root"/*; do
+      [[ -L "$entry" ]] && { found=1; break; }
+    done
+  fi
+  if (( found )); then
+    add_row "$tool" "legacy skills" "unchanged" "$root still holds links; no longer created, can be removed (~/.agents/skills is used)"
+  fi
+}
 
 install_claude() {
   local base="$HOME_DIR/.claude"
@@ -355,14 +389,8 @@ install_claude() {
 install_codex() {
   local base="$HOME_DIR/.codex"
 
-  if [[ -d "$TOOLKIT_ROOT/skills" ]]; then
-    local skill_dir name
-    for skill_dir in "$TOOLKIT_ROOT/skills"/*/; do
-      [[ -f "${skill_dir}SKILL.md" ]] || continue
-      name="$(basename "$skill_dir")"
-      plan_link_surface "codex" "skills/$name" "$base/skills/$name" "$TOOLKIT_ROOT/skills/$name"
-    done
-  fi
+  install_agents_skills
+  note_legacy_skill_root "codex" "$base/skills"
 
   # Codex reads generated TOML (rendered from tool-subagents/*.md, never committed).
   local codex_agents="$TOOLKIT_ROOT/tool-subagents/.generated/codex"
@@ -386,7 +414,8 @@ install_codex() {
 
 install_cursor() {
   local base="$HOME_DIR/.cursor"
-  plan_link_surface "cursor" "skills" "$base/skills" "$TOOLKIT_ROOT/skills"
+  install_agents_skills
+  note_legacy_skill_root "cursor" "$base/skills"
   plan_link_surface "cursor" "agents" "$base/agents" "$TOOLKIT_ROOT/tool-subagents"
   add_row "cursor" "user-rules (manual)" "skipped" "no global rules file; paste text below into Cursor Settings > Rules"
   CURSOR_SELECTED=1
@@ -395,7 +424,8 @@ install_cursor() {
 
 install_windsurf() {
   local base="$HOME_DIR/.codeium/windsurf"
-  plan_link_surface "windsurf" "skills" "$base/skills" "$TOOLKIT_ROOT/skills"
+  install_agents_skills
+  note_legacy_skill_root "windsurf" "$base/skills"
   managed_block_apply "windsurf" "memories/global_rules.md" "$base/memories/global_rules.md"
 }
 

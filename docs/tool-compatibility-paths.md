@@ -26,13 +26,13 @@ verified against this toolkit's own `setup-repo.*`, `ensure-symlinks.*`, and
 | Tool | Project location | Format |
 |------|------------------|--------|
 | Antigravity | `.agent/skills/` | Thin skill compatibility link to `.agents/skills/` |
-| Codex / generic | `AGENTS.md`, `.agents/skills/`, optional `.codex/skills/`, optional `.codex/agents/` | `AGENTS.md` is primary; provider skill paths stay thin links to the shared skill catalog |
-| Cursor | `.cursor/skills/`, `.cursor/rules/`, `.cursor/agents/` | Skills and agents are links to the canonical shared files; `.cursor/rules/*.mdc` is generated from `rules/` (git-ignored through a generated `.cursor/rules/.gitignore` that lists only the generated files; hand-made rules there stay visible to git): `always_on` becomes `alwaysApply: true`, `model_decision` becomes `alwaysApply: false` with its description, `glob` becomes `globs:`, `manual` sets neither |
+| Codex / generic | `AGENTS.md`, `.agents/skills/`, optional `.codex/agents/` | `AGENTS.md` is primary; `.agents/skills/` is the shared skill root (Codex also reads it) |
+| Cursor | `.agents/skills/`, `.cursor/rules/`, `.cursor/agents/` | Skills come from the shared `.agents/skills/` root; agents are links to the canonical shared files; `.cursor/rules/*.mdc` is generated from `rules/` (git-ignored through a generated `.cursor/rules/.gitignore` that lists only the generated files; hand-made rules there stay visible to git): `always_on` becomes `alwaysApply: true`, `model_decision` becomes `alwaysApply: false` with its description, `glob` becomes `globs:`, `manual` sets neither |
 | Claude Code | `CLAUDE.md`, `.claude/skills/`, `.claude/agents/` | `CLAUDE.md` imports `AGENTS.md` (`@AGENTS.md`); shared skills and agents are links |
 | Gemini CLI | `.gemini/skills/` | Thin skill compatibility link to `.agents/skills/` |
 | GitHub Copilot | `.github/copilot-instructions.md` | Concatenated repo-local export from the shared selection plus resolved LLM config docs - not a skills directory; the toolkit creates no Copilot skills link (see below) |
 | OpenCode | `.opencode/skills/` | Thin skill compatibility link to `.agents/skills/` |
-| Windsurf | `.windsurf/skills/`, `.windsurf/rules/`, `.windsurf/workflows/` | Thin skill link plus shared rule/workflow links |
+| Windsurf | `.agents/skills/`, `.windsurf/rules/`, `.windsurf/workflows/` | Skills come from the shared `.agents/skills/` root; rule/workflow links are shared |
 
 `setup-repo.*` asks which tools a consumer repo uses and links the selected
 project roots above. `ensure-symlinks.*` repairs the `.agents/`, `.agent/`,
@@ -45,6 +45,13 @@ says the Copilot agent also discovers project skills in `.github/skills/`,
 `.agents/skills/` links above may already be visible to it. Which editor
 versions honour each path is untested.
 
+Skill roots (C6): sync creates project skill links only under `.agents/skills`
+(read by Codex, Cursor, Windsurf and Copilot) and `.claude/skills` (Claude
+Code), plus the `.agent`, `.gemini` and `.opencode` roots not reviewed yet.
+It no longer creates `.codex/skills`, `.cursor/skills` or `.windsurf/skills`.
+Existing ones are never deleted; sync prints one line per old link it finds
+saying it can be removed.
+
 ### Upgrade note (one-time step)
 
 After updating the toolkit, run the sync or installer once so the Codex agents link is re-pointed to `tool-subagents/.generated/codex/`: an existing `.codex/agents` or `~/.codex/agents` link that still targets `tool-subagents/` shows no `.toml` (the committed copies are gone) until then. Project level: `./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github` (in the toolkit) or `../llm-toolkit-project/scripts/setup-repo.sh .` / `ensure-symlinks.sh .` (in a consumer); Windows: `.\scripts\sync-tool-configs.ps1 . -SkipAgentsMd` or `..\llm-toolkit-project\scripts\setup-repo.ps1 .`. User level: `./scripts/install-global-surfaces.sh --apply` or `.\scripts\install-global-surfaces.ps1 -Apply`. The scripts and `npm run subagents:check` print a WARNING while the old link is still in place.
@@ -53,7 +60,11 @@ After updating the toolkit, run the sync or installer once so the Codex agents l
 
 Most tools also support installing skills globally, outside any one repo.
 `scripts/install-global-surfaces.sh` / `.ps1` (see `docs/global-install.md`)
-materializes every path below as a link back to this toolkit's `skills/`,
+materializes every path below as a link back to this toolkit's `skills/`
+(Codex, Cursor and Windsurf share one `~/.agents/skills/<name>` link per skill;
+the installer no longer creates `~/.codex/skills`, `~/.cursor/skills` or
+`~/.codeium/windsurf/skills`, never deletes old ones, and prints one line per
+old link it finds saying it can be removed),
 links the agent path for Claude Code (`~/.claude/agents`), Codex
 and Cursor (`~/.cursor/agents`) to `tool-subagents/` (Codex, `~/.codex/agents`, is linked to the generated `tool-subagents/.generated/codex/`), and
 writes a managed instruction block into the global instruction files of
@@ -65,12 +76,12 @@ Codex-only mirror script and remains available.
 | Tool | Global skill path |
 |------|-------------------|
 | Antigravity | `~/.gemini/antigravity/skills/` |
-| Codex | `~/.codex/skills/` (per-skill links; also `.codex/sync-shared-skills.sh`) |
-| Cursor | `~/.cursor/skills/` |
+| Codex | `~/.agents/skills/` (per-skill links; also `.codex/sync-shared-skills.sh`) |
+| Cursor | `~/.agents/skills/` |
 | Claude Code | `~/.claude/skills/` |
 | Gemini CLI | `~/.gemini/skills/` |
 | OpenCode | `~/.config/opencode/skills/` |
-| Windsurf | `~/.codeium/windsurf/skills/` |
+| Windsurf | `~/.agents/skills/` |
 
 GitHub Copilot is not in this table because the installer does not target it
 (it has no Copilot installer and creates no `~/.copilot/skills` link). Vendor

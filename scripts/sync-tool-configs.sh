@@ -993,11 +993,8 @@ if [[ -d "$PROJECT/skills" ]]; then
     "$PROJECT/.agents/skills|../skills" \
     "$PROJECT/.agent/skills|../.agents/skills" \
     "$PROJECT/.claude/skills|../.agents/skills" \
-    "$PROJECT/.codex/skills|../.agents/skills" \
-    "$PROJECT/.cursor/skills|../.agents/skills" \
     "$PROJECT/.gemini/skills|../.agents/skills" \
-    "$PROJECT/.opencode/skills|../.agents/skills" \
-    "$PROJECT/.windsurf/skills|../.agents/skills"; do
+    "$PROJECT/.opencode/skills|../.agents/skills"; do
     link_target="${link_spec%%|*}"
     link_source="${link_spec#*|}"
     if ! ensure_symlink "$link_target" "$link_source"; then
@@ -1012,6 +1009,23 @@ if [[ -d "$PROJECT/skills" ]]; then
     echo "  Re-run with --force if a blocking local path should be replaced." >&2
   fi
 fi
+
+# Skill roots now created: .agents/skills (Codex, Cursor, Windsurf, Copilot)
+# and .claude/skills. Old per-tool roots are never created again and never
+# deleted here; say which ones can be removed by hand.
+for legacy_root in ".codex/skills" ".cursor/skills" ".windsurf/skills"; do
+  legacy_found=0
+  if [[ -L "$PROJECT/$legacy_root" ]]; then
+    legacy_found=1
+  elif [[ -d "$PROJECT/$legacy_root" ]]; then
+    for legacy_entry in "$PROJECT/$legacy_root"/*; do
+      [[ -L "$legacy_entry" ]] && { legacy_found=1; break; }
+    done
+  fi
+  if [[ "$legacy_found" -eq 1 ]]; then
+    echo "  Note: $legacy_root holds links that are no longer created; it can be removed (.agents/skills is used)."
+  fi
+done
 
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   build_ignore_block() {
@@ -1150,13 +1164,13 @@ Canonical shared content lives in toolkit \`skills/\`, \`rules/\`, \`workflows/\
 | Tool | Location | Format |
 |------|----------|--------|
 | Antigravity | \`.agent/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
-| Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; provider skill paths stay thin links to the shared skill catalog |
-| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills and agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated from \`rules/\` (git-ignored through \`.cursor/rules/.gitignore\`; hand-made rules there stay visible to git); project filtering happens via local ignore files |
+| Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; \`.agents/skills/\` is the shared skill root (Codex also reads it) |
+| Cursor | \`.agents/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills come from the shared \`.agents/skills/\` root; agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated from \`rules/\` (git-ignored through \`.cursor/rules/.gitignore\`; hand-made rules there stay visible to git); project filtering happens via local ignore files |
 | Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` imports \`AGENTS.md\` (\`@AGENTS.md\`); shared skills and agents are links |
 | Gemini CLI | \`.gemini/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus resolved LLM config docs |
 | OpenCode | \`.opencode/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
-| Windsurf | \`.windsurf/skills/\`, \`.windsurf/rules/\`, \`.windsurf/workflows/\` | Thin skill links plus shared rule/workflow links |
+| Windsurf | \`.agents/skills/\`, \`.windsurf/rules/\`, \`.windsurf/workflows/\` | Skills come from the shared \`.agents/skills/\` root; rule/workflow links are shared |
 
 ### Clone Bootstrap
 
@@ -1269,7 +1283,7 @@ if [[ -d "$PROJECT/workflows" ]]; then
 fi
 if [[ -d "$PROJECT/skills" ]]; then
   if [[ "${SKILLS_SYNCED:-0}" -eq 1 ]]; then
-    append_linked ".agents/skills/, .agent/skills/, .claude/skills/, .codex/skills/, .cursor/skills/, .gemini/skills/, .opencode/skills/, .windsurf/skills/"
+    append_linked ".agents/skills/, .agent/skills/, .claude/skills/, .gemini/skills/, .opencode/skills/"
   fi
 fi
 if [[ -n "$LINKED_LIST" ]]; then

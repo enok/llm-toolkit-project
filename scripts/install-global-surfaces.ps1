@@ -410,6 +410,49 @@ function Set-ManagedBlock {
 # Per-tool installers
 # ---------------------------------------------------------------------------
 
+$script:AgentsSkillsDone = $false
+
+# Shared user-level skill root read by Codex, Cursor and Windsurf: one link per
+# skill under ~/.agents/skills (never a link to the whole catalog, and entries
+# that are not toolkit skills are left alone).
+function Install-AgentsSkills {
+    if ($script:AgentsSkillsDone) { return }
+    $script:AgentsSkillsDone = $true
+    $base = Join-Path $HomeDir '.agents'
+    $skillsRoot = Join-Path $ToolkitRoot 'skills'
+    if (Test-Path -LiteralPath $skillsRoot -PathType Container) {
+        Get-ChildItem -LiteralPath $skillsRoot -Directory | Sort-Object -Property Name | ForEach-Object {
+            $skillMd = Join-Path $_.FullName 'SKILL.md'
+            if (Test-Path -LiteralPath $skillMd -PathType Leaf) {
+                Set-LinkSurface -Tool 'agents' -SurfaceLabel "skills/$($_.Name)" -LinkPath (Join-Path $base "skills/$($_.Name)") -TargetPath $_.FullName
+            }
+        }
+    }
+}
+
+# Old per-tool skill roots are no longer created. Existing links are never
+# removed here; one row says each one can be removed by hand.
+function Write-LegacySkillRootNote {
+    param(
+        [Parameter(Mandatory)][string]$Tool,
+        [Parameter(Mandatory)][string]$Root
+    )
+    $found = $false
+    if (Test-Path -LiteralPath $Root) {
+        $item = Get-Item -LiteralPath $Root -Force
+        if ($item.LinkType) {
+            $found = $true
+        } elseif ($item.PSIsContainer) {
+            foreach ($child in (Get-ChildItem -LiteralPath $Root -Force)) {
+                if ($child.LinkType) { $found = $true; break }
+            }
+        }
+    }
+    if ($found) {
+        Add-ResultRow -Tool $Tool -Surface 'legacy skills' -Action 'unchanged' -Detail "$Root still holds links; no longer created, can be removed (~/.agents/skills is used)"
+    }
+}
+
 function Install-ClaudeSurface {
     $base = Join-Path $HomeDir '.claude'
     Set-LinkSurface -Tool 'claude' -SurfaceLabel 'skills' -LinkPath (Join-Path $base 'skills') -TargetPath (Join-Path $ToolkitRoot 'skills')
@@ -419,15 +462,8 @@ function Install-ClaudeSurface {
 
 function Install-CodexSurface {
     $base = Join-Path $HomeDir '.codex'
-    $skillsRoot = Join-Path $ToolkitRoot 'skills'
-    if (Test-Path -LiteralPath $skillsRoot -PathType Container) {
-        Get-ChildItem -LiteralPath $skillsRoot -Directory | Sort-Object -Property Name | ForEach-Object {
-            $skillMd = Join-Path $_.FullName 'SKILL.md'
-            if (Test-Path -LiteralPath $skillMd -PathType Leaf) {
-                Set-LinkSurface -Tool 'codex' -SurfaceLabel "skills/$($_.Name)" -LinkPath (Join-Path $base "skills/$($_.Name)") -TargetPath $_.FullName
-            }
-        }
-    }
+    Install-AgentsSkills
+    Write-LegacySkillRootNote -Tool 'codex' -Root (Join-Path $base 'skills')
     # Codex reads generated TOML (rendered from tool-subagents/*.md, never committed).
     $codexAgentsOk = $true
     if ($Apply) {
@@ -454,7 +490,8 @@ function Install-CodexSurface {
 
 function Install-CursorSurface {
     $base = Join-Path $HomeDir '.cursor'
-    Set-LinkSurface -Tool 'cursor' -SurfaceLabel 'skills' -LinkPath (Join-Path $base 'skills') -TargetPath (Join-Path $ToolkitRoot 'skills')
+    Install-AgentsSkills
+    Write-LegacySkillRootNote -Tool 'cursor' -Root (Join-Path $base 'skills')
     Set-LinkSurface -Tool 'cursor' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents')
     Add-ResultRow -Tool 'cursor' -Surface 'user-rules (manual)' -Action 'skipped' -Detail 'no global rules file; paste text below into Cursor Settings > Rules'
     $script:CursorSelected = $true
@@ -463,7 +500,8 @@ function Install-CursorSurface {
 
 function Install-WindsurfSurface {
     $base = Join-Path $HomeDir '.codeium/windsurf'
-    Set-LinkSurface -Tool 'windsurf' -SurfaceLabel 'skills' -LinkPath (Join-Path $base 'skills') -TargetPath (Join-Path $ToolkitRoot 'skills')
+    Install-AgentsSkills
+    Write-LegacySkillRootNote -Tool 'windsurf' -Root (Join-Path $base 'skills')
     Set-ManagedBlock -Tool 'windsurf' -SurfaceLabel 'memories/global_rules.md' -FilePath (Join-Path $base 'memories/global_rules.md')
 }
 

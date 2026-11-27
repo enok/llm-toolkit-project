@@ -5,11 +5,11 @@ This repo uses symlinked skills, rules, and workflows for LLM-assisted developme
 ## Contents
 
 - **Canonical source**: shared skills, rules, workflows, and subagents stay in the toolkit; provider paths are thin compatibility links, not copies
-- **Skills**: `.agents/skills/<name>` -> toolkit `skills/<name>`; selected provider roots such as `.agent/skills/`, `.claude/skills/`, `.cursor/skills/`, `.gemini/skills/`, `.opencode/skills/`, and `.windsurf/skills/` link back to the same catalog
+- **Skills**: `.agents/skills/<name>` -> toolkit `skills/<name>`; Codex, Cursor, Windsurf and Copilot read `.agents/skills/`; selected provider roots such as `.agent/skills/`, `.claude/skills/`, `.gemini/skills/`, and `.opencode/skills/` link back to the same catalog
 - **Claude Code**: `.claude/skills/<name>` and `.claude/agents/` -> shared toolkit content
-- **Codex (optional)**: `.codex/skills/<name>` and optional `.codex/agents/`; `AGENTS.md` stays primary
-- **Windsurf**: `.windsurf/rules/`, `.windsurf/workflows/`, and optional `.windsurf/skills/<name>` -> shared toolkit content
-- **Cursor**: `.cursor/skills/` and `.cursor/agents/` stay symlinked to canonical shared files; `.cursor/rules/*.mdc` is generated from the shared rules (git-ignored per file through a generated `.cursor/rules/.gitignore`)
+- **Codex (optional)**: optional `.codex/agents/`; `AGENTS.md` stays primary
+- **Windsurf**: `.windsurf/rules/`, `.windsurf/workflows/` -> shared toolkit content
+- **Cursor**: `.cursor/agents/` stays symlinked to canonical shared files; `.cursor/rules/*.mdc` is generated from the shared rules (git-ignored per file through a generated `.cursor/rules/.gitignore`)
 
 ## Repo-local LLM files
 

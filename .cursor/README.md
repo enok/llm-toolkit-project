@@ -9,13 +9,13 @@ This directory mirrors how other tools consume the same knowledge:
 | `tool-subagents/` (repo root) | Canonical source for shared project subagent prompts |
 | `.cursor/rules/*.mdc` | Generated from `rules/` by `scripts/sync-tool-configs.sh` (the sync writes `.cursor/rules/.gitignore` listing exactly these files, so hand-made rules in the same directory stay visible to git; marked `generated-by: sync-tool-configs`; hand-made files are never touched or deleted; in this repo the root `.gitignore` covers the whole directory) |
 | `.cursor/agents` | Symlink to `../tool-subagents` |
-| `.cursor/skills` | Symlink to `../.agents/skills` (catalog; consumer repos use per-skill links instead) |
+| `.cursor/skills` | Legacy link, no longer created by sync (Cursor reads `.agents/skills`); an existing one can be removed |
 
 **`.cursor` should stay thin.** Skills and agents are symlinks to the canonical sources and the rules are generated from `rules/`. Do not hand-edit generated files; edit `skills/`, `rules/`, or `tool-subagents/` instead. `.cursor/workflows` is no longer created (not a Cursor surface); an existing link can be removed.
 
 **Rule conversion:** `trigger: always_on` becomes `alwaysApply: true`; `model_decision` becomes `alwaysApply: false` and keeps its `description` (Cursor loads it when relevant); `glob` becomes `alwaysApply: false` with `globs:`; `manual` sets neither. `manual` emits no `description` (Cursor would treat it as agent-requested) and `globs` is written unquoted. An older `.cursor/rules` directory link is replaced only with `--force`, and only when it points at the toolkit `rules/` (any other link is left alone); stale generated files are removed on the next sync.
 
-**Cursor Agent Skills** load from `.cursor/skills/` (and `.agents/skills/`); see `skills/README.md` for the skill catalog.
+**Cursor Agent Skills** load from `.agents/skills/` (the shared root; `.cursor/skills/` is no longer created); see `skills/README.md` for the skill catalog.
 
 ## Repair `.cursor/` and `.claude/agents`
 

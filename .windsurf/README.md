@@ -9,7 +9,7 @@ This directory mirrors how other tools consume the same shared knowledge:
 | `skills/` (repo root) | Canonical on-demand skill catalog |
 | `.windsurf/rules` | Symlink to the canonical shared rules |
 | `.windsurf/workflows` | Symlink to the canonical shared workflows |
-| `.windsurf/skills/<name>` | Per-skill compatibility symlinks into the canonical skill catalog |
+| `.windsurf/skills/<name>` | Legacy per-skill links, no longer created by sync (Windsurf reads `.agents/skills`); existing ones can be removed |
 
 **`.windsurf/` should stay thin.** Do not hand-edit through `.windsurf/`; edit `rules/`, `workflows/`, or `skills/` instead.
 

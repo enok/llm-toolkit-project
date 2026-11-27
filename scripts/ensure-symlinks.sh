@@ -113,7 +113,6 @@ else
   fi
 
   ensure_plain_dir "$CONSUMER/.codex" "$FORCE" || exit 1
-  link_shared_skill_catalog "$CONSUMER/.codex/skills" "Codex: .codex/skills/<name> -> toolkit/skills/<name>" || exit 1
   if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]] && render_codex_agents "$TOOLKIT_ROOT"; then
     repoint_legacy_agents_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT"
     ensure_dir_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT/tool-subagents/.generated/codex" "$FORCE" || exit 1
@@ -122,10 +121,8 @@ else
   ensure_plain_dir "$CONSUMER/.windsurf" "$FORCE" || exit 1
   ensure_dir_link "$CONSUMER/.windsurf/rules" "$TOOLKIT_ROOT/rules" "$FORCE" || exit 1
   ensure_dir_link "$CONSUMER/.windsurf/workflows" "$TOOLKIT_ROOT/workflows" "$FORCE" || exit 1
-  link_shared_skill_catalog "$CONSUMER/.windsurf/skills" "Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>" || exit 1
 
   ensure_plain_dir "$CONSUMER/.cursor" "$FORCE" || exit 1
-  link_shared_skill_catalog "$CONSUMER/.cursor/skills" "Cursor: .cursor/skills/<name> -> toolkit/skills/<name>" || exit 1
   if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
     ensure_dir_link "$CONSUMER/.cursor/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
   fi

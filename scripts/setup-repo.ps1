@@ -169,14 +169,12 @@ $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot '
 $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerWindsurfRoot 'workflows') -TargetPath (Join-Path $ToolkitRoot 'workflows') -AllowRepair:$Force
 
 if ($USE_WINDSURF) {
-    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerWindsurfRoot 'skills') -Label 'Windsurf: .windsurf/skills/<name> -> toolkit/skills/<name>'
     Write-Host '.windsurf/rules and .windsurf/workflows linked to toolkit'
 }
 
 if ($USE_CURSOR) {
     $consumerCursorRoot = Join-Path $Consumer '.cursor'
     Ensure-ConsumerDirectory -Path $consumerCursorRoot
-    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCursorRoot 'skills') -Label 'Cursor: .cursor/skills/<name> -> toolkit/skills/<name>'
     if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
         $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCursorRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
     }
@@ -207,7 +205,6 @@ if ($USE_CLAUDE) {
 if ($USE_CODEX) {
     $consumerCodexRoot = Join-Path $Consumer '.codex'
     Ensure-ConsumerDirectory -Path $consumerCodexRoot
-    Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCodexRoot 'skills') -Label 'Codex: .codex/skills/<name> -> toolkit/skills/<name>'
     if ((Test-Path -LiteralPath $toolkitAgents -PathType Container) -and (Invoke-CodexAgentRender -ToolkitRoot $ToolkitRoot)) {
         Remove-LegacyAgentsLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -ToolkitRoot $ToolkitRoot
         $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath (Join-Path $toolkitAgents '.generated/codex') -AllowRepair:$Force
@@ -392,11 +389,11 @@ Write-Host '    .windsurf/workflows/       - shared workflows -> toolkit workflo
 Write-Host '    docs/llm/                  - repo-local LLM guidance'
 Write-Host '    scripts/sync-llm-configs.* - consumer-local LLM sync wrapper'
 Write-Host '    AGENTS.md                  - repo-level instructions and context'
-if ($USE_WINDSURF) { Write-Host '  Windsurf:';  Write-Host '    .windsurf/skills/<name>    - shared skills -> toolkit skills/<name>' }
+if ($USE_WINDSURF) { Write-Host '  Windsurf:';  Write-Host '    .windsurf/rules, workflows     - shared links (skills: .agents/skills)' }
 if ($USE_ANTIGRAVITY) { Write-Host '  Antigravity:'; Write-Host '    .agent/skills/<name>       - shared skills -> toolkit skills/<name>' }
-if ($USE_CURSOR)   { Write-Host '  Cursor:';    Write-Host '    .cursor/skills/<name>      - shared skills -> toolkit skills/<name>'; Write-Host '    .cursor/                   - provider root with shared subpath links' }
+if ($USE_CURSOR)   { Write-Host '  Cursor:';    Write-Host '    .cursor/                   - provider root with shared subpath links' }
 if ($USE_CLAUDE)   { Write-Host '  Claude Code:'; Write-Host '    .claude/skills/<name>      - shared skills -> toolkit skills/<name>' }
-if ($USE_CODEX)    { Write-Host '  Codex:';     Write-Host '    .codex/skills/<name>       - shared skills -> toolkit skills/<name>' }
+if ($USE_CODEX)    { Write-Host '  Codex:';     Write-Host '    .codex/agents              - generated agent TOML (skills: .agents/skills)' }
 if ($USE_GEMINI)   { Write-Host '  Gemini CLI:'; Write-Host '    .gemini/skills/<name>      - shared skills -> toolkit skills/<name>' }
 if ($USE_OPENCODE) { Write-Host '  OpenCode:'; Write-Host '    .opencode/skills/<name>    - shared skills -> toolkit skills/<name>' }
 Write-Host ''
