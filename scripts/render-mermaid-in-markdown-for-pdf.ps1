@@ -30,7 +30,7 @@ param(
     [string] $ImageFormat = "svg",
 
     [Parameter(Mandatory = $false)]
-    ### POST endpoint for Mermaid → image (default: public Kroki for ImageFormat).
+    ### POST endpoint for Mermaid -> image (default: public Kroki for ImageFormat).
     [string] $KrokiUrl = "",
 
     [Parameter(Mandatory = $false)]

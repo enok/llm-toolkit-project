@@ -109,16 +109,16 @@ review before use.
 - Preserve and check the wrapped command's exit status. If filtering fails or
   omits required evidence, rerun only the narrow command with RTK disabled.
 - Never put secrets, tokens, credentials, or signed URLs in command arguments.
-- Keep RTK telemetry, raw-output tee, hook audit, and persistent command-history
-  storage disabled, and verify the effective environment plus the absence of
-  any history database, tee directory, or audit log after a harmless smoke
-  test. Some builds do not enforce `tracking.enabled = false` and let
-  `RTK_DB_PATH` override the config file (observed on native Windows 0.44.x):
-  there, set the user environment `RTK_DB_PATH=NUL` and
-  `tracking.database_path = "NUL"` as well.
-- Do not enable global automatic rewrite hooks (`rtk init`) without a separate
-  security review. Prompt-level explicit use keeps command selection visible
-  and makes state-changing exclusions enforceable.
+- Keep RTK telemetry, recall store, raw-output tee, hook audit, and command
+  history off, and verify the effective environment plus the absence of any
+  history/recall database, tee directory, or audit log after a smoke test.
+  `[tracking] enabled = false` is parsed but not honoured, so
+  `RTK_DB_PATH` is the only tracking control. RTK 1.x adds a recall store,
+  switched off by `RTK_TEE=0`, `RTK_RECALL=0` and `[retriever] mode = "disabled"`.
+- Never run `rtk init`, `rtk trust`, `rtk telemetry enable`, `rtk llm-proxy`,
+  `rtk claude`, `rtk pipeline add` or `rtk plugins`.
+- The reviewed deployment (version, install, environment, config, smoke test)
+  is in `skills/token-efficiency/references/rtk-reviewed-deployment.md`.
 - Report RTK reduction statistics only as approximate command-output savings;
   they are not exact tokenizer counts or total model/billing reductions.
 

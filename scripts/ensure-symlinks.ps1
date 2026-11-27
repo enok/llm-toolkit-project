@@ -104,7 +104,7 @@ if ($IsToolkitRepo) {
     Write-Host 'Toolkit repo: skipping per-skill provider links; sync-tool-configs.sh repairs catalog junctions.'
 }
 else {
-    # ── 1. Shared skills and provider roots, linked by subpath ───────────────────
+    # -- 1. Shared skills and provider roots, linked by subpath -------------------
     $consumerAgentsRoot = Join-Path $Consumer '.agents'
     Ensure-ConsumerDirectory -Path $consumerAgentsRoot
     Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerAgentsRoot 'skills') -Label 'Skills: .agents/skills/<name> -> toolkit/skills/<name>'

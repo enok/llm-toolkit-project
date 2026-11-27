@@ -615,13 +615,13 @@ class RefinementSecretRuleTests(unittest.TestCase):
         cases = [
             (kv("DB_PASSWORD", "=", "Xk9@q2Lm#77Zp!aa"), "secret-assignment", "Xk9@q2Lm#77Zp!aa"),
             (kv("password", ": ", "S3cr3t!Pa$$w0rd#2024xyz"), "secret-assignment", "S3cr3t!Pa$$w0rd#2024xyz"),
-            (kv("DB_PASSWORD_PROD", "=", "Zq8wLm3Pt7Rv2Ks9"), "secret-assignment", "Zq8wLm3Pt7Rv2Ks9"),
-            (kv("SECRET_KEY_BASE", "=", "a8f3c9e1b7d2f4a6c8e0"), "secret-assignment", "a8f3c9e1b7d2f4a6c8e0"),
-            (kv("passwordProd", ": ", "Zq8wLm3Pt7Rv2Ks9"), "secret-assignment", "Zq8wLm3Pt7Rv2Ks9"),
+            (kv("DB_PASSWORD_PROD", "=", "Zq8wLm3Pt7Rv2Ks9"), "secret-assignment", "Zq8wLm3Pt7Rv2Ks9"),  # gitleaks:allow
+            (kv("SECRET_KEY_BASE", "=", "a8f3c9e1b7d2f4a6c8e0"), "secret-assignment", "a8f3c9e1b7d2f4a6c8e0"),  # gitleaks:allow
+            (kv("passwordProd", ": ", "Zq8wLm3Pt7Rv2Ks9"), "secret-assignment", "Zq8wLm3Pt7Rv2Ks9"),  # gitleaks:allow
             ("postgres" + "://admin:" + "S3cretPw9" + "@db.internal:5432/app", "url-credentials", "S3cretPw9"),
             ("https" + "://deploy:" + "Tk7mQ2vX" + "@git.internal/r.git", "url-credentials", "Tk7mQ2vX"),
-            ("key " + "sk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc", "stripe-key", "4eC39HqLyjWDarjtT1zdp7dc"),
-            ("key " + "rk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc", "stripe-key", "4eC39HqLyjWDarjtT1zdp7dc"),
+            ("key " + "sk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc", "stripe-key", "4eC39HqLyjWDarjtT1zdp7dc"),  # gitleaks:allow
+            ("key " + "rk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc", "stripe-key", "4eC39HqLyjWDarjtT1zdp7dc"),  # gitleaks:allow
             ("maps " + google, "google-api-key", google),
             ("cookie " + jwt, "jwt", jwt),
         ]

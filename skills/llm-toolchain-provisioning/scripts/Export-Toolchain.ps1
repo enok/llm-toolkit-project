@@ -6,7 +6,7 @@
     logic; this only resolves an interpreter and forwards arguments, per
     rules/cross-platform-scripts.md.
 .PARAMETER Out
-    Path to write the manifest to. Use a git-ignored path — the manifest
+    Path to write the manifest to. Use a git-ignored path - the manifest
     records one workstation's state and must not be committed.
 .PARAMETER Provider
     Limit to specific providers (e.g. claude-code, cursor). Default: all detected.
