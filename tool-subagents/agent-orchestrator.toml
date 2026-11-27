@@ -581,9 +581,10 @@ between tool calls is summarised rather than shown to the user word for word,
 send each print through a tool the host shows verbatim (for example a
 send-message tool). A configured notification mirror (see "Tasks-table
 notification cadence" in `rules/request-orchestration.md`) sends one message
-per print, and each message carries the same full table as the chat print:
-the manifest, every column, every row, the footer rows and the closing line.
-A mirror is never a shortened table or a status line.
+per print in exactly the format the route's approval names. When it names the
+full table, each message carries the same full table as the chat print (the
+manifest, every column, every row, the footer rows and the closing line), never
+a shortened table; when it names a status line, send only that.
 
 ### Durable checkpoints and resume
 
@@ -967,7 +968,7 @@ Progress notification (opt-in, gated):
   line for the root agent to send. In explicit LOA, sending may be assigned to a
   user-authorized async worker only after the human-facing gate is satisfied.
 - The root agent may send a status line without a fresh per-message approval only when the user explicitly pre-authorized progress posting for this run/session, naming both the destination (e.g. a specific chat channel or thread) and the status-line format; that standing approval covers only that exact format and destination, per `rules/human-comment-reply-gate.md`. Anything beyond it — different destination, added detail, findings, evidence — goes back to draft-and-approve.
-- Never include evidence, file contents, or findings that the user has not already agreed can leave the local session.
+- Never include evidence, file contents, or findings that the user has not already agreed can leave the local session (a route approved for the full table has agreed to its Evidence column, nothing more).
 
 ## Known pitfalls
 
