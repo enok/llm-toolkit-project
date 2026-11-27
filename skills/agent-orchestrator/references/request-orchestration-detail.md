@@ -17,6 +17,8 @@ and parallel dispatch", item 5; the per-task quality loop in
 
 ## Default route
 
+Scheduled and recurring automation runs (digests, scans, syncs) are requests too and run under the same contract: a tier and an exact model per row, the root owns writes, and the tasks table is kept. When a scheduled task is created or updated, its standalone prompt names this rule and `tool-subagents/agent-orchestrator.md`; this holds for every such task, not only a flagship one (`workflows/automation-maintenance.md`).
+
 1. Classify the request as trivial/local or multi-lane.
 2. Keep trivial answers, single-file edits, and immediate blockers local.
 3. For multi-lane work, use `agent-orchestrator` from `tool-subagents/` to split the request into independent tasks. The orchestrator enforces a mandatory 30-minute cap per task, parallel-by-default splitting, and pre-execution evaluation (see `tool-subagents/agent-orchestrator.md` "SLA accounting and maximal decomposition"). When a task's elapsed time exceeds its SLA, the orchestrator terminates it, diagnoses the cause, fixes the defect, and restarts as a fresh lane.
@@ -38,7 +40,7 @@ and parallel dispatch", item 5; the per-task quality loop in
 
 - Keep root context small. Load only the primary workflow or skill plus directly required helper rules, references, and subagents.
 - The root/orchestrator stays thin: it holds the durable state ledger, the open decisions awaiting the human, and the lanes in flight — everything else is read from disk on demand. Point lanes at the ledger instead of pasting context into their prompts, and record each finding once so no later lane re-derives it. See `tool-subagents/agent-orchestrator.md` "Thin orchestrator and the durable state ledger" for the binding contract.
-- Per-task context isolation is a mandatory step: see "Context isolation per task" below.
+- Per-task context isolation is a mandatory step: see "Context isolation per task (MANDATORY)" in the core `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md` "Context economy and parallel dispatch", item 5.
 - Knowledge base first: before splitting, query the toolkit knowledge base (`kb.py search`, `-k 5` or fewer, at most one refined query per question) and point lanes at the hits by path instead of re-reading catalogs or source; fall back to `learnings/INDEX.md` and direct reads when it is unreachable and say so (`rules/knowledge-base.md`, `tool-subagents/agent-orchestrator.md` "Knowledge base first and knowledge write-back").
 - Prefer single-responsibility skills, rules, workflows, and agents; compose them for larger tasks instead of duplicating or inlining long guidance.
 - If a workflow needs more detail than fits the size limit, split the reusable phase into another workflow and call it by path from the parent.

@@ -125,6 +125,25 @@ class MeasureAlwaysOnTests(unittest.TestCase):
             "slim brief",
             "`TASKS_TABLE.md` + `CONTEXT_STATE.md`",
             "NOT POSTED",
+            # notification mirror
+            "every full-table print is also sent to the matching channel",
+            "naming what is blocked and what the user must decide",
+            "carries the requester header",
+            "exactly what the route's approval names",
+            # per-run loop
+            "`## Known pitfalls`",
+            "the `preflight` output",
+            "run `workflows/run-retrospective.md`",
+            "end the final report with its metrics line",
+            # contract source when the contract files cannot be reached
+            "request access to the toolkit root once, at W0, for that folder only",
+            "consumer `AGENTS.md` shared-rules block",
+            "applies the contract from memory and says so in the plan header",
+            "never worked around",
+            # delegation depth
+            "root -> coordinator -> specialist",
+            "coordinator agents may call other agents when their task has independently verifiable subparts",
+            "leaf agents should not recursively delegate unless their prompt or manifest explicitly allows it",
         ):
             self.assertIn(marker, core)
         detail = "skills/agent-orchestrator/references/request-orchestration-detail.md"
