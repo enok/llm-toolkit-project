@@ -207,6 +207,6 @@ them as expected artifacts with evidence, not as emitter or service failures.
 - Related specialist handoffs.
 - Learning/token efficiency: reusable lesson, routing gap, or context that can
   move to `workflows/aws-alarm-investigator-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  a rule, workflow, skill,
   reference, or the consumer repo's `docs/llm/`."""
 name = "aws-alarm-investigator"

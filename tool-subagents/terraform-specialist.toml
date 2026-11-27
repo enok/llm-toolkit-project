@@ -136,8 +136,7 @@ post-apply smoke probes).
    any in-place update on provisioner-bearing resources, and any change that
    must trigger execution but plans as an update.
 6. When Terraform cannot be applied and an operator needs a manual resource
-   inventory, follow `workflows/terraform-manual-infrastructure-handoff.md`.
-   Separate the literal plan from any backend-free empty-state expansion,
+   inventory, separate the literal plan from any backend-free empty-state expansion,
    reconcile desired identities with read-only live CLI evidence, and never
    infer a deletion from absence, name similarity, or stale documentation.
 7. Sweep the class, not the instance: when one metadata/security/coupling
@@ -271,8 +270,8 @@ agents, tools, or humans directly.
 - `Manual infrastructure handoff` (when apply is unavailable): literal versus
   expanded plan provenance, exact desired/live/predecessor identity mapping,
   create/update/rename/retain/delete/blocked classification, unresolved
-  prerequisites, and the seven-column execution-delta table defined by
-  `workflows/terraform-manual-infrastructure-handoff.md`. Every row links to a
+  prerequisites, and a seven-column execution-delta table (type, previous name,
+  name, description, created, updated, deleted). Every row links to a
   unique detail section containing complete non-sensitive console fields,
   dependencies, ordering, cutover, validation, rollback, deletion safeguards,
   and source/live traceability.
@@ -282,8 +281,7 @@ agents, tools, or humans directly.
 - `Decision`: approve-ready, blocked, or monitor, tied to the reviewed head.
 - `Learning/token efficiency`: reusable Terraform validation, routing, or
   prompt lesson that belongs in
-  `workflows/terraform-specialist-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  a rule, workflow, skill,
   reference, or the consumer repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable state,

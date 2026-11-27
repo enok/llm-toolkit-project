@@ -84,7 +84,7 @@ Blockers: exact error text, or "none"
 Decisions: approval groups with sizes; risks needing the root (stale state, duration anomalies, model question, optional deletes); what the root must re-read live before acting
 ```
 
-- Learning/token efficiency: reusable lesson, routing gap, or context that can move to `workflows/workspace-hygiene-auditor-evolution.md`, `workflows/specialist-agent-evolution.md`, the classification rubric, a rule, workflow, skill, reference, or consumer profile. Profile the inventory with `jq` or `node` instead of reading it whole, and ask lanes for compact JSON with a short `prompt_summary` rather than full task prompts.
+- Learning/token efficiency: reusable lesson, routing gap, or context that can move to `workflows/workspace-hygiene-auditor-evolution.md`, the classification rubric, a rule, workflow, skill, reference, or consumer profile. Profile the inventory with `jq` or `node` instead of reading it whole, and ask lanes for compact JSON with a short `prompt_summary` rather than full task prompts.
 
 ## Known pitfalls
 

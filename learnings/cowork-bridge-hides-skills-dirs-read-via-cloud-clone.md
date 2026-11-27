@@ -61,7 +61,7 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
   Commander), copy it to a non-protected folder with the desktop shell, run the copy there, and
   park the copy in a folder the owner reviews for deletion.
 
-Durable guidance: workflows/toolkit-maintenance.md (Known pitfalls); workflows/career-profile-sync.md (Phase 6)
+Durable guidance: workflows/career-profile-sync.md (Phase 6)
 
 # Why
 The bridge refuses folder names it treats as Claude's own data folders, so `skills/` and

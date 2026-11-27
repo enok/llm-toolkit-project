@@ -105,6 +105,5 @@ If neither CLI nor MCP is available, the agent will ask the user to paste the ti
 
 In chat, say:
 - **"Get details for ABC-1234"** — fetches and displays the issue
-- **"Research ABC-1234"** — triggers ticket-research workflow
 
 The agent tries **CLI first** (lower context), then **MCP** (richer tools), then asks for a paste.

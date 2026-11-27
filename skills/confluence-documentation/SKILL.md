@@ -194,6 +194,5 @@ curl -u "<email>:<api-token>" -X POST -H "X-Atlassian-Token: no-check" \
 
 - `workflows/confluence-documentation.md`
 - `integrations/confluence.md`
-- `workflows/document-creation.md`
 - `skills/diagram-authoring/SKILL.md`
 - `skills/external-skill-intake/SKILL.md`

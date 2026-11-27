@@ -14,7 +14,6 @@ PDF, slide, or PR diagrams need specialist creation guidance or validation.
    versioned.
 2. Load only relevant context: `skills/diagram-authoring/SKILL.md`,
    `skills/diagram-authoring/references/deterministic-diagram-system.md`,
-   `workflows/document-creation.md`,
    existing diagrams, source files, configs, tickets, PRs, wiki pages, and any
    checked-in diagram standard in the consumer repo's `docs/llm/`.
 3. Identify whether `system-architecture-specialist` should first validate

@@ -24,19 +24,16 @@ Trigger examples:
 
 ## Workflow
 
-1. Load `workflows/system-architecture-specialist-validation.md`.
-2. Invoke or follow `tool-subagents/system-architecture-specialist.md`.
-3. Keep root-agent ownership for edits, docs, diagrams, validation, commits,
+1. Invoke or follow `tool-subagents/system-architecture-specialist.md`.
+2. Keep root-agent ownership for edits, docs, diagrams, validation, commits,
    pushes, and user-facing communication.
-4. Compose with `skills/best-practices/SKILL.md`,
-   `workflows/project-discovery.md`, `workflows/document-creation.md`,
+3. Compose with `skills/best-practices/SKILL.md`,
+   `workflows/project-discovery.md`,
    `diagram-creation-specialist`, `confluence-documentation-specialist`,
    `documentation-reviewer`, `pr-validator`, and language/security/contract/log
    specialists only when their evidence lanes are relevant.
-5. Keep product-specific architecture facts (service inventories, hostnames,
+4. Keep product-specific architecture facts (service inventories, hostnames,
    account layouts) in the consumer repo's `docs/llm/`, not in this skill.
-6. If the specialist misses a reusable pattern, run
-   `workflows/system-architecture-specialist-evolution.md`.
 
 ## Known pitfalls
 

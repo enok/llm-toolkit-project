@@ -4,78 +4,18 @@ description: Run a mandatory static-analysis gate against only code added or mod
 
 # Changed-code quality gate workflow
 
-Use this workflow for every validation that includes created or updated source
-code. It is not required for documentation-only or configuration-only changes.
-`rules/changed-code-quality-gate-required.md` makes it mandatory before commit,
-push, PR readiness, or completion.
+Mandatory for changed source code per `rules/changed-code-quality-gate-required.md`
+(scope and blocking policy live there); not needed for docs- or config-only changes.
 
-## Steps
+1. Pick the base: local uncommitted work omits `--base`; branch/pre-PR passes the
+   trusted target branch or base SHA; CI PR passes base and head SHAs with
+   `--event pull_request`; CI push passes `before`/`after` with `--event push`
+   (a new branch passes this toolkit's trunk, `main`).
+2. Run the repository's `scripts/changed_code_quality_gate.py` with the platform's
+   Python launcher, e.g. `--base origin/main`. `--scope-only` is not coverage.
+3. Exit codes: 0 pass or nothing applicable; 1 findings; 2 Git scope/config error;
+   3 analyzer or coverage unavailable; 4 analyzer or report failure. Stop on 1-4.
+4. Tests, build, dependency, docs, and security gates still run; this replaces none.
 
-1. Confirm the repository root, the intended base/head, and whether the run is
-   local, pull request, or push validation.
-2. Select the base:
-   - local uncommitted work: omit `--base`;
-   - branch/pre-PR: pass the trusted target branch or an immutable base SHA;
-   - CI PR: check out the real event head with full history, then pass the
-     immutable base and head SHAs using `--event pull_request`;
-   - CI push: pass the event `before` and `after` SHAs using `--event push`; for
-     a new branch, pass the repository's trusted integration trunk explicitly
-     (this toolkit uses `main`; other repositories should pass their own default
-     branch).
-3. Run the repository's copy of `scripts/changed_code_quality_gate.py` with the
-   active platform's Python launcher. Use `--scope-only` only to inspect scope;
-   it is not analyzer coverage.
-4. Review the JSON result. Verify that every included path is added or modified
-   code, that every failing finding overlaps an added or modified line, and that
-   every exclusion has a valid reason.
-   Confirm that candidate `.gitignore`/`.semgrepignore` files, inline
-   suppression comments, minified formatting, and vendor/build path names did
-   not reduce the scoped or analyzer-reported file set.
-   The reference adapters support Java, Python, JavaScript, TypeScript
-   (including common module extensions), Bash, PowerShell, and Dockerfile
-   (hadolint). Java uses the trusted Semgrep policy; shell scripts additionally
-   require their platform syntax parser and changed-line policy checks. A
-   changed Dockerfile is judged whole-file: any hadolint error/warning in it
-   blocks, because hadolint reports one line per instruction and a partial span
-   is easy to fool. Other recognized languages, unrecognized file types,
-   oversized source, and source-like symlinks exit blocked until project-native
-   results are normalized to the same scope. On POSIX, a changed path with a
-   backslash blocks, even for non-code files.
-5. Stop on exit 1-4. Do not convert unavailable, malformed, timed-out, broader
-   unfiltered, or stale analyzer evidence into a pass.
-6. Continue with unit, integration, build, dependency, documentation, and
-   security validation. This gate replaces none of them.
-
-## Reference commands
-
-```bash
-python scripts/changed_code_quality_gate.py --base origin/main
-python scripts/changed_code_quality_gate.py --event pull_request --base "$BASE_SHA" --head "$HEAD_SHA"
-```
-
-```powershell
-python scripts/changed_code_quality_gate.py --base origin/main
-python scripts/changed_code_quality_gate.py --event pull_request --base $env:BASE_SHA --head $env:HEAD_SHA
-```
-
-Replace `origin/main` with the repository's default branch when it differs. Use
-the platform's usable Python launcher (`python`, `python3`, or `py -3`).
-
-## Exit codes
-
-| Code | Meaning |
-| --- | --- |
-| 0 | Passed, or no applicable changed code |
-| 1 | Changed-code findings |
-| 2 | Git scope or configuration error |
-| 3 | Required analyzer or coverage unavailable |
-| 4 | Analyzer execution or report failure |
-
-Never put secrets on the command line. Scanner credentials are permitted only
-for trusted CI events and must follow the target project's existing
-secret-handling policy.
-
-## Related
-
-- `.github/workflows/changed-code-quality-gate.yml` for the CI wiring that runs
-  the gate implementation, configuration, and rules from a protected revision.
+Never put secrets on the command line. CI wiring:
+`.github/workflows/changed-code-quality-gate.yml` (runs the gate from a protected revision).

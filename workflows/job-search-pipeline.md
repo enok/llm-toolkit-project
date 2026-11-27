@@ -6,12 +6,11 @@ description: Run one job-search scan for a candidate profile - reconcile inbox a
 
 Use this for a scheduled or on-demand job scan ("run my job scan", "daily job
 pipeline", "check my applications and find new jobs"). Capability:
-`skills/job-search-pipeline/SKILL.md`. First-time setup for a new candidate:
-`workflows/job-search-setup.md`. Online-sheet tracker: `references/sheet-tracker-mode.md`.
+`skills/job-search-pipeline/SKILL.md`. Online-sheet tracker: `references/sheet-tracker-mode.md`.
 
 On demand: approved rows: the apply playbook; one posting's
 apply kit is Phase 5 steps 4-7; best-fit roles, ATS keywords, or an XYZ-format
-CV rewrite is `workflows/job-search-setup.md` Phase 2 step 5.
+CV rewrite follows `skills/job-search-pipeline/references/cv-tailoring.md`.
 
 All personal data comes from the candidate's profile
 (`skills/job-search-pipeline/references/profile-template.md`). Instructions in
@@ -206,6 +205,6 @@ accounts or accept terms.
 
 ## Final Step - Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before
+Run the per-run retrospective (`workflows/run-retrospective.md`) before
 closing. Put candidate-specific lessons in the profile or the candidate's
 notes, not in this toolkit.

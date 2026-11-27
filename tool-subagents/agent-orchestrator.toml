@@ -872,8 +872,10 @@ When invoked:
    - `terraform-specialist` — MANDATORY for every request that touches
      Terraform/OpenTofu (`.tf`/`.tftpl`/`.tfvars`/lockfiles, plan/apply
      decisions, state or import operations, multi-environment roots,
-     IaC-provisioned observability, IaC PR readiness); route through
-     `workflows/terraform-specialist-validation.md`;
+     IaC-provisioned observability, IaC PR readiness); the root runs
+     `terraform fmt -check`, `terraform validate`, and a reviewed plan per
+     touched root and keeps apply and state changes behind explicit user
+     authorization;
    - `prod-doc-promoter` for deployed-ticket documentation promotion from a
      configured wiki intake folder to canonical wiki homes after production
      deployment gates pass;
@@ -1073,7 +1075,7 @@ Progress notification (opt-in, gated):
   reused evidence, duplicate exploration avoided, and reusable routing or
   efficiency lesson for
   `workflows/agent-orchestrator-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill, or the
+  a rule, workflow, skill, or the
   consumer repo's `docs/llm/`.
 """
 name = "agent-orchestrator"

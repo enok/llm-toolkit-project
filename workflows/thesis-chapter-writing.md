@@ -40,7 +40,7 @@ Step 4 of `workflows/thesis-writing-main.md` (Phase 2: Content Development), ext
 
 **Execute:**
 ```
-1. Read `workflows/research-analysis-cycle.md` (method choice and baselines)
+1. Confirm the method choice and baselines
 2. Map methods to references:
    - Descriptive stats → Bussab & Morettin (2017)
    - Regression → Wooldridge (2020)

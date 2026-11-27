@@ -29,9 +29,9 @@ HOURS_PER_FTE_WEEK = D(40)
 # activity, manual hours per week, conservative %, likely %, assets behind it
 DEFAULT_ROWS = [
     ("Ticket research & context gathering", 3.5, 10, 25,
-     "workflows/ticket-research.md, skills/design-driven-dev, workflows/cross-repo-impact.md"),
+     "skills/design-driven-dev"),
     ("Coding + tests", 9.0, 8, 20,
-     "workflows/ticket-implementation.md, workflows/new-backend-feature.md, "
+     "workflows/ticket-implementation.md, "
      "skills/python-best-practices, skills/js-ts-best-practices"),
     ("Pre-PR self-checks", 1.5, 10, 30,
      "skills/pre-pr-check, workflows/changed-code-quality-gate.md, skills/run-tests"),

@@ -8,8 +8,7 @@ Use this when a candidate needs results fast (short pay runway, sudden
 availability) and wants an interactive sprint: "which of these jobs fit me",
 "find more positions", "give me an attack plan starting tomorrow", "prepare me for
 the interviews", "keep a list of everything I applied to". The unattended
-recurring scan is `workflows/job-search-pipeline.md`; first-time profile setup is
-`workflows/job-search-setup.md`. This workflow composes them with the skills
+recurring scan is `workflows/job-search-pipeline.md`. This workflow composes it with the skills
 below instead of repeating them.
 
 Rules in force: `rules/request-orchestration.md`,

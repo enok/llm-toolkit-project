@@ -110,48 +110,44 @@ For every non-trivial request the root agent routes through `rules/request-orche
 
 | User intent | Use |
 | --- | --- |
-| "Review my changes" / "review this PR" | **ticket-review** or **review** workflow |
-| "Review and fix" / "fix my branch" | **ticket-review-and-fix** or **review-and-fix** workflow |
+| "Review my changes" / "review this PR" | **ticket-review** workflow |
 | "Pre-PR check" / "ready for PR" | **pre-pr-check** workflow + skill |
 | "Quality gate" / "Sonar" / "Semgrep changed code" | **changed-code-quality-gate** workflow |
 | "Validate this PR" / "approve or block" | **pr-validator-validation** workflow + **pr-validator** skill |
-| "Ticket is solved, drive the PR" | **ticket-pr-validation-loop** workflow |
 | "Validate Java changes" | **java-change-validation** workflow + **java-change-validator** skill |
 | "Commit and push" / "validate and push" | **commit-and-push** workflow (with **pre-pr-check** first) |
 | "Fix CI" / "address PR comments" / "PR bot findings" | **gh-fix-ci**, **gh-address-comments**, **pr-automation-review** workflows |
-| "Start ticket ABC-123" / "implement a ticket" | **ticket-research** and **ticket-implementation** workflows |
+| "Start ticket ABC-123" / "implement a ticket" | **ticket-implementation** workflow |
 | "Run tests" / "test plan" | **run-tests** workflow |
-| "Terraform" / ".tf change" / "plan/apply" / "state or import" (mandatory routing) | **terraform-specialist-validation** workflow, with **terraform-change-safety** |
-| "Airflow DAG" / "Glue job" / "crawler" / "MWAA" | **dag-glue-specialist-validation** workflow |
+| "Terraform" / ".tf change" / "plan/apply" / "state or import" (mandatory routing) | **terraform-specialist** lane, with **terraform-change-safety** |
 | "Investigate this alarm" / "CloudWatch alarm RCA" | **aws-alarm-investigator-validation** workflow + **aws-alarm-investigator** skill |
 | "Analyze logs" / "CloudWatch logs" / "nginx logs" | **log-investigation** workflow + **log-analysis** skill |
 | "Incident" / "production issue" / "runbook" | **incident-ops**, **runbook-authoring** skills |
 | "Update docs" / "review documentation" | **update-docs** workflow or **doc-delta** skill; **documentation-reviewer-validation** workflow |
-| "Architecture docs" / "diagrams" / "C4" / "PlantUML" | **document-creation** workflow, **diagram-authoring** skill, **diagram-creation-specialist-validation**, **system-architecture-specialist-validation** |
-| "Confluence" / "wiki page" / "promote deployed docs" | **confluence-documentation** workflow + skill; **confluence-documentation-specialist-validation**; **prod-doc-promoter-validation** |
+| "Architecture docs" / "diagrams" / "C4" / "PlantUML" | **diagram-authoring** skill, **diagram-creation-specialist-validation** |
+| "Confluence" / "wiki page" / "promote deployed docs" | **confluence-documentation** workflow + skill; **prod-doc-promoter-validation** |
 | "Verify the UI" / "compare with Figma" / "check exported images" | **ui-verify** skill |
 | "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill |
-| "Study a topic and publish repo, Medium and LinkedIn" / "study repo in one or more languages" / "reduce a study repo to one language" | **study-repo-to-publication** workflow |
 | "Write / replace / review a publication (article or post)" / "position this article for my target role" / "replace the published story and post" | **study-publication-medium-linkedin** workflow; **publication-positioning** rule |
 | "Security review" / "OWASP audit" / "threat model" | **security-report** workflow |
-| "Cut a release" / "Maven release" / "E2E for release" | **maven-release** skill; **ticket-release** workflow |
+| "Cut a release" / "Maven release" / "E2E for release" | **maven-release** skill |
 | "Migrate Jenkins to GitHub Actions" / "CI parity" | **jenkins-to-github-actions** skill |
 | "Local env broken" / "set up my machine" | **environment-diagnose** workflow, **local-env-bootstrap** skill, `INFRA.sh` / `INFRA.ps1` |
 | "Which plugins are installed" / "reproduce my assistant setup" | **llm-toolchain-provisioning** skill |
 | "Split this across agents" / "which model per task" / "LOA mode" | **agent-orchestrator** skill, **model-selector** skill, **agent-orchestrator-validation** workflow |
 | "Save tokens" / "compact command output" | **token-efficiency** skill |
-| "Create a specialist agent" / "improve the specialist" | **specialist-agent-factory** / **specialist-agent-evolution** workflows + skill |
-| "Compact this chat" / "mine chat history into assets" | **context-compaction** / **chat-knowledge-curation** workflows |
+| "Create a specialist agent" / "improve the specialist" | **specialist-agent-factory** workflow + skill |
+| "Compact this chat" / "mine chat history into assets" | **context-compaction** workflow |
 | "What do we know about X" / "save this knowledge" / "keep the knowledge base in sync" | **knowledge-base** skill, **knowledge-base-sync** workflow, under `rules/knowledge-base.md` |
-| "Save this as a learning" / "improve the toolkit" | **capture-learning**, **self-improvement**, **toolkit-maintenance** workflows; **llm-context-engineering** skill |
+| "Save this as a learning" / "improve the toolkit" | **capture-learning** workflow; **llm-context-engineering** skill |
 | "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under `rules/workflow-self-improvement.md` |
 | "Import external skills" | **external-skill-intake** skill |
 | "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | `docs/plugins.md` and `scripts/plugins.py`, under `rules/plugin-governance.md` (loaded on demand) |
 | "Add a skill / workflow / agent / rule" / "is this resource worth it" | **resource-value-check** workflow (mandatory before adding), `scripts/check_value_checks.py` |
 | "Java / Python / JavaScript / shell patterns" | **python-best-practices**, **js-ts-best-practices** skills |
-| "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows |
+| "Notebook analysis" / "ML experiment" / "data pipeline" | **data-pipeline-change** workflow |
 | "Thesis" / "ABNT" | **thesis-writing-main** workflow |
-| "Job scan" / "job search" / "track my applications" | **job-search-pipeline** workflow + skill; **job-search-setup** workflow for a new candidate |
+| "Job scan" / "job search" / "track my applications" | **job-search-pipeline** workflow + skill |
 | "Is this course / degree / MBA / certification worth it" / "does it carry weight in the market" | **credential-evaluation** skill |
 | "Sync my CV with LinkedIn" / "I left my employer, update everywhere" / "keep my CV, profile and job files consistent" | **career-profile-sync** workflow (review step: **cv-truthfulness-reviewer**) |
 | "Check my CV for unsupported claims" / "is every claim in my CV or profile true" | **cv-truthfulness-reviewer** subagent |
@@ -198,13 +194,13 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 `workflows/README.md` describes every workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair.
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`, `workflows/resource-value-check.md`
-- **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
-- **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
-- **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
-- **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`, `workflows/study-publication-medium-linkedin.md`, `workflows/technical-content-publishing.md`
-- **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
-- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/context-compaction.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/run-retrospective.md`, `workflows/knowledge-base-sync.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`, `workflows/resource-value-check.md`
+- **Core engineering:** `workflows/project-discovery.md`, `workflows/ticket-review.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/environment-diagnose.md`
+- **Tickets, PRs, CI, releases:** `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
+- **Infrastructure, operations, logs:** `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
+- **Documentation, diagrams, wiki:** `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/study-publication-medium-linkedin.md`, `workflows/technical-content-publishing.md`
+- **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment-update.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-plagiarism-check.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`
+- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
 
 ---
 

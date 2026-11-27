@@ -66,8 +66,7 @@ Return concise but detailed findings:
   required before posting or resolving.
 - `Related specialist handoffs`: who should review next and why.
 - `Learning/token efficiency`: reusable lesson, routing gap, or context that can
-  be moved to `workflows/java-validator-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  be moved to a rule, workflow, skill,
   reference, or the consumer repo's `docs/llm/` to reduce future tokens.
 
 If no issues are found, say that clearly and name the residual risks and any

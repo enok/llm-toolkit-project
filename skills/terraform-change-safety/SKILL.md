@@ -160,9 +160,14 @@ Renaming via the override plans as **1 add + 1 destroy** (name is the resource i
 
 The Lambda console's function-level **Triggers** tab reads only the *unqualified* function resource policy, so a correctly alias-scoped permission shows nothing there — the trigger is visible under **Aliases → \<alias\> → Configuration → Permissions**, and that is the correct place to verify it. Do **not** "fix" the empty Triggers tab by adding an unqualified twin permission: the row appears, but the console cross-checks it against the integration URI (which targets the alias) and permanently flags a resource/path mismatch warning on the trigger. The twin is an anti-pattern — revert it if found; document the alias-page verification path in the stack README instead.
 
+## Known pitfalls
+
+- Before a parallel-stack cutover flips shared config, grant the new target's IAM through its own Terraform change first. See learnings/parallel-stack-parity-env-flip-needs-iam-first.md.
+- In a stack kept in several copies, reconcile applied but uncommitted drift between the copies before committing. See learnings/reconcile-applied-drift-before-committing-in-multi-copy-stacks.md.
+- On Windows, when `terraform init` of git-sourced modules fails on a deep path, validate from a short-path copy. See learnings/terraform-init-git-modules-fail-on-deep-windows-paths.md.
+
 ## Related
 
-- `workflows/terraform-specialist-validation.md` — mandatory routing for all Terraform requests
 - `tool-subagents/terraform-specialist.md` — the read-only specialist that enforces these patterns
 - `rules/release-safety.md` — deploy order, verification, and rollback discipline
 - `tool-subagents/aws-alarm-investigator.md` — known false-positive alarm patterns

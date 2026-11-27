@@ -8,8 +8,7 @@ Use when a career fact changes ("I left that employer", "set the end date",
 "add this skill and project", "I earned this certification", "drop the old
 courses") or when asked to "sync my CV with LinkedIn", and the same fact appears
 in more than one place. The recurring
-job-search runs are `workflows/job-search-pipeline.md` and
-`workflows/job-search-setup.md`; they read the files this workflow keeps in
+job-search run is `workflows/job-search-pipeline.md`; it reads the files this workflow keeps in
 step.
 
 Everything personal (employers, dates, titles, handles, file locations) comes

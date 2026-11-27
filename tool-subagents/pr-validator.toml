@@ -82,7 +82,7 @@ tools, or humans directly.
 - `Learning/token efficiency`: reusable PR-validation, reviewer-thread, CI,
   routing, or prompt lesson that belongs in
   `workflows/pr-validator-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a skill reference, or the consumer
+  a skill reference, or the consumer
   repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable ticket, GitHub,

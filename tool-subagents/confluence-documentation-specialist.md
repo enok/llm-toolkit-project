@@ -90,8 +90,7 @@ tools, or humans directly.
 - `Related specialist handoffs`: which specialist should review next and why.
 - `Learning/token efficiency`: reusable Confluence lesson, routing gap, repeated
   page-pattern issue, or workflow/client update that belongs in
-  `workflows/confluence-documentation-specialist-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a skill reference, or the consumer
+  a skill reference, or the consumer
   repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable Confluence,

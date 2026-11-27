@@ -118,8 +118,7 @@ tools, or humans directly.
   runtime evidence.
 - `Learning/token efficiency`: reusable DAG/Glue validation, routing, external
   pattern, or prompt lesson that belongs in
-  `workflows/dag-glue-specialist-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  a rule, workflow, skill,
   reference, or the consumer repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable Airflow,

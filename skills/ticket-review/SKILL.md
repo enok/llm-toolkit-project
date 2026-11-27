@@ -38,6 +38,5 @@ The review is guided by this repo's `rubrics/`: **architecture**, **security**, 
 ## Related
 
 - `workflows/ticket-review.md` — ticket-scoped, report-only review workflow (AC coverage, unresolved PR comments, rules/skills findings)
-- `workflows/ticket-review-and-fix.md` — the same review followed by the fix loop
 - `skills/pre-pr-check/SKILL.md` — lint + tests + quality gate + review
 - `references/java-dto-library-pr-review.md` — contract-surface and hygiene checks for Java DTO/library PRs

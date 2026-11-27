@@ -1,6 +1,6 @@
 # Jira Setup For Ticket Workflows
 
-The ticket workflows (`workflows/ticket-research.md`) can fetch Jira
+The ticket workflows can fetch Jira
 ticket details and turn them into an implementation plan. It prefers the
 **Atlassian CLI (`acli`)** (recommended - lower context and token use), and
 falls back to **Jira MCP** (optional, more context-heavy, native IDE tools)

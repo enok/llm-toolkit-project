@@ -10,8 +10,7 @@ an equivalent scheduled task), asks for something to be done later and sent to
 them (see "Deferred follow-ups"), or wants scheduled tasks inventoried and
 tidied (see "Hygiene").
 
-For automations bound to a specific ticket after implementation is solved,
-compose this workflow with `workflows/ticket-pr-validation-loop.md` so the
+For automations bound to a specific ticket after implementation is solved, the
 automation preserves its schedule/thread binding while the run logic validates
 the ticket, PR comments, fixes, and CI/CD on the current head.
 
@@ -203,7 +202,11 @@ archive" requests leave drafts in separate worktrees and in-progress ledger rows
 - If a recurring task is obsolete, delete it and tell the user why the heartbeat
   stopped.
 
+## Known pitfalls
+
+- While consolidating a branch, pause only the enabled scheduled tasks that write to the repository, record them, and resume exactly those. See learnings/consolidation-pr-is-the-harvest-base.md.
+
 ## Final Step - Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before
+Run the per-run retrospective (`workflows/run-retrospective.md`) before
 closing this workflow.

@@ -88,7 +88,7 @@ tools, or humans directly.
 - `Learning/token efficiency`: reusable diagram notation, export, QA, routing,
   or prompt lesson that belongs in
   `workflows/diagram-creation-specialist-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a skill reference, or the consumer
+  a skill reference, or the consumer
   repo's `docs/llm/`.
 
 If no issues are found, say so directly and name any unavailable renderer,

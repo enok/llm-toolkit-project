@@ -84,8 +84,7 @@ tools, or humans directly.
 - `Related specialist handoffs`: who should review next and why.
 - `Learning/token efficiency`: reusable architecture, routing, source-grounding,
   or prompt lesson that belongs in
-  `workflows/system-architecture-specialist-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a skill reference, or the consumer
+  a skill reference, or the consumer
   repo's `docs/llm/`.
 
 If no issues are found, say so directly and name unavailable architecture,

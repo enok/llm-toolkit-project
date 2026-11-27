@@ -33,7 +33,7 @@ defaults; a consumer's profile overrides them.
 
 1. Write the positioning down once, in the consumer's `PUBLICATION-PROFILE.md`: target role,
    focus, article and post budgets, hashtag cap, approval mode. Intake reads it or creates it
-   instead of asking piecemeal (`workflows/study-repo-to-publication.md`, Phase 0).
+   instead of asking piecemeal.
 2. The article is one short system design story: at most 1,500 words by toolkit default (1,300
    in an example consumer profile), 2-3 diagrams led by a hero system-design diagram, at most one code block of 15 lines or fewer, a title and subtitle
    that name the system design problem or capability. The full pattern explanation, class-level

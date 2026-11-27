@@ -73,5 +73,4 @@ These tools run locally and send nothing to a server; keep it that way, because 
 
 ## Related
 
-- `docs/llm/workflows/bilingual-notebook-sync.md` for multi-language documents.
 - Tool sources: MarkItDown (github.com/microsoft/markitdown, MIT), MinerU (github.com/opendatalab/MinerU, Apache 2.0), Pandoc (pandoc.org), python-docx, PyMuPDF (pymupdf.readthedocs.io).

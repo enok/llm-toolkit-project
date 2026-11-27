@@ -1,16 +1,16 @@
 ---
-description: Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post per the consumer's positioning profile, gated by a shape check and a profile check, with drafts-only mode, README link PRs, back-links, a replacement path, and separate approval gates (Phases 7-10 of study-repo-to-publication)
+description: Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post per the consumer's positioning profile, gated by a shape check and a profile check, with drafts-only mode, README link PRs, back-links, a replacement path, and separate approval gates
 ---
 
 # Study Publication: Medium And LinkedIn
 
-Phases 7-10 of `workflows/study-repo-to-publication.md`, split out so both files stay under the size limit; it also runs on its own once the repo is merged and green. Output: a Medium story and a LinkedIn teaser post that link to the repo and to each other in both directions, with the README links merged. Positioning (target role, primary focus, budgets, hashtag cap, approval mode) comes from the consumer's profile, not from this file (`rules/publication-positioning.md`).
+Runs once the study repo is merged and green. Output: a Medium story and a LinkedIn teaser post that link to the repo and to each other in both directions, with the README links merged. Positioning (target role, primary focus, budgets, hashtag cap, approval mode) comes from the consumer's profile, not from this file (`rules/publication-positioning.md`).
 
 Route through `rules/request-orchestration.md`. The root agent owns all writes, external mutations, and user communication. Constraints: `rules/external-write-authorization.md`, `rules/human-comment-reply-gate.md`, `rules/git-conventions.md`. Browser steps run on the user's machine in the signed-in session; bot checks and captchas go to the user.
 
-Inputs: the merged repo (default branch, merge commit SHA), the tag list, the fact table and principles page, the intake answers (target role, content angle, approval gates; Phase 0 of the parent), the profile (path, budgets, approval mode: `gated` or `drafts-only`), and the study topic's name (the term the title, subtitle, and post hook must not contain). The parent's Known pitfalls on diagram size at the destination and device-commit filenames apply here too.
+Inputs: the merged repo (default branch, merge commit SHA), the tag list, the fact table and principles page, the intake answers (target role, content angle, approval gates), the profile (path, budgets, approval mode: `gated` or `drafts-only`), and the study topic's name (the term the title, subtitle, and post hook must not contain). Check diagram size at the destination and device-commit filenames.
 
-Merge rule (Phases 8 and 10; same as Phase 6 of the parent): merge only after the user names the specific PR number and base branch in the current session; when CI is green, state both and ask (the intake gate list is not that approval). Merge with squash.
+Merge rule (Phases 8 and 10): merge only after the user names the specific PR number and base branch in the current session; when CI is green, state both and ask (the intake gate list is not that approval). Merge with squash.
 
 ## Validation Gate (before every draft is shown as ready)
 

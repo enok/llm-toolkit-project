@@ -198,6 +198,6 @@ rows the owner approved but did not name, follow `references/apply-playbook.md`.
 
 ## Final Step - Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before
+Run the per-run retrospective (`workflows/run-retrospective.md`) before
 closing. Put portal-specific lessons in the profile or the candidate's notes,
 not in this toolkit.

@@ -41,7 +41,7 @@ Or, in Git Bash:
 Keep generic guidance in the shared toolkit. Add repo-only guidance here when it would be incorrect or too specific for other projects, for example:
 
 - repository-specific data contracts and staging conventions
-- notebook conventions that depend on this repo's folders, datasets, or outputs (via the `notebook-analysis` workflow)
+- notebook conventions that depend on this repo's folders, datasets, or outputs
 - AWS orchestration guidance that reflects this repo's current shell-script ETL and minimal `infra/` baseline (via `aws-airflow-terraform-project` skill)
 - documentation expectations tied to the thesis deliverables
 - mandatory local security-check gates
@@ -57,7 +57,7 @@ The `learnings/` directory at the repo root captures trial-and-error discoveries
 
 ## Rubrics
 
-The shared toolkit includes structured review rubrics for architecture, security, and holistic code review. These are referenced by the `review` and `review-and-fix` workflows:
+The shared toolkit includes structured review rubrics for architecture, security, and holistic code review:
 
 - `rubrics/architecture.md`
 - `rubrics/code-review-checklist.md`
@@ -121,7 +121,5 @@ Skill-specific references live under `.agents/skills/*/references/`. Repository-
 
 **Complete workflow list:**
 - `data-source-ingestion.md` — Bronze layer data ingestion
-- `pipeline-change-project.md` — Project-specific pipeline changes
-- `bilingual-notebook-sync.md` — EN/pt-BR notebook synchronization
 - `aws-airflow-terraform-project.md` — Project-specific infrastructure guidance
 - `thesis-plagiarism-check.md` — Originality verification

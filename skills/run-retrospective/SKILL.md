@@ -24,8 +24,7 @@ start and the reference set.
   existing signatures, classify, record, promote (`signatures`, `append`,
   `candidates`).
 - **Periodic review:** trend per workflow, recurring signatures, and the
-  promotion backlog (`summary`, `candidates`), as in the self-improvement
-  review step of `workflows/toolkit-maintenance.md`.
+  promotion backlog (`summary`, `candidates`).
 - **Log hygiene:** check every stored record (`validate`).
 
 One record per root run, written by the root/parent agent. Lanes, nested
@@ -156,7 +155,6 @@ Full field rules and a complete example: `references/run-record-schema.md`.
 
 ## Related
 
-- `workflows/run-retrospective.md` - the seven-phase per-run procedure.
-- `workflows/self-improvement.md` - broader harvest across sessions.
+- `workflows/run-retrospective.md` - routing entry for this skill.
 - `rules/error-driven-learning.md` and `workflows/capture-learning.md` - the `learning` rung.
 - `workflows/task-quality-loop.md` - per-task iterations, first-pass flags, defect lists.

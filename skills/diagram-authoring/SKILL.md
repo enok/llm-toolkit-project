@@ -126,5 +126,4 @@ metadata:
 - `skills/diagram-authoring/references/diagram-quality-review.md`
 - `skills/diagram-authoring/references/publication-diagram-style.md`
 - `skills/project-discovery/references/diagram-conventions.md`
-- `workflows/document-creation.md`
 - `workflows/markdown-pdf-export.md`

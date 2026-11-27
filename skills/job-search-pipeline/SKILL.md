@@ -11,7 +11,7 @@ metadata:
 
 Engine for a candidate's recurring job search. Everything personal lives in the
 candidate's profile, never here. Run procedure: `workflows/job-search-pipeline.md`;
-first-time setup: `workflows/job-search-setup.md`; owner-signed-in portals:
+owner-signed-in portals:
 `workflows/job-portal-profile-sync.md`.
 
 ## Files

@@ -116,7 +116,7 @@ tools, or humans directly.
 - `Learning/token efficiency`: reusable promotion lesson, routing gap, repeated
   destination-map issue, automation guard, or context that belongs in
   `workflows/prod-doc-promoter-evolution.md`,
-  `workflows/specialist-agent-evolution.md`, a rule, workflow, skill,
+  a rule, workflow, skill,
   integration guide, or the consumer repo's `docs/llm/`.
 
 If promotion is not safe, block clearly and name the smallest evidence or

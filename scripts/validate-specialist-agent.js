@@ -314,14 +314,10 @@ function checkSpecialist(agent) {
     assertContains(`tool-subagents/${agent}.md`, "## Related Specialists", `related specialist handoffs for ${agent}`);
     assertContains(`tool-subagents/${agent}.md`, "Learning/token efficiency", `learning/token efficiency output for ${agent}`);
   }
+  // Companion validation/evolution workflows are optional (some were removed
+  // after value checks); when one exists it must be indexed and linked.
   const validationWorkflow = findCompanionWorkflow(agent, "validation");
   const evolutionWorkflow = findCompanionWorkflow(agent, "evolution");
-  if (!validationWorkflow) {
-    fail(`validation workflow missing for ${agent}`);
-  }
-  if (!evolutionWorkflow) {
-    fail(`evolution workflow missing for ${agent}`);
-  }
   assertContains("INTENTS.md", agent, `routing for ${agent}`);
   if (hasSkillTwin) {
     assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
@@ -332,7 +328,7 @@ function checkSpecialist(agent) {
   }
   if (evolutionWorkflow) {
     assertContains("workflows/README.md", path.basename(evolutionWorkflow), `evolution workflow index for ${agent}`);
-    assertContains(`tool-subagents/${agent}.md`, evolutionWorkflow, `self-improvement workflow link for ${agent}`);
+    assertContains(`tool-subagents/${agent}.md`, evolutionWorkflow, `evolution workflow link for ${agent}`);
   }
   assertContains("tool-subagents/README.md", `\`${agent}\``, `subagent index for ${agent}`);
   pass(`specialist ${agent} check completed`);

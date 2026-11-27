@@ -359,8 +359,7 @@ Authority: ${readOnly ? "read-only; do not edit files, post comments, stage, com
 - Related specialist handoffs.
 - Risks and assumptions.
 - Learning/token efficiency: reusable lesson, routing gap, or context that can
-  move to \`workflows/${name}-evolution.md\`,
-  \`workflows/specialist-agent-evolution.md\`, a rule, workflow, skill,
+  move to \`workflows/${name}-evolution.md\`, a rule, workflow, skill,
   reference, or consumer profile.
 `,
     ],

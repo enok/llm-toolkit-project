@@ -1,8 +1,7 @@
 # Code Review Checklist Rubric
 
 Use this checklist when performing a holistic, evidence-based AI diff review
-(the **ticket-review** or **pre-pr-check** skill, or the **review**
-workflow). Evaluate the staged diff (or branch diff) against the categories
+(the **ticket-review** or **pre-pr-check** skill). Evaluate the staged diff (or branch diff) against the categories
 below; apply only where the changed code is relevant. Base every finding on
 concrete evidence in the diff or the source it touches.
 

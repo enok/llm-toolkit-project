@@ -67,9 +67,3 @@ Report:
 - human reply draft status;
 - a learning/token-efficiency note for future toolkit improvement.
 
----
-
-## Final Step - Evolution
-
-If the validator missed a recurring Java issue, was too noisy, or required
-excessive context, run `workflows/java-validator-evolution.md`.

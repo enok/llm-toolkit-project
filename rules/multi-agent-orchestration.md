@@ -44,7 +44,7 @@ description: Parallel subagents, safe fanout, and when to serialize work
 
 ## Workflows that should fan out when lanes are independent
 
-When the active workflow has separate read-only or non-overlapping write lanes, parallelize by default (see each workflow’s steps): **review**, **ticket-review**, **ticket-review-and-fix**, **pre-pr-check**, **project-discovery**, **run-tests**, **ticket-research**, **gh-fix-ci**, **gh-address-comments**, **environment-diagnose**, **security-report**, **update-docs**, **cross-repo-impact**, **dependency-upgrade**, and **document-creation** (when phases are independent). Enable per-agent model selection (Cursor Max Mode or equivalent) only so complexity-tier requests can actually be honored — not to run every subagent at full capability; tiers still follow `rules/request-orchestration.md`.
+When the active workflow has separate read-only or non-overlapping write lanes, parallelize by default (see each workflow’s steps): **ticket-review**, **pre-pr-check**, **project-discovery**, **run-tests**, **gh-fix-ci**, **gh-address-comments**, **environment-diagnose**, **security-report**, and **update-docs**. Enable per-agent model selection (Cursor Max Mode or equivalent) only so complexity-tier requests can actually be honored — not to run every subagent at full capability; tiers still follow `rules/request-orchestration.md`.
 
 ## Tool mapping
 

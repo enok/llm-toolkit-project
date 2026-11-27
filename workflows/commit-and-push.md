@@ -4,7 +4,7 @@ description: Semantic commit organization, validation, rebase, and safe push pro
 
 # Commit and Push
 
-Reusable commit/push procedure used by `ticket-review-and-fix`, `ticket-implementation`, and any workflow that ends with committing changes. Follow every step in order.
+Reusable commit/push procedure used by `ticket-implementation` and any workflow that ends with committing changes. Follow every step in order.
 
 ---
 
@@ -211,4 +211,4 @@ For each addressed PR comment (S2 fixes), reply with what changed and where.
 
 ## Final Step — Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow.

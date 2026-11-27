@@ -23,7 +23,7 @@ Turn real engineering work into public writing a skeptical engineer still finish
 
 ## Scope
 
-Hand off instead of drafting: product marketing with no engineering evidence, comment replies (`rules/human-comment-reply-gate.md`), repo documentation (`document-creation`). Content needing legal or PR sign-off: flag it, stop at the draft.
+Hand off instead of drafting: product marketing with no engineering evidence, comment replies (`rules/human-comment-reply-gate.md`), repo documentation. Content needing legal or PR sign-off: flag it, stop at the draft.
 
 ## Required inputs
 

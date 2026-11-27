@@ -194,7 +194,7 @@ Segundo Autor (Ano, p. xx), "texto citado diretamente".
    - No → Address appropriately
 ### Step 4: Common Thesis-Specific Plagiarism Risks
 
-Review the thesis against the risk catalog in `workflows/thesis-plagiarism-prevention.md` (methodology-section risks, literature-review risks, results/discussion risks, code and data risks). Record every risk found in the Step 5 documentation.
+Review the thesis for methodology-section, literature-review, results/discussion, and code and data plagiarism risks. Record every risk found in the Step 5 documentation.
 
 ### Step 5: Final Documentation
 
@@ -263,13 +263,8 @@ referências bibliográficas).
 [Nome do autor]
 [Data]
 ```
-## Prevention, Tools, And Emergency Fix
-
-For day-to-day prevention habits (note-taking, writing, citing, paraphrasing), reference-management and detection tools, and the emergency procedure when a section is flagged, run the **thesis-plagiarism-prevention** workflow (`workflows/thesis-plagiarism-prevention.md`).
-
 ## Related Resources
 
-- `workflows/thesis-submission-preparation.md` — Final thesis checklist
 - The institution's academic integrity policy
 - ABNT NBR 6023:2023 (References)
 - ABNT NBR 14724:2020 (Academic Work Presentation)

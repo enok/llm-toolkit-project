@@ -17,7 +17,7 @@ incomplete specialist up to repository standards.
 4. Identify companion rules, skills, workflows, validation gates, and related
    specialists the new agent should recommend through the root agent.
 5. Include a `Learning/token efficiency` output section that points to the
-   specialist's evolution workflow and `workflows/specialist-agent-evolution.md`.
+   specialist's evolution workflow.
 6. Before adding a new specialist, pass the mandatory **resource-value-check**
    workflow (`workflows/resource-value-check.md`); add it only if `scripts/check_value_checks.py` passes for it.
 

@@ -180,9 +180,7 @@ edits for pages with no generator.
 
 ## How Workflows Use Confluence
 
-- **ticket-research** — searches for related documentation pages to gather context
 - **project-discovery** — reads architecture docs, onboarding guides, team wikis
-- **review** — checks if documentation needs updating after code changes
 - **confluence-documentation** — performs safe documentation CRUD and synchronization
 
 ---

@@ -152,7 +152,7 @@ high-severity escaped defect:
 ```json
 {"schema": 1,
  "date": "2026-10-07",
- "workflow": "study-repo-to-publication",
+ "workflow": "study-publication-medium-linkedin",
  "agent": "agent-orchestrator",
  "task_shape": "multi-language study repo + article + social post",
  "outcome": "success",

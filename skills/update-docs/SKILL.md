@@ -51,4 +51,3 @@ Keep documentation in sync with code and configuration changes.
 ## Related
 
 - `workflows/update-docs.md` — Complete workflow
-- `workflows/document-creation.md` — Creating new docs

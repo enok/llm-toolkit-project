@@ -91,9 +91,7 @@ Uses the same MCP server as Jira — see `jira.md` Option 2 for full details. Th
 
 ## How Workflows Use Confluence
 
-- **ticket-research** — searches for related documentation pages to gather context
 - **project-discovery** — reads architecture docs, onboarding guides, team wikis
-- **review** — checks if documentation needs updating after code changes
 
 ---
 

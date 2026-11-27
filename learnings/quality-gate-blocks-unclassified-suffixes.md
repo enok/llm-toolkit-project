@@ -27,8 +27,7 @@ under their natural suffixes, and the gate blocked the change.
   gate scans; the recorded fix was to avoid suffixless file changes. When a change must
   touch `.gitattributes` (`rules/cross-platform-scripts.md` asks for it), report the gate
   block and propose adding the name to `NON_CODE_NAMES` in
-  `scripts/changed_code_quality_gate.py` through `workflows/toolkit-maintenance.md`
-  instead of working around it.
+  `scripts/changed_code_quality_gate.py` instead of working around it.
 - The gate is already required before commit and push
   (`rules/changed-code-quality-gate-required.md`); running
   `python scripts/changed_code_quality_gate.py --base <trusted-base>` on a change that adds
@@ -36,7 +35,7 @@ under their natural suffixes, and the gate blocked the change.
 
 - Classify diagram sources such as `.mmd` as non-code in the gate's `NON_CODE_SUFFIXES` list
   (check the list; add the suffix together with a test if it is missing). Every other new
-  suffix needs the same `NON_CODE_SUFFIXES` change through `workflows/toolkit-maintenance.md`.
+  suffix needs the same `NON_CODE_SUFFIXES` change.
 
 # Why
 

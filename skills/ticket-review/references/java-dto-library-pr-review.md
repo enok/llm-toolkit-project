@@ -24,8 +24,8 @@ models, or request/response contract packages.
 - Align numeric documentation with implementation. If the code parses Java
   `long`, document and test the `Long.MAX_VALUE` boundary; if arbitrary digits
   are allowed, avoid `Long.parseLong`.
-- Cross-check consumers with `rules/api-contract-surface.md` and the
-  **cross-repo-impact** workflow when the artifact is consumed by other repos.
+- Cross-check consumers with `rules/api-contract-surface.md` when the artifact
+  is consumed by other repos.
 
 ## Review Hygiene
 

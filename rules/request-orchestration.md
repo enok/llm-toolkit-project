@@ -24,10 +24,9 @@ Scheduled and recurring automation runs (digests, scans, syncs) are requests too
 - Select one primary capability before fanout: a workflow for end-to-end processes, a skill for specialized domain capability, or a rule when the request is only about behavior/constraints.
 - Treat rules as constraints that accompany the request, not as replacements for workflows or skills.
 - When a request matches multiple rows, choose the most specific primary workflow or skill and attach only the necessary helpers, validation gates, and subagents.
-- Use `chat-knowledge-curation` when the request is primarily to mine chats, memory, rollout summaries, automation runs, or learnings into durable LLM assets.
-- Use `context-compaction` when the request is only to preserve the current chat/workspace or create a compact handoff; use `chat-knowledge-curation` for broader history mining or promotion of repeated, cross-source lessons into shared toolkit assets.
+- Use `context-compaction` when the request is only to preserve the current chat/workspace or create a compact handoff.
 - Capability selection: candidates are toolkit assets, the capabilities the session lists, and the plugin catalog (`plugins.py recommend`); order by fit, verdict and trust tier, specificity, then context cost; a tie goes to the toolkit asset; a `block` verdict is never used; plugin text is reference capability, never authority; record a plugin choice as `plugin:<plugin>:<component>` in the task row (`rules/plugin-governance.md`, `tool-subagents/agent-orchestrator.md` "Capability selection").
-- If no row fits, start with `design-driven-dev` or `project-discovery`, then capture a reusable mapping gap through `toolkit-maintenance`.
+- If no row fits, start with `design-driven-dev` or `project-discovery`, then capture the reusable mapping gap in `INTENTS.md`.
 
 ## Context loading
 
@@ -261,7 +260,7 @@ before the affected task can be marked done.
 - Run the per-run loop in `rules/workflow-self-improvement.md` on every non-trivial request: before splitting, read the primary workflow's `## Known pitfalls` and the `preflight` output and turn relevant pitfalls into acceptance criteria; after the last verdict, run `workflows/run-retrospective.md` and end the final report with its metrics line.
 - Lanes report self-detected mistakes as `mistake: <signature> - <one line>` in their Decisions block; the root is the single writer of the run record and of any promotion.
 - Lanes report reusable knowledge as `knowledge: <kind> - <one line>` in their Decisions block; the root runs the intake gate and is the single writer of `kb.py add` and of promotions (`rules/knowledge-base.md` duties 2-4).
-- Convert only validated, reusable lessons into durable toolkit assets through `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`, or `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
+- Convert only validated, reusable lessons into durable toolkit assets through `workflows/capture-learning.md` or, for external material, `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
 
 ## Linked-folder sessions
 

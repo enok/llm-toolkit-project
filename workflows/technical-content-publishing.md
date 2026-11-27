@@ -6,7 +6,7 @@ description: Turn a software project into an evidence-grounded article, social p
 
 **Goal:** Produce a content set for a software project: a long-form article (Medium-style), a short social post, a document carousel, a cover image, and an architecture diagram. Every claim is traced to evidence, every asset is validated by someone other than its producer, and **nothing is posted** - the output is a reviewed draft bundle plus handoff.
 
-Use to write about a project the author can inspect. Not for unverifiable marketing, posting or scheduling (Phase 6), or plain documentation (`workflows/document-creation.md`).
+Use to write about a project the author can inspect. Not for unverifiable marketing, posting or scheduling (Phase 6), or plain documentation.
 
 Platform specifics (lengths, truncation, formatting, slide counts, image sizes, paste steps) live in the skill, not here:
 
@@ -180,11 +180,11 @@ Escalate only on the triggers in `rules/request-orchestration.md` (two consecuti
 
 - Skill: `skills/technical-content-publishing/SKILL.md`
 - Rubric: `rubrics/technical-content.md`
-- Workflows: `workflows/task-quality-loop.md`, `workflows/document-creation.md`
+- Workflows: `workflows/task-quality-loop.md`
 - Rules: `rules/external-write-authorization.md`, `rules/request-orchestration.md`
 
 ---
 
 ## Final Step - Self-improvement
 
-Run the **self-improvement** workflow (`workflows/self-improvement.md`) before closing this workflow. Feed in recurring validator defects, failed hooks, and platform limit or paste problems that belong in the references.
+Run the per-run retrospective (`workflows/run-retrospective.md`) before closing this workflow. Feed in recurring validator defects, failed hooks, and platform limit or paste problems that belong in the references.

@@ -43,5 +43,4 @@ Help engineers work in notebooks without turning them into opaque, one-off artif
 
 ## Pair With
 
-- `notebook-analysis`
 - `python-best-practices`

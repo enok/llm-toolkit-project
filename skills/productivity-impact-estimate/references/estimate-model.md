@@ -28,8 +28,8 @@ repository; re-check them with `ls` before quoting, because assets move.
 
 | Activity | Manual h/week | Conservative % | Likely % | Assets behind it |
 |---|---|---|---|---|
-| Ticket research and context gathering | 3.5 | 10 | 25 | workflows/ticket-research.md, cross-repo-impact.md; skills/design-driven-dev |
-| Coding + tests | 9.0 | 8 | 20 | workflows/ticket-implementation.md, new-backend-feature.md; best-practices skills |
+| Ticket research and context gathering | 3.5 | 10 | 25 | skills/design-driven-dev |
+| Coding + tests | 9.0 | 8 | 20 | workflows/ticket-implementation.md; best-practices skills |
 | Pre-PR self-checks | 1.5 | 10 | 30 | skills/pre-pr-check, run-tests; workflows/changed-code-quality-gate.md |
 | Reviewing teammates' PRs | 3.0 | 0 | 15 | skills/ticket-review, pr-validator, java-change-validator |
 | Addressing review comments | 2.0 | 10 | 25 | workflows/gh-address-comments.md, pr-automation-review.md |

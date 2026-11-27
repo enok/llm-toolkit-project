@@ -114,7 +114,5 @@ Evaluated and rejected; do not re-import without the listed re-evaluation condit
 
 - `rules/plugin-governance.md`
 - `docs/plugins.md`
-- `workflows/self-improvement.md`
-- `workflows/toolkit-maintenance.md`
 - `skills/llm-context-engineering/SKILL.md`
 - `rules/security-check-required.md`

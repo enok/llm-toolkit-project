@@ -57,8 +57,7 @@ Use lowercase kebab-case that summarizes the topic:
 Every learning ships in the same change as a link from the skill, rule,
 workflow, or agent definition that owns its lesson (`learnings/<slug>.md`;
 `tests/test_learning_promotion_coverage.py` enforces it). The
-`toolkit-maintenance` workflow (`workflows/toolkit-maintenance.md`)
-periodically promotes learnings that keep recurring into stronger checks; the
+toolkit periodically promotes learnings that keep recurring into stronger checks; the
 file and its `INDEX.md` line stay as the evidence those assets link. Only a
 superseded learning's `INDEX.md` line is marked `~~strikethrough~~`, with the
 replacement named.
