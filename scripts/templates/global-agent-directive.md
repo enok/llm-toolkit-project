@@ -53,7 +53,7 @@ workflow, or rule before fanning out to specialists.
 Per `{{TOOLKIT_ROOT}}/rules/knowledge-base.md`, before planning run
 `python3 {{TOOLKIT_ROOT}}/scripts/kb.py search "<topic>"`; after you learn something
 reusable, record it with `python3 {{TOOLKIT_ROOT}}/scripts/kb.py add`. If the
-knowledge base is unreachable, fall back to `learnings/INDEX.md` and say so.
+knowledge base is unreachable, fall back to the owning assets' `## Known pitfalls` (`learnings/INDEX.md` lists only pending intake) and say so.
 
 ## Layering with repo-local instructions
 

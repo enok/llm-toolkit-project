@@ -86,12 +86,8 @@ Gotchas:
   private API calls.
   Limits of the browser tools themselves (waits, result size, uploads,
   several browsers): `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md` > "Browser tool limits".
-- To set a filter in a custom (React-style) dropdown, open it by dispatching on
-  the trigger the full sequence `pointerdown`, `mousedown`, `pointerup`,
-  `mouseup`, `click`, in that order, then pick the option the same way. Do not
-  use a lone `click` (the widget listens for the pointer sequence and stays
-  closed) or assign `.value` (the framework tracks its own state and ignores it).
-  Framework widgets change state only through the events they listen for.
+- Custom (React-style) dropdown filters: see "Browser tool limits" in the
+  ui-automation file above (full pointer sequence, not a lone `click`).
 - Search is semantic: about 25 results per query, and queries overlap heavily.
   Run all LinkedIn queries in one lane, or split lanes by result page, not by
   query; two lanes splitting the queries mostly read the same postings.

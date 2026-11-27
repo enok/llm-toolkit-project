@@ -28,7 +28,8 @@ from typing import Dict, List
 
 ROOT = Path(__file__).resolve().parents[1]
 
-SCANNED_DIRS = ("skills", "rules", "workflows", "tool-subagents", "docs", "scripts")
+SCANNED_DIRS = ("skills", "rules", "workflows", "tool-subagents", "docs", "scripts",
+                "rubrics", "clients", "integrations", "kb", ".github")
 NON_LEARNING_FILES = ("INDEX.md", "README.md")
 SKIPPED_FILES = ("docs/llm/value-checks.csv",)
 SKIPPED_DIR_NAMES = ("__pycache__", "node_modules")
@@ -190,13 +191,23 @@ class FixtureTreeTest(unittest.TestCase):
                     "docs/notes.md": "See ./learnings/gone-d.md.\n",
                     "scripts/demo.sh": "# learnings/gone-e.md\n",
                     "README.md": "See learnings/gone-f.md.\n",
+                    "rubrics/demo.md": "See learnings/gone-g.md.\n",
+                    "clients/demo.md": "See learnings/gone-h.md.\n",
+                    "integrations/demo.md": "See learnings/gone-i.md.\n",
+                    "kb/demo.md": "See learnings/gone-j.md.\n",
+                    ".github/demo.md": "See learnings/gone-k.md.\n",
                 },
             )
             report = check_tree(root)
         self.assertEqual(
             [
+                ".github/demo.md: learnings/gone-k.md",
                 "README.md: learnings/gone-f.md",
+                "clients/demo.md: learnings/gone-h.md",
                 "docs/notes.md: learnings/gone-d.md",
+                "integrations/demo.md: learnings/gone-i.md",
+                "kb/demo.md: learnings/gone-j.md",
+                "rubrics/demo.md: learnings/gone-g.md",
                 "rules/demo.md: learnings/gone-a.md",
                 "scripts/demo.sh: learnings/gone-e.md",
                 "tool-subagents/demo.toml: learnings/gone-c.md",
@@ -251,7 +262,7 @@ class FixtureTreeTest(unittest.TestCase):
                     ),
                     "docs/llm/value-checks.csv": "removed,learnings/history-only.md\n",
                     "tests/test_demo.py": "# learnings/test-only.md\n",
-                    "kb/notes.md": "learnings/kb-only.md\n",
+                    "examples/notes.md": "learnings/example-only.md\n",
                     "skills/demo/__pycache__/x.md": "learnings/cache-only.md\n",
                 },
             )

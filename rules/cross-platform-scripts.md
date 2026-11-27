@@ -15,7 +15,7 @@ Scripts created or modified by agents should run on Windows, Linux, and macOS.
 - Avoid hardcoded absolute user paths, drive letters, `/tmp`-only assumptions, GNU-only flags, or shell features that break on another supported OS. Use `pathlib`, environment variables, `mktemp`, or documented OS-specific fallbacks.
 - Document prerequisites and example commands for Windows, Linux, and macOS when quoting or path syntax differs.
 - Validate on the current platform and structure the script so the other platforms are easy to validate. Verify at least syntax and a dry-run path for the portable entrypoint; when possible, test from a different working directory so scripts do not depend on the repo root.
-- A command run through a remote device bridge can hit the bridge's per-call timeout while the process keeps running; redirect its output to a log file and poll the log (`environment-diagnose/references/device-bridge.md`).
+- A command run through a remote device bridge can hit the bridge's per-call timeout while the process keeps running; redirect its output to a log file and poll the log (`skills/environment-diagnose/references/device-bridge.md`).
 
 ## Content hashes and byte pins
 
