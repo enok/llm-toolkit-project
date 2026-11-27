@@ -6,7 +6,7 @@ tags: [job-search, orchestration, subagent-prompts]
 # Lane prompts
 
 Templates for the read-only lanes the orchestrator dispatches during
-`workflows/job-search-pipeline.md` and `workflows/job-search-apply.md`. Fill
+`workflows/job-search-pipeline.md`. Fill
 `<...>` from the profile. Every lane returns the four-block contract (outcome /
 evidence / blockers / decisions) and never sends, applies, types into a form,
 or clicks state-changing controls. L6 alone writes files: its four kit files,
@@ -186,8 +186,7 @@ profile summary used for fit scoring; template in
 ## V1 - re-check kept rows
 
 > Read-only validator for <candidate>; you never produced these rows. For every
-> kept row in <rows file>, dispatch the `job-posting-analyst` agent (or do the
-> same by hand) to re-open the posting link and re-check, from the posting text
+> kept row in <rows file>, re-open the posting link and re-check, from the posting text
 > only: (a) pay is quoted in <criteria.pay.currency>; (b) workplace is remote and
 > no clause requires on-site or hybrid work; (c) the candidate's country is
 > eligible; (d) the posting date is inside <per_run_window>; (e) the posting is

@@ -37,9 +37,9 @@ Rules in force: `rules/request-orchestration.md`,
    recruiter who has followed up several times is the warmest lead); board
    searches via `skills/job-search-pipeline/references/board-playbook.md`; other
    boards when the candidate asks for postings beyond one site.
-2. Dispatch `tool-subagents/job-posting-analyst.md` lanes (three to five postings
+2. Dispatch read-only analysis lanes (three to five postings
    each) and one inbox lane. Lanes are read-only and return the four-block
-   contract. Validate with `workflows/job-posting-analyst-validation.md`.
+   contract.
 3. Keep a known list (applied, attempted, rejected) so nothing is analyzed or
    applied twice.
 
@@ -58,7 +58,7 @@ what to skip. Never claim a stack fit the profile does not support.
 
 ## Phase 3 - Applications (owner-approved, one at a time)
 
-1. For tracker rows the owner approved, run `workflows/job-search-apply.md`.
+1. For tracker rows the owner approved, follow `skills/job-search-pipeline/references/apply-playbook.md`.
    For ad-hoc chat requests, only apply or submit when the candidate asks or
    confirms. Answer form
    questions from facts (work authorization and sponsorship per

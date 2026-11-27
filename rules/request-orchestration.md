@@ -270,7 +270,7 @@ Applies when a cloud session reaches the user's computer only through linked fol
 
 ## Delegation blocked by usage limits
 
-- If a dispatch fails with a session or usage limit (HTTP 429), do not retry or re-dispatch in a loop. Set each affected row to `blocked` with `usage limit (resets <time>)` in Evidence and persist the ledger. Where the host can schedule a message back into the session, schedule one for the reset time (`rules/capability-check-before-limitation.md`).
+- If a dispatch fails with a session or usage limit (HTTP 429), do not retry or re-dispatch in a loop. Set each affected row to `blocked` with `usage limit (resets <time>)` in Evidence and persist the ledger. Where the host can schedule a message back into the session, schedule one for the reset time.
 - A lane stopped by the limit may have written its files without returning. Check the files it owned on disk before redoing any of it; a lane with no final report is not `completed` until the root has read its output and its validator has passed.
 - Keep doing root-owned work: ledger, staging, deterministic scripts. If the user asks to continue now, the root may run the blocked producer rows inline at their tier's acceptance criteria and record `deviation: delegation blocked by usage limit (platform refusal, not a tier choice)` on each row. Such a run is not a clean run in the run record.
 - Independent validation stays pending. The root never reviews its own draft and records that as the independent validator. Leave the validator row open and keep pushes, PRs, and other external writes gated on it.

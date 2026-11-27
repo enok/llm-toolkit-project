@@ -26,9 +26,9 @@ a proxy, a stored-prompt database), and the safe slice differs per tool.
   `rtk mvn` runs a repository's own `mvnw` script, so keep it off untrusted repositories.
   1.x links a BUSL-1.1 engine; an Apache-only build exists as a separate release asset.
   Run a smoke test (exit codes equal raw git, no database, tee or marker files).
-- Caveman 4.2.0: pass with conditions for the text-only skill (copy files, pin the commit,
-  keep the licence and a change note). Block the plugin, installer, CLI and proxy: the CLI
-  sends usage telemetry unless switched off.
+- Caveman 4.2.0: block the plugin, installer, CLI and proxy: the CLI sends usage telemetry
+  by default. The text-only skill passed the security review but was not added: in the value
+  check against the plain model, the plain model's answers were shorter and equally correct.
 - Ponytail 5.3.3: pass with conditions as a Claude Code plugin installed from a local clone
   checked out at the reviewed commit, task ledger off, webhook empty. The scanner's three
   high findings are the same hook-path pattern, a Windows backslash normaliser that stays

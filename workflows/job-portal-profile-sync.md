@@ -12,9 +12,9 @@ Capability: `skills/job-search-pipeline/SKILL.md`.
 Related files:
 
 - form mechanics (Angular Material, react-select, file inputs, JS quirks):
-  `skills/job-search-pipeline/references/apply-playbook.md`;
+  `references/apply-playbook.md`;
 - applying to rows the owner approved in the tracker:
-  `workflows/job-search-apply.md`;
+  `references/apply-playbook.md`;
 - chained tracker writes: `skills/job-search-pipeline/scripts/tracker_batch.py`;
 - profile schema: `skills/job-search-pipeline/references/profile-template.md`;
 - truthfulness rule and master CV: `skills/job-search-pipeline/references/cv-tailoring.md`.
@@ -147,7 +147,7 @@ Rules:
 ## Phase 5 - Applications to named openings (optional)
 
 Run this only for openings the owner named in chat in this request. For tracker
-rows the owner approved but did not name, run `workflows/job-search-apply.md`.
+rows the owner approved but did not name, follow `references/apply-playbook.md`.
 
 1. For each opening, reload its job page. If it shows "already applied", record
    it as applied and do not click Apply.

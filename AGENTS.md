@@ -143,7 +143,6 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Which plugins are installed" / "reproduce my assistant setup" | **llm-toolchain-provisioning** skill |
 | "Split this across agents" / "which model per task" / "LOA mode" | **agent-orchestrator** skill, **model-selector** skill, **agent-orchestrator-validation** workflow |
 | "Save tokens" / "compact command output" | **token-efficiency** skill |
-| "Be terse" / "caveman" / "short answers" / "less tokens" | **terse-output** skill |
 | "Create a specialist agent" / "improve the specialist" | **specialist-agent-factory** / **specialist-agent-evolution** workflows + skill |
 | "Compact this chat" / "mine chat history into assets" | **context-compaction** / **chat-knowledge-curation** workflows |
 | "What do we know about X" / "save this knowledge" / "keep the knowledge base in sync" | **knowledge-base** skill, **knowledge-base-sync** workflow, under `rules/knowledge-base.md` |
@@ -170,7 +169,6 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 
 - `rules/api-contract-surface.md`
 - `rules/application-truthfulness.md`
-- `rules/capability-check-before-limitation.md`
 - `rules/changed-code-quality-gate-required.md`
 - `rules/ci-feedback-loop.md`
 - `rules/cli-over-mcp.md`
@@ -179,7 +177,6 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/cross-platform-scripts.md`
 - `rules/documentation-review-required.md`
 - `rules/error-driven-learning.md`
-- `rules/evidence-before-verdict.md`
 - `rules/external-write-authorization.md`
 - `rules/git-conventions.md`
 - `rules/human-comment-reply-gate.md`
@@ -211,7 +208,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
 - **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`, `workflows/study-publication-medium-linkedin.md`, `workflows/technical-content-publishing.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
-- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-posting-analyst-validation.md`, `workflows/job-posting-analyst-evolution.md`, `workflows/job-search-apply.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
+- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
 
 ---
 
@@ -227,7 +224,6 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **model-selector** | Assign every task a complexity tier, concrete model, effort, and token band before it runs; audit finished task tables for overspend |
 | **specialist-agent-factory** | Create or update reusable specialist agents (subagent prompt, validation/evolution workflows, skill entrypoint, routing, provider overlays) |
 | **token-efficiency** | Reduce token consumption: command-output compaction (RTK), `gh --json`/`jq` field selection, ripgrep budgeting, ast-grep, repomix packing |
-| **terse-output** | Terse reply style that keeps every technical fact (vendored Apache-2.0 derivative): answer first, no filler; code, commands, errors, security warnings, irreversible-action confirmations and owner reports stay exact and in full sentences |
 | **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
@@ -374,7 +370,6 @@ Consumer-specific rule templates live in `rules/examples/`.
 | **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 | **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
-| **job-posting-analyst** | Route job-posting reading and fit analysis through the read-only analyst: normalize pay, stack, seniority, contract form and work authorization, score fit, flag duplicates, and tier apply-now / apply-next / bridge / skip |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
 ### Thesis And Academic Formatting
@@ -389,7 +384,7 @@ Skills marked toolkit-local in `skills/README.md` (documentation governance, sec
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (29 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `cv-truthfulness-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`, `job-posting-analyst`, `workspace-hygiene-auditor`, `publication-reviewer`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (28 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `cv-truthfulness-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`, `workspace-hygiene-auditor`, `publication-reviewer`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 

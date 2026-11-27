@@ -10,7 +10,6 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | --- | --- |
 | `api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
 | `application-truthfulness.md` | Truthful applications, profiles and screening answers (employment status, work authorization, credentials, metrics); every submission behind explicit owner approval |
-| `capability-check-before-limitation.md` | Check the session's real tool, connector, and skill surface before declaring a task impossible or handing it to the user |
 | `changed-code-quality-gate-required.md` | Blocking static-analysis gate scoped to added or modified lines during code validation |
 | `ci-feedback-loop.md` | Turn CI failures into rule/workflow updates instead of one-off fixes |
 | `cli-over-mcp.md` | Prefer capable authenticated CLIs over MCP servers, preserving user-selected apps and MCP-only capabilities |
@@ -19,7 +18,6 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `cross-platform-scripts.md` | Agent-authored scripts must run on Windows, Linux, and macOS unless a wrapper is intentionally OS-specific |
 | `documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` before completion |
 | `error-driven-learning.md` | Capture trial-and-error wins as indexed learnings and migrate them into durable toolkit assets |
-| `evidence-before-verdict.md` | Read the exact variant from the artifact and check a primary source before any compatibility or support verdict; lead with a correction when new evidence overturns a claim |
 | `external-write-authorization.md` | Bind every external mutation (tickets, PR metadata, wiki, chat, email) to an explicit current instruction |
 | `git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, PR lifecycle, rebase, duplicate-file gate |
 | `human-comment-reply-gate.md` | Draft-and-approve gate for any human-facing review or comment reply |

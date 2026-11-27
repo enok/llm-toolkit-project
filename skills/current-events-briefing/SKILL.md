@@ -76,7 +76,7 @@ These hold on every turn; each has a reason, so apply the intent in cases not li
      registration where the law requires it, total vs valid votes; compare only
      against the same pollster's previous wave (reference checklist).
 5. **"Send it to me when it is out."** This is a deferred follow-up, not a
-   limitation. Apply `rules/capability-check-before-limitation.md`, then the
+   limitation. Apply `learnings/deferred-follow-up-declared-impossible.md`, then the
    "Deferred follow-ups" section of `workflows/automation-maintenance.md`: time
    the run after the publication window from step 2 and carry every scope the
    user asked for (analysis, fact-checks, polls) into the run.
@@ -109,3 +109,10 @@ tomorrow morning?" followed by Sources.
 - The answer states the maturity reached and what is still pending.
 - Any follow-up the user asked for is scheduled with a tool-confirmed ID and
   time, or the user was told plainly what could not be scheduled and why.
+
+## Known pitfalls
+
+- A source that refuses automated fetches (robots rules): go to another primary document, never retry the refused page
+  through another tool. See `learnings/webfetch-robots-disallowed-marketplace-pages.md`.
+- A primary source that is blocked: cross-check independent pages and label provenance in the answer. See
+  `learnings/blocked-primary-source-cross-check-and-label-provenance.md`.

@@ -131,7 +131,6 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | --- | --- | --- |
 | **API Contract Surface** | `rules/api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
 | **Application Truthfulness** | `rules/application-truthfulness.md` | Truthful applications, profiles and screening answers (employment status, work authorization, credentials, metrics); every submission behind explicit owner approval |
-| **Capability Check Before Limitation** | `rules/capability-check-before-limitation.md` | Check the session's real tool, connector, and skill surface before declaring a task impossible or handing it to the user |
 | **Changed-Code Quality Gate Required** | `rules/changed-code-quality-gate-required.md` | Blocking static-analysis gate scoped to added or modified lines |
 | **CI Feedback Loop** | `rules/ci-feedback-loop.md` | Turn CI failures into rule and workflow updates |
 | **CLI over MCP** | `rules/cli-over-mcp.md` | Prefer capable authenticated CLIs; record why MCP was chosen when it is |
@@ -140,7 +139,6 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Cross-Platform Scripts** | `rules/cross-platform-scripts.md` | Scripts must run on Windows, Linux, and macOS |
 | **Documentation Review Required** | `rules/documentation-review-required.md` | Route created or changed documentation through `documentation-reviewer` |
 | **Error-Driven Learning** | `rules/error-driven-learning.md` | Capture trial-and-error wins as indexed learnings |
-| **Evidence Before Verdict** | `rules/evidence-before-verdict.md` | Read the exact variant from the artifact and check a primary source before any compatibility or support verdict; lead with a correction when new evidence overturns a claim |
 | **External Write Authorization** | `rules/external-write-authorization.md` | Bind every external mutation (tickets, PRs, wiki, chat, email) to an explicit instruction |
 | **Git Conventions** | `rules/git-conventions.md` | Branch naming, protected-branch etiquette, semantic commits, rebase, duplicate-file gate |
 | **Human Comment Reply Gate** | `rules/human-comment-reply-gate.md` | Draft-and-approve gate for human-facing replies |
@@ -162,7 +160,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 116 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 113 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -190,7 +188,7 @@ All workflows by area:
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
 - **Documentation, diagrams, wiki:** `workflows/document-creation.md`, `workflows/documentation-reviewer-validation.md`, `workflows/documentation-reviewer-evolution.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/diagram-creation-specialist-evolution.md`, `workflows/system-architecture-specialist-validation.md`, `workflows/system-architecture-specialist-evolution.md`, `workflows/confluence-documentation.md`, `workflows/confluence-documentation-specialist-validation.md`, `workflows/confluence-documentation-specialist-evolution.md`, `workflows/prod-doc-promoter-validation.md`, `workflows/prod-doc-promoter-evolution.md`, `workflows/markdown-pdf-export.md`, `workflows/documentation-sync-project.md`, `workflows/bilingual-doc-sync.md`, `workflows/paired-doc-sync.md`, `workflows/translation-sync.md`, `workflows/study-repo-to-publication.md`, `workflows/study-publication-medium-linkedin.md`, `workflows/technical-content-publishing.md`
 - **Data science, thesis, notebooks, pipelines:** `workflows/project-execution-main.md`, `workflows/notebook-analysis.md`, `workflows/notebook-analysis-update.md`, `workflows/notebook-to-script.md`, `workflows/notebook-latex-polish.md`, `workflows/ml-experiment.md`, `workflows/ml-experiment-update.md`, `workflows/experiment-result-update.md`, `workflows/research-analysis-cycle.md`, `workflows/analysis-validation.md`, `workflows/thesis-writing-main.md`, `workflows/thesis-chapter-writing.md`, `workflows/thesis-submission-preparation.md`, `workflows/thesis-plagiarism-check.md`, `workflows/thesis-plagiarism-prevention.md`, `workflows/data-source-ingestion.md`, `workflows/data-source-storage-backend.md`, `workflows/dataset-onboarding.md`, `workflows/data-pipeline-change.md`, `workflows/pipeline-change-project.md`, `workflows/bilingual-notebook-sync.md`
-- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-posting-analyst-validation.md`, `workflows/job-posting-analyst-evolution.md`, `workflows/job-search-apply.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
+- **Career and job search:** `workflows/job-search-pipeline.md`, `workflows/job-search-setup.md`, `workflows/career-profile-sync.md`, `workflows/job-portal-profile-sync.md`, `workflows/job-search-attack-plan.md`, `workflows/recruiter-legitimacy-check.md`, `workflows/screening-interview-quick-prep.md`, `workflows/technical-interview-prep.md`
 
 ## Skills at a Glance
 
@@ -204,7 +202,6 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **model-selector** | Assign every task a complexity tier, concrete model, effort, and token band before it runs; audit finished task tables for overspend |
 | **specialist-agent-factory** | Create or update reusable specialist agents (subagent prompt, validation/evolution workflows, skill entrypoint, routing, provider overlays) |
 | **token-efficiency** | Reduce token consumption: command-output compaction (RTK), `gh --json`/`jq` field selection, ripgrep budgeting, ast-grep, repomix packing |
-| **terse-output** | Terse reply style that keeps every technical fact (vendored Apache-2.0 derivative): answer first, no filler; code, commands, errors, security warnings, irreversible-action confirmations and owner reports stay exact and in full sentences |
 | **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
@@ -351,7 +348,6 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 | **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 | **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
-| **job-posting-analyst** | Route job-posting reading and fit analysis through the read-only analyst: normalize pay, stack, seniority, contract form and work authorization, score fit, flag duplicates, and tier apply-now / apply-next / bridge / skip |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
 #### Thesis And Academic Formatting

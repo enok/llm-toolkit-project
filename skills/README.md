@@ -22,7 +22,6 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **model-selector** | Assign every task a complexity tier, concrete model, effort, and token band before it runs; audit finished task tables for overspend |
 | **specialist-agent-factory** | Create or update reusable specialist agents (subagent prompt, validation/evolution workflows, skill entrypoint, routing, provider overlays) |
 | **token-efficiency** | Reduce token consumption: command-output compaction (RTK), `gh --json`/`jq` field selection, ripgrep budgeting, ast-grep, repomix packing |
-| **terse-output** | Terse reply style that keeps every technical fact (vendored Apache-2.0 derivative): answer first, no filler; code, commands, errors, security warnings, irreversible-action confirmations and owner reports stay exact and in full sentences |
 | **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
@@ -169,7 +168,6 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 | **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
-| **job-posting-analyst** | Route job-posting reading and fit analysis through the read-only analyst: normalize pay, stack, seniority, contract form and work authorization, score fit, flag duplicates, and tier apply-now / apply-next / bridge / skip |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
 ### Thesis And Academic Formatting

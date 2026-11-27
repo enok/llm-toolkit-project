@@ -27,7 +27,7 @@ not real and handed the work back to the user.
 # Solution
 
 Before stating any limitation, check declared and deferred tools, connectors,
-and skills (`rules/capability-check-before-limitation.md`). For a deferred
+and skills. For a deferred
 follow-up, prefer a scheduled task that runs the research and notifies the
 user, timed after the sources' publication window, with a standalone prompt
 that carries every scope the user asked for; fall back to a reminder only
@@ -36,7 +36,6 @@ when no scheduler exists, and say so. Procedure: "Deferred follow-ups" in
 
 # Related
 
-- `rules/capability-check-before-limitation.md`: the rule this learning motivates.
 - `workflows/automation-maintenance.md` ("Deferred follow-ups"): how to create the task.
 
 # Why
