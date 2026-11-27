@@ -18,8 +18,7 @@ text also failed.
 1. Typing the topic and clicking the matching suggestion with the mouse: no chip was added
    and the field kept the typed text.
 2. A dispatched mousedown followed by a click on the suggestion's list item: no chip was
-   added either. This differs from the publish dialog, where a DOM click had worked
-   (`learnings/medium-topic-autocomplete-swaps-typed-topic.md`).
+   added either. This differs from the publish dialog, where a DOM click had worked.
 3. Comparing the inserted paragraph and a heading with the approved text byte for byte:
    the editor held curly quotes where the paste had straight ones, and a heading held
    no-break spaces, so the match failed although the text was right.

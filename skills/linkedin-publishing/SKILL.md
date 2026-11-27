@@ -171,7 +171,7 @@ a fact sheet (`skills/technical-content-publishing/SKILL.md`).
   (any non-zero exit: do not run). See learnings/linkedin-composer-file-inputs-belong-to-messaging-overlay.md;
   the workflow keeps the signature (`workflows/study-publication-medium-linkedin.md`).
 - Stage the PNG in the browser tool's session uploads folder and upload to the proxy input;
-  other paths were rejected. See learnings/browser-extension-file-upload-requires-session-staged-path.md.
+  other paths were rejected.
 - Attach the image before pressing Post: media cannot be added after publishing. See
   learnings/linkedin-cannot-attach-media-after-publishing.md.
 - When the user asks to edit existing posts, edit them in place and state that the editor changes
@@ -183,23 +183,20 @@ a fact sheet (`skills/technical-content-publishing/SKILL.md`).
   post only if the user asks. See learnings/linkedin-image-change-needs-new-post-with-more-pointer.md.
   (sig: spec-gap/image-change-needs-new-post-with-pointer)
 - Structure every post as Attention, Interest, Desire, Action, with the hook inside the "see
-  more" cut (its first paragraph within the hook budget) and the stage map shown with the draft. See
-  learnings/posts-need-aida-structure-and-role-positioning.md.
+  more" cut (its first paragraph within the hook budget) and the stage map shown with the draft.
   (sig: spec-gap/post-missing-aida-structure)
 - Keep the post a short teaser for the target role (budgets from the profile, at most 5 hashtags
   named in the text, the article link as the one call to action) and run `check_publication.py post`
   before showing the draft. See learnings/study-posts-system-design-first-short-teaser.md.
   (sig: spec-gap/publication-not-positioned-for-target-role)
 - Verify an image that crossed the device bridge by decoded pixels, not by byte hash; a
-  transfer can re-encode a PNG. See learnings/device-bridge-transfer-reencodes-png-compare-decoded-pixels.md.
+  transfer can re-encode a PNG.
   (sig: coordination/transfer-reencodes-png)
 - When staging a file just written into a cloud-synced folder is refused as "hardlinked", wait for
-  the sync to settle and retry the same file; do not create extra copies. See
-  learnings/synced-folder-fresh-file-staging-refused-as-hardlinked.md.
+  the sync to settle and retry the same file; do not create extra copies.
   (sig: platform-quirk/synced-folder-fresh-file-reports-hardlink)
 - Stage every image revision under a fresh filename and verify it on the machine; a device commit
-  to an existing path can keep the old bytes. See
-  learnings/device-commit-to-existing-path-can-keep-stale-bytes.md.
+  to an existing path can keep the old bytes.
 
 ## Related
 

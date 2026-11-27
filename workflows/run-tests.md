@@ -104,7 +104,7 @@ npm test -- --coverage                       # Node
 
 ## Known pitfalls
 
-- Run the tests of a script that guards against hostile input (deeply nested JSON) on the newest interpreter as well as the oldest supported one, and do not trust a green run on one version: the run-retrospective nesting guard waits for `RecursionError` and three of its tests failed on a newer Python while passing on an older one; the cause is not yet known and the explicit-depth fix is untested. See `learnings/deep-json-nesting-guard-depends-on-interpreter.md`.
+- Run the tests of a script that guards against hostile input (deeply nested JSON) on the newest interpreter as well as the oldest supported one, and do not trust a green run on one version: the run-retrospective nesting guard waits for `RecursionError` and three of its tests failed on a newer Python while passing on an older one; the cause is not yet known and the explicit-depth fix is untested.
 
 ---
 

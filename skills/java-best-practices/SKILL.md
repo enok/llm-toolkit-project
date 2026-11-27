@@ -135,8 +135,8 @@ Each rule file contains:
 
 ## Known pitfalls
 
-- Benchmark results taken from a cold JVM mostly measure class loading and JIT warm-up, so a "slower" or "faster" verdict can flip once the code is warm. Warm up, repeat, and report cold and warm numbers separately before drawing a conclusion. See `learnings/benchmark-cold-start-vs-warm-jit.md`.
-- Copying JSON through a streaming parser can round large decimal numbers, which silently alters money or id values. Keep big decimals as text or `BigDecimal` and compare input and output. See `learnings/jackson-streaming-copy-rounds-big-decimals.md`.
+- Benchmark results taken from a cold JVM mostly measure class loading and JIT warm-up, so a "slower" or "faster" verdict can flip once the code is warm. Warm up, repeat, and report cold and warm numbers separately before drawing a conclusion.
+- Copying JSON through a streaming parser can round large decimal numbers, which silently alters money or id values. Keep big decimals as text or `BigDecimal` and compare input and output.
 
 ## Related Skills
 

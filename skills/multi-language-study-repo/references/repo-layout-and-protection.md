@@ -156,7 +156,7 @@ gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input protection.j
 gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input protection.json
 ```
 
-Stable-name rules (learning `branch-protection-required-checks-need-stable-job-names`):
+Stable-name rules:
 
 - Give every job an explicit `name:` equal to its id (`java`, `python`, ...).
 - Never use `strategy.matrix` for a required job: the check becomes
@@ -193,7 +193,7 @@ Verify protection by API read-back only. Do not test it with a real push to
 `main`: if protection were missing, the test commit would land on `main`
 permanently. A behavioral test belongs in a scratch repo with the same JSON.
 
-PowerShell rule (learning `powershell-gh-jq-quoting-breaks`): never rely on
+PowerShell rule: never rely on
 `gh --jq '...'` with nested quotes (it failed with "accepts 1 arg(s), received
 5"); pipe to `ConvertFrom-Json` and select with PowerShell. Pass JSON bodies
 with `--input <file>`, not inline strings.

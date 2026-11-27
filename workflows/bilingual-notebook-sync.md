@@ -107,8 +107,8 @@ Use consistent translations for domain terms:
 - **Different random seeds**: Ensure both notebooks use the same seeds for reproducibility
 - **Path differences**: Both should reference the same data sources, not language-specific copies
 - **Output drift**: Clear outputs before committing; regenerate in both languages
-- Verify the exact cell text in the target pt-BR notebook before writing a patch anchor: pt-BR cells can keep English strings (for example `print()` or `except` messages never localised), so a translated or assumed anchor can miss. Make the patch script count replacements and fail on zero instead of printing a warning. See learnings/notebook-patch-anchor-mismatch-ptbr.md.
-- When both language notebooks write the same output file (for example a GeoJSON), pick one canonical language for its property names, document it in the notebook that regenerates it, and re-check the file after running either notebook: whichever runs last silently rewrites the schema and breaks consumers such as QGIS projects. Prefer generating the file from a dedicated script with a fixed property schema. See learnings/geojson-property-language-drift.md.
+- Verify the exact cell text in the target pt-BR notebook before writing a patch anchor: pt-BR cells can keep English strings (for example `print()` or `except` messages never localised), so a translated or assumed anchor can miss. Make the patch script count replacements and fail on zero instead of printing a warning.
+- When both language notebooks write the same output file (for example a GeoJSON), pick one canonical language for its property names, document it in the notebook that regenerates it, and re-check the file after running either notebook: whichever runs last silently rewrites the schema and breaks consumers such as QGIS projects. Prefer generating the file from a dedicated script with a fixed property schema.
 
 ## Related Resources
 

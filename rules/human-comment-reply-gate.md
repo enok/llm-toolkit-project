@@ -43,8 +43,7 @@ state:
 - when the conversation spans several channels (e.g. email plus chat or social
   messaging or a ticket), the complete history on every involved channel, not
   only the one being replied on; paginate or scroll to the first message,
-  because chat UIs often lazy-load only recent messages
-  (`learnings/linkedin-messaging-history-lazy-loads.md`);
+  because chat UIs often lazy-load only recent messages;
 - relevant code, tests, docs, PR body, and latest diff/current head;
 - surrounding file or artifact context needed to understand the comment;
 - any prior automated replies from the agent or tooling.

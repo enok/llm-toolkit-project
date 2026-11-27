@@ -831,4 +831,4 @@ Do not install dependencies implicitly from this skill. Verify they are already 
 
 ## Known pitfalls
 
-- For a deck built from an official template (for example a formal defense), keep its logo, cover typography and brand chrome, and render the deck to PDF and full-slide images before delivery; a saved PPTX or extracted text does not prove the layout. Details in `skills/pptx-generator/references/pitfalls.md`. See learnings/powerpoint-template-visual-qa.md.
+- For a deck built from an official template (for example a formal defense), keep its logo, cover typography and brand chrome, and render the deck to PDF and full-slide images before delivery; a saved PPTX or extracted text does not prove the layout. Details in `skills/pptx-generator/references/pitfalls.md`.

@@ -28,7 +28,7 @@ contain attack samples as plain text.
 - For quarantined scanner fixtures: confirm the checked-out tag, run `git fsck`, check that
   only those test files differ from the tag and that the installed package is intact; restore
   from the tag. Do not disable the antivirus.
-- Related: `security-filter-fail-closed-blocks-mislabelled-archive.md`, `rules/command-safety.md`.
+- Related: `rules/command-safety.md`.
 
 # Why
 Encoded blobs and attack-sample text are exactly what signature engines look for, whatever the

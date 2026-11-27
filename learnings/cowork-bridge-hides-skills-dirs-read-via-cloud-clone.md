@@ -31,7 +31,7 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
 - **Write:** Desktop Commander `start_process` runs native PowerShell on the PC with the repo, `git`
   over SSH and an authenticated `gh`. Do not touch the user's own clone if it holds another
   session's uncommitted work. Create a separate worktree from `origin/main` at an ABSOLUTE sibling
-  path (see `git-c-worktree-relative-path-lands-in-repo-root.md`):
+  path:
   `git -C <toolkit-clone> worktree add <abs-path>\<repo>-<topic> -b <branch> origin/main`.
 - Commit in the container, export a git bundle or patch, move it with `SendUserFile` +
   `device_commit_files` (see `cloud-session-device-bridge-file-io.md`); `device_commit_files` also

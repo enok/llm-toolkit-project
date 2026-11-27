@@ -4,9 +4,7 @@ Observed while editing a signed-in profile through a browser extension. These
 generalize to most heavy single-page sites.
 
 Related: `details-pages.md` (edit-form URLs, editors per section),
-`browser-session-notes.md` (tool limits, bot checks),
-`learnings/browser-rich-text-vs-textarea-input.md` (why rich text and
-textareas need different input methods) and
+`browser-session-notes.md` (tool limits, bot checks) and
 `learnings/browser-tool-operational-limits.md` (result-size and wait caps).
 Use those instead of repeating them here.
 

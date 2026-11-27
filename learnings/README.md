@@ -41,8 +41,8 @@ Root cause explanation.
 
 Use lowercase kebab-case that summarizes the topic:
 
-- `llm-toolkit-junction-architecture.md`
-- `llm-adaptive-skill-loading.md`
+- `cloud-session-device-bridge-file-io.md`
+- `tracker-sync-refuses-guessing.md`
 
 ## Rules
 

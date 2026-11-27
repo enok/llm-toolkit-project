@@ -72,4 +72,4 @@ Firehose, or similar systems.
 
 ## Known pitfalls
 
-- On Windows Git Bash, run AWS CLI calls whose arguments start with `/` (log groups such as `/aws/lambda/<function>`, SSM parameter names) with `MSYS_NO_PATHCONV=1`, or `export MSYS_NO_PATHCONV=1` for the session; quoting does not stop the rewrite, and a doubled leading slash leaks into the value on some tools. A "Member must satisfy regular expression pattern" error on a valid log group means the argument was mangled, not that the group is missing. See learnings/git-bash-path-conversion-breaks-aws-cli-args.md.
+- On Windows Git Bash, run AWS CLI calls whose arguments start with `/` (log groups such as `/aws/lambda/<function>`, SSM parameter names) with `MSYS_NO_PATHCONV=1`, or `export MSYS_NO_PATHCONV=1` for the session; quoting does not stop the rewrite, and a doubled leading slash leaks into the value on some tools. A "Member must satisfy regular expression pattern" error on a valid log group means the argument was mangled, not that the group is missing.

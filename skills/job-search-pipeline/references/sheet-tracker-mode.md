@@ -97,9 +97,5 @@ Print the tasks table first (wave, task, tier, explicit model, validator, SLA).
 ## Reading and writing the sheet
 
 Order of preference: a Sheets connector (read and write); the Drive connector
-for reading only; the owner's signed-in browser for cell edits. The browser
-recipe, read-back and the connector limits are in
-[google-sheets-browser-cell-editing-recipe](../../../learnings/google-sheets-browser-cell-editing-recipe.md)
-and
-[drive-connector-reads-sheets-cannot-write-cells](../../../learnings/drive-connector-reads-sheets-cannot-write-cells.md).
+for reading only; the owner's signed-in browser for cell edits.
 Always read back every written row and compare before reporting success.

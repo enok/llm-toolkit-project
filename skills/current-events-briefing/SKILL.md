@@ -50,8 +50,6 @@ These hold on every turn; each has a reason, so apply the intent in cases not li
    | Next day | Consolidated analysis, viewer snap polls where they exist | Consensus or split among independent analysts; snap polls with method caveats |
    | 2-7 days | Opinion polls with fieldwork after the event | Whether vote intention moved, same pollster vs its previous wave |
 
-   See `learnings/live-event-verdicts-lag-the-event.md` for why this step
-   exists.
 3. **Search in tiers** (reference file): wire services and major outlets for
    what happened; independent fact-checkers for claims; registered polls for
    numbers; analysts across the spectrum for "who did better".
@@ -113,6 +111,5 @@ tomorrow morning?" followed by Sources.
 ## Known pitfalls
 
 - A source that refuses automated fetches (robots rules): go to another primary document, never retry the refused page
-  through another tool. See `learnings/webfetch-robots-disallowed-marketplace-pages.md`.
-- A primary source that is blocked: cross-check independent pages and label provenance in the answer. See
-  `learnings/blocked-primary-source-cross-check-and-label-provenance.md`.
+  through another tool.
+- A primary source that is blocked: cross-check independent pages and label provenance in the answer.

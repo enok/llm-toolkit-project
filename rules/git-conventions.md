@@ -47,7 +47,7 @@ checkouts, deployments, and audit history depend on them.
 
 ## Dirty Working Trees
 
-- **Never reset, checkout, or clean a dirty working tree.** Run `git status --porcelain=v1 --untracked-files=all` first: any output is uncommitted work that `git reset --hard <ref>`, `git checkout -f`, or `git clean` discards silently, including edits earlier lanes or runs left in a shared clone. To sync a clone to a ref use `python3 scripts/git_safe_sync.py --repo <clone> --to <ref>` (`--dry-run` to preview, `--wip-commit` or `--stash` to keep dirty work); it refuses with exit 3 on a dirty tree. See `learnings/git-reset-hard-discards-uncommitted-work.md`. (sig: coordination/reset-hard-discards-uncommitted-work)
+- **Never reset, checkout, or clean a dirty working tree.** Run `git status --porcelain=v1 --untracked-files=all` first: any output is uncommitted work that `git reset --hard <ref>`, `git checkout -f`, or `git clean` discards silently, including edits earlier lanes or runs left in a shared clone. To sync a clone to a ref use `python3 scripts/git_safe_sync.py --repo <clone> --to <ref>` (`--dry-run` to preview, `--wip-commit` or `--stash` to keep dirty work); it refuses with exit 3 on a dirty tree. (sig: coordination/reset-hard-discards-uncommitted-work)
 
 ## Commit Messages
 
@@ -107,8 +107,8 @@ same category contiguous, and skip categories with no legitimate changes.
   `git diff --quiet backup/<ticket>-before-regroup-<timestamp> HEAD` to exit
   zero and the two refs' `^{tree}` values to match exactly.
 - A rewrite that scrubs terms from a repository's whole history and is then
-  force-pushed follows `learnings/history-scrub-force-push-checklist.md`
-  (backup, every ref and tag, mirror re-scan) in addition to the steps above.
+  force-pushed also needs a backup, every ref and tag covered, and a mirror
+  re-scan, in addition to the steps above.
 
 ### Stacked-PR split safeguards
 
@@ -191,11 +191,10 @@ memory or a hand-maintained planning list.
 - If a Ready PR later gains an actionable finding, return it to Draft with `gh pr ready <PR_NUMBER> --undo`, fix, re-validate, then mark Ready again.
 - When branch protection refuses a merge (a required scanner, review, or
   approval the agent cannot give itself), record the exact action the user must
-  take, verify the PR state live, and never report it as merged
-  (`learnings/pr-merge-blocked-by-protection-agent-cannot-self-merge.md`).
+  take, verify the PR state live, and never report it as merged.
 - A stop-hook or review message about unsigned commits is feedback, not a
   request to rewrite history: do not re-sign or force-push existing commits
-  unless the user asks (`learnings/stop-hook-unsigned-commits-feedback-is-not-a-rewrite-request.md`).
+  unless the user asks.
 
 ## Duplicate-File Gate (Mandatory — Pre-Push)
 
@@ -241,12 +240,10 @@ the user explicitly approves the destructive recovery step.
 - Several accounts on one machine: one key per account plus a host alias or an
   `includeIf "hasconfig:remote.*.url:git@<host>:*/**"` block (`**` straight
   after the colon never matches `owner/repo`; needs Git 2.36+). Check with
-  `git config --show-origin --get-regexp 'user\.|includeif'` inside the repo
-  (`learnings/git-includeif-hasconfig-ssh-url-needs-slash-glob.md`).
+  `git config --show-origin --get-regexp 'user\.|includeif'` inside the repo.
 - A worktree created inside a cloud VM stores VM paths: run
   `git worktree repair` (or recreate it) on the device before running gates
-  there, and never report a gate as passed when a step was skipped
-  (`learnings/vm-created-worktree-paths-break-on-device.md`).
+  there, and never report a gate as passed when a step was skipped.
 
 ## Ticket/Feature Branch Rebase Before Push
 
@@ -267,7 +264,7 @@ the user explicitly approves the destructive recovery step.
   branches to be up to date") is caught up with
   `gh pr update-branch <pr> --rebase`, never the default merge variant of that
   command and never `git merge main`; then read the PR state back before
-  reporting it (`learnings/strict-required-checks-behind-main-use-update-branch.md`).
+  reporting it.
 
 ## Environment Branch Promotion
 

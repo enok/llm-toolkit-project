@@ -913,7 +913,7 @@ When invoked:
    - on `escalate` or an exhausted budget, stop the loop and hand the task to the normal-mode root agent or explicit-LOA coordinator marked `escalated` with its verdict history — never silently accept a failed result and never loop past the budget;
    - loops run independently, so tasks in the same wave keep iterating in parallel without a barrier.
 7. After loop results return, judge them before using them:
-   - evidence sufficiency: exact files, commands, sources, traces, or artifacts are cited, and any count that gates a decision is re-derived with a deterministic command instead of accepted from the child's summary (`learnings/agent-self-reported-counts-are-not-evidence.md`);
+   - evidence sufficiency: exact files, commands, sources, traces, or artifacts are cited, and any count that gates a decision is re-derived with a deterministic command instead of accepted from the child's summary;
    - scope fit: the child stayed inside the delegated task and user constraints;
    - conflict handling: incompatible findings are reconciled or sent back for a narrow redo;
    - validation value: suggested checks are executable, relevant, and not just ceremonial;

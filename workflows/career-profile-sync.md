@@ -79,8 +79,7 @@ not others is the failure this workflow exists to prevent.
    account. Prepare the exact values per portal and hand them to the owner, or
    edit only where the owner has an open session and approved that portal.
 4. **Counts and derived numbers** quoted in any document are recomputed from the
-   source they summarise, not copied from a README or an earlier draft. See
-   `learnings/readme-catalog-counts-drift-from-disk.md`.
+   source they summarise, not copied from a README or an earlier draft.
 
 ## Phase 4 - Re-render the CV to its page budget
 
@@ -115,8 +114,7 @@ When files travel between a cloud session and the owner's machine:
 
 1. Stage every commit in a fresh staging subfolder, never re-commit under a
    path already used, and verify the SHA-256 on the machine through the device
-   shell before trusting the file. See
-   `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`.
+   shell before trusting the file.
 2. If `skills/` or `tool-subagents/` is unreadable through the bridge, read
    through a cloud clone; to run a script from a protected folder, copy it to a
    non-protected folder first and park the copy for deletion afterwards. See
@@ -143,7 +141,5 @@ When files travel between a cloud session and the owner's machine:
   (sig: spec-gap/employment-fact-updated-in-one-place)
 - CV layout not checked on the page images: Phase 4.
   (sig: validation-gap/cv-layout-not-visually-checked)
-- Catalog counts drift from disk. See
-  `learnings/readme-catalog-counts-drift-from-disk.md`.
-- A re-committed staged path can keep old bytes. See
-  `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`.
+- Catalog counts drift from disk.
+- A re-committed staged path can keep old bytes.

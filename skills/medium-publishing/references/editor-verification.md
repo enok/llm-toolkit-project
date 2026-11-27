@@ -72,8 +72,7 @@ an unrecognised language name may be ignored.
 ## 3. SHA-256 of every code block against its source
 
 Hash the text of `pre .pre--content` (its `innerText`), not `pre.innerText`: the latter
-includes the language label the editor adds, so it can never equal the source
-(`learnings/medium-editor-code-block-hash-needs-pre-content-innertext.md`). Normalise the
+includes the language label the editor adds, so it can never equal the source. Normalise the
 editor text before hashing: replace non-breaking spaces with a space, trim, and turn every line
 that holds a single space into an empty line (those lines are the blank-line workaround from
 [paste-recipe.md](paste-recipe.md)). Compare the first 12 hex characters of the SHA-256 with the
@@ -125,8 +124,7 @@ can be hashed the same way when their source is a file.
 Expected: `mdLinkLeftovers` is 0 and the title is the intended plain text. Also
 skim the first screen for stray `**`, `##`, and backticks, which indicate
 markdown that was never rendered to HTML. Scan what the editor holds, title included, not
-only the Markdown source: a title such as `[[x] y](url)` once stayed raw text
-(`learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md`).
+only the Markdown source: a title such as `[[x] y](url)` once stayed raw text.
 
 When comparing editor or page text with the approved text, normalise first: in the
 editor, pasted straight quotes became curly quotes, and a heading's text held no-break

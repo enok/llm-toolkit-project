@@ -29,7 +29,7 @@ use `python3` where `python` is missing or is not Python 3 (Windows often has a
 | Every empty line inside a `<pre>` becomes a single space (`learnings/medium-paste-splits-code-blocks-at-blank-lines.md`) | A truly empty line split one file into several code boxes; `<br>` instead of newlines did not help. Pasting back still yields valid code; Python ignores whitespace-only lines. | `build`; `check` flags remaining empty lines |
 | No `<table>`: convert to a bullet list (`Label: value`) or a mode-0 `<pre>` with aligned columns | Medium has no tables. | author; `check` flags |
 | No inline `<code>` in the pasted HTML: convert to plain text (use `<em>` or `<strong>` only when emphasis is wanted). Where a flag or code token needs code styling, apply it in the editor after pasting (section 4) | A pasted `<code>` element is not carried over; the editor does have an inline-code style (the backtick shortcut produces a `markup--code` span), so the old note that Medium has no inline code is outdated. | author; `check` flags |
-| No markdown left in the HTML: scan for a closing bracket followed by `(http` (`learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md`) | A title like `[[x] y](url)` rendered as raw text. Scan the rendered HTML, not only the Markdown source. | author; `check` flags |
+| No markdown left in the HTML: scan for a closing bracket followed by `(http` | A title like `[[x] y](url)` rendered as raw text. Scan the rendered HTML, not only the Markdown source. | author; `check` flags |
 | Images are absolute `https` URLs from `raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>` | Medium re-hosts pasted images, so the source must be fetchable by anyone; a SHA (not a branch) stops caching from serving a stale diagram. | author; `check` flags unpinned or foreign URLs |
 | Entity-encode every non-ASCII character as `&#NNN;` | See section 3. | `build`; `check` flags leftovers |
 | Start the document with the `<h1>` title | The title field is expected to take the first heading (untested); confirm it after pasting. | author |
@@ -61,8 +61,7 @@ derivable and readers see which file they are reading.
 ## 3. Non-ASCII and the Windows clipboard
 
 Windows PowerShell 5.1 `Set-Clipboard -AsHtml` mangles non-ASCII text on the
-HTML clipboard (a right single quote became the replacement character;
-`learnings/powershell-set-clipboard-ashtml-mangles-non-ascii.md`).
+HTML clipboard (a right single quote became the replacement character).
 Entity-encode first (`build` does this for the whole document, including
 `<pre>` bodies; `check` fails while any non-ASCII byte is left), then the file
 is pure ASCII and encoding no longer matters.
@@ -74,8 +73,7 @@ Set-Clipboard -AsHtml -Value $html
 
 Keep the paste file in a fresh filename per revision and confirm its length or
 a marker on the machine that runs this command; one session saw a copy to an
-existing path keep the old bytes
-(`learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`).
+existing path keep the old bytes.
 
 ## 4. Pasting into the editor
 

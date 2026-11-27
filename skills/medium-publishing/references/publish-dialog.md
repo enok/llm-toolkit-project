@@ -38,7 +38,7 @@ Two behaviours were observed:
 - Clicking a suggestion with the mouse closed the dropdown without adding
   anything.
 
-What worked (`learnings/medium-topic-autocomplete-swaps-typed-topic.md`): type the topic (no Enter), wait for the suggestions, then
+What worked: type the topic (no Enter), wait for the suggestions, then
 dispatch a DOM click on the exact suggestion button whose text equals the topic,
 and verify the chips afterwards. The selectors below are illustrative; inspect
 the live dialog (accessibility tree or `find`) for the real ones.
@@ -88,7 +88,7 @@ browser lands on, and report it.
    to a live story uses this button, not "Publish"). The browser tool's auto-mode classifier
    can deny this final click even after the content was approved; ask for an explicit go that
    names the click ("click Save and publish on `<story title>` now"), or hand the click to the
-   user (`learnings/auto-mode-classifier-denies-final-publish-click.md`).
+   user.
 4. Verify on the post-redirect page: navigate the browser to the story URL,
    let redirects settle, and read that DOM. A quick `fetch` of the public URL
    right after saving may return a cached copy and look unchanged.
@@ -103,7 +103,7 @@ section headings. Read the inserted blocks back with the normalisation in
 ## 6. Replacing one link
 
 Ctrl+K on text that is already linked did not open the link editor (earlier note, not
-re-tested). What worked, in the editor of the live story (`learnings/medium-published-story-link-edit-via-toolbar-link-button.md`):
+re-tested). What worked, in the editor of the live story:
 
 1. Select the link text.
 2. Click the toolbar link button once. This removes the link.

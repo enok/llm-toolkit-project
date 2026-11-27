@@ -53,7 +53,7 @@ Return:
 
 ## Known pitfalls
 
-- When the change touches CloudWatch alarms, do not accept state transitions (OK -> ALARM -> OK) as validation: check that `AlarmActions`/`OKActions` are non-empty, the notification topic exists, and subscriptions are confirmed (none in `PendingConfirmation`), then trip one alarm per action family and confirm the email or page arrives with the right alarm name, state change, threshold reason, and description. See learnings/alarm-e2e-must-validate-the-notification-path.md.
+- When the change touches CloudWatch alarms, do not accept state transitions (OK -> ALARM -> OK) as validation: check that `AlarmActions`/`OKActions` are non-empty, the notification topic exists, and subscriptions are confirmed (none in `PendingConfirmation`), then trip one alarm per action family and confirm the email or page arrives with the right alarm name, state change, threshold reason, and description.
 
 ## Related Skills
 

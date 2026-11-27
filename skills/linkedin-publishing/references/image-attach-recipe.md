@@ -45,16 +45,13 @@ fails on exactly this mistake.
 1. **Stage the PNG in the browser tool's session uploads folder.** Use the bridge that copies a
    file into the session's uploads area (in the recorded setup the staged path looked like
    `/mnt/user-data/uploads/<folder>/<file>.png`). The browser tool's file upload accepted only
-   this session-staged path (`learnings/browser-extension-file-upload-requires-session-staged-path.md`).
+   this session-staged path.
    - Use a fresh filename for every revision of the image: a file transfer to an
-     already-existing path once kept the old bytes (see
-     `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`).
+     already-existing path once kept the old bytes.
    - Confirm what the browser actually receives by its decoded pixels, not by a byte hash: a
-     device transfer can re-encode a PNG, so the bytes can differ while the picture is the same
-     (`learnings/device-bridge-transfer-reencodes-png-compare-decoded-pixels.md`).
+     device transfer can re-encode a PNG, so the bytes can differ while the picture is the same.
    - A file just written into a cloud-synced folder may be refused for staging as "hardlinked":
-     wait for the sync to settle and retry the same stage; do not make extra copies
-     (`learnings/synced-folder-fresh-file-staging-refused-as-hardlinked.md`).
+     wait for the sync to settle and retry the same stage; do not make extra copies.
 
 2. **Add a temporary light-DOM proxy input** (light DOM so ordinary element references can
    target it; run the guard on the snippet first):

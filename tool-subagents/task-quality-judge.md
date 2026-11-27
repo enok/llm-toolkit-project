@@ -37,7 +37,7 @@ Rules:
 
 ## Known pitfalls
 
-- Re-derive any count or total that a criterion depends on with your own deterministic command (for example `rg` with `--count-matches`, or a `jq` extraction) instead of accepting the producer's narrative, and cite the command and its output in the verdict. See `learnings/agent-self-reported-counts-are-not-evidence.md`.
+- Re-derive any count or total that a criterion depends on with your own deterministic command (for example `rg` with `--count-matches`, or a `jq` extraction) instead of accepting the producer's narrative, and cite the command and its output in the verdict.
 
 ## Related Specialists
 

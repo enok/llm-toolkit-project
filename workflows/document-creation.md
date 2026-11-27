@@ -114,7 +114,7 @@ For detailed authoring rules, use `skills/diagram-authoring/SKILL.md`,
 - **Optional image QA** — post-export quality control is mandatory; if the image cannot be inspected, report a blocker.
 - **Low-resolution exports** — prefer vector output and verify dimensions for required raster images.
 - **Forgetting render flags** — wide PlantUML diagrams need `-DPLANTUML_LIMIT_SIZE=32768`.
-- **Planned or asked written as done** — re-read each status row at its source and mark it planned, reported or unconfirmed; a plan or an unanswered question in a team message is not completed work. See `learnings/planned-or-asked-status-written-as-done-reread-source.md`. (sig: wrong-assumption/planned-or-asked-status-written-as-done)
+- **Planned or asked written as done** — re-read each status row at its source and mark it planned, reported or unconfirmed; a plan or an unanswered question in a team message is not completed work. (sig: wrong-assumption/planned-or-asked-status-written-as-done)
 
 ---
 

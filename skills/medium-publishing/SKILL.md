@@ -169,23 +169,20 @@ replace it when its shape is wrong and retitle in place only when the shape surv
 - Put one space on empty lines inside `<pre>` before pasting (`build` does it) and check one code
   box per listing. See learnings/medium-paste-splits-code-blocks-at-blank-lines.md.
 - Hash each editor code block from `pre .pre--content` innerText, normalised (nbsp to space, trim,
-  single-space lines to empty), never from `pre.innerText`. See
-  learnings/medium-editor-code-block-hash-needs-pre-content-innertext.md.
+  single-space lines to empty), never from `pre.innerText`.
 - In the publish dialog, click the exact topic suggestion (never Enter) and read the topic
-  chips back. See learnings/medium-topic-autocomplete-swaps-typed-topic.md. In the Change topics
+  chips back. In the Change topics
   popover of a published story clicks did not add a topic: type until the exact topic is the
   first suggestion, press Enter, read the chips back (publish-dialog.md section 7). See
   learnings/medium-change-topics-popover-enter-adds-first-suggestion.md.
 - Entity-encode non-ASCII before putting HTML on the Windows PowerShell 5.1 clipboard (`build` does
-  it). See learnings/powershell-set-clipboard-ashtml-mangles-non-ascii.md.
+  it).
 - Scan the rendered paste HTML, title included, and the editor text for `](http` (`check` does the
-  first). See learnings/validators-must-scan-rendered-html-for-markdown-leftovers.md.
+  first).
 - Change one link in a published story with the toolbar link button (click to remove, click again
-  to type the URL), then read the anchor back. See
-  learnings/medium-published-story-link-edit-via-toolbar-link-button.md.
+  to type the URL), then read the anchor back.
 - Get an explicit go that names the final "Save and publish" click, or hand that click to the user;
-  content approval alone can be denied by the browser tool's classifier. See
-  learnings/auto-mode-classifier-denies-final-publish-click.md.
+  content approval alone can be denied by the browser tool's classifier.
   (sig: env-constraint/auto-mode-denies-publish-click)
 - Before a long paste or the publish click, confirm the browser tool is still connected to the
   signed-in Medium session, and keep a second signed-in browser as a fallback (a built-in browser
@@ -194,11 +191,10 @@ replace it when its shape is wrong and retitle in place only when the shape surv
   methods the doc describes as mutually exclusive together) and cite official pages only, not mirrors; see
   [content-angle.md](references/content-angle.md). (sig: quality-defect/snippet-contradicts-api-doc)
 - Structure every article and post as Attention, Interest, Desire, Action and show the stage map
-  with the draft; position the title on the highest-level concept the body supports. See
-  learnings/posts-need-aida-structure-and-role-positioning.md.
+  with the draft; position the title on the highest-level concept the body supports.
   (sig: spec-gap/post-missing-aida-structure)
 - Write each paste file under a fresh filename and verify its length on the machine; a copy to an
-  existing path can keep the old bytes. See learnings/device-commit-to-existing-path-can-keep-stale-bytes.md.
+  existing path can keep the old bytes.
 - Position the study publication for the target role: a short system-design-first article with the
   study topic inside the body, a teaser post, budgets from the profile, checked by
   `check_publication.py` before the draft is shown. See

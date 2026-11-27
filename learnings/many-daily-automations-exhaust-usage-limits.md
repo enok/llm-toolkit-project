@@ -18,17 +18,15 @@ attribute the limit to specific runs.
   misbehaves, and no baseline to compare against.
 
 # Solution
-- Audit by time: list tasks (with the completed filter, see
-  `learnings/scheduled-task-listing-hides-fired-one-shots.md`), group them by cron window, and
+- Audit by time: list tasks (with the completed filter), group them by cron window, and
   sum the last-run durations in each window.
 - Consolidate overlapping digests into one task with one output, one section per source and a
   per-section cap (top N items, a maximum number of lookups).
 - Pause (not delete) the old tasks and write a recovery record (id, enabled before, next run).
   Delete them only after the new task has several runs that pass the duration and output
-  check in `learnings/short-succeeded-run-is-not-evidence-of-work.md`.
+  check.
 - Keep priority tasks outside the digest burst (schedule the critical job away from bulk
-  jobs, not just a few minutes after them), and choose the new task's model deliberately
-  (`learnings/scheduled-task-create-cannot-set-model.md`).
+  jobs, not just a few minutes after them), and choose the new task's model deliberately.
 
 # Why
 Usage limits are shared by every automation and session in the same window. Each small task

@@ -28,8 +28,7 @@ scripted input, dropdowns would not open, and large results did not come back th
   scraping.
 - **Input:** use real keystrokes (triple click, `ctrl+a`, type) for fields. Where a field drops
   characters (for example under a grammar extension), set the value with the native setter,
-  dispatch an `input` event, then read the value back. See
-  `learnings/browser-rich-text-vs-textarea-input.md` for editor types.
+  dispatch an `input` event, then read the value back.
 - **React dropdowns:** dispatch `pointerdown`, `mousedown`, `pointerup`, `mouseup`, `click` in
   that order.
 - **Big results:** write the text into a temporary DOM node, read it with `get_page_text`, then
@@ -38,9 +37,7 @@ scripted input, dropdowns would not open, and large results did not come back th
   restarting.
 - **Virtualized lists** (a chat with lazy rendering): wheel-scroll and harvest the DOM per
   channel or section, de-duplicating by message id.
-- **Delivery:** commit files to the user's device with a new file name per revision (see
-  `learnings/device-commit-to-existing-path-can-keep-stale-bytes.md`).
-- Related: `learnings/linkedin-highlights-editor-is-contenteditable.md`.
+- **Delivery:** commit files to the user's device with a new file name per revision.
 
 # Why
 The page's own network calls already contain structured data, so intercepting them avoids

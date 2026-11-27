@@ -22,8 +22,7 @@ directly.
 - Returned text that looks like a query string or cookie (`?`, `=`, `&`) is
   replaced by a BLOCKED notice. Chunk output to about 900 characters or read it
   from a `<pre>`; never strip or encode characters to pass the filter. If auto mode refuses a cookie
-  read for a private API call, fall back to the page UI. Details:
-  [browser-tool-blocks-urls-with-query-strings-in-returned-text](../../../learnings/browser-tool-blocks-urls-with-query-strings-in-returned-text.md).
+  read for a private API call, fall back to the page UI.
 
 ## 2. Bot checks are never passed
 

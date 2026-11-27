@@ -151,8 +151,7 @@ role links; top-five pins off-target; the exported profile PDF is not a CV
   works on these React selects). Confirm "Notify network" is off before saving.
   Re-read the details page: the entry shows the start, the end, and the duration.
 - **Skill-name variants are one record.** Spelling or casing variants of a
-  skill resolve to the same LinkedIn record, so a "replace" can be a no-op:
-  see `learnings/linkedin-skill-name-variants-are-one-record.md`.
+  skill resolve to the same LinkedIn record, so a "replace" can be a no-op.
 - **Adding a skill.** Tick the roles or projects that evidence it and untick
   "Follow this skill" unless the owner asked; re-read the skills list afterwards
   (`references/details-pages.md`, section 4).
@@ -160,14 +159,11 @@ role links; top-five pins off-target; the exported profile PDF is not a CV
 ## Known pitfalls
 
 - Collect every edit-form URL before the first delete; lists re-render after a
-  delete. See `learnings/linkedin-details-pages-lazy-load-in-main-container.md`.
+  delete.
   (sig: platform-quirk/linkedin-details-pages-lazy-load)
-- Check the edit heading before each confirm, one dialog at a time. See
-  `learnings/linkedin-delete-dialogs-verify-item-name.md`.
+- Check the edit heading before each confirm, one dialog at a time.
   (sig: safety-near-miss/linkedin-delete-dialog-name-check)
-- Highlights is a contenteditable editor, project descriptions are textareas. See
-  `learnings/linkedin-highlights-editor-is-contenteditable.md`.
+- Highlights is a contenteditable editor, project descriptions are textareas.
   (sig: platform-quirk/linkedin-highlights-contenteditable)
-- Get a go that names the final click, or hand that click to the owner. See
-  `learnings/auto-mode-classifier-denies-final-publish-click.md`.
+- Get a go that names the final click, or hand that click to the owner.
   (sig: env-constraint/auto-mode-denies-publish-click)

@@ -173,8 +173,7 @@ family) if any.
 - Asked "did this run in production?", candidates tend to answer with adjacent
   breadth. Drill a one-sentence direct answer first, then the supporting detail.
 - A video link of the problem that was asked cannot be read from a sandbox
-  (YouTube answers HTTP 429); resolve its title through oEmbed. See
-  `learnings/youtube-watch-page-429-use-oembed.md`.
+  (YouTube answers HTTP 429); resolve its title through oEmbed.
 - Voice transcription swaps technical terms ("regex" and "rejects", "heap" and
   "hip", "stack" and "step"); confirm the term in one line before explaining.
   Voice-session and no-screen-share rules: `references/mock-interview-protocol.md`.

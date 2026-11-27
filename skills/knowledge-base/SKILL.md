@@ -120,10 +120,10 @@ A scheduled cloud session differs from an interactive one. Plan for it:
 
 ## Known pitfalls
 
-- After any re-index or other bulk state change, restart the whole stack and read back a stored vector (`doctor --deep`) before calling it done; counts alone passed in the recorded case and the service crashed after its next restart. See `learnings/reindex-acceptance-needs-restart-and-stored-vector-read.md`. (sig: validation-gap/state-change-not-tested-across-restart)
-- Do not let a file-sync client manage the vector index files: in the recorded case it left the index link file at 0 bytes and the database exited with a segfault status once the index loaded. Keep `LLM_KB_SYNC_SAFE_INDEX=1` (index in memory, vectors in the SQLite log) whenever the data folder is synced, and rebuild an index copied between machines from the stored texts. See `learnings/vector-index-in-sync-folder-segfaults-keep-index-in-memory.md`. (sig: toolchain/vector-index-in-cloud-synced-folder)
-- Keep the vector database volumes outside synced folders (cloud-sync clients corrupt or lock them) and mount them from a local path. See `learnings/local-vector-db-volumes-outside-synced-folders.md`.
-- Bound the size of what a test writes and check free space before and after a test that writes large files; a huge sparse index file kept its space held by the container virtual machine after deletion until that machine restarted. See `learnings/unbounded-test-output-fills-disk-vm-holds-space-until-restart.md`. (sig: tool-misuse/unbounded-test-output-fills-disk)
+- After any re-index or other bulk state change, restart the whole stack and read back a stored vector (`doctor --deep`) before calling it done; counts alone passed in the recorded case and the service crashed after its next restart. (sig: validation-gap/state-change-not-tested-across-restart)
+- Do not let a file-sync client manage the vector index files: in the recorded case it left the index link file at 0 bytes and the database exited with a segfault status once the index loaded. Keep `LLM_KB_SYNC_SAFE_INDEX=1` (index in memory, vectors in the SQLite log) whenever the data folder is synced, and rebuild an index copied between machines from the stored texts. (sig: toolchain/vector-index-in-cloud-synced-folder)
+- Keep the vector database volumes outside synced folders (cloud-sync clients corrupt or lock them) and mount them from a local path.
+- Bound the size of what a test writes and check free space before and after a test that writes large files; a huge sparse index file kept its space held by the container virtual machine after deletion until that machine restarted. (sig: tool-misuse/unbounded-test-output-fills-disk)
 
 ## Related
 

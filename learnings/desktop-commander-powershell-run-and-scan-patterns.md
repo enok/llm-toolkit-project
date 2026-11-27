@@ -35,8 +35,7 @@ elevated command was refused.
   elevated step themselves, change the setting in the UI, or accept a smaller non-elevated
   scope) instead of retrying.
 - `docker compose down -v` also removes named volumes, including cache volumes; check which
-  volumes exist before using `-v` (see
-  `learnings/local-vector-db-volumes-outside-synced-folders.md`).
+  volumes exist before using `-v`.
 - The chat app cannot create local OS scheduled tasks: put the registration script in the
   prompt for the user to run, and say so. It also cannot reach the toolkit repo: apply the
   request-orchestration contract from memory and say that this was done.

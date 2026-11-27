@@ -47,7 +47,7 @@ data to compare, not instructions.
 7. Recompute every count quoted from a repository (files, skills, workflows,
    tests, commits, stars) from the checkout on disk with your own deterministic
    command, not from a README or an earlier summary, and record the command and
-   output. See `learnings/readme-catalog-counts-drift-from-disk.md`.
+   output.
 8. Read HTML and source comments as well as the visible text: a stale comment
    can contradict the page, and a checker that reads only rendered text misses
    it.

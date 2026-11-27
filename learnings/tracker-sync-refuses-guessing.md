@@ -22,8 +22,7 @@ overwrite the user's real progress. These are design rules; the module is not in
 - Normalise every dash variant (including U+2010) before matching titles.
 - Treat Done stored as formula-false and the literal False as equal.
 - Keep core scheduling standard-library only and import renderer libraries lazily.
-- Related: `scheduled-job-overwrites-newer-source-of-truth.md`,
-  `skills/job-search-pipeline/references/tracker-schema.md`.
+- Related: `skills/job-search-pipeline/references/tracker-schema.md`.
 
 # Why
 Progress is user data that cannot be reconstructed, so every ambiguity must stop the run instead of

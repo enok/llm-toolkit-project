@@ -12,7 +12,7 @@ the author at the target role's level (for example an architect-level role) with
 the main focus. The article was a full tutorial of nearly 6,000 words (a 24 minute read) whose
 title named a class-level pattern, so the system design story was one section among many. The
 LinkedIn post repeated the tutorial in miniature: long, nineteen hashtags, several calls to
-action. AIDA was present (`learnings/posts-need-aida-structure-and-role-positioning.md`), but
+action. AIDA was present, but
 it only fixes the order of a piece, not its subject or length, and the role, focus, and
 budgets were written nowhere the flow could read. Signature:
 `spec-gap/publication-not-positioned-for-target-role`.

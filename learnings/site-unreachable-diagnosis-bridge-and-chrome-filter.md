@@ -34,8 +34,7 @@ Work from the outside in and stop at the layer that fails:
 - UI panels animate in: take a fresh screenshot before clicking an element found in an earlier one.
 - A vendor driver app can override an OS setting (for example a peripheral's scroll or button
   behaviour): check both the OS settings and the vendor's own app.
-- Related: a security filter can also cause local-file "Access denied"; see
-  `learnings/security-filter-fail-closed-blocks-mislabelled-archive.md`.
+- Related: a security filter can also cause local-file "Access denied".
 
 # Why
 Each vantage point answers a different question, so the order narrows the cause quickly.

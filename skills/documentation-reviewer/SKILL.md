@@ -61,8 +61,7 @@ check the test evidence behind every Tested row. In one run 88 Tested rows were
 checked, 68 were confirmed and 20 re-marked, and 13 wrong or loose claims were
 corrected, so the second pass is not optional. Numbers quoted in public text
 come from the documents that carry their caveat (sandbox only, not the target
-runtime, shared CPU), never from a summary that dropped it. Related lesson:
-[planned-or-asked-status-written-as-done-reread-source](../../learnings/planned-or-asked-status-written-as-done-reread-source.md).
+runtime, shared CPU), never from a summary that dropped it.
 
 ## Required Context
 

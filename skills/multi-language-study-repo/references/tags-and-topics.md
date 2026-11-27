@@ -50,13 +50,12 @@ text. Update the ledger first when content changes, then the destinations.
 | Destination | Format and limits | How to set | Approval |
 | --- | --- | --- | --- |
 | GitHub repository topics | lowercase, hyphen-separated; at most 20 topics, each at most 50 characters (GitHub's limits); only tags the repo backs | the repository topics API once the docs are final (re-set if the ledger grows); read the topics back | a settings change on the user's repo: its own external-write approval (`rules/external-write-authorization.md`) |
-| Medium topics | at most 5 per story: the five that best represent the content, led by the profile's primary focus (for a system-design-first profile: system design and its architecture concepts first, then the language and the topic) | publish dialog: type without Enter, click the exact suggestion, read the chips back (`learnings/medium-topic-autocomplete-swaps-typed-topic.md`, `skills/medium-publishing/references/publish-dialog.md`) | part of the draft the user approves |
+| Medium topics | at most 5 per story: the five that best represent the content, led by the profile's primary focus (for a system-design-first profile: system design and its architecture concepts first, then the language and the topic) | publish dialog: type without Enter, click the exact suggestion, read the chips back (`skills/medium-publishing/references/publish-dialog.md`) | part of the draft the user approves |
 | LinkedIn hashtags | CamelCase, no spaces, at the end of the post; at most 5 or the profile cap; chosen by positioning (the profile's primary focus and architecture concepts first, then the language, then the study topic); every hashtag named in the post text, none for what it does not mention (post order: `skills/medium-publishing/references/content-angle.md`) | part of the post text, hash-verified before Post (`skills/linkedin-publishing/SKILL.md`) | part of the text the user approves |
 
 GitHub topics call (illustrative; not run in the authoring sandbox, which has no GitHub
 access). Write the body to a file (on Windows PowerShell 5.1 write it with
-`Out-File -Encoding ascii`: a redirect writes UTF-16,
-`learnings/powershell-redirect-writes-utf16.md`), replace all topics, read them back:
+`Out-File -Encoding ascii`: a redirect writes UTF-16), replace all topics, read them back:
 
 ```bash
 printf '{"names": ["<topic-one>", "<topic-two>"]}' > topics.json

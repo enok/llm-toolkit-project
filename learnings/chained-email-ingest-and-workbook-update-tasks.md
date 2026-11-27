@@ -35,8 +35,6 @@ Two chained tasks with a shared contract file:
   description.
 - Never put derived passwords, tax ids, biller names or folder paths in the prompt; use an
   untracked local secrets file.
-- Related: `email-automation-sender-auth-and-link-allowlist.md`,
-  `scheduled-batch-scripts-need-time-budgets.md`, `gmail-raw-for-attachments-plain-text-costs-tokens.md`.
 
 # Why
 Splitting the writers gives each task a small blast radius, and additive updates plus pinned

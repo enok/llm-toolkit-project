@@ -105,23 +105,20 @@ learnings/scheduled-run-resumes-after-usage-limit.md.
 Use when inventorying, consolidating, or tidying scheduled tasks.
 
 - List completely: pass the completed filter (for example the trigger list
-  tool's `include_completed` flag) or fired one-shots stay invisible. See
-  learnings/scheduled-task-listing-hides-fired-one-shots.md.
+  tool's `include_completed` flag) or fired one-shots stay invisible.
 - Delete fired one-shots only from an ID allow-list the owner approved; prefer
   one recurring task with an end condition over a chain of one-shots.
 - Consolidate overlapping dailies into one task and pause (do not delete) the
   old ones until the new one has run well. See
   learnings/many-daily-automations-exhaust-usage-limits.md.
 - Creation has no model field: ask the owner which model, or report the one the
-  task actually got. See learnings/scheduled-task-create-cannot-set-model.md.
+  task actually got.
   A run-now call may be denied; do not work around it, tell the user to press
   Run now.
 - A SUCCEEDED run lasting seconds for a job that needs real work is a finding:
-  open the run session. See learnings/short-succeeded-run-is-not-evidence-of-work.md.
-- Re-read live state before each change; an inventory snapshot goes stale. See
-  learnings/inventory-snapshot-goes-stale-before-destructive-steps.md.
+  open the run session.
+- Re-read live state before each change; an inventory snapshot goes stale.
 - Edit toolkit files in a separate worktree when the shared checkout is dirty.
-  See learnings/dirty-shared-checkout-use-a-worktree.md.
 - Before creating a digest or other recurring task, inventory the existing
   ones (names, pause state, delivery time) and present consolidate, resume, or
   new as a decision.
@@ -130,8 +127,7 @@ Use when inventorying, consolidating, or tidying scheduled tasks.
   record each task ID with its prior enabled state, and resume exactly those
   afterwards. Same record format as `workflows/folder-reorganization.md`
   steps 2-4; see `workflows/knowledge-base-sync.md` for the writer.
-- Agent sessions are absent from chat-history tools; see
-  learnings/chat-history-tools-exclude-agent-sessions.md. The full cleanup
+- Agent sessions are absent from chat-history tools. The full cleanup
   procedure is `workflows/assistant-workspace-cleanup.md`.
 
 ## Deferred follow-ups ("send me X when it is ready")
@@ -169,11 +165,10 @@ When one task consumes another's output:
   nothing is new; first-run dry run and a cutoff date); the consumer updates the
   workbook additively and never regenerates it. Update the prompt before the
   first firing, or that firing runs the old prompt. See
-  learnings/chained-email-ingest-and-workbook-update-tasks.md and
-  learnings/gmail-raw-for-attachments-plain-text-costs-tokens.md.
+  learnings/chained-email-ingest-and-workbook-update-tasks.md.
 - After rebuilding a plan or document, audit every scheduled task that writes
   the same file and repoint or disable it; a stale generator overwrites the new
-  version (learnings/scheduled-job-overwrites-newer-source-of-truth.md).
+  version.
 - A task bound to a local folder runs only while the computer and desktop app
   are on; say so in its description.
 
@@ -181,9 +176,7 @@ When one task consumes another's output:
 
 Scheduled scripts that process many items need caps, a per-item alarm, a global
 budget strictly below the tool timeout, and a per-item error status with
-bounded retries, or one slow item kills the daily run. See
-learnings/scheduled-batch-scripts-need-time-budgets.md and
-learnings/email-automation-sender-auth-and-link-allowlist.md. Resume on every
+bounded retries, or one slow item kills the daily run. Resume on every
 exit path: a run that stops early must leave state the next run continues from.
 
 ## Unsaved-work sweep
@@ -199,8 +192,7 @@ archive" requests leave drafts in separate worktrees and in-progress ledger rows
    in output folders.
 3. The root presents the findings; it never auto-deletes or pushes
    (`rules/external-write-authorization.md`). Keep the main checkout off
-   long-lived feature branches. See also
-   learnings/dirty-shared-checkout-use-a-worktree.md.
+   long-lived feature branches.
 
 ## Failure handling
 

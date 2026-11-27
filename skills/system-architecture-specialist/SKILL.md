@@ -41,4 +41,4 @@ Trigger examples:
 
 ## Known pitfalls
 
-- Before reporting an absent architecture element (for example a gateway in front of a function) as a gap, look for evidence the absence is deliberate: caller configuration (timeout budgets, hard-coded function or queue names), git history of the caller and infrastructure repos, and the owning team asked directly; when the element is added or removed, record the negative decision (reason plus the condition that would justify revisiting) in the docs. See learnings/architecture-absence-may-be-a-deliberate-decision.md.
+- Before reporting an absent architecture element (for example a gateway in front of a function) as a gap, look for evidence the absence is deliberate: caller configuration (timeout budgets, hard-coded function or queue names), git history of the caller and infrastructure repos, and the owning team asked directly; when the element is added or removed, record the negative decision (reason plus the condition that would justify revisiting) in the docs.

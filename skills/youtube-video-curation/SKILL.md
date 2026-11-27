@@ -75,7 +75,7 @@ or a Windows Store stub for `python3`), substitute `python3`, or `py -3` on Wind
    auth wall means the video exists, so it does not count as broken. Run link reviews at
    scale on the user's machine, because sandbox egress blocks them. Replace a dead link
    with the same-length edit in every copy (annotation, spreadsheet, generator source,
-   JSON) so offsets and layouts stay intact. See `learnings/youtube-watch-page-429-use-oembed.md`.
+   JSON) so offsets and layouts stay intact.
    For a document with many links (extraction by class, login-gated links, semantic match, typo'd ids), follow [link-audit.md](references/link-audit.md).
 6. **Record the result** where the document keeps its links, one row per slot:
 

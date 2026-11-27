@@ -20,8 +20,7 @@ container, and the recorded fix is to move the PR work to the user's machine.
 # Solution
 
 Do pull-request work with `gh` on the user's machine, not in the cloud container. Route it
-the same way the definitive builds are routed in
-`learnings/cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md` (through the
+the same way the definitive builds are routed (through the
 root session's device bridge; lanes cannot reach it), and report the container-side
 attempt as blocked instead of retrying it.
 
@@ -30,7 +29,7 @@ GraphQL-backed commands such as `gh pr create` (for example `gh api -X POST
 repos/<owner>/<repo>/pulls -f title=... -f head=... -f base=...`, illustrative, not run in the
 authoring session). Adding the repo in a cloud session may grant read but refuse push; commit
 in the clone and push from the linked computer (bundle or patch), or push with that
-computer's own credentials. See `learnings/public-repo-read-does-not-prove-push-access.md`.
+computer's own credentials.
 
 # Why
 

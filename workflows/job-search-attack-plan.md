@@ -104,15 +104,13 @@ a single imminent screening, use `workflows/screening-interview-quick-prep.md`.
    rebuilds the document and re-delivers it.
 4. Deliver to the chat and to the candidate's synced folder. When uploading to a
    cloud drive, send binaries and PDFs with conversion disabled, check the returned
-   type and size, and ask the candidate to delete any stray converted copy
-   (`learnings/drive-pdf-upload-converts-to-empty-google-doc.md`).
+   type and size, and ask the candidate to delete any stray converted copy.
 
 ## Phase 7 - Tracker
 
 Write rows in the tracker's column order. If the tracker is a hosted spreadsheet
 the connector cannot write, try the browser; if the browser extension stalls,
-save a CSV in column order beside the plan and give the import steps
-(`learnings/browser-extension-stalls-on-heavy-sheets-tab.md`). Flag template
+save a CSV in column order beside the plan and give the import steps. Flag template
 targets that conflict with the candidate's real floor.
 
 ## Phase 8 - Daily loop

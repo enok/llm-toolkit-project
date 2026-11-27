@@ -23,8 +23,7 @@ and the next harvest had to rediscover it.
   and the "Unsaved-work sweep" section of `workflows/automation-maintenance.md` describe it.
 - Review the report with the owner; commit or discard each item explicitly. Do not delete
   anything the sweep merely lists.
-- Keep the main checkout on the default branch and put long-lived work in a worktree. See
-  `learnings/dirty-shared-checkout-use-a-worktree.md`.
+- Keep the main checkout on the default branch and put long-lived work in a worktree.
 - Before archiving a chat, confirm the draft is on a pushed branch or in a PR.
 
 # Why

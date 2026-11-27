@@ -82,6 +82,4 @@ Each extra step is one more thing that can fail on someone else's machine.
 - [ ] No project codenames, hosts or ids baked in; they come from config
 
 Related: [environment-diagnose](../../environment-diagnose/SKILL.md) for a
-setup that used to work, and
-[cloud-cli-permission-denied-triage-and-admin-request](../../../learnings/cloud-cli-permission-denied-triage-and-admin-request.md)
-when a doctor check fails on missing cloud roles.
+setup that used to work.

@@ -23,7 +23,7 @@ See `rules/multi-agent-orchestration.md`.
 
 ## Known pitfalls
 
-- Treat a job that stays in progress with no output far beyond its usual run time (the recorded hang lasted 50 minutes) as hung, not slow: force-cancel the run through the API with the user's go for that run (`rules/external-write-authorization.md`; `POST /repos/<owner>/<repo>/actions/runs/<run-id>/force-cancel`), then rerun it. See `learnings/ci-run-hung-force-cancel.md`. (sig: env-constraint/ci-run-hung)
+- Treat a job that stays in progress with no output far beyond its usual run time (the recorded hang lasted 50 minutes) as hung, not slow: force-cancel the run through the API with the user's go for that run (`rules/external-write-authorization.md`; `POST /repos/<owner>/<repo>/actions/runs/<run-id>/force-cancel`), then rerun it. (sig: env-constraint/ci-run-hung)
 
 ---
 

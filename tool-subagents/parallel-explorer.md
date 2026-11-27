@@ -18,4 +18,4 @@ Avoid implementation; avoid long prose. Optimize for another agent to act immedi
 
 ## Known pitfalls
 
-- Before reporting a directory as missing or empty, confirm the checkout is not a lagging branch: run `git status`, `git log --oneline --graph --all -15`, and `git rev-list --count HEAD..origin/main`; a nonzero behind count next to an empty directory means the content is on another branch. See `learnings/lagging-branch-checkout-looks-like-broken-clone.md`.
+- Before reporting a directory as missing or empty, confirm the checkout is not a lagging branch: run `git status`, `git log --oneline --graph --all -15`, and `git rev-list --count HEAD..origin/main`; a nonzero behind count next to an empty directory means the content is on another branch.

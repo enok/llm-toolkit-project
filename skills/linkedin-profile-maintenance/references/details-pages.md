@@ -139,7 +139,3 @@ ta.dispatchEvent(new Event('input', { bubbles: true }));
 | Edit text | The field's text, then the saved entry |
 | End date | The details line with start, end, and duration |
 | Add project | The project page: dates, link, skills, associated-with empty |
-
-See also `learnings/browser-rich-text-vs-textarea-input.md` for why the
-contenteditable editors above take typed input while plain textareas take a
-set value.
