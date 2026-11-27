@@ -321,6 +321,9 @@ gh pr create --draft --base main --title "<TICKET-ID>: Add <topic> content" --bo
 gh pr checks <pr> --watch                 # wait for the first green run, then apply protection.json (section 4)
 gh pr ready <pr>
 gh pr merge <pr> --squash --delete-branch # only under the merge rule above; repo setting also deletes the remote branch
+                                          # if the PR branch is checked out in another worktree, use
+                                          # --match-head-commit <sha> and no --delete-branch, then
+                                          # git worktree remove, git branch -D, git fetch --prune
 gh run list --repo <owner>/<repo> --branch main --limit 1   # CI on main after the merge
 ```
 

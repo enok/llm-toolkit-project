@@ -19,7 +19,7 @@ Gather every signal of this run from evidence, not memory:
 
 | Source | Where to find it | `source` value |
 | --- | --- | --- |
-| Validator verdicts, defect lists, iteration counts | verdict history (`workflows/task-quality-loop.md`), tasks table `Loop` / Evidence | `validator` |
+| Validator verdicts, defect lists, iteration counts | verdict history (`workflows/task-quality-loop.md`), tasks table Evidence (`iter used/budget`) | `validator` |
 | Tool errors that forced another approach | session ledger (`CONTEXT_STATE.md`) | `tool-error` |
 | User corrections | the conversation | `user` |
 | CI failures | CI run logs (see also `rules/ci-feedback-loop.md`) | `ci` |

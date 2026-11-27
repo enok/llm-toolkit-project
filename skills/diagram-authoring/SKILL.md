@@ -68,6 +68,7 @@ metadata:
 - Renderers drift between versions (the same file laid out differently in 11.16 and 11.17). Render publication PNGs in one environment, the one the visual validator inspected, and commit those PNGs.
 - `mmdc` shrinks a wide flowchart (natural width above its 800 px page, `-w`) together with its text; pass `-w 2400` and compute legibility from the natural width.
 - For the publication look (init line, role palette, per-type grammar, GitHub compatibility, hexagonal SVG, pilot-first rule), follow `references/publication-diagram-style.md`; check the PNG at its destination width with `skills/image-quality-inspection/references/destination-legibility.md`.
+- For carousel pages (HTML to PDF and PNG, with the overflow-checking renderer), follow section 9 of `references/publication-diagram-style.md`.
 
 ## PlantUML guardrails
 
@@ -113,6 +114,7 @@ metadata:
 - Before rendering, check that every panel shows the nodes the pattern at hand needs (in the
   recorded case: the contract, the implementations and an outside selector). A panel without
   them is redrawn. (sig: quality-defect/diagram-content-fidelity)
+- Do not label a diagram as built when it shows a target design: check each drawn control against the sources, retitle, name the gaps in the text and in the diagram, then re-validate. See `learnings/target-design-drawn-as-built-retitle-and-name-gaps.md`. (sig: validation-gap/target-design-drawn-as-built)
 
 ## Related
 

@@ -24,6 +24,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `self-improvement.md` | Capture mistakes as happy-path learnings, identify reusable skills/workflows, and safely harvest external LLM-tool skills |
 | `toolkit-maintenance.md` | Maintain the shared LLM toolkit — mine feedback, de-duplicate guidance, add generic skills/workflows, validate indexes, and sync clients |
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
+| `knowledge-base-sync.md` | Scheduled knowledge-base sync: gather new knowledge, run the intake gate, promote it on one rolling pull request, archive inbox items after the merge |
 
 ### Core Engineering
 
@@ -81,6 +82,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `aws-airflow-terraform-project.md` | Project-local companion to aws-airflow-terraform-change for the data-platform repo (Airflow DAGs plus Terraform roots) |
 | `aws-data-pipeline-ops.md` | Inspect AWS-backed data pipelines with read-first S3, MWAA, Airflow, CloudWatch, and Secrets Manager operations |
 | `aws-data-platform-ops.md` | Inspect or operate AWS-backed data pipelines with explicit scope, verification, and evidence |
+| `folder-reorganization.md` | Reorganize a folder tree without breaking automations, scripts, documents, or cloud-sync links: inspect, propose, approve, pause automations, execute with rollback, verify, resume, report |
 
 ### Documentation, Diagrams, And Wiki
 
@@ -103,7 +105,8 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `bilingual-doc-sync.md` | Keep English and localized documentation or notebooks aligned during code and analysis changes |
 | `paired-doc-sync.md` | Keep paired docs, notebooks, and deliverables synchronized across languages or presentation variants |
 | `translation-sync.md` | Keep English and translated docs, labels, and examples synchronized after changes |
-| `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a Medium article and a LinkedIn post that lead with non-obvious applications for well-known topics, all linked both ways behind separate approval gates |
+| `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a short profile-positioned Medium article and a LinkedIn teaser post validated by `check_publication.py` and a profile check, all linked both ways behind separate approval gates |
+| `study-publication-medium-linkedin.md` | Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post in AIDA order per the consumer's positioning profile, with a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replacement path for live pieces, behind separate approval gates (Phases 7-10 of `study-repo-to-publication.md`) |
 
 ### Data Science, Thesis, And Notebooks
 

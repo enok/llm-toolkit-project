@@ -26,6 +26,19 @@ to the PC, (b) refresh files that already existed there, and (c) scan a ~13 GB f
   `start_process` (e.g. `python C:\path\script.py ...`), write results to a file, then
   `device_stage_files` the result into the container to analyse it.
 - PowerShell one-liners with nested quotes break easily; put Python in a file instead.
+- Multi-line Python through a PowerShell-backed remote shell: inline `python -c "..."` quoting broke.
+  Write the code with a single-quoted here-string to a temp file, run it, remove it. The closing
+  `'@` must start its own line. PowerShell 5.1 `-Encoding UTF8` adds a BOM, which Python source files tolerate.
+
+```powershell
+$code = @'
+import json, pathlib
+print(len(list(pathlib.Path('.').glob('*'))))
+'@
+Set-Content -Path "$env:TEMP\job.py" -Value $code -Encoding UTF8
+python "$env:TEMP\job.py"
+Remove-Item "$env:TEMP\job.py"
+```
 
 # Why
 The bridge mount is a remote filesystem with per-call timeouts and no delete permission

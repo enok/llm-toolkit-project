@@ -1,0 +1,19 @@
+Your retry policy is one of the design patterns you never named, and it decides how your system fails.
+
+Most retry code I review hardcodes one backoff rule inside the client. Change the rule and you touch every caller.
+
+I moved the rule behind one interface and let the system pick it at runtime: fixed delay for batch jobs, exponential backoff with jitter for user-facing calls, no retry for writes that are not idempotent.
+
+What you get:
+- One place to change the retry rule
+- Tests that run in microseconds with a fake clock
+- Different rules per call site without if/else chains
+
+This is software architecture and system design, not only class design: a gateway that selects a resilience policy per route. The repo holds the Java example, both diagrams and the tests.
+
+Full walk-through with the architecture diagram: https://medium.com/@example/retry-policies-123abc
+Code (Java 25): https://github.com/example-owner/retry-policies
+
+Which retry rule has bitten you in production?
+
+#Java #SystemDesign #DesignPatterns #Kubernetes

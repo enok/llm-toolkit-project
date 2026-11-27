@@ -12,8 +12,8 @@ by Drive folder ID (e.g. drive.google.com/drive/folders/<id>) and by local path.
 # Failed Approaches
 - Planning "new folder + move contents out": the new folder gets a NEW Drive ID, so every
   ID-based link to the old folder would open an empty or retired folder.
-- Editing files with temp-file + rename (`os.replace`): risks Drive treating it as
-  delete + create (new file ID). Existing jobs already used `cat new > file` for this reason.
+- Assuming temp-file + rename (`os.replace`) always gives a new Drive file ID: not confirmed (see
+  Solution). Existing jobs still used `cat new > file` out of caution.
 - Verifying "file count before == after": failed because Drive itself created 20 and removed
   6 hidden `desktop.ini` files (Hidden+System, 106 bytes) in moved/new folders.
 
@@ -23,6 +23,10 @@ by Drive folder ID (e.g. drive.google.com/drive/folders/<id>) and by local path.
 - Keep the folder that external links point to as the folder you RENAME, and keep the file
   those links are meant to reach at its top level.
 - Overwrite edited files in place: open `r+b`, write, `truncate()`, `fsync`, read back.
+- Observed: an .xlsx written about daily by a script that saves to a temp file and `os.replace()`s
+  it in the same folder kept its Drive file ID for more than three weeks (Drive API: same id,
+  `createdTime` unchanged). The real risks are delete-then-recreate and moving a file out of the
+  folder and back. For one-off edits, overwriting in place remains the safest choice.
 - `.gsheet` / `.gdoc` are small JSON pointers (`doc_id`): move them, never recreate them.
 - Verify per file (each pre-move file at its mapped path with the same size) and treat
   `desktop.ini` churn as tool-managed noise; explain any byte delta exactly.

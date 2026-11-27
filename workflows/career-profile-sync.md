@@ -23,7 +23,8 @@ current instruction (`rules/external-write-authorization.md`).
 ## Phase 0 - Orchestrate
 
 Follow `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md`:
-print the wave-ordered tasks table with tier and explicit model per task. The
+print the tasks table defined in its "Tasks table contract" (wave, tier, and
+explicit model per task) before work starts and after every completion. The
 root owns every write and the browser session. Read-only lanes (evidence mining,
 cross-file consistency search) may run in parallel; the truthfulness review in
 Phase 5 is a different invocation than whoever produced the text

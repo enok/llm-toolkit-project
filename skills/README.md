@@ -25,8 +25,8 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **chat-knowledge-curation** | Mine chat history, memory notes, rollout summaries, automation runs, and learnings into durable toolkit assets |
 | **llm-context-engineering** | Keep AGENTS/rules/workflows/skills lean, generic, provider-agnostic, and loaded on demand |
 | **llm-application-architecture** | Design or evaluate RAG, agents, memory, tool use, gateways, evaluation, and rollout architecture for LLM applications |
-| **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest |
-| **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories |
+| **llm-toolchain-provisioning** | Export, review, and restore installed LLM assistant extensions (plugins, marketplaces, MCP servers) as a portable manifest; plugin catalog via `scripts/plugins.py` |
+| **external-skill-intake** | Safely evaluate, download, adapt, scan, and index skills from public LLM-tool repositories; plugin-specific checks for the intake procedure in `docs/plugins.md` |
 | **error-driven-learning** | Always-on discipline: read `learnings/INDEX.md` before work and capture trial-and-error discoveries after it |
 | **onboarding** | Get started with this toolkit in a repo, or add it to one |
 | **project-discovery** | Understand a project: structure, architecture, flows, how-tos, related projects |
@@ -35,6 +35,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **second-opinion** | Dual-model side-by-side sanity check of plans, designs, or code |
 | **cli-creator** | Build durable command-line tools and companion skills from API docs, specs, or scripts |
 | **run-retrospective** | End-of-run retrospective: run records, mistake signatures, promotion ladder (learning, checklist, guard, rule), and trend metrics via `run_retro.py` |
+| **knowledge-base** | Search the toolkit knowledge base before reading source, run the intake gate, save to the pending inbox, set up and check the local vector KB via `scripts/kb.py` |
 
 ### Engineering Practices And Languages
 
@@ -102,6 +103,7 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **terraform-specialist** | Read-only Terraform specialist: module/root review, plan safety, state and import lifecycle, multi-env roots, drift codification |
 | **terraform-change-safety** | Terraform change-safety patterns: `terraform_data` lifecycle, module variable wiring, alarm first-datapoint planning, alias-qualified permissions |
 | **infra-adoption** | Adopt or import existing infrastructure into managed IaC |
+| **folder-reorganization** | Reorganize a folder tree (renames, moves, archive) without breaking automations, scripts, documents, or cloud-sync links: approval-first proposal, path map, resumable scripted run with rollback, verification against live consumers |
 | **aws-airflow-terraform-project** | Repository-specific AWS Airflow Terraform guidance for the data-science project (toolkit-local context) |
 
 ### Security
@@ -133,8 +135,8 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **markdown-pdf-export** | Generate and verify ticket-ready PDFs from Markdown (HTML+Chrome for tables, Kroki+Pandoc for diagrams) |
 | **pptx-generator** | Generate, edit, and read PowerPoint decks with PptxGenJS |
 | **powerpoint-slides** | Visually rich academic and thesis-defense PowerPoint decks |
-| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, and an explicit approval gate |
-| **linkedin-publishing** | Post or repost on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard |
+| **medium-publishing** | Publish an article to Medium through browser automation: paste-ready HTML, editor DOM verification, publish dialog, a profile-positioned short system-design article checked by `check_publication.py`, replacing a published story, and an explicit approval gate |
+| **linkedin-publishing** | Post or repost a teaser on LinkedIn with an attached diagram through browser automation: shadow-DOM composer, image attach recipe, messaging-overlay hazard, "More..." pointer on a replaced post |
 | **youtube-video-curation** | Rank and oEmbed-verify the best explainer video per language or topic; never invent video ids |
 
 ### Data Science, Notebooks, And Pipelines

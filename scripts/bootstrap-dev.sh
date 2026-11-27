@@ -12,7 +12,14 @@
 #   --full               Core + recommended + docs/diagram extras
 #   --agent <name>       Also install an agent CLI: claude | codex | gemini | all
 #   --consumer <path>    Link a consumer repo to this toolkit after installs
+#   --no-kb              Skip the knowledge-base step (on by default except with --minimal)
+#   --kb-data-dir <path> Data folder for the knowledge base (passed to kb.py init)
 #   --dry-run            Print what would be installed without changing anything
+#
+# The knowledge-base step (scripts/kb.py init, up --build, index, schedule install)
+# runs after the tool installs and needs Docker with compose; without it the step
+# prints the command to run later and the bootstrap still succeeds. The prompt
+# hook is never installed here (opt-in: kb.py hook install).
 #
 # Idempotent: existing tools are detected and skipped. Interactive auth steps
 # (gh auth login, acli auth, aws configure) are printed, never run silently.
@@ -25,6 +32,8 @@ PROFILE="default"   # default = core + recommended; minimal = core; full = every
 AGENT=""
 CONSUMER=""
 DRY_RUN=""
+NO_KB=""
+KB_DATA_DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -32,6 +41,8 @@ while [[ $# -gt 0 ]]; do
     --full) PROFILE="full"; shift ;;
     --agent) AGENT="${2:-}"; shift 2 ;;
     --consumer) CONSUMER="${2:-}"; shift 2 ;;
+    --no-kb) NO_KB=1; shift ;;
+    --kb-data-dir) KB_DATA_DIR="${2:-}"; [[ -n "$KB_DATA_DIR" ]] || { echo "--kb-data-dir requires a path" >&2; exit 2; }; shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
     -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 2 ;;
@@ -198,6 +209,37 @@ if command -v rtk >/dev/null 2>&1 && [[ -z "$DRY_RUN" ]]; then
   fi
 fi
 
+# ---------- knowledge base (default + full; skipped by --minimal or --no-kb) ----------
+
+if [[ "$PROFILE" != "minimal" && -z "$NO_KB" ]]; then
+  echo "== Knowledge base =="
+  KB_PY="$SCRIPT_DIR/kb.py"
+  KB_INIT=(python3 "$KB_PY" init)
+  [[ -n "$KB_DATA_DIR" ]] && KB_INIT+=(--data-dir "$KB_DATA_DIR")
+  KB_LATER="$(printf '%q ' "${KB_INIT[@]}")"
+  for kb_step in "up --build" "index" "schedule install"; do
+    # shellcheck disable=SC2086  # kb_step is a fixed word list
+    KB_LATER+="; $(printf '%q ' python3 "$KB_PY" $kb_step)"
+  done
+  if [[ -n "$DRY_RUN" ]]; then
+    run "${KB_INIT[@]}"
+    run python3 "$KB_PY" up --build
+    run python3 "$KB_PY" index
+    run python3 "$KB_PY" schedule install
+  elif ! command -v python3 >/dev/null 2>&1; then
+    echo "Knowledge base skipped: python3 is missing. Run later: $KB_LATER"
+    MISSING_SUMMARY+=("Knowledge base (needs python3 first)")
+  elif ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+    echo "Knowledge base skipped: Docker with compose is missing or its daemon is not running. Run later: $KB_LATER"
+    MISSING_SUMMARY+=("Knowledge base (start Docker, then run the command printed above)")
+  elif run "${KB_INIT[@]}" && run python3 "$KB_PY" up --build && run python3 "$KB_PY" index && run python3 "$KB_PY" schedule install; then
+    INSTALLED_SUMMARY+=("Knowledge base (indexed; scheduled sync installed)")
+  else
+    echo "Knowledge base step failed. Run later: $KB_LATER"
+    MISSING_SUMMARY+=("Knowledge base (a kb.py step failed; see output above)")
+  fi
+fi
+
 # ---------- toolkit wiring ----------
 
 if [[ -n "$CONSUMER" ]]; then
@@ -232,6 +274,9 @@ Next steps (interactive, run yourself):
      - VS Code Copilot: .github/copilot-instructions.md is generated on sync
   6. Link your project repo (if not done): ./scripts/setup-repo.sh /path/to/repo
   7. Validate the toolkit:               npm run validate && ./scripts/security-check-toolkit.sh
+  8. Knowledge base status:              python3 scripts/kb.py status
+     Optional prompt hook (explicit opt-in, never installed by this script):
+                                         python3 scripts/kb.py hook install
 
 Never run 'rtk init' or enable RTK hooks/telemetry/tee/audit logging; RTK stays
 an explicit per-command proxy (see rules/command-safety.md and

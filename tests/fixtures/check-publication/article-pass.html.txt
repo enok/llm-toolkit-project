@@ -1,0 +1,24 @@
+<h1>Retry policies are a gateway capability, not a client detail</h1>
+<p>Most services hardcode one retry rule inside every client. When the rule has to change, every caller changes with it, and nobody can say which routes retry what.</p>
+<h2>The problem</h2>
+<p>A checkout call, a nightly export and a payment write all fail differently. The checkout call needs a fast retry with jitter. The export can wait and try again every minute. The payment write must never be retried blindly.</p>
+<h2>What you get</h2>
+<ul>
+<li>One place that decides how a route retries.</li>
+<li>Policies you can test in microseconds with a fake clock.</li>
+<li>A different rule for each call site, without a chain of conditionals.</li>
+</ul>
+<h2>The design</h2>
+<p>The client asks a policy object for the next delay and for whether it may try again. The policy is chosen per route by the gateway.</p>
+<pre><code class="language-java">public interface RetryPolicy {
+    Optional&lt;Duration&gt; nextDelay(int attempt, Throwable failure);
+}
+</code></pre>
+<figure><img src="https://raw.githubusercontent.com/example-owner/retry-policies/0123456789abcdef0123456789abcdef01234567/docs/diagrams/gateway.png" alt="Gateway policy table"><figcaption>One policy per route, chosen at the gateway.</figcaption></figure>
+<figure><img src="https://raw.githubusercontent.com/example-owner/retry-policies/0123456789abcdef0123456789abcdef01234567/docs/diagrams/class.png" alt="Class diagram"><figcaption>The policy interface and its implementations.</figcaption></figure>
+<h2>Next steps</h2>
+<p>Open the repository, run the tests and swap the policy for one route. Then tell me which retry rule has bitten you in production.</p>
+<ul>
+<li><a href="https://github.com/example-owner/retry-policies">Repository</a></li>
+<li><a href="https://www.linkedin.com/feed/update/urn:li:activity:0000000000000000000/">LinkedIn post</a></li>
+</ul>

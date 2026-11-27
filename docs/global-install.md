@@ -97,6 +97,36 @@ markers. Its content is rendered from
 re-run replaces only the text between the markers -- any of your own
 notes above or below the block are left exactly as they were.
 
+## Knowledge base (recommended)
+
+After the surfaces are installed, set up the local knowledge base so agents
+can query the toolkit instead of re-reading it. It needs Docker with
+compose, Python 3 and git. Details, configuration and troubleshooting are
+in `docs/knowledge-base.md`.
+
+```bash
+./scripts/kb.sh init
+./scripts/kb.sh up --build
+./scripts/kb.sh index
+./scripts/kb.sh schedule install
+```
+
+```powershell
+.\scripts\kb.ps1 init
+.\scripts\kb.ps1 up --build
+.\scripts\kb.ps1 index
+.\scripts\kb.ps1 schedule install
+```
+
+Pass `--data-dir <data-folder>` to `init` to keep the index outside the
+default `~/.llm-toolkit/kb-data`. Run these once per machine. To remove it
+later, run `schedule remove`, `hook remove` and `down` (see
+`docs/knowledge-base.md`).
+
+If a CLI session does not see the app-level global instructions, copy the
+directive into the user-level instruction file
+(`learnings/global-instructions-not-visible-to-cli-session-copy-to-user-level-file.md`).
+
 ## Refreshing after `git pull`
 
 The links point at paths inside this repository, not at specific file
@@ -116,6 +146,12 @@ Re-run with `--apply`/`-Apply` when:
 
 Both cases are idempotent: re-running is always safe, and anything
 already correct reports `unchanged`.
+
+To make this automatic, set `LLM_KB_REFRESH_SURFACES=1` in the knowledge
+base configuration (`docs/knowledge-base.md`): the scheduled index refresh
+then re-runs this installer in apply mode, never forced, whenever the
+checkout's HEAD changed. `python3 scripts/kb.py surfaces refresh` does the
+same on demand; blocked paths are reported and left alone.
 
 ## Uninstalling
 

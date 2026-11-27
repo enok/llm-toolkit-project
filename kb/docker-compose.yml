@@ -1,0 +1,59 @@
+# Toolkit knowledge base: Chroma server + KB service (+ one-shot ingest job).
+# Always started through scripts/kb.py, which renders <data>/state/compose.env:
+#   docker compose -p llm-toolkit-kb -f <toolkit>/kb/docker-compose.yml --env-file <data>/state/compose.env ...
+# Only the service publishes a port, on 127.0.0.1; Chroma stays on the compose network. Machine-specific paths live only in the env file, never here.
+name: llm-toolkit-kb
+
+x-kb-environment: &kb-environment
+  KB_COLLECTION: ${KB_COLLECTION:-llm-toolkit}
+  KB_MAX_DISTANCE: ${KB_MAX_DISTANCE:-0.55}
+  KB_DUP_DISTANCE: ${KB_DUP_DISTANCE:-0.12}
+  KB_NEAR_DISTANCE: ${KB_NEAR_DISTANCE:-0.30}
+  KB_SCAN_SECONDS: ${KB_SCAN_SECONDS:-30}
+  KB_SYNC_SAFE_INDEX: ${KB_SYNC_SAFE_INDEX:-1}
+
+x-kb-volumes: &kb-volumes
+  - "${KB_CORPUS_DIR:?KB_CORPUS_DIR is required}:/corpus/repo:ro"
+  - "${KB_DATA_DIR:?KB_DATA_DIR is required}/inbox:/corpus/inbox:ro"
+  - "${KB_DATA_DIR:?KB_DATA_DIR is required}/archive:/corpus/archive:ro"
+  # generated plugin capability cards (scripts/plugins.py catalog), indexed as source "plugins"
+  - "${KB_DATA_DIR:?KB_DATA_DIR is required}/plugins/catalog:/corpus/plugins:ro"
+  - "${KB_DATA_DIR:?KB_DATA_DIR is required}/models:/root/.cache/chroma"
+  - "${KB_DATA_DIR:?KB_DATA_DIR is required}/state:/state"
+
+services:
+  chroma:
+    image: chromadb/chroma:1.0.15
+    container_name: llm-toolkit-kb-chroma
+    # No published port: only the service reaches Chroma, over the compose network.
+    volumes:
+      - "${KB_DATA_DIR:?KB_DATA_DIR is required}/chroma:/data"
+    environment:
+      ANONYMIZED_TELEMETRY: "FALSE"
+    restart: unless-stopped
+
+  service:
+    build: ./service
+    image: llm-toolkit-kb:local
+    container_name: llm-toolkit-kb-service
+    command: ["service.py"]
+    ports:
+      - "127.0.0.1:${KB_PORT:-8011}:8011"
+    environment: *kb-environment
+    volumes: *kb-volumes
+    depends_on:
+      - chroma
+    restart: unless-stopped
+
+  ingest:
+    build: ./service
+    image: llm-toolkit-kb:local
+    profiles: ["tools"]
+    command: ["ingest.py"]
+    environment:
+      <<: *kb-environment
+      # set to 1 for one run by `kb.py index --allow-mass-delete`; lifts only the 50% removal guard
+      KB_ALLOW_MASS_DELETE: ${KB_ALLOW_MASS_DELETE:-0}
+    volumes: *kb-volumes
+    depends_on:
+      - chroma

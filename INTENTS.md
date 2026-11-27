@@ -65,6 +65,7 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | bootstrap or repair local setup / set up my machine | `local-env-bootstrap` | skill | `INFRA.sh` / `INFRA.ps1`, `environment-diagnose` |
 | diagnose my environment / cannot build locally | `environment-diagnose` | workflow + skill | `local-env-bootstrap`, `onboarding` |
 | which plugins or extensions are installed / reproduce my assistant setup | `llm-toolchain-provisioning` | skill | `local-env-bootstrap` |
+| reorganize / restructure / clean up a folder tree | `folder-reorganization` | workflow + skill | `agent-orchestrator`, `automation-maintenance` |
 | shell script / Bash / PowerShell work | `shell-scripting` | skill | `rules/command-safety.md`, `rules/cross-platform-scripts.md`, `security` |
 
 ## Documentation, Diagrams, And Wiki
@@ -85,10 +86,13 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | academic or thesis defense deck | `powerpoint-slides` | skill | `pptx-generator` |
 | convert PDF / DOCX / XLSX / Markdown | `document-conversion` | skill | `markdown-pdf-export` |
 | keep bilingual or paired docs in sync / translation drift | `bilingual-doc-sync` / `paired-doc-sync` / `translation-sync` | workflow | `documentation-reviewer` |
-| publish this article on Medium / turn this repo into a Medium story / fix a published Medium story / order a well-known topic's article by non-obvious applications first | `medium-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
+| publish this article on Medium / turn this repo into a Medium story / fix a published Medium story / write the short system-design-first study article (default; the non-obvious-applications-first order is for a full-tutorial profile only) | `medium-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
 | share this on LinkedIn with a diagram / repost with an image / replace my LinkedIn post | `linkedin-publishing` | skill | `diagram-authoring`, `image-quality-inspection`, `rules/human-comment-reply-gate.md`, `rules/external-write-authorization.md` |
 | find the best YouTube video per language / verify these video links | `youtube-video-curation` | skill | `multi-language-study-repo`, `medium-publishing` |
 | study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `multi-language-study-repo`, `diagram-authoring`, `youtube-video-curation`, `medium-publishing`, `linkedin-publishing` |
+| publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `medium-publishing`, `linkedin-publishing`, `diagram-authoring`, `rules/external-write-authorization.md` |
+| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `medium-publishing`, `linkedin-publishing`, `rubrics/technical-content.md` (if present) |
+| review this article or post before I approve it / check a draft against my publication profile | `medium-publishing` | skill | `rules/publication-positioning.md`, `skills/medium-publishing/scripts/check_publication.py`, `documentation-reviewer` |
 
 ## Security
 
@@ -119,11 +123,19 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | create, rename, pause, or delete an automation | `automation-maintenance` | workflow | `rules/external-write-authorization.md` |
 | edit AGENTS / rules / workflows / skills | `llm-context-engineering` | skill | `toolkit-maintenance`, `rules/workflow-authoring.md` |
 | improve this toolkit / maintain the toolkit | `toolkit-maintenance` | workflow | `self-improvement`, `validate-toolkit-indexes`, `learnings/INDEX.md` |
+| search what we know about X / which asset covers X / how do we do X here | `knowledge-base` | skill | `rules/knowledge-base.md`, `learnings/INDEX.md` |
+| save this knowledge / remember this for every agent | `knowledge-base` | skill | `rules/knowledge-base.md` (intake gate), `chat-knowledge-curation`, `capture-learning` |
+| set up the knowledge base on this machine / the knowledge base is down | `knowledge-base` | skill | `docs/knowledge-base.md`, `environment-diagnose` |
+| keep the knowledge base in sync / promote the knowledge inbox | `knowledge-base-sync` | workflow | `knowledge-base`, `rules/external-write-authorization.md`, `toolkit-maintenance` |
 | capture a lesson / save this as a learning | `capture-learning` | workflow | `error-driven-learning` |
 | improve the toolkit from this work / capture mistakes | `self-improvement` | workflow | `capture-learning`, `external-skill-intake` |
 | run a retrospective / learn from this run's mistakes / what keeps going wrong in `<workflow>` / show the quality trend of a workflow | `run-retrospective` | workflow + skill | `rules/workflow-self-improvement.md`, `self-improvement`, `capture-learning`, `task-quality-loop` |
 | make every workflow learn from its mistakes / measure workflow accuracy over time | `rules/workflow-self-improvement.md` | rule | `run-retrospective`, `error-driven-learning`, `rules/request-orchestration.md` |
 | import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement`, `security` |
+| add or install a plugin / find a plugin in the marketplace | `docs/plugins.md` | script | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
+| remove unnecessary plugins / prune plugins | `docs/plugins.md` | script | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
+| audit installed plugins / are my plugins safe | `docs/plugins.md` | script | `llm-toolchain-provisioning`, `scripts/plugins.py` |
+| which plugin, skill or agent is best for this task | `rules/plugin-governance.md` | rule | `agent-orchestrator`, `knowledge-base`, `scripts/plugins.py` |
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |
 | set up dev-tools in this repo / get started | `onboarding` | skill | `scripts/setup-repo.sh`, `docs/repo-setup-prompt.md` |

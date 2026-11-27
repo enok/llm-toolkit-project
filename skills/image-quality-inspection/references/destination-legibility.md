@@ -35,7 +35,10 @@ Text px and image width must be in the same unit (both device pixels of the file
 | Check | Pass |
 | --- | --- |
 | Effective text | 14 px floor, 16 px or more as the target, for every label that carries meaning |
-| Aspect ratio (W:H) | between 2:1 (wide) and 1:1.6 (tall); no long strips |
+| Label height (target) | text at least about 2.2% of the image width (about 53 px on a 2400 px wide image), which is about 15 px at a 700 px column; 2.0% (14 px at 700 px) stays the floor |
+| Carousel page text (1080 px wide page) | headline at least 64 px, body at least 36 px, footer and disclosure at least 32 px; these floors replace the 14 px effective-text floor for carousel pages |
+| Density (article column or carousel image) | at most 9-10 nodes per image; split a dense flow (for example control plane versus per-lane detail) into separate images. This cap is tighter than the node limits elsewhere in `skills/diagram-authoring` and wins for these destinations |
+| Aspect ratio (W:H) | between 2:1 (wide) and 1:1.6 (tall); no long strips; for an article-column diagram prefer landscape, 16:9 or 3:2 (a portrait fan-out inside 1:1.6 that passes the other checks is allowed) |
 | Margin | uniform white margin on every side, about 48 px at 2x render scale (24 CSS px; scale it with the render scale); no box, label, or arrow touches or crosses an edge |
 | Resolution | the floors in `image-quality-gate.md` (2x the displayed size; 2000 or 3000 px on the longest side); when a narrow diagram falls under the floor, raise the render scale (for example 3x), which does not change legibility |
 | Palette | only the project's palette; one colour per role |

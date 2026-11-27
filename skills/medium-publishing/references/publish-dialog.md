@@ -18,8 +18,16 @@ user's explicit approval of that exact action
 | Subtitle | 140 characters | One sentence on what the reader gets. |
 | Topics | up to 5 | The five that best represent the content (`skills/multi-language-study-repo/references/tags-and-topics.md`); see section 2; verify the chips. |
 | Preview image | one | Choose a diagram from the story, not a decorative image. |
+| SEO title, SEO description | 60, 156 characters | Separate fields in the story menu, "More settings"; Google truncates beyond these; they do not replace the visible title and subtitle. |
+| Image files | PNG, JPG, GIF; 25 MB; 1192 px wide or more | WebP and SVG are not accepted. Alt text and captions are supported (no italics in captions); give each image alt text. |
 
 Count characters before typing and keep the values in the approved draft.
+
+SEO and image figures verified 2026-10-01 (primary sources, undated pages; re-verify after a few months):
+https://medium.com/medium-handbook/seo-tips-to-make-your-stories-discoverable-and-grow-your-readership-b0c8230a8200 ,
+https://medium.com/medium-handbook/how-to-use-medium-seo-settings-to-reach-more-readers-97facde95e83 ,
+https://help.medium.com/hc/en-us/articles/215679797-Images ,
+https://medium.com/blog/tips-and-tricks-for-medium-writers-1d79498101c3 .
 
 ## 2. Topics: autocomplete picks the wrong one
 

@@ -28,6 +28,7 @@ Match the validator to the task's evidence type; use `task-quality-judge` when n
 | Test selection / build evidence | `test-runner` |
 | Documentation, runbooks, generated LLM surfaces | `documentation-reviewer` |
 | CV / career-profile claims | `cv-truthfulness-reviewer` |
+| Public article and social post drafts | Read-only validator lane checking the consumer's publication profile and `rubrics/technical-content.md` if that file exists (with `skills/medium-publishing/scripts/check_publication.py`); the draft stays `NOT POSTED` until the owner approves |
 | Java changes | `java-change-validator` |
 | Security-sensitive work | `security-auditor` or `owasp-security-auditor` |
 | Diagrams / exported images | `diagram-creation-specialist` |
@@ -82,10 +83,13 @@ When a task arrives `escalated`, the root agent chooses explicitly — never sil
 
 ## Reporting
 
-The orchestrator's task table tracks the loop live: `Loop` column shows `used/budget` (e.g. `2/5`), `Status` gains `validating` and `refining` states, and escalated rows keep their full verdict history available for the root agent's final report. After the run, feed loop statistics (tasks that needed >1 iteration, recurring defect classes, validator misses) into `workflows/self-improvement.md` as evolution signals.
+The orchestrator's task table tracks the loop live: the row's Evidence cell shows `iter used/budget` (e.g. `iter 2/5`), `Status` gains `validating` and `refining` states, and escalated rows keep their full verdict history available for the root agent's final report. After the run, feed loop statistics (tasks that needed >1 iteration, recurring defect classes, validator misses) into `workflows/self-improvement.md` as evolution signals.
 
 Per task, report to the run record built by `workflows/run-retrospective.md`: iterations used (summed into `iterations`), the first-pass flag (counted in `first_pass` unless the task is later reopened), and a mistake signature for each distinct root cause behind the blocking defects of its `fail` verdicts, classified per `skills/run-retrospective/references/mistake-taxonomy.md`. An in-loop tier escalation adds a `tier-misassignment/...` signature; an `escalated` task is never first-pass.
 
 ## Known pitfalls
 
 - When a validator reports the same defect shape in several files, trace it to the shared generator or template and fix it there before refining the instances; a fix to the instances alone lets the generator emit the defect again. See `learnings/find-generator-not-just-instances.md`.
+- Compile-check Python in a clean-tree gate or read-only review in memory (`compile(open(path, 'rb').read(), path, 'exec')` or `ast.parse`), not with `python -m py_compile`, which writes a `__pycache__` file even under `-B` or `PYTHONDONTWRITEBYTECODE`; if it was run, remove the folder and confirm the tree is clean. See `learnings/py-compile-writes-bytecode-despite-no-bytecode-flag.md`. (sig: tool-misuse/compile-check-wrote-bytecode-into-reviewed-tree)
+- When a second review finds a new variant of a class after a point fix, stop adding exclusions: describe the class, invert the rule to an allow-list where possible, and test the class, not the reported sample. See `learnings/detection-rule-point-exclusions-reopened-use-allow-list.md`. (sig: quality-defect/exclusion-list-fix-reopened-by-next-variant)
+- When a refine round re-validates, resume the validator that issued the defect list, or give a fresh validator the verdict history and the root's rulings; a fresh one with no history failed a label an earlier verdict had prescribed. Cite in the brief the workflow section for any prescribed wording (untested as a rule). (sig: validation-gap/revalidation-without-verdict-history)

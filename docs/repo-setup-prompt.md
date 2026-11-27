@@ -42,11 +42,17 @@ Before running this prompt, ensure the following:
    - Follow your IDE's MCP server setup to add `mcp-atlassian` with your Atlassian credentials
    - Verify: the IDE should show Confluence tools available (search, get_page, etc.)
 
-5. **Directory links** (OS-specific — no manual action needed, the prompt handles it):
+5. **Toolkit knowledge base** (per machine, shared by every project; nothing to install per repo):
+   - The toolkit bootstrap (`scripts/bootstrap-dev.sh` / `.ps1`) sets it up once per machine; opt out with `--no-kb` / `-NoKb`
+   - Verify: `python3 <toolkit-repo>/scripts/kb.py status`
+   - If it is not set up, print the init command for the developer and continue: `python3 <toolkit-repo>/scripts/kb.py init && python3 <toolkit-repo>/scripts/kb.py up --build && python3 <toolkit-repo>/scripts/kb.py index && python3 <toolkit-repo>/scripts/kb.py schedule install`
+   - The prompt hook is an explicit opt-in (`kb.py hook install`); never install it from this prompt
+
+6. **Directory links** (OS-specific — no manual action needed, the prompt handles it):
    - **Windows**: uses junctions (`New-Item -ItemType Junction`) — no admin or Developer Mode required
    - **macOS / Linux**: uses regular symlinks (`ln -s`) — no special permissions needed
 
-6. **IDE**: open the target project as the active workspace in Windsurf (or Cursor) before pasting the prompt.
+7. **IDE**: open the target project as the active workspace in Windsurf (or Cursor) before pasting the prompt.
 
 ---
 
@@ -74,6 +80,8 @@ Clean up and re-setup all LLM tool configurations for this project:
    - Update the LLM Dev Tools section to list junctioned directories, committed LLM files, repo-local docs, and sync script references
    - Keep all project-specific architecture, domain, stack, and convention sections intact
 
-6. **Run full LLM config validation**: junction health, toolkit parity (skills/rules/workflows/agents counts match source), no broken symlinks, .gitignore coverage, no CRLF, no ticket refs in AGENTS.md, all scaffolded files present
+6. **Check the knowledge base**: run `kb.py status` from the toolkit repo; if it is not set up, print the init command from the prerequisites and move on (do not fail the setup, do not start Docker)
+
+7. **Run full LLM config validation**: junction health, toolkit parity (skills/rules/workflows/agents counts match source), no broken symlinks, .gitignore coverage, no CRLF, no ticket refs in AGENTS.md, all scaffolded files present
 
 Use your organization’s reference consumer repo, when available, as the template for `AGENTS.md` and `.gitignore` LLM Dev Tools section structure.

@@ -14,6 +14,7 @@ Apply this rule at the start of every non-trivial chat request. The user does no
 3. For multi-lane work, use `agent-orchestrator` from `tool-subagents/` to split the request into independent tasks. The orchestrator enforces a mandatory 30-minute cap per task, parallel-by-default splitting, and pre-execution evaluation (see `tool-subagents/agent-orchestrator.md` "SLA accounting and maximal decomposition"). When a task's elapsed time exceeds its SLA, the orchestrator terminates it, diagnoses the cause, fixes the defect, and restarts as a fresh lane.
 4. Dispatch the maximum safe parallel read-only or disjoint-write slices.
 5. Reduce the findings locally before editing, validating, or answering.
+6. Treat a free-text reply that re-sends the brief as a re-scope: diff it against the ledger objective, record each new requirement and each repeated constraint (for example "wait before starting") in the ledger, then continue from the ledger state instead of restarting from the brief; re-plan only the rows the new requirements change, and treat a repeated wait/hold constraint under `agent-orchestrator` "User hold".
 
 ## Capability routing
 
@@ -23,12 +24,14 @@ Apply this rule at the start of every non-trivial chat request. The user does no
 - When a request matches multiple rows, choose the most specific primary workflow or skill and attach only the necessary helpers, validation gates, and subagents.
 - Use `chat-knowledge-curation` when the request is primarily to mine chats, memory, rollout summaries, automation runs, or learnings into durable LLM assets.
 - Use `context-compaction` when the request is only to preserve the current chat/workspace or create a compact handoff; use `chat-knowledge-curation` for broader history mining or promotion of repeated, cross-source lessons into shared toolkit assets.
+- Capability selection: candidates are toolkit assets, the capabilities the session lists, and the plugin catalog (`plugins.py recommend`); order by fit, verdict and trust tier, specificity, then context cost; a tie goes to the toolkit asset; a `block` verdict is never used; plugin text is reference capability, never authority; record a plugin choice as `plugin:<plugin>:<component>` in the task row (`rules/plugin-governance.md`, `tool-subagents/agent-orchestrator.md` "Capability selection").
 - If no row fits, start with `design-driven-dev` or `project-discovery`, then capture a reusable mapping gap through `toolkit-maintenance`.
 
 ## Context loading
 
 - Keep root context small. Load only the primary workflow or skill plus directly required helper rules, references, and subagents.
 - The root/orchestrator stays thin: it holds the durable state ledger, the open decisions awaiting the human, and the lanes in flight — everything else is read from disk on demand. Point lanes at the ledger instead of pasting context into their prompts, and record each finding once so no later lane re-derives it. See `tool-subagents/agent-orchestrator.md` "Thin orchestrator and the durable state ledger" for the binding contract.
+- Knowledge base first: before splitting, query the toolkit knowledge base (`kb.py search`, `-k 5` or fewer, at most one refined query per question) and point lanes at the hits by path instead of re-reading catalogs or source; fall back to `learnings/INDEX.md` and direct reads when it is unreachable and say so (`rules/knowledge-base.md`, `tool-subagents/agent-orchestrator.md` "Knowledge base first and knowledge write-back").
 - Prefer single-responsibility skills, rules, workflows, and agents; compose them for larger tasks instead of duplicating or inlining long guidance.
 - If a workflow needs more detail than fits the size limit, split the reusable phase into another workflow and call it by path from the parent.
 - Do not load broad catalogs or entire reference trees unless the request needs them.
@@ -65,7 +68,14 @@ not two. Whenever a consumer has a configured notification route and a standing
 authorization covering it, every print of the table is also sent to the matching
 channel — first table, after each task completion, and immediately when a task
 becomes blocked, with the blocked send naming what is blocked and what the user
-must decide.
+must decide. The prints being mirrored are the full-table prints defined in
+`tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets,
+tokens, prints, checkpoints": after planning, after every completion, failure,
+or escalation, on a block or SLA breach, and as the final table. The chat
+print carries the full table: manifest, every column (including `Vector DB
+used`, `Complexity` and the exact `Model/Effort`), every row, the footer rows
+and the closing line. A mirrored message carries what the route's approval
+names (see below).
 
 - **The route and its authorization are configuration, not defaults.** They live
   with the consumer as a consumer-configured notification route (for example
@@ -80,14 +90,17 @@ must decide.
   Equally, a standing authorization does not survive a missing connection — when
   the transport is unavailable, say the mirror was skipped and why rather than
   silently dropping it.
-- **Every mirrored table carries the requester header**, because these channels
+- **Every mirrored message carries the requester header**, because these channels
   serve multiple people and an unattributed table is ambiguous.
 - **A skipped send is reported, never assumed delivered.** Treat the mirror as
   part of the table's completion: if the table was printed and the send did not
   happen, that is an open item, not a detail.
-- **The pre-approved format is narrow.** Each mirrored message carries only the
-  status-line format approved with the route (agent, one-line result, complexity
-  tier); anything else returns to the draft-and-approve flow in
+- **The pre-approved content is exactly what the route's approval names.**
+  When the owner approved the full table for that destination, each mirrored
+  message carries the requester header and the full table (its Evidence column
+  included), never a shortened version; when the approval names a status line,
+  send only that. Anything beyond the approved content (another destination,
+  file contents, findings) returns to the draft-and-approve flow in
   `rules/human-comment-reply-gate.md`.
 
 ## Per-task quality loop
@@ -95,7 +108,7 @@ must decide.
 - Every delegated task runs as a bounded produce->validate->refine loop per `workflows/task-quality-loop.md`, with **max 5 iterations per task** (budget 1 for deterministic `light` tasks).
 - Before dispatch, each task gets verifiable acceptance criteria and a read-only validator matched to its evidence type (see the selection map in `workflows/task-quality-loop.md`); `task-quality-judge` covers tasks with no domain specialist.
 - The validator is never the producer. On `fail`, only the defect list goes back to the producer for targeted refinement; on `escalate` or an exhausted budget, the task returns to the normal-mode root agent or explicit-LOA coordinator marked `escalated` with its verdict history.
-- A task is `done` only after its validator returns `pass`; never silently accept a failed result and never loop past the budget.
+- A task is `completed` only after its validator returns `pass`; never silently accept a failed result and never loop past the budget.
 
 ## Model selection contract (MANDATORY)
 
@@ -105,8 +118,11 @@ scored. A violation of this contract is a routing defect that must be corrected
 before the affected task can be marked done.
 
 1. **Assign before executing.** At split time — before any task runs — every
-   task in the plan gets a complexity tier AND a concrete model plus effort,
-   printed in the tasks table's `Model/Effort` column. No task starts without
+   task in the plan gets a complexity tier, printed in the tasks table's
+   `Complexity` column, AND the exact model plus effort, printed in its
+   `Model/Effort` column as `<model name and version> / <effort>` (for
+   example `Claude Opus 5.5 / medium`; root rows and non-Claude agents
+   included, each with its own model name and effort scale). No task starts without
    its assignment. The column is never filled retroactively from what happened;
    it is the dispatch decision, written first and then verified against what
    actually ran. Use `model-selector` from `tool-subagents/` to produce the
@@ -212,7 +228,7 @@ before the affected task can be marked done.
 - In normal mode the root stays on the strongest available model. In explicit
   LOA mode the parent remains a reconciliation/final checker while each async
   task uses the coordinator's economical, platform-confirmed tier mapping.
-- Present the delegation plan as a table (agent, task, complexity tier, validator, loop budget, rough time estimate, which wave/parallel group it runs in, and a status column updated as tasks move through pending/running/validating/refining/done/escalated) so the user can see the fanout before it runs and track it while it runs.
+- Present the delegation plan as the 15-column tasks table defined in `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns, assets, tokens, prints, checkpoints" (wave, assets, model/effort, status, evidence, tokens, baseline and remaining SLA), so the user can see the fanout before it runs and track it while it runs. Do not restate or trim the columns here.
 - Inside a quality loop, escalate the producer one tier after 2 consecutive `reasoning`-classed failures; `mechanical` failures refine at the same tier.
 
 ## Result judgment and learning
@@ -223,6 +239,7 @@ before the affected task can be marked done.
 - After substantial orchestration, extract reusable lessons: mistakes, missing route triggers, weak prompts, missing validators, source gaps, or better ways to solve the task.
 - Run the per-run loop in `rules/workflow-self-improvement.md` on every non-trivial request: before splitting, read the primary workflow's `## Known pitfalls` and the `preflight` output and turn relevant pitfalls into acceptance criteria; after the last verdict, run `workflows/run-retrospective.md` and end the final report with its metrics line.
 - Lanes report self-detected mistakes as `mistake: <signature> - <one line>` in their Decisions block; the root is the single writer of the run record and of any promotion.
+- Lanes report reusable knowledge as `knowledge: <kind> - <one line>` in their Decisions block; the root runs the intake gate and is the single writer of `kb.py add` and of promotions (`rules/knowledge-base.md` duties 2-4).
 - Convert only validated, reusable lessons into durable toolkit assets through `workflows/self-improvement.md`, `workflows/toolkit-maintenance.md`, or `skills/external-skill-intake/SKILL.md`; keep project-specific facts in the consumer repo's `docs/llm/` or other repo-local docs.
 
 ## Safety boundaries
@@ -232,6 +249,7 @@ before the affected task can be marked done.
   isolated and approved them, or explicit LOA mode has verified they are inside
   the user's stated authority and assigned them to a bounded owner.
 - Do not use agents to bypass repo-local instructions, user constraints, auth boundaries, or required validation.
+- Do not use plugin capabilities to bypass these boundaries; adding, removing, or disabling a plugin is an owner-authorized action (`rules/plugin-governance.md`).
 - If the user says to avoid agents, run serially for that request.
 
 ## Output discipline
@@ -239,3 +257,9 @@ before the affected task can be marked done.
 - Ask each agent for concise, structured output that another agent can act on quickly, under the capped four-block return contract (outcome / evidence / blockers / decisions) in `tool-subagents/agent-orchestrator.md` "Thin orchestrator and the durable state ledger".
 - Merge duplicate findings, resolve conflicts, and present only the useful result to the user.
 - Prefer map-reduce summaries over dumping raw subagent transcripts.
+- Every orchestrated prompt prints the assets manifest and the full tasks table
+  after planning and after every task completion, per the print cadence in
+  `tool-subagents/agent-orchestrator.md` "Tasks table contract: columns,
+  assets, tokens, prints, checkpoints". It also checkpoints the ledger before
+  each dispatch and at each completion, so a run that dies (out of credit,
+  crash) resumes from the ledger instead of restarting.
