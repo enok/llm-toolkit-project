@@ -357,7 +357,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 
 ## Tool Subagents
 
-`tool-subagents/README.md` lists all 29 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, CV/profile truthfulness, job postings, and workspace hygiene.
+`tool-subagents/README.md` lists all 28 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, CV/profile truthfulness, and workspace hygiene.
 
 ## Integrations
 
