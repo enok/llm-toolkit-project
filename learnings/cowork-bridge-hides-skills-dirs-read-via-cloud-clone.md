@@ -30,8 +30,8 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
   full tree including `skills/` and `tool-subagents/`, and the index validators run there.
 - **Write:** Desktop Commander `start_process` runs native PowerShell on the PC with the repo, `git`
   over SSH and an authenticated `gh`. Do not touch the user's own clone if it holds another
-  session's uncommitted work. Create a separate worktree from `origin/main` at an ABSOLUTE sibling
-  path:
+  session's uncommitted work. Create a separate worktree from `origin/main` at an ABSOLUTE path in
+  a folder the owner named or approved for the task:
   `git -C <toolkit-clone> worktree add <abs-path>\<repo>-<topic> -b <branch> origin/main`.
 - Commit in the container, export a git bundle or patch, move it with `SendUserFile` +
   `device_commit_files` (see `cloud-session-device-bridge-file-io.md`); `device_commit_files` also
@@ -43,8 +43,9 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
 - The usual gates still apply on this path: present learnings before commit (capture-learning
   approval) and merge only on explicit approval (no blanket merge).
 - **Junction or symlinked folders:** a Windows junction or symlinked folder gives the same
-  `d?????????` / "Permission denied" symptom in the bridge's Linux shell. Read it through the
-  desktop (native) shell, or from a read-only clone of the public repo, and write natively.
+  `d?????????` / "Permission denied" symptom in the bridge's Linux shell. Read it from a
+  read-only clone of the public repo; reading or writing the folder itself through the native shell
+  needs it to be an allowed folder or the owner's approval.
 - **Git noise and residue:** `git status` through the bridge floods with warnings for the
   unreadable folders; filter with `git status -- . ':!skills' ':!tool-subagents'`. Device-side
   `git commit` via the bridge leaves `.lock` files that cannot be deleted, so run git natively
@@ -57,9 +58,13 @@ be read, and the resulting toolkit change could not be pushed, through the obvio
 - **Folders granted mid-session** may never mount in the sandbox: check with `ls` of the mount
   root, fall back to the device bridge or Desktop Commander for those paths and say so; do not
   loop on re-requesting.
-- **Variant - run a script that lives in a protected folder:** read it (cloud clone or Desktop
-  Commander), copy it to a non-protected folder with the desktop shell, run the copy there, and
-  park the copy in a folder the owner reviews for deletion.
+- **Allowed folders only (owner decision, 2026-11-27):** work only in the folders the owner
+  connected or named for the task. A refusal on a protected folder is a boundary, not an obstacle:
+  do not copy a script or file out of it to run or edit it elsewhere, and do not reach it through
+  another shell, plugin or path unless the owner approved that folder. When the task needs a folder that is not allowed, stop, say which
+  folder and why, and ask the owner for approval (a folder-access request, or the owner runs that
+  step). Reading the public repository through a cloud clone stays allowed: it never touches the
+  protected folder.
 
 Durable guidance: workflows/career-profile-sync.md (Phase 6)
 

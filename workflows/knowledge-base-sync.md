@@ -108,6 +108,11 @@ learning). Learnings follow `workflows/capture-learning.md`; workflow
 edits follow `rules/workflow-authoring.md`; checklist bullets follow the
 `## Known pitfalls` convention there. Keep a mapping table:
 inbox name -> destination path -> action (new, extended, merged, rejected).
+This phase is the destination guide: prompts or notes that still cite the
+removed `skills/chat-knowledge-curation` skill mean this phase. An item whose
+resource already has a `remove` row in `docs/llm/value-checks.csv` is rejected
+as already measured; a new skill, workflow, agent or rule needs the value check first
+(`workflows/resource-value-check.md`; learnings are exempt).
 
 ## Phase 5 - Write on a fresh worktree
 
