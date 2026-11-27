@@ -85,6 +85,7 @@ Write `case.md` in a scratch workspace outside the repository with:
 | Tie | Do not add (`remove`). Exception: if the resource encodes environment knowledge the plain run tripped on (a tool quirk, a local convention the model cannot know), add it only as on-demand content (`on-demand`). One retest on a smaller model is allowed (`retest`); add only if it lifts that model. |
 | Plain wins | Do not add (`remove`). For an existing resource, repoint or remove its dependents first. |
 | Owner-mandated contract file | Measure and slim (`slim` or `keep-slim`); never `remove`. |
+| Twin forms of one procedure (skill and workflow, or skill and agent) | Race every form and the plain run in the same case. Add only the best form; cut the other to a short pointer into it (`keep-slim`) or leave it out (`remove`). |
 
 A resource whose value is environment knowledge is judged on whether the plain
 arm actually hit the documented pitfall, not on general answer quality.
