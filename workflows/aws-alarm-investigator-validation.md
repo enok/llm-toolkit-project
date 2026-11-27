@@ -23,7 +23,8 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
    - investigation window before/during/after the state change
    - allowed read-only tools and any forbidden data sources
 2. Load only needed guidance:
-   - `tool-subagents/aws-alarm-investigator.md`
+   - `skills/aws-alarm-investigator/SKILL.md` (procedure, probe hints,
+     false-positive patterns, output contract)
    - `rules/log-analysis-safety.md` when logs are involved
    - `integrations/aws-cli.md` when AWS CLI commands are the available tool path
    - `skills/incident-ops/SKILL.md` for active incidents or mitigation planning
@@ -51,7 +52,8 @@ change AWS state, refuse the action and draft a human/operator handoff instead.
    - state what would prove or disprove each hypothesis
    - correlate metric breach, log onset, resource events, deploy/config changes,
      and dependency symptoms
-   - check the specialist's known false-positive patterns (first-deploy
+   - check the known false-positive patterns in
+     `skills/aws-alarm-investigator/SKILL.md` (first-deploy
      `breaching` missing-data alarms, dimension-mismatch empty data) before
      ranking failure hypotheses
    - separate immediate trigger from likely deeper cause

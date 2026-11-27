@@ -47,13 +47,14 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | diagnose my environment / cannot build locally | `environment-diagnose` | workflow + skill | `local-env-bootstrap`, `onboarding` |
 | which plugins or extensions are installed / reproduce my assistant setup | `llm-toolchain-provisioning` | skill | `local-env-bootstrap` |
 | reorganize / restructure / clean up a folder tree | `folder-reorganization` | workflow + skill | `agent-orchestrator`, `automation-maintenance` |
+| cut or verify a release / rollout / rollback | `maven-release` | skill | `release-coordinator`, `rules/release-safety.md` |
 | is this installer safe / a third party wants me to install an app | `third-party-installer-vetting` | workflow | `recruiter-legitimacy-check`, `rules/command-safety.md`, `rules/external-write-authorization.md` |
 
 ## Documentation, Diagrams, And Wiki
 
 | Ask in plain English | Primary capability | Type | Helpers |
 | --- | --- | --- | --- |
-| update docs for this change | `update-docs` | workflow + skill | `doc-delta`, `documentation-reviewer-validation` |
+| update docs for this change / docs or changelog drift | `update-docs` | workflow + skill | `documentation-sync`, `doc-delta`, `documentation-reviewer-validation` |
 | review documentation / validate generated docs / is this runbook accurate | `documentation-reviewer-validation` | workflow + skill | `documentation-reviewer`, `rules/documentation-review-required.md` |
 | create or fix diagrams / Mermaid / PlantUML / AWS diagrams / C4 | `diagram-authoring` | skill | `diagram-creation-specialist-validation` |
 | validate diagrams / strict deterministic diagram review | `diagram-creation-specialist-validation` | workflow + skill | `diagram-creation-specialist` |

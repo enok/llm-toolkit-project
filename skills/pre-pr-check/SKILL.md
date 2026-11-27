@@ -9,4 +9,4 @@ metadata:
 
 # Pre-PR Check
 
-Full pre-PR validation of the checked-out branch: repo checks, the changed-code quality gate, optional Snyk, UI-verify report and in-agent review. Follow `workflows/pre-pr-check.md`.
+Full pre-PR validation of the checked-out branch: lint and tests, duplicate-file gate, the changed-code quality gate, PR file-change table, value gate, optional Snyk, UI-verify report gate and in-agent review. Follow `workflows/pre-pr-check.md`, which holds the procedure.

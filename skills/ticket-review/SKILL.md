@@ -31,12 +31,22 @@ Perform an AI-generated review of a diff using the IDE's LLM. No lint, unit test
    - `docs/jira/<TICKET>/review.md` — human-readable review text
    - `docs/jira/<TICKET>/review-report.json` — structured report with findings (each with type/severity: blocker, suggestion, nice-to-have; file, line, message, suggestion) and summary, so a later fix step can consume it.
 
+## Ticket-scoped signals (S1, S2, S3)
+
+When the review is tied to a ticket or PR, tag every finding with its signal:
+
+- **S1 — acceptance criteria.** Label each AC `AC-1`, `AC-2`, ... and map it to the code that implements it and the test that verifies it. Missing implementation or missing test = **Blocker (S1)**; vague or untestable AC = Ticket Quality Issue.
+- **S2 — unresolved PR comments.** Read all review comments (`gh pr view <N> --json reviews,comments`), keep the unresolved ones, and verify for each whether the current code addresses it. Unaddressed actionable comment = **Blocker (S2)**.
+- **S3 — rules and skills.** Findings from steps 2-3 above.
+
+The report then carries an S1 table (AC, implemented?, tested?, code/test path:line), an S2 table (comment, status, action needed) and the S3 findings.
+
 ## Rubrics
 
 The review is guided by `rubrics/architecture.md` and the categories and Red/Yellow/Green format in step 2. For full pre-PR (lint + tests + optional Snyk + review), use the **pre-pr-check** skill instead.
 
 ## Related
 
-- `workflows/ticket-review.md` — ticket-scoped, report-only review workflow (AC coverage, unresolved PR comments, rules/skills findings)
+- `workflows/ticket-review.md` — report-only entry point; the S1/S2/S3 procedure lives in this file
 - `skills/pre-pr-check/SKILL.md` — lint + tests + quality gate + review
 - `references/java-dto-library-pr-review.md` — contract-surface and hygiene checks for Java DTO/library PRs

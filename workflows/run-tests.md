@@ -85,6 +85,11 @@ npm test -- --coverage                       # Node
 - Re-run after every fix to confirm.
 - In a cloud sandbox a pass is partial (registries may return 403, the toolchain may lag the target versions): run the definitive suite on the user's machine and log each step's name, exit code and toolchain versions as evidence. (sig: env-constraint/sandbox-egress-blocks-registries)
 
+### Failure classification
+- Separate the product verdict from the environment or harness verdict in the final report.
+- If scenario assertions pass and cleanup or teardown fails later, report the behavioral proof and the cleanup blocker separately.
+- If a shared setup step such as a global `before all` fails before scenarios execute, report the run as environment-blocked, not feature-failed.
+
 ---
 
 ## Troubleshooting

@@ -33,6 +33,7 @@ Apply these to every task.
 - Generated or exported images require an image quality check before completion: open each one in its real render path and fix and re-render until it is sharp, uncropped, legible at its destination size and current.
 - Documentation created or changed by agents, chats, automations, scripts, or humans requires `documentation-reviewer` before completion (`rules/documentation-review-required.md`).
 - Workflow files must stay under 12,000 characters (`rules/workflow-authoring.md`); split reusable phases instead of deleting detail.
+- Created or updated source code passes the changed-code quality gate against the trusted Git base before validation passes (`rules/changed-code-quality-gate-required.md`).
 - If verification cannot run here, say explicitly what was not checked and what the user should run.
 
 ### 6. Multi-Agent Execution
@@ -54,7 +55,7 @@ Apply these to every task.
 ### 9. Mandatory Security Gate
 
 - Security review is mandatory for every new or modified code path, script, workflow, rule, skill, agent, integration guide, or operational document, including LLM-surface prompt-injection scanning (`rules/security-check-required.md`).
-- Run `./scripts/security-check-toolkit.sh` (or `.\scripts\security-check-toolkit.ps1`) before closing work here; changed code also passes `workflows/changed-code-quality-gate.md`.
+- Run `./scripts/security-check-toolkit.sh` (or `.\scripts\security-check-toolkit.ps1`) before closing work here.
 
 ---
 
@@ -175,7 +176,7 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 
 Loaded on demand (read the rule when its topic comes up):
 
-- `rules/command-safety.md`: running risky shell commands (network, pipes, installs, deletes, sudo)
+- `rules/command-safety.md`: running risky shell commands (network, pipes, installs, deletes, Git history rewrites, secrets, sudo)
 - `rules/workflow-self-improvement.md`: a non-trivial run needs its run record, retrospective or promotion
 - `rules/cross-platform-scripts.md`: writing or editing scripts for Windows, Linux and macOS
 - `rules/workflow-authoring.md`: creating, editing or splitting a file in `workflows/`

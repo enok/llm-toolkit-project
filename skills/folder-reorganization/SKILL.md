@@ -15,7 +15,7 @@ names in their prompts or attachments, scripts with relative paths, spreadsheets
 and documents that store paths, and cloud-sync links that depend on file and
 folder IDs.
 
-- Run procedure (phases, gates, lanes): `workflows/folder-reorganization.md`.
+- Run procedure: the contract, process, and phase gates below (`workflows/folder-reorganization.md` is only the entry point).
 - Approval proposal and resume ledger skeletons: `references/proposal-template.md`.
 - File formats, options, and a worked example for the scripts: `references/data-formats.md`.
 - Automation pause and resume details: `workflows/automation-maintenance.md`.
@@ -71,7 +71,22 @@ LIST automations (read-only), INSPECT (inventory, reference scan, parallel
 read-only lanes), PROPOSE (tree, path map, edits, the pause with its recovery
 record, new automation prompts, independent validation against the scan), STOP
 for approval, EXECUTE (pause automations, preflight, snapshot, run, edits),
-VERIFY (including the live consumers), RESUME automations, REPORT. Details and gates: `workflows/folder-reorganization.md`.
+VERIFY (including the live consumers), RESUME automations, REPORT.
+
+## Phase gates
+
+- **Propose:** a read-only lane that did not write the proposal re-derives the
+  consumer list from the reference scan, confirms each hit is edited,
+  whitelisted with a reason, or listed as an owner action, and rechecks the
+  counts before approval.
+- **Verify:** run the live consumers against scratch outputs (each script,
+  query, or prompt command that used the old paths, output redirected to a
+  temporary location); a grep alone does not prove a path resolves. Confirm
+  cloud folder and file IDs are unchanged when the cloud API is reachable.
+- **Rollback after resume:** if automations were already resumed, pause them
+  again and revert their prompts to the old paths before rolling back.
+- **Resume:** update each paused automation's prompt through the scheduling API
+  and re-read it; re-enable it only when every path it uses resolves.
 
 ## Scripts
 

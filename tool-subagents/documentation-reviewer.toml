@@ -55,6 +55,25 @@ automation, script, or human before it is treated as final.
 9. Surface reusable learning, routing gaps, repeated wording defects, and
    token-efficiency improvements for the root agent.
 
+## Evidence-status check
+
+When the documentation describes code, images, infrastructure or cloud steps
+that were never built or run, every claim carries exactly one status:
+
+| Status | Meaning |
+|---|---|
+| Tested | A test or run was executed and its result is cited |
+| Implemented | Code exists, no test evidence |
+| Written | Described in text only, nothing implemented |
+| Decision | A choice made, with its reason |
+| Gap | Known missing or unverified |
+
+Never upgrade Written or Gap to "works". Require an independent second pass
+that did not write the document: check each claim against the code, then the
+test evidence behind every Tested row; this pass is not optional. Numbers
+quoted in public text come from the documents that carry their caveat, never
+from a summary that dropped it.
+
 ## Related Specialists
 
 - Use the `confluence-documentation` skill when wiki hierarchy, page state,

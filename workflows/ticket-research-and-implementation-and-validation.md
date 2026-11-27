@@ -48,7 +48,7 @@ Run the **ticket-implementation** workflow (`workflows/ticket-implementation.md`
 Review, fix, and validate, in full:
 
 1. **Scope and Context** — determine branch, base, ticket ID, and PR metadata.
-2. **Three-Signal Inspection** — inspect against ACs (S1), unresolved PR comments (S2), and rules/skills (S3).
+2. **Three-Signal Inspection** — inspect against ACs (S1), unresolved PR comments (S2), and rules/skills (S3) as defined in `skills/ticket-review/SKILL.md`.
 3. **Present Findings** — categorize and present all findings.
 4. **Fix All Issues** — fix every Blocker and actionable finding (S1 → S2 → S3).
 5. **Update PR and Documentation** — update PR description and related docs.

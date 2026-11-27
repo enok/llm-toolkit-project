@@ -282,14 +282,16 @@ function checkSpecialist(agent) {
     fail(`agent name must be kebab-case: ${agent}`);
     return;
   }
-  // A skill twin is optional (some were removed after value checks); when its
-  // folder exists it must be complete and indexed.
-  const hasSkillTwin = exists(`skills/${agent}`);
+  // A missing skill twin passes only when the value-check ledger records its
+  // removal; otherwise the twin and its index entries are required.
+  const removed = removedLedgerPaths();
+  const twinRemoved = !exists(`skills/${agent}`)
+    && (removed.has(`skills/${agent}`) || removed.has(`skills/${agent}/SKILL.md`));
   const required = [
     `tool-subagents/${agent}.md`,
     `tool-subagents/${agent}.toml`,
   ];
-  if (hasSkillTwin) {
+  if (!twinRemoved) {
     required.push(`skills/${agent}/SKILL.md`);
   }
   for (const file of required) {
@@ -314,12 +316,18 @@ function checkSpecialist(agent) {
     assertContains(`tool-subagents/${agent}.md`, "## Related Specialists", `related specialist handoffs for ${agent}`);
     assertContains(`tool-subagents/${agent}.md`, "Learning/token efficiency", `learning/token efficiency output for ${agent}`);
   }
-  // Companion validation/evolution workflows are optional (some were removed
-  // after value checks); when one exists it must be indexed and linked.
+  // A missing companion workflow passes only when the ledger records the
+  // removal of that workflow; when one exists it must be indexed and linked.
   const validationWorkflow = findCompanionWorkflow(agent, "validation");
   const evolutionWorkflow = findCompanionWorkflow(agent, "evolution");
+  if (!validationWorkflow && !companionRemoved(agent, "validation", removed)) {
+    fail(`validation workflow missing for ${agent}`);
+  }
+  if (!evolutionWorkflow && !companionRemoved(agent, "evolution", removed)) {
+    fail(`evolution workflow missing for ${agent}`);
+  }
   assertContains("INTENTS.md", agent, `routing for ${agent}`);
-  if (hasSkillTwin) {
+  if (!twinRemoved) {
     assertContains("AGENTS.md", `**${agent}**`, `AGENTS skill index for ${agent}`);
     assertContains("README.md", `**${agent}**`, `README skill index for ${agent}`);
   }
@@ -332,6 +340,52 @@ function checkSpecialist(agent) {
   }
   assertContains("tool-subagents/README.md", `\`${agent}\``, `subagent index for ${agent}`);
   pass(`specialist ${agent} check completed`);
+}
+
+const LEDGER = "docs/llm/value-checks.csv";
+let cachedRemoved;
+
+// Paths whose ledger decision is `remove`. The resource is the first CSV field
+// and the decision the tenth; the note field may hold quoted commas, so only
+// the unquoted leading fields are split.
+function removedLedgerPaths() {
+  if (cachedRemoved !== undefined) {
+    return cachedRemoved;
+  }
+  cachedRemoved = new Set();
+  if (!exists(LEDGER)) {
+    return cachedRemoved;
+  }
+  const lines = read(LEDGER).split(/\r?\n/).slice(1);
+  for (const line of lines) {
+    const fields = line.split(",");
+    if (fields.length >= 10 && !fields.slice(0, 10).some((field) => field.startsWith('"')) && fields[9] === "remove") {
+      cachedRemoved.add(fields[0]);
+    }
+  }
+  return cachedRemoved;
+}
+
+// A removed companion is `workflows/<agent>-<kind>.md`, or a removed
+// `workflows/<name>-<kind>.md` whose remaining name tokens all belong to the
+// agent name (for example `java-validator-evolution.md` for
+// `java-change-validator`).
+function companionRemoved(agent, kind, removed) {
+  if (removed.has(`workflows/${agent}-${kind}.md`)) {
+    return true;
+  }
+  const agentTokens = new Set(agent.split("-"));
+  const suffix = `-${kind}.md`;
+  for (const entry of removed) {
+    if (!entry.startsWith("workflows/") || !entry.endsWith(suffix) || entry.includes("/", 10)) {
+      continue;
+    }
+    const tokens = entry.slice(10, -suffix.length).split("-");
+    if (tokens.length > 0 && tokens.every((token) => agentTokens.has(token)) && !exists(entry)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function findCompanionWorkflow(agent, kind) {

@@ -77,7 +77,7 @@ Keep `breaching` (correct steady state) and neutralize the one-time deploy artif
 2. Seed one synthetic success datapoint (`aws cloudwatch put-metric-data`) as a post-apply step.
 3. At minimum, document in the stack README that exactly one false alarm + recovery pair is expected within the first day, so on-call does not chase it.
 
-General lesson: `breaching` missing-data handling and "metric is new" are inherently in conflict for the first evaluation window — every alarm on a newly created sparse custom metric needs a deliberate first-datapoint plan in the same change, not just correct steady-state settings. Investigation-side triage of this pattern lives in `tool-subagents/aws-alarm-investigator.md`.
+General lesson: `breaching` missing-data handling and "metric is new" are inherently in conflict for the first evaluation window — every alarm on a newly created sparse custom metric needs a deliberate first-datapoint plan in the same change, not just correct steady-state settings. Investigation-side triage of this pattern lives in `skills/aws-alarm-investigator/SKILL.md`.
 
 Alarm sensitivity choices (`treat_missing_data = "breaching"` on liveness metrics) must be justified with real traffic evidence documented in a comment above the resource — e.g. the metric's actual datapoint history over a representative window — plus a revisit condition. When a reviewer challenges the evidence, re-query it fresh; never cite the numbers from a prior review.
 
@@ -169,4 +169,4 @@ The Lambda console's function-level **Triggers** tab reads only the *unqualified
 ## Related
 
 - `rules/release-safety.md` — deploy order, verification, and rollback discipline
-- `workflows/aws-alarm-investigator-validation.md` — known false-positive alarm patterns
+- `skills/aws-alarm-investigator/SKILL.md` — known false-positive alarm patterns

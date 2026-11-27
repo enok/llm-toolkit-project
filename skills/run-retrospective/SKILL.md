@@ -11,8 +11,8 @@ metadata:
 
 Tooling for the loop in `rules/workflow-self-improvement.md`:
 preflight -> capture -> retrospective + record -> promote -> verify -> measure.
-The procedure is `workflows/run-retrospective.md`; this skill is the quick
-start and the reference set.
+This skill holds the procedure, quick start, and reference set;
+`workflows/run-retrospective.md` is only the routing entry.
 
 ## When to use
 
@@ -131,6 +131,24 @@ kebab name of the owning workflow (<= 80 chars). Signatures are
 `<category>/<kebab-slug>`, at most once per record; reuse an existing one
 (`signatures`) when the root cause matches.
 Full field rules and a complete example: `references/run-record-schema.md`.
+
+## Root cause (per mistake)
+
+Answer two questions per mistake, one line each:
+
+1. **Why did it happen?** The mechanism (wrong flag, unverified belief,
+   platform behaviour, missing criterion).
+2. **Why was it not caught earlier?** Which preflight item, acceptance
+   criterion, validator, or test should have stopped it; this usually names the
+   missing guard and becomes the promotion target.
+
+Write the fix applied in this run to `fix`. Set `prevented_by` to the asset
+that prevents recurrence: the existing one that should have caught it, the one
+this run's promotion creates, or `null` when none exists yet. If the mistake
+happened although its `prevented_by` asset already existed, that prevention was
+ineffective: climb one level when promoting. When that existing prevention was
+never recorded in the log, backfill it in this record's `promotions` at its
+actual level, and also record the higher level you land.
 
 ## Rules that keep the numbers honest
 

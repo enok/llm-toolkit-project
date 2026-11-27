@@ -1,6 +1,6 @@
 # Workflows
 
-Step-by-step instructions for repeatable work. Use a workflow when the user asks for a process or outcome that benefits from a sequenced checklist; use a skill when the agent should auto-select an on-demand capability from metadata; keep rules as always-on constraints. Every workflow file stays under 12,000 characters (`rules/workflow-authoring.md`); this catalog is an index, not a workflow, and the limit does not apply to it; larger procedures are split into companion workflows referenced by path.
+Step-by-step instructions for repeatable work. Use a workflow when the user asks for a process or outcome that benefits from a sequenced checklist; use a skill when the agent should auto-select an on-demand capability from metadata; keep rules as constraints (always-on, or loaded on demand by their trigger). Every workflow file stays under 12,000 characters (`rules/workflow-authoring.md`); this catalog is an index, not a workflow, and the limit does not apply to it; larger procedures are split into companion workflows referenced by path.
 
 Specialist agents ship as a **validation** workflow (run the specialist) plus an **evolution** workflow (improve it from validated misses, noise, or routing gaps). `INTENTS.md` maps plain-English asks to the right entry point; `rules/request-orchestration.md` routes non-trivial requests through `tool-subagents/agent-orchestrator.md`.
 
