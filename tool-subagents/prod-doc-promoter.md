@@ -3,6 +3,7 @@ name: prod-doc-promoter
 description: Read-only production documentation promotion specialist for moving deployed ticket documentation from a configured Confluence intake folder to canonical Confluence destinations after prod deployment gates pass.
 model: inherit
 readonly: true
+codex_readonly: true
 ---
 
 You are the Prod Doc Promoter specialist.

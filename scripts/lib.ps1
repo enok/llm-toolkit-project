@@ -358,6 +358,7 @@ function Remove-LegacyAgentsLink {
     $existingCanon = Get-ToolkitDirectoryLinkTargetCanon -LinkPath $LinkPath
     $legacyCanon = Normalize-ToolkitFullPath (Resolve-Path -LiteralPath $legacyDir).Path
     if ($existingCanon -and ($existingCanon -ieq $legacyCanon)) {
+        Write-Warning "$LinkPath still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex."
         Write-Host "Re-pointing legacy $LinkPath (tool-subagents -> tool-subagents/.generated/codex)"
         Remove-ToolkitPathSafely -Path $LinkPath
     }

@@ -215,6 +215,9 @@ function checkSubagents() {
       }
       const generatedReal = realpathOrNull(safeRepoPath(generatedDir));
       if (canonicalReal && generatedReal && generatedReal === canonicalReal) {
+        if (generatedDir === ".codex/agents") {
+          warn(`${generatedDir} still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed. Run once: ./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github (or .\\scripts\\sync-tool-configs.ps1)`);
+        }
         continue; // legacy link onto tool-subagents/: nothing generated to compare
       }
       for (const file of fs.readdirSync(tempRoot)) {
@@ -289,13 +292,8 @@ function checkSpecialist(agent) {
       if (meta.readonly !== "false") {
         fail(`tool-subagents/${agent}.md should declare readonly: false for explicit LOA mode`);
       }
-      const rendered = renderCodexToml(read(`tool-subagents/${agent}.md`), agent);
-      const toml = rendered.toml || "";
-      if (!toml.includes("readonly = false")) {
-        fail(`rendered Codex TOML for ${agent} lacks the writable LOA manifest (readonly = false)`);
-      }
-      if (!toml.includes("external_side_effects = true")) {
-        fail(`rendered Codex TOML for ${agent} lacks the LOA side-effect capability`);
+      if (meta.external_side_effects !== "true") {
+        fail(`tool-subagents/${agent}.md should declare external_side_effects: true for the LOA side-effect capability`);
       }
     } else if (meta.readonly !== "true") {
       fail(`tool-subagents/${agent}.md should declare readonly: true for validator-style specialists`);

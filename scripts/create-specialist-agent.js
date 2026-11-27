@@ -216,7 +216,7 @@ function rewriteFrontmatterForProvider(provider, content) {
       tierValue = colon === -1 ? "" : line.slice(colon + 1).trim().replace(/^["']|["']$/g, "");
       continue;
     }
-    if (key === "readonly") {
+    if (key === "readonly" || key === "codex_readonly" || key === "external_side_effects") {
       continue;
     }
     kept.push(line);

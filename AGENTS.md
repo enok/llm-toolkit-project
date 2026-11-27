@@ -175,7 +175,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has one `.md` source (Cursor/Claude); the Codex TOML is generated from it (`npm run subagents:render`, gitignored) and `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 

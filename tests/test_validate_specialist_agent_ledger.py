@@ -25,13 +25,13 @@ def write(root: Path, relative: str, text: str) -> None:
 class CompanionLedgerTests(unittest.TestCase):
     """A missing evolution workflow passes only on an exact `remove` ledger row."""
 
-    def run_validator(self, agent: str, ledger_paths: "list[str]") -> subprocess.CompletedProcess:
+    def run_validator(self, agent: str, ledger_paths: "list[str]", flags: str = "readonly: true") -> subprocess.CompletedProcess:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "scripts").mkdir()
             shutil.copy(SCRIPT, root / "scripts" / SCRIPT.name)
             shutil.copy(SCRIPT.with_name("subagent-render.js"), root / "scripts" / "subagent-render.js")
-            prompt = (f"---\nname: {agent}\nreadonly: true\n---\n\n## Related Specialists\n\n"
+            prompt = (f"---\nname: {agent}\n{flags}\n---\n\n## Related Specialists\n\n"
                       "Learning/token efficiency\n")
             write(root, f"tool-subagents/{agent}.md", prompt)
             write(root, "tool-subagents/README.md", f"`{agent}`\n")
@@ -61,6 +61,27 @@ class CompanionLedgerTests(unittest.TestCase):
     def test_listed_alias_passes(self) -> None:
         result = self.run_validator("java-change-validator", ["workflows/java-validator-evolution.md"])
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+@unittest.skipUnless(shutil.which("node"), "node is required to run the validator")
+class OrchestratorFlagTests(CompanionLedgerTests):
+    """The orchestrator contract is enforced on the .md frontmatter."""
+
+    LEDGER = ["workflows/agent-orchestrator-evolution.md"]
+
+    def test_declared_writable_and_side_effects_passes(self) -> None:
+        result = self.run_validator("agent-orchestrator", self.LEDGER, "readonly: false\nexternal_side_effects: true")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_readonly_true_fails(self) -> None:
+        result = self.run_validator("agent-orchestrator", self.LEDGER, "readonly: true\nexternal_side_effects: true")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("readonly: false", result.stderr)
+
+    def test_missing_side_effects_flag_fails(self) -> None:
+        result = self.run_validator("agent-orchestrator", self.LEDGER, "readonly: false")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("external_side_effects: true", result.stderr)
 
 
 if __name__ == "__main__":

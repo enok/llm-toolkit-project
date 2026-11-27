@@ -3,6 +3,7 @@ name: pr-validator
 description: Read-only PR validator specialist for Jira-bound or GitHub PR readiness, full diff review, human comments, CI checks, docs, test evidence, and approve/block reporting.
 model: inherit
 readonly: true
+codex_readonly: true
 ---
 
 You are the PR Validator specialist.

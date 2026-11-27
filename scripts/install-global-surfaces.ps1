@@ -442,6 +442,11 @@ function Install-CodexSurface {
         }
     }
     if ($codexAgentsOk) {
+        $legacyAgentsCanon = Get-LinkTargetCanonical -LinkPath (Join-Path $base 'agents')
+        $legacyToolkitDir = Join-Path $ToolkitRoot 'tool-subagents'
+        if ($legacyAgentsCanon -and (Test-Path -LiteralPath $legacyToolkitDir -PathType Container) -and ($legacyAgentsCanon -ieq (Get-FullPathSafe (Resolve-Path -LiteralPath $legacyToolkitDir).Path))) {
+            Write-Warning "$(Join-Path $base 'agents') still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex (re-pointing now when applying)."
+        }
         Set-LinkSurface -Tool 'codex' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents/.generated/codex')
     }
     Set-ManagedBlock -Tool 'codex' -SurfaceLabel 'AGENTS.md' -FilePath (Join-Path $base 'AGENTS.md')

@@ -375,6 +375,10 @@ install_codex() {
     fi
   fi
   if [[ -n "$codex_agents" ]]; then
+    if [[ -L "$base/agents" && -d "$base/agents" && -d "$TOOLKIT_ROOT/tool-subagents" ]] \
+      && [[ "$(cd "$base/agents" && pwd -P)" == "$(cd "$TOOLKIT_ROOT/tool-subagents" && pwd -P)" ]]; then
+      echo "WARNING: $base/agents still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex (re-pointing now when applying)." >&2
+    fi
     plan_link_surface "codex" "agents" "$base/agents" "$codex_agents"
   fi
   managed_block_apply "codex" "AGENTS.md" "$base/AGENTS.md"

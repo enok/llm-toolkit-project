@@ -150,6 +150,7 @@ repoint_legacy_agents_link() {
   resolved="$(cd "$link_path" 2>/dev/null && pwd -P)" || return 0
   legacy="$(cd "$root/tool-subagents" 2>/dev/null && pwd -P)" || return 0
   if [[ "$resolved" == "$legacy" ]]; then
+    echo "WARNING: $link_path still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex." >&2
     echo "Re-pointing legacy $link_path (tool-subagents/ -> tool-subagents/.generated/codex)" >&2
     rm -f -- "$link_path"
   fi

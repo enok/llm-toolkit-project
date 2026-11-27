@@ -940,11 +940,22 @@ if [[ -d "$PROJECT/tool-subagents" ]]; then
   # Codex reads generated TOML (rendered from the .md sources, never committed).
   # A legacy link onto tool-subagents/ is re-pointed; nothing else is removed.
   CODEX_LINK_OK=0
-  if command -v node >/dev/null 2>&1 \
+  CODEX_CONSUMER_SKIP=0
+  SYNC_TOOLKIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+  if [[ "$(cd "$PROJECT" && pwd -P)" != "$SYNC_TOOLKIT_ROOT" ]]; then
+    # Consumer repo with its own tool-subagents/: never render into the
+    # consumer's tree. Only the toolkit's own agents are rendered, into the
+    # toolkit's .generated folder; setup-repo/ensure-symlinks link them.
+    command -v node >/dev/null 2>&1 \
+      && node "$SYNC_TOOLKIT_ROOT/scripts/create-specialist-agent.js" --render-codex >/dev/null 2>&1 || true
+    CODEX_CONSUMER_SKIP=1
+    echo "  Note: $PROJECT has its own tool-subagents/; Codex TOML is not rendered into it (toolkit agents are rendered in the toolkit's tool-subagents/.generated/codex)."
+  elif command -v node >/dev/null 2>&1 \
     && node "$(dirname "${BASH_SOURCE[0]}")/create-specialist-agent.js" --render-codex \
       --source "$PROJECT/tool-subagents" "$PROJECT/tool-subagents/.generated/codex" >/dev/null 2>&1; then
     if [[ -L "$PROJECT/.codex/agents" ]] \
       && [[ "$(cd "$PROJECT/.codex/agents" 2>/dev/null && pwd -P)" == "$(cd "$PROJECT/tool-subagents" && pwd -P)" ]]; then
+      echo "  WARNING: .codex/agents still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex." >&2
       echo "  Re-pointing legacy .codex/agents -> tool-subagents/.generated/codex"
       rm -f -- "$PROJECT/.codex/agents"
     fi
@@ -957,7 +968,7 @@ if [[ -d "$PROJECT/tool-subagents" ]]; then
     echo "  OK shared subagent symlinks repaired"
   else
     CODEX_AGENTS_SYNCED=0
-    echo "Warning: optional .codex/agents link could not be repaired; continuing." >&2
+    [[ "$CODEX_CONSUMER_SKIP" -eq 1 ]] || echo "Warning: optional .codex/agents link could not be repaired; continuing." >&2
     echo "  OK shared Cursor/Claude subagent symlinks repaired"
   fi
 fi

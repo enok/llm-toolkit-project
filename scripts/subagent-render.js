@@ -30,7 +30,10 @@ function tomlBasicString(value) {
 }
 
 function tomlMultilineBody(body) {
-  const escaped = body.replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"');
+  const escaped = body
+    .replace(/\\/g, "\\\\")
+    .replace(/"""/g, '\\"\\"\\"')
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`);
   return `"""\n${escaped}"""`;
 }
 
@@ -54,11 +57,11 @@ function renderCodexToml(mdText, expectedName) {
     return { error: "prompt body is empty" };
   }
   const lines = [`name = ${tomlBasicString(meta.name)}`, `description = ${tomlBasicString(meta.description)}`];
-  if (meta.readonly === "true" || meta.readonly === "false") {
-    lines.push(`readonly = ${meta.readonly}`);
-    if (meta.readonly === "false") {
-      lines.push("external_side_effects = true");
-    }
+  // The Codex file carries only the keys Codex agent files are known to use.
+  // `readonly` is emitted only when the .md declares `codex_readonly`; the
+  // toolkit-side `readonly` / `external_side_effects` contract stays in the .md.
+  if (meta.codex_readonly === "true" || meta.codex_readonly === "false") {
+    lines.push(`readonly = ${meta.codex_readonly}`);
   }
   lines.push(`developer_instructions = ${tomlMultilineBody(`${instructions}\n`)}`);
   return { toml: `${lines.join("\n")}\n` };
