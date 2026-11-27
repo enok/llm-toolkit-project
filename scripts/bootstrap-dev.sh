@@ -113,10 +113,10 @@ install_tool() {
   fi
   local pkg_name=""
   case "$PKG" in
-    brew) pkg_name="$brew_pkg"; [[ -z "$pkg_name" ]] || run brew install "$pkg_name" ;;
-    apt) pkg_name="$apt_pkg"; [[ -z "$pkg_name" ]] || run sudo apt-get install -y "$pkg_name" ;;
-    dnf) pkg_name="$dnf_pkg"; [[ -z "$pkg_name" ]] || run sudo dnf install -y "$pkg_name" ;;
-    winget) pkg_name="$winget_id"; [[ -z "$pkg_name" ]] || run winget.exe install --id "$winget_id" -e --silent --accept-package-agreements --accept-source-agreements ;;
+    brew) pkg_name="$brew_pkg"; if [[ -n "$pkg_name" ]]; then run brew install "$pkg_name" || true; fi ;;
+    apt) pkg_name="$apt_pkg"; if [[ -n "$pkg_name" ]]; then run sudo apt-get install -y "$pkg_name" || true; fi ;;
+    dnf) pkg_name="$dnf_pkg"; if [[ -n "$pkg_name" ]]; then run sudo dnf install -y "$pkg_name" || true; fi ;;
+    winget) pkg_name="$winget_id"; if [[ -n "$pkg_name" ]]; then run winget.exe install --id "$winget_id" -e --silent --accept-package-agreements --accept-source-agreements || true; fi ;;
   esac
   if [[ -z "$pkg_name" ]]; then
     MISSING_SUMMARY+=("$label")
@@ -183,10 +183,12 @@ install_tool gh "GitHub CLI" gh gh gh GitHub.cli
 
 if [[ "$PROFILE" != "minimal" ]]; then
   install_tool aws "AWS CLI v2" awscli awscli awscli Amazon.AWSCLI
-  if command -v mvn >/dev/null 2>&1; then
+  if [[ "$PKG" != "winget" ]]; then
+    install_tool mvn "Maven" maven maven maven ""
+  elif command -v mvn >/dev/null 2>&1; then
     SKIPPED_SUMMARY+=("Maven (already installed)")
   else
-    MISSING_SUMMARY+=("Maven — no winget package (brew install maven / apt install maven elsewhere); or download from https://maven.apache.org/download.cgi")
+    MISSING_SUMMARY+=("Maven — no winget package; download from https://maven.apache.org/download.cgi")
   fi
   # Token-efficiency tools (see skills/token-efficiency/SKILL.md)
   install_tool sg "ast-grep" ast-grep "" "" ast-grep.ast-grep
@@ -307,17 +309,17 @@ fi
 if command -v rtk >/dev/null 2>&1 && [[ -z "$DRY_RUN" ]]; then
   PROFILE_FILE="$HOME/.bashrc"
   [[ "$OS" == "macos" && -f "$HOME/.zshrc" ]] && PROFILE_FILE="$HOME/.zshrc"
+  if [[ "$OS" == "macos" && -d "$HOME/.rtk-off" ]]; then
+    # A directory here would let RTK create its databases; refuse before touching the profile.
+    echo "$HOME/.rtk-off is a directory; remove it so the RTK history paths cannot be created, then rerun." >&2
+    exit 3
+  fi
   if ! grep -q "RTK_SUPPRESS_HOOK_WARNING" "$PROFILE_FILE" 2>/dev/null; then
     {
       echo ""
       echo "# RTK privacy controls (LLM toolkit bootstrap): no DB, no telemetry, no tee"
       if [[ "$OS" == "macos" ]]; then
         # A plain file as the parent: the DB paths below can never be created.
-        if [[ -d "$HOME/.rtk-off" ]]; then
-          # A directory here would let RTK create its databases; refuse instead of guessing.
-          echo "~/.rtk-off is a directory; remove it so the RTK history paths cannot be created, then rerun." >&2
-          exit 3
-        fi
         [[ -e "$HOME/.rtk-off" ]] || : > "$HOME/.rtk-off"
         echo "export RTK_DB_PATH=\"\$HOME/.rtk-off/history.db\""
         echo "export RTK_RECALL_DB=\"\$HOME/.rtk-off/recall.db\""

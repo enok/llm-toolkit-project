@@ -26,7 +26,7 @@ Practical, security-reviewed techniques to cut token consumption without losing 
 Prefix high-output, non-interactive read/build/test commands with `rtk` (e.g. `rtk git status`, `rtk mvn test`). 60-90% output reduction with preserved exit codes.
 
 - Follow `rules/command-safety.md` for the full constraint set: never route repository/history, remote-service, infrastructure, privilege, approval, release, or deployment mutations through RTK; keep byte-exact/security/production evidence raw; preserve and check exit status.
-- Never run `rtk init`, `rtk trust`, `rtk telemetry enable`, `rtk llm-proxy`, `rtk claude`, `rtk pipeline add` or `rtk plugins`; no hooks, telemetry, tee, recall store or persistent tracking. Keep `RTK_DB_PATH=NUL` (the only effective tracking control; `[tracking] enabled = false` is not honoured), `RTK_TELEMETRY_DISABLED=1`, `RTK_TEE=0`, `RTK_RECALL=0`, `RTK_SUPPRESS_HOOK_WARNING=1`.
+- Never run `rtk init`, `rtk trust`, `rtk telemetry enable`, `rtk llm-proxy`, `rtk claude`, `rtk pipeline add` or `rtk plugins`; no hooks, telemetry, tee, recall store or persistent tracking. Keep `RTK_DB_PATH` on a null target (`NUL` on Windows, `/dev/null` on Linux, a path under the plain file `~/.rtk-off` on macOS; the only effective tracking control; `[tracking] enabled = false` is not honoured), `RTK_TELEMETRY_DISABLED=1`, `RTK_TEE=0`, `RTK_RECALL=0`, `RTK_SUPPRESS_HOOK_WARNING=1`.
 - Only the reviewed deployment (RTK 1.2.1 on Windows through winget, and the smoke-tested Homebrew build on macOS) is approved; a new version or platform needs its own review. Install, pin, config, smoke test, licence note (BUSL-1.1 engine in 1.x) and the `rtk mvn` caveat: `references/rtk-reviewed-deployment.md`.
 
 ### `gh --json` + `jq` field selection
