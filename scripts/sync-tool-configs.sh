@@ -948,8 +948,15 @@ if [[ -d "$PROJECT/tool-subagents" ]]; then
     # toolkit's .generated folder; setup-repo/ensure-symlinks link them.
     command -v node >/dev/null 2>&1 \
       && node "$SYNC_TOOLKIT_ROOT/scripts/create-specialist-agent.js" --render-codex >/dev/null 2>&1 || true
-    CODEX_CONSUMER_SKIP=1
-    echo "  Note: $PROJECT has its own tool-subagents/; Codex TOML is not rendered into it (toolkit agents are rendered in the toolkit's tool-subagents/.generated/codex)."
+    if compgen -G "$PROJECT/tool-subagents/*.toml" >/dev/null; then
+      # The consumer keeps its own hand-written Codex TOML there: link it as
+      # before (read-only; nothing is written into the consumer's folder).
+      ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents" && CODEX_LINK_OK=1
+      CODEX_CONSUMER_SKIP=1
+    else
+      CODEX_CONSUMER_SKIP=1
+      echo "  Note: $PROJECT has its own tool-subagents/; Codex TOML is not rendered into it (toolkit agents are rendered in the toolkit's tool-subagents/.generated/codex)."
+    fi
   elif command -v node >/dev/null 2>&1 \
     && node "$(dirname "${BASH_SOURCE[0]}")/create-specialist-agent.js" --render-codex \
       --source "$PROJECT/tool-subagents" "$PROJECT/tool-subagents/.generated/codex" >/dev/null 2>&1; then

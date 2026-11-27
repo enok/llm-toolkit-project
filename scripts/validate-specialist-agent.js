@@ -163,11 +163,23 @@ function checkRulesRedirects() {
 const VALID_SUBAGENT_MODELS = new Set(["inherit", "haiku", "sonnet", "opus"]);
 const VALID_SUBAGENT_TIERS = new Set(["light", "standard", "deep"]);
 
+function checkOrchestratorFlags(agent, meta) {
+  if (meta.readonly !== "false") {
+    fail(`tool-subagents/${agent}.md should declare readonly: false for explicit LOA mode`);
+  }
+  if (meta.external_side_effects !== "true") {
+    fail(`tool-subagents/${agent}.md should declare external_side_effects: true for the LOA side-effect capability`);
+  }
+}
+
 function checkSubagents() {
   for (const file of listFiles("tool-subagents", (name) => name.endsWith(".md") && name !== "README.md")) {
     const agent = file.replace(/\.md$/, "");
     const mdPath = `tool-subagents/${file}`;
     const meta = parseFrontmatter(read(mdPath));
+    if (agent === "agent-orchestrator") {
+      checkOrchestratorFlags(agent, meta);
+    }
     if (meta.name !== agent) {
       fail(`${mdPath} frontmatter name '${meta.name || ""}' does not match file`);
     }
@@ -289,12 +301,7 @@ function checkSpecialist(agent) {
       fail(`tool-subagents/${agent}.md frontmatter name mismatch`);
     }
     if (agent === "agent-orchestrator") {
-      if (meta.readonly !== "false") {
-        fail(`tool-subagents/${agent}.md should declare readonly: false for explicit LOA mode`);
-      }
-      if (meta.external_side_effects !== "true") {
-        fail(`tool-subagents/${agent}.md should declare external_side_effects: true for the LOA side-effect capability`);
-      }
+      checkOrchestratorFlags(agent, meta);
     } else if (meta.readonly !== "true") {
       fail(`tool-subagents/${agent}.md should declare readonly: true for validator-style specialists`);
     }

@@ -94,7 +94,7 @@ is untested.
 | `.cursor/workflows/` | No longer created (not a Cursor surface); an existing link keeps working and can be removed | `workflows/` |
 | `.cursor/agents/` | Cursor specialist agents | `tool-subagents/` |
 | `.claude/agents/` | Claude Code specialist agents | `tool-subagents/` |
-| `.codex/agents/` | Optional Codex specialist agents | `tool-subagents/.generated/codex/` (TOML rendered from `tool-subagents/*.md`; gitignored) |
+| `.codex/agents/` | Optional Codex specialist agents | `tool-subagents/.generated/codex/` (TOML rendered from `tool-subagents/*.md`; gitignored). A consumer's own hand-written agent TOML lives in its `tool-subagents/` and is linked as before (`.codex/agents -> ../tool-subagents`) |
 
 Generated exports such as `CLAUDE.md`, the Copilot instructions file, and
 the managed `AGENTS.md` sync block should stay thin summaries or pointers.
