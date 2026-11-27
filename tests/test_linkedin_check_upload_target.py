@@ -3,17 +3,14 @@ from __future__ import annotations
 import contextlib
 import importlib.util
 import io
-import re
 import sys
 import tempfile
-import textwrap
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "check_upload_target.py"
-REFERENCES = ROOT / "skills" / "linkedin-publishing" / "references"
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "linkedin-publishing"
 SPEC = importlib.util.spec_from_file_location("check_upload_target", SCRIPT)
 assert SPEC and SPEC.loader
@@ -37,11 +34,6 @@ def fixture(name: str) -> Path:
 
 def violations(text: str) -> "list[str]":
     return [v.message for v in guard.check_text(text)]
-
-
-def js_blocks(markdown_path: Path) -> "list[str]":
-    text = markdown_path.read_text(encoding="utf-8")
-    return [textwrap.dedent(b) for b in re.findall(r"```js\n(.*?)```", text, re.S)]
 
 
 class OriginalMistakeTests(unittest.TestCase):
@@ -121,22 +113,6 @@ class RecipeSnippetTests(unittest.TestCase):
                 code, out, err = run_main(str(fixture(name)))
                 self.assertEqual((code, err), (0, ""), out)
                 self.assertTrue(out.startswith("ok:"))
-
-    @unittest.skipUnless(REFERENCES.is_dir(), "the linkedin-publishing references were removed")
-    def test_recipe_fixtures_are_the_blocks_in_the_recipe(self) -> None:
-        blocks = [b.strip() for b in js_blocks(REFERENCES / "image-attach-recipe.md")]
-        for name in RECIPE_FIXTURES:
-            with self.subTest(name=name):
-                self.assertIn(fixture(name).read_text(encoding="utf-8").strip(), blocks)
-
-    @unittest.skipUnless(REFERENCES.is_dir(), "the linkedin-publishing references were removed")
-    def test_every_js_block_in_the_references_passes(self) -> None:
-        for reference in ("image-attach-recipe.md", "composer-automation.md"):
-            blocks = js_blocks(REFERENCES / reference)
-            self.assertTrue(blocks, reference)
-            for i, block in enumerate(blocks):
-                with self.subTest(reference=reference, block=i):
-                    self.assertEqual(violations(block), [])
 
     def test_forwarding_to_the_proxy_is_allowed(self) -> None:
         self.assertEqual(violations(fixture("forward-to-proxy").read_text(encoding="utf-8")), [])

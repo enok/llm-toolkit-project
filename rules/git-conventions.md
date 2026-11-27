@@ -22,6 +22,7 @@ description: Git branch naming, protected-branch etiquette, semantic commit stru
 - Never commit build output, IDE files, OS metadata, coverage output or secrets files (`.env.local`, `*.key`).
 - Unit tests stay with the code they verify. Split a mixed file at hunk level (`git add -p`) or in a clean dedicated worktree. Split an oversized category into named contiguous subgroups, not by line count.
 - Regrouping history (authorized ticket branch only): record `git rev-parse 'HEAD^{tree}'`, create `backup/<ticket>-before-regroup-<timestamp>`, work in a clean worktree, and require an identical tree against the backup before any rebase.
+- A whole-history scrub that is then force-pushed also needs a verified backup, every ref and tag rewritten, and a mirror re-scan that finds no term.
 - Stacked PRs: every layer passes its own build and tests; prove the final tree equals the pre-split recovery ref; reconcile each PR's base/head SHA and files against the hosting service's live PR Files API. Never force-remove a split worktree holding unique dirty state; prove it clean or kept in a retained ref first. Verify adjacent ancestry; note any minimum-dependency exception in both PR descriptions.
 
 ## PR File Change Table (Mandatory)

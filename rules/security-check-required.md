@@ -22,8 +22,8 @@ A change to code, scripts, `rules/`, `workflows/`, `skills/`, `tool-subagents/`,
 
 ## CI and Terraform identity boundary
 
-- A CI, deployment or Terraform principal must not manage a policy, trust policy, permissions boundary or credential attached to itself; existing self-administration is a finding. IAM bootstrap uses a distinct controlled role or pipeline; if none exists, fail closed and assign the blocker to its owner.
-- One remote authorization object has one Terraform-state owner: search stacks and state routes before an import; a duplicate declaration blocks until one owner is retired.
+- A CI, deployment or Terraform principal must not manage a policy, trust policy, permissions boundary or credential attached to itself; existing self-administration is a finding. IAM bootstrap uses a distinct controlled role or pipeline whose constrained executor cannot change its own policy, trust or boundary, pass arbitrary roles, or reach production outside the approved route; if none exists, fail closed and assign the blocker to its owner.
+- One remote authorization object has one Terraform-state owner: search stacks and state routes before an import; a duplicate declaration blocks until one owner is explicitly retired without applying or merging it.
 
 ## Windows setup
 

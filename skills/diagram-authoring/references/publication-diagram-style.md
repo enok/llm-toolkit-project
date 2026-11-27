@@ -250,4 +250,4 @@ with sync_playwright() as p:
 
 An overflow exits non-zero before any PDF is written. Then check the PDF (page size as set, text selectable) and inspect every page at phone width.
 
-Before delivery check the carousel: type floors on the 1080 px page (headline >= 64 px, body >= 36 px, footer and disclosure >= 32 px), safe area, contrast, and PDF text exactly matching the source markdown.
+Before delivery run `python3 scripts/check_carousel.py --slides <html> --pdf <pdf> --source <md>` (exit 0 required): it checks the type floors on the 1080 px page (headline >= 64 px, body >= 36 px, footer and disclosure >= 32 px), the safe area, contrast, and PDF text exactly matching the source markdown.
