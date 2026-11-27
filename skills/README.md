@@ -155,6 +155,7 @@ description: What this skill does and when to use it, with trigger keywords. 1-1
 3. Run `./scripts/validate-skills-with-skillspector.sh --skill <name>` and `python3 scripts/scan-llm-surface-security.py`.
 4. Add the skill row to `skills/README.md`, `README.md`, `AGENTS.md`, and a phrase row to `INTENTS.md`.
 5. Run `./scripts/sync-tool-configs.sh . --skip-agents-md` so the provider links see it (see the path map).
+6. Re-run the global installer so the user-level roots get the new link (`./scripts/install-global-surfaces.sh --apply`).
 
 ## Validation
 

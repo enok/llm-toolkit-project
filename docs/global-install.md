@@ -146,15 +146,19 @@ directive into the user-level instruction file.
 The links point at paths inside this repository, not at specific file
 contents, so pulling toolkit updates (new skills, an updated
 `tool-subagents/agent-orchestrator.md`, and so on) is visible to every
-tool immediately -- no re-run needed for the linked skills/agents
-directories.
+tool immediately for the linked agents directories and for edits to an
+existing skill. A skill added or removed in the toolkit is NOT visible to
+Claude Code, Codex, Cursor or Windsurf until the installer runs again,
+because `~/.claude/skills` and `~/.agents/skills` hold one link per skill:
+run `scripts/install-global-surfaces.sh --apply` (PowerShell:
+`scripts/install-global-surfaces.ps1 -Apply`).
 
 Re-run with `--apply`/`-Apply` when:
 
 - A new tool's home directory now exists and you want it picked up
   (`auto` mode only re-scans on each run).
-- A Codex skill was added or removed, since Codex needs one link per
-  skill directory refreshed.
+- A skill was added or removed in the toolkit (the user-level roots
+  `~/.claude/skills` and `~/.agents/skills` need one link per skill).
 - `scripts/templates/global-agent-directive.md` changed and you want the
   managed block in each global instruction file to reflect it.
 
@@ -182,7 +186,9 @@ other tools, so delete only the links that point into this toolkit's
 
 ```bash
 TK=<toolkit-root>
-rm -f ~/.claude/agents ~/.codex/agents ~/.cursor/agents
+for p in ~/.claude/agents ~/.codex/agents ~/.cursor/agents; do
+  find "$p" -maxdepth 0 -type l -lname "$TK/*" -delete 2>/dev/null
+done
 for d in ~/.claude/skills ~/.agents/skills ~/.codex/skills ~/.cursor/skills \
          ~/.codeium/windsurf/skills ~/.gemini/skills ~/.config/opencode/skills \
          ~/.gemini/antigravity/skills; do
@@ -194,19 +200,22 @@ done
 ```
 
 **Links** (PowerShell): a junction/symlink is safe to remove with
-`Remove-Item` as long as you don't add `-Recurse` (which would otherwise
-recurse into -- and delete -- the link's target on older PowerShell
-versions). The helper removes a path only when it is a link whose target is
-inside the toolkit:
+`[IO.Directory]::Delete($path, $false)` (never `Remove-Item -Recurse`, which
+on older PowerShell versions recurses into -- and deletes -- the link's
+target). The helper removes a path only when it is a link whose target is
+inside the toolkit (the trailing separator keeps a sibling folder such as
+`<toolkit-root>-other` from matching):
 
 ```powershell
-$toolkit = '<toolkit-root>'
+$toolkit = '<toolkit-root>'.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
 function Remove-ToolkitLink([string]$Path) {
     $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
     if ($item -and $item.LinkType) {
         $target = [string]($item.Target | Select-Object -First 1)
+        $target = $target.Replace('/', [IO.Path]::DirectorySeparatorChar)
         if ($target.StartsWith($toolkit, [System.StringComparison]::OrdinalIgnoreCase)) {
-            Remove-Item -LiteralPath $Path -Force
+            if ($item.PSIsContainer) { [IO.Directory]::Delete($Path, $false) }
+            else { Remove-Item -LiteralPath $Path -Force }
         }
     }
 }

@@ -176,6 +176,40 @@ class SkillRootsTest(unittest.TestCase):
         for name in self._skill_names():
             self.assertTrue((claude_skills / name).is_symlink(), name)
 
+    def test_force_backup_of_a_same_name_folder_goes_outside_the_skills_root(self) -> None:
+        name = self._skill_names()[0]
+        claude_skills = self.home / ".claude" / "skills"
+        (claude_skills / name).mkdir(parents=True)
+        (claude_skills / name / "mine.txt").write_text("mine", encoding="utf-8")
+        blocked = self._install("claude")
+        self.assertNotEqual(blocked.returncode, 0)
+        self.assertTrue((claude_skills / name / "mine.txt").is_file())
+        forced = subprocess.run(
+            ["bash", str(INSTALL), "--tools", "claude", "--apply", "--force"],
+            capture_output=True, text=True, env=_env(self.home), check=False,
+        )
+        self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
+        self.assertTrue((claude_skills / name).is_symlink())
+        self.assertEqual(sorted(p.name for p in claude_skills.iterdir()), self._skill_names())
+        backups = list((self.home / ".claude" / "skills.backup").glob(f"{name}-*"))
+        self.assertEqual(len(backups), 1)
+        self.assertEqual((backups[0] / "mine.txt").read_text(encoding="utf-8"), "mine")
+        self.assertIn("skills.backup", forced.stdout)
+
+    def test_force_on_a_foreign_directory_link_prints_the_real_previous_target(self) -> None:
+        other = self.tmp / "other-skills"
+        other.mkdir()
+        (self.home / ".claude").mkdir()
+        (self.home / ".claude" / "skills").symlink_to(other)
+        forced = subprocess.run(
+            ["bash", str(INSTALL), "--tools", "claude", "--apply", "--force"],
+            capture_output=True, text=True, env=_env(self.home), check=False,
+        )
+        self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
+        self.assertIn(f"was a link to {other}", forced.stdout)
+        self.assertNotIn("whole catalog", forced.stdout)
+        self.assertEqual(list(other.iterdir()), [])
+
     def test_claude_removes_only_stale_links_into_the_toolkit(self) -> None:
         claude_skills = self.home / ".claude" / "skills"
         claude_skills.mkdir(parents=True)

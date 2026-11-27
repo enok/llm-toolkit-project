@@ -309,39 +309,27 @@ $gitignoreLines = @(
     'node_modules/'
     '.DS_Store'
 ) + (Get-SharedSkillIgnoreLines -Prefix '.agents') + @(
-    '.agents/skills/AGENTS.md'
     '.windsurf/rules/'
     '.windsurf/workflows/'
 )
-if ($USE_WINDSURF) {
-    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.windsurf'
-}
 if ($USE_ANTIGRAVITY) {
     $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.agent'
-    $gitignoreLines += '.agent/skills/AGENTS.md'
 }
 if ($USE_CURSOR) {
-    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.cursor'
-    $gitignoreLines += '.cursor/skills/AGENTS.md'
     $gitignoreLines += '.cursor/workflows/'
     $gitignoreLines += '.cursor/agents/'
 }
 if ($USE_CLAUDE) {
     $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.claude'
-    $gitignoreLines += '.claude/skills/AGENTS.md'
 }
 if ($USE_CODEX) {
-    $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.codex'
-    $gitignoreLines += '.codex/skills/AGENTS.md'
     $gitignoreLines += '.codex/agents/'
 }
 if ($USE_GEMINI) {
     $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.gemini'
-    $gitignoreLines += '.gemini/skills/AGENTS.md'
 }
 if ($USE_OPENCODE) {
     $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.opencode'
-    $gitignoreLines += '.opencode/skills/AGENTS.md'
 }
 $gitignoreBlock = $gitignoreLines -join "`n"
 

@@ -53,7 +53,7 @@ says the Copilot agent also discovers project skills in `.github/skills/`,
 `.agents/skills/` links above may already be visible to it. Which editor
 versions honour each path is untested.
 
-Skill roots (C6): sync creates project skill links only under `.agents/skills`
+Skill roots: sync creates project skill links only under `.agents/skills`
 (read by Codex, Cursor, Windsurf and Copilot) and `.claude/skills` (Claude
 Code), plus the `.agent`, `.gemini` and `.opencode` roots not reviewed yet.
 It no longer creates `.codex/skills`, `.cursor/skills` or `.windsurf/skills`.
@@ -73,14 +73,20 @@ materializes every path below as a link back to this toolkit's `skills/`
 the installer no longer creates `~/.codex/skills`, `~/.cursor/skills` or
 `~/.codeium/windsurf/skills`, never deletes old ones, and prints one line per
 old link it finds saying it can be removed),
-links the agent path for Claude Code (`~/.claude/agents`), Codex
-and Cursor (`~/.cursor/agents`) to `tool-subagents/` (Codex, `~/.codex/agents`, is linked to the generated `tool-subagents/.generated/codex/`), and
+links agents (Claude Code and Cursor link `~/.claude/agents` and
+`~/.cursor/agents` to `tool-subagents/`; Codex links `~/.codex/agents` to
+`tool-subagents/.generated/codex/`), and
 writes a managed instruction block into the global instruction files of
 Claude Code (`~/.claude/CLAUDE.md`), Codex (`~/.codex/AGENTS.md`), Windsurf
 (`~/.codeium/windsurf/memories/global_rules.md`), and Gemini CLI
 (`~/.gemini/GEMINI.md`). `.codex/sync-shared-skills.sh` is not part of the
 global install: it only repairs the toolkit root's `.agents/skills` and
 `.claude/skills` catalog links and writes nothing under the home directory.
+
+Because `~/.claude/skills` and `~/.agents/skills` hold one link per skill, a
+skill added or removed in the toolkit is not visible at user level until the
+installer runs again (`scripts/install-global-surfaces.sh --apply`, PowerShell
+`scripts/install-global-surfaces.ps1 -Apply`).
 
 | Tool | Global skill path |
 |------|-------------------|
@@ -142,7 +148,7 @@ Regenerate every compatibility surface after changing `rules/`,
 provider links and refreshing the other repo-local exports. On a fresh clone
 where links are missing, run the same command from the toolkit root (add
 `--skip-github` / `-SkipGithub` to leave `.github/` alone), or for a consumer
-repo run `../llm-toolkit/scripts/setup-repo.cmd .`. `.agent`, `.agents`,
+repo run `../llm-toolkit-project/scripts/setup-repo.cmd .`. `.agent`, `.agents`,
 `.claude`, `.cursor` and `.windsurf` surfaces are links or real directories of
 links, as described under the layout note above (junctions on Windows);
 `.cursor/rules/*.mdc` is generated and gitignored. If the

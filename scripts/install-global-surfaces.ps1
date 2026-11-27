@@ -251,7 +251,8 @@ function Set-LinkSurface {
         [Parameter(Mandatory)][string]$Tool,
         [Parameter(Mandatory)][string]$SurfaceLabel,
         [Parameter(Mandatory)][string]$LinkPath,
-        [Parameter(Mandatory)][string]$TargetPath
+        [Parameter(Mandatory)][string]$TargetPath,
+        [string]$BackupRoot = ''
     )
 
     $targetCanon = Get-FullPathSafe $TargetPath
@@ -272,7 +273,12 @@ function Set-LinkSurface {
     if (Test-Path -LiteralPath $LinkPath) {
         if ($Force) {
             $backup = "$LinkPath.bak-$BackupTimestamp"
+            # A backup folder outside a skills root keeps the tool from loading it as a duplicate skill.
+            if ($BackupRoot) { $backup = Join-Path $BackupRoot ("$(Split-Path -Leaf $LinkPath)-$BackupTimestamp") }
             if ($Apply) {
+                if ($BackupRoot -and -not (Test-Path -LiteralPath $BackupRoot)) {
+                    New-Item -ItemType Directory -Path $BackupRoot -Force | Out-Null
+                }
                 Move-Item -LiteralPath $LinkPath -Destination $backup
                 New-DirectoryLink -LinkPath $LinkPath -TargetPath $TargetPath
             }
@@ -468,11 +474,13 @@ function Install-SkillDir {
         $isCatalog = $existing -and ($existing -ieq (Get-FullPathSafe $skillsRoot))
         if ($isCatalog -or $Force) {
             $migrating = $true
+            $previous = 'the whole catalog'
+            if (-not $isCatalog) { $previous = Get-LinkRawTarget -Item $linkItem }
             if ($Apply) {
                 Remove-LinkOrPath -Path $Dir
                 New-Item -ItemType Directory -Path $Dir -Force | Out-Null
             }
-            Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'updated' -Detail "$Dir was a link to the whole catalog; now a real directory with one link per skill"
+            Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'updated' -Detail "$Dir was a link to $previous; now a real directory with one link per skill"
         }
         else {
             Add-ResultRow -Tool $Tool -Surface 'skills' -Action 'blocked' -Detail "existing link at $Dir does not point to the toolkit; rerun with -Force"
@@ -509,7 +517,7 @@ function Install-SkillDir {
             Add-ResultRow -Tool $Tool -Surface "skills/$name" -Action 'skipped' -Detail "$linkPath is a link outside the toolkit; left alone"
             return
         }
-        Set-LinkSurface -Tool $Tool -SurfaceLabel "skills/$name" -LinkPath $linkPath -TargetPath $_.FullName
+        Set-LinkSurface -Tool $Tool -SurfaceLabel "skills/$name" -LinkPath $linkPath -TargetPath $_.FullName -BackupRoot "$Dir.backup"
     }
 
     # Stale per-skill links: only links into the toolkit's skills/ whose skill is gone.

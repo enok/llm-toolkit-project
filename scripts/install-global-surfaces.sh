@@ -224,7 +224,7 @@ link_points_to() {
 }
 
 plan_link_surface() {
-  local tool="$1" surface_label="$2" link_path="$3" target_path="$4"
+  local tool="$1" surface_label="$2" link_path="$3" target_path="$4" backup_root="${5:-}"
   local parent
   parent="$(dirname "$link_path")"
 
@@ -244,7 +244,10 @@ plan_link_surface() {
   if [[ -e "$link_path" ]]; then
     if (( FORCE )); then
       local backup="${link_path}.bak-${BACKUP_TS}"
+      # A backup folder outside a skills root keeps the tool from loading it as a duplicate skill.
+      [[ -n "$backup_root" ]] && backup="$backup_root/$(basename "$link_path")-${BACKUP_TS}"
       if (( APPLY )); then
+        [[ -n "$backup_root" ]] && mkdir -p "$backup_root"
         mv "$link_path" "$backup"
         mkdir -p "$parent"
         ln -sfn "$target_path" "$link_path"
@@ -363,11 +366,13 @@ install_skill_dir() {
   if [[ -L "$dir" ]]; then
     if link_points_to "$dir" "$skills_src" || (( FORCE )); then
       migrating=1
+      local previous="the whole catalog"
+      link_points_to "$dir" "$skills_src" || previous="$(readlink "$dir")"
       if (( APPLY )); then
         rm -f "$dir"
         mkdir -p "$dir"
       fi
-      add_row "$tool" "${label_prefix}skills" "updated" "$dir was a link to the whole catalog; now a real directory with one link per skill"
+      add_row "$tool" "${label_prefix}skills" "updated" "$dir was a link to $previous; now a real directory with one link per skill"
     else
       add_row "$tool" "${label_prefix}skills" "blocked" "existing link at $dir does not point to the toolkit; rerun with --force"
       return 0
@@ -401,7 +406,7 @@ install_skill_dir() {
           ;;
       esac
     fi
-    plan_link_surface "$tool" "${label_prefix}skills/$name" "$dir/$name" "$skills_src/$name"
+    plan_link_surface "$tool" "${label_prefix}skills/$name" "$dir/$name" "$skills_src/$name" "${dir}.backup"
   done
 
   # Stale per-skill links: only links into the toolkit's skills/ whose skill is gone.
