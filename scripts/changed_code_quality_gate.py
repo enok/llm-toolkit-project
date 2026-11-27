@@ -45,7 +45,11 @@ NON_CODE_NAMES = {
     ".cursorignore", ".cursorindexingignore", "agents", "claude", "license",
     "readme", "rules", "skills", "workflows",
 }
+BACKSLASH_PATH_REASON = "changed path contains a backslash"
+LONE_CR_REASON = "Dockerfile contains a carriage return not followed by a newline"
 BLOCKING_SKIP_REASONS = {
+    BACKSLASH_PATH_REASON,
+    LONE_CR_REASON,
     "binary file",
     "source file exceeds 10 MiB",
     "unrecognized changed file type",
@@ -202,6 +206,8 @@ def safe_code_file(root: Path, relative: str, patterns: tuple[str, ...]) -> tupl
         sample = source.read(8192)
     if b"\0" in sample:
         return None, "binary file"
+    if is_dockerfile(relative) and re.search(rb"\r(?!\n)", resolved.read_bytes()):
+        return None, LONE_CR_REASON
     return resolved, None
 
 
@@ -235,6 +241,11 @@ def build_scope(root: Path, args: argparse.Namespace, config: dict[str, Any]) ->
     lines: dict[str, tuple[tuple[int, int], ...]] = {}
     skipped: dict[str, str] = {}
     for relative in sorted(changed_paths(root, base, head)):
+        if os.name != "nt" and "\\" in relative:
+            # On POSIX a backslash is part of the file name; normalizing it to
+            # "/" would analyze a different file than the one that changed.
+            skipped[relative] = BACKSLASH_PATH_REASON
+            continue
         _, reason = safe_code_file(root, relative, patterns)
         if reason:
             skipped[relative] = reason
@@ -403,34 +414,60 @@ def run_script_policy(root: Path, scope: Scope) -> dict[str, Any]:
 
 
 DOCKER_DIRECTIVE_RE = re.compile(r"^\s*#\s*([A-Za-z]+)\s*=\s*(\S+)\s*$")
-HEREDOC_RE = re.compile(r"<<-?\s*([\"']?)([A-Za-z_][A-Za-z0-9_]*)\1")
+DOCKER_DIRECTIVES = {"syntax", "escape", "check"}
+HEREDOC_RE = re.compile(r"<<(-?)\s*([\"']?)([A-Za-z_][A-Za-z0-9_]*)\2")
 
 
 def dockerfile_lines(path: Path) -> list[str]:
-    text = path.read_text(encoding="utf-8", errors="replace")
-    lines = [line[:-1] if line.endswith("\r") else line for line in text.split("\n")]
+    """Lines numbered as Git and hadolint number them: split on LF only."""
+    data = path.read_bytes()
+    if re.search(rb"\r(?!\n)", data):
+        raise ValueError(LONE_CR_REASON)
+    lines = [line.decode("utf-8", errors="replace") for line in data.split(b"\n")]
     return lines[:-1] if lines and lines[-1] == "" else lines
+
+
+def dockerfile_escapes(lines: list[str]) -> set[str]:
+    """Escape character(s) a span must honour; when unsure, include both candidates."""
+    escape, seen = "\\", set()
+    for line in lines:
+        match = DOCKER_DIRECTIVE_RE.match(line)
+        if not match or match.group(1).lower() not in DOCKER_DIRECTIVES or match.group(1).lower() in seen:
+            break
+        seen.add(match.group(1).lower())
+        if match.group(1).lower() == "escape":
+            escape = match.group(2)[0]
+    escapes = {escape}
+    # A later "# escape=" comment is not a directive for Docker; if another
+    # parser honoured it the span would differ, so keep the longer span.
+    for line in lines:
+        if line.strip() and not line.lstrip().startswith("#"):
+            break
+        match = DOCKER_DIRECTIVE_RE.match(line)
+        if match and match.group(1).lower() == "escape":
+            escapes.add(match.group(2)[0])
+    return escapes
 
 
 def instruction_end(lines: list[str], start: int) -> int:
     """Last line of the instruction that starts at ``start`` (continuations and heredocs)."""
-    escape = "\\"
-    for line in lines:
-        match = DOCKER_DIRECTIVE_RE.match(line)
-        if not match:
-            break
-        if match.group(1).lower() == "escape":
-            escape = match.group(2)[0]
-    end = start
-    continuing = lines[start - 1].rstrip().endswith(escape)
-    while continuing and end < len(lines):
-        end += 1
-        text = lines[end - 1].strip()
-        if text and not text.startswith("#"):
-            continuing = lines[end - 1].rstrip().endswith(escape)
-    for _, word in HEREDOC_RE.findall("\n".join(lines[start - 1:end])):
-        end = next((number for number in range(end + 1, len(lines) + 1) if lines[number - 1].strip() == word), len(lines))
-    return end
+    longest = start
+    for escape in dockerfile_escapes(lines):
+        end = start
+        continuing = lines[start - 1].rstrip().endswith(escape)
+        while continuing and end < len(lines):
+            end += 1
+            text = lines[end - 1].strip()
+            if text and not text.startswith("#"):
+                continuing = lines[end - 1].rstrip().endswith(escape)
+        for dash, _, word in HEREDOC_RE.findall("\n".join(lines[start - 1:end])):
+            # The terminator is the exact word; <<- also strips leading tabs.
+            end = next((
+                number for number in range(end + 1, len(lines) + 1)
+                if (lines[number - 1].lstrip("\t") if dash else lines[number - 1]) == word
+            ), len(lines))
+        longest = max(longest, end)
+    return longest
 
 
 def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
@@ -470,8 +507,8 @@ def run_hadolint(root: Path, scope: Scope) -> dict[str, Any]:
                 return failed(f"hadolint exited 1 without findings for {relative}")
             try:
                 lines = dockerfile_lines(root / relative)
-            except OSError as exc:
-                return failed(f"cannot read Dockerfile source: {exc}")
+            except (OSError, ValueError) as exc:
+                return failed(f"cannot read Dockerfile source {relative}: {exc}")
             for finding in payload:
                 if not isinstance(finding, dict) or not isinstance(finding.get("code"), str) or not isinstance(finding.get("file"), str):
                     return failed(f"invalid hadolint finding structure for {relative}")

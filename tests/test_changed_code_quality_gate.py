@@ -75,9 +75,9 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_hadolint_is_pinned_and_checksum_verified(self) -> None:
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        self.assertIn("HADOLINT_VERSION: v2.12.0", workflow)
-        self.assertIn("HADOLINT_SHA256: 56de6d5e5ec427e17b74fa48d51271c7fc0d61244bf5c90e828aab8362d55010", workflow)
-        self.assertIn("releases/download/${HADOLINT_VERSION}/hadolint-Linux-x86_64", workflow)
+        self.assertIn("HADOLINT_VERSION: v2.15.1", workflow)
+        self.assertIn("HADOLINT_SHA256: c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507", workflow)
+        self.assertIn("releases/download/${HADOLINT_VERSION}/hadolint-linux-x86_64", workflow)
         self.assertIn("sha256sum -c -", workflow)
         self.assertLess(workflow.index("sha256sum -c -"), workflow.index('chmod +x "$hadolint_dir/hadolint"'))
 
@@ -555,6 +555,51 @@ class DockerfileGateTests(unittest.TestCase):
                 code, report = self.gate(spec)
                 self.assertEqual((4, "error"), (code, report["status"]))
                 self.assertIn(reason, self.hadolint_report(report)["reason"])
+
+    def commit_dockerfile(self, data: bytes) -> None:
+        (self.root / "Dockerfile").write_bytes(data)
+        run_git(self.root, "add", "Dockerfile")
+        run_git(self.root, "commit", "-qm", "new base")
+
+    def test_lone_carriage_return_blocks_instead_of_shifting_lines(self) -> None:
+        # Git and hadolint count LF only; a lone CR must not add a line and cut a span short.
+        self.commit_dockerfile(b"FROM alpine:3.20\n# note\rmore\nRUN apk add \\\n    curl\n")
+        (self.root / "Dockerfile").write_bytes(b"FROM alpine:3.20\n# note\rmore\nRUN apk add \\\n    git\n")
+        code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 3}]})
+        self.assertEqual((3, "blocked"), (code, report["status"]))
+        self.assertEqual(gate.LONE_CR_REASON, report["skipped"]["Dockerfile"])
+
+    def test_indented_heredoc_word_does_not_end_heredoc(self) -> None:
+        self.commit_dockerfile(b"FROM alpine:3.20\nRUN <<EOF\napk add curl\n  EOF\napk add git\nEOF\nUSER app\n")
+        (self.root / "Dockerfile").write_bytes(b"FROM alpine:3.20\nRUN <<EOF\napk add curl\n  EOF\napk add git bash\nEOF\nUSER app\n")
+        code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 2}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+        self.assertEqual(6, self.hadolint_report(report)["findings"][0]["endLine"])
+        self.assertEqual(3, gate.instruction_end(["RUN <<-EOF", "x", "\tEOF", "USER a"], 1))
+        self.assertEqual(4, gate.instruction_end(["RUN <<-EOF", "x", "  EOF", "USER a"], 1))
+
+    def test_escape_after_unknown_directive_is_not_a_directive(self) -> None:
+        base = b"# syntax=docker/dockerfile:1\n# foo=bar\n# escape=`\nFROM alpine:3.20\nRUN apk add \\\n    curl\n"
+        self.commit_dockerfile(base)
+        (self.root / "Dockerfile").write_bytes(base.replace(b"    curl", b"    git"))
+        code, report = self.gate({"findings": [{"code": "DL3018", "level": "warning", "line": 5}]})
+        self.assertEqual((1, "fail"), (code, report["status"]))
+        self.assertEqual(6, self.hadolint_report(report)["findings"][0]["endLine"])
+
+    @unittest.skipIf(os.name == "nt", "a backslash cannot be part of a Windows file name")
+    def test_backslash_in_changed_path_blocks_every_file_type(self) -> None:
+        (self.root / "evil").mkdir()
+        (self.root / "evil" / "app.Dockerfile").write_text("FROM alpine:3.20\n", encoding="utf-8")
+        run_git(self.root, "add", "evil")
+        run_git(self.root, "commit", "-qm", "decoy target")
+        for name in ("evil\\app.Dockerfile", "evil\\app.py", "notes\\a.md"):
+            (self.root / name).write_text("FROM alpine:3.20\n", encoding="utf-8")
+        code, report = self.gate({"findings": []})
+        self.assertEqual((3, "blocked"), (code, report["status"]))
+        for name in ("evil\\app.Dockerfile", "evil\\app.py", "notes\\a.md"):
+            self.assertEqual(gate.BACKSLASH_PATH_REASON, report["skipped"][name])
+        self.assertEqual([], report["files"])
+        self.assertFalse((self.bin / "argv.jsonl").exists())
 
     def test_non_dockerfile_change_is_unaffected(self) -> None:
         (self.root / "Dockerfile.md").write_text("FROM alpine\n", encoding="utf-8")
