@@ -42,8 +42,10 @@ run's `promotions` at its actual level (for example `learning` for a
   `workflows/<agent>-evolution.md` (for example
   `workflows/agent-orchestrator-evolution.md`).
 - **`tier-misassignment`**: correct the task-type row of the lookup table in
-  `rules/request-orchestration.md` or the `tool-subagents/model-selector.md`
-  guidance, via `workflows/model-selector-evolution.md`.
+  `skills/agent-orchestrator/references/request-orchestration-detail.md`
+  ("Task-type to tier lookup") or the `tool-subagents/model-selector.md`
+  guidance, via `workflows/model-selector-evolution.md`, and update the
+  lookup summary in `rules/request-orchestration.md` in the same change.
 - **CI-detected**: `rules/ci-feedback-loop.md` already demands a prevention
   step; the ladder decides how strong it must be.
 - **Project-specific facts** stay in the consumer repo's `docs/llm/`; only

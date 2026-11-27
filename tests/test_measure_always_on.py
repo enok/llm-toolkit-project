@@ -102,6 +102,72 @@ class MeasureAlwaysOnTests(unittest.TestCase):
         self.assertLessEqual(result["agents_md_bytes"], measure_always_on.AGENTS_MAX_DEFAULT)
         self.assertIn("AGENTS.md", result["tools"]["Claude Code"]["files"])
 
+    def test_validate_script_enforces_rules_budget(self) -> None:
+        import json
+
+        scripts = json.loads((REPO_ROOT / "package.json").read_text(encoding="utf-8"))["scripts"]
+        self.assertIn("measure-always-on.py --check --rules-budget 50000", scripts["validate"])
+
+    def test_repository_always_on_rules_within_budget(self) -> None:
+        result = measure_always_on.measure(REPO_ROOT)
+        self.assertLessEqual(result["always_on_rules"]["bytes"], 50000)
+
+    def test_request_orchestration_core_keeps_mandatory_contract(self) -> None:
+        core = (REPO_ROOT / "rules" / "request-orchestration.md").read_text(encoding="utf-8")
+        self.assertIn("trigger: always_on", core)
+        for marker in (
+            "Before the first task runs, print",
+            "Reprint the full table",
+            "`Remaining SLA`",
+            "`light` -> `haiku`, `standard` -> `sonnet`, `deep` -> `opus`",
+            "the root owns user communication",
+            "The validator is never the producer",
+            "slim brief",
+            "`TASKS_TABLE.md` + `CONTEXT_STATE.md`",
+            "NOT POSTED",
+            # notification mirror
+            "every full-table print is also sent to the matching channel",
+            "naming what is blocked and what the user must decide",
+            "carries the requester header",
+            "exactly what the route's approval names",
+            # per-run loop
+            "`## Known pitfalls`",
+            "the `preflight` output",
+            "run `workflows/run-retrospective.md`",
+            "end the final report with its metrics line",
+            # contract source when the contract files cannot be reached
+            "request access to the toolkit root once, at W0, for that folder only",
+            "consumer `AGENTS.md` shared-rules block",
+            "applies the contract from memory and says so in the plan header",
+            "never worked around",
+            "if access is declined or unavailable, use the consumer `AGENTS.md`",
+            "granted-but-refused bridge path is not a declined grant",
+            "apply this rule alone and record the routing deviation in the ledger",
+            # tier lookup with effort
+            "`light` (`haiku` / low",
+            "`standard` (`sonnet` / medium)",
+            "`deep` (`opus` / high)",
+            "`frontier` (session model / high)",
+            "UI automation on an ID list",
+            "learnings from a facts ledger",
+            # inline exemptions
+            "by its exact name in that row",
+            "recorded on that row as a deviation, never left silent",
+            "once the root stages its inputs does not qualify",
+            # plan self-checks
+            "three or more rows with one `Model/Effort` value fails",
+            "every row above `standard` names its trigger or lookup row",
+            "say so in the response rather than silently rewriting the column",
+            # delegation depth
+            "root -> coordinator -> specialist",
+            "coordinator agents may call other agents when their task has independently verifiable subparts",
+            "leaf agents should not recursively delegate unless their prompt or manifest explicitly allows it",
+        ):
+            self.assertIn(marker, core)
+        detail = "skills/agent-orchestrator/references/request-orchestration-detail.md"
+        self.assertIn(detail, core)
+        self.assertTrue((REPO_ROOT / detail).is_file())
+
 
 if __name__ == "__main__":
     unittest.main()
