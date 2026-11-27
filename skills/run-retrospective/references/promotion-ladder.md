@@ -42,8 +42,10 @@ lesson its owner already carries), and also record the higher level you land.
   `workflows/<agent>-evolution.md` (for example
   `workflows/agent-orchestrator-evolution.md`).
 - **`tier-misassignment`**: correct the task-type row of the lookup table in
-  `rules/request-orchestration.md` or the `tool-subagents/model-selector.md`
-  guidance, via `workflows/model-selector-evolution.md`.
+  `skills/agent-orchestrator/references/request-orchestration-detail.md`
+  ("Task-type to tier lookup") or the `tool-subagents/model-selector.md`
+  guidance, via `workflows/model-selector-evolution.md`, and update the
+  lookup summary in `rules/request-orchestration.md` in the same change.
 - **CI-detected**: `rules/ci-feedback-loop.md` already demands a prevention
   step; the ladder decides how strong it must be.
 - **Project-specific facts** stay in the consumer repo's `docs/llm/`; only
@@ -53,7 +55,7 @@ lesson its owner already carries), and also record the higher level you land.
 
 Checklist promotions live in a section named exactly `## Known pitfalls`,
 placed near the end of the owning workflow, `SKILL.md`, or agent definition
-(`tool-subagents/<name>.md`, mirrored in its `.toml`), before any "Final Step"
+(`tool-subagents/<name>.md`; its Codex TOML is generated from it), before any "Final Step"
 or "Related" section. One bullet per signature:
 
 ```markdown

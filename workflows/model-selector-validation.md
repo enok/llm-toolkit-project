@@ -18,7 +18,8 @@ table should be audited for model overspend.
    tier, model, effort, estimated token band, and rationale naming the matched
    lookup row or the escalation trigger.
 4. Check the assignment against the model selection contract in
-   `rules/request-orchestration.md`: cheapest capable model, escalation only on a
+   `rules/request-orchestration.md` (full text:
+   `skills/agent-orchestrator/references/request-orchestration-detail.md`): cheapest capable model, escalation only on a
    recorded trigger, effort raised before a model tier is jumped, and no child
    assigned the session frontier model at split time.
 5. Flag routing defects: rows above their lookup tier with no named trigger, and

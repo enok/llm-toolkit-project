@@ -321,6 +321,49 @@ function Assert-ToolkitDirectoryReparseMatches {
     }
 }
 
+function Invoke-CodexAgentRender {
+    <#
+    .SYNOPSIS
+      Renders the Codex agent TOML from tool-subagents/*.md into tool-subagents/.generated/codex (never committed).
+      Returns $true on success; warns and returns $false when node is missing or an agent cannot be rendered.
+    #>
+    param([Parameter(Mandatory)][string]$ToolkitRoot)
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if (-not $nodeCmd) {
+        Write-Warning 'node not found; cannot render Codex agent TOML (skipping .codex/agents).'
+        return $false
+    }
+    & node (Join-Path $ToolkitRoot 'scripts/create-specialist-agent.js') --render-codex | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning 'Codex agent TOML render failed (skipping .codex/agents).'
+        return $false
+    }
+    return (Test-Path -LiteralPath (Join-Path $ToolkitRoot 'tool-subagents/.generated/codex') -PathType Container)
+}
+
+function Remove-LegacyAgentsLink {
+    <#
+    .SYNOPSIS
+      One-release compatibility: a link that still points at tool-subagents/ keeps working until the installer
+      runs; then only the link itself is re-pointed (never the directory it points at, never a plain folder).
+    #>
+    param(
+        [Parameter(Mandatory)][string]$LinkPath,
+        [Parameter(Mandatory)][string]$ToolkitRoot
+    )
+    $legacyDir = Join-Path $ToolkitRoot 'tool-subagents'
+    if (-not (Test-Path -LiteralPath $legacyDir -PathType Container)) {
+        return
+    }
+    $existingCanon = Get-ToolkitDirectoryLinkTargetCanon -LinkPath $LinkPath
+    $legacyCanon = Normalize-ToolkitFullPath (Resolve-Path -LiteralPath $legacyDir).Path
+    if ($existingCanon -and ($existingCanon -ieq $legacyCanon)) {
+        Write-Warning "$LinkPath still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex."
+        Write-Host "Re-pointing legacy $LinkPath (tool-subagents -> tool-subagents/.generated/codex)"
+        Remove-ToolkitPathSafely -Path $LinkPath
+    }
+}
+
 function Ensure-ToolkitDirectoryLink {
     <#
     .SYNOPSIS

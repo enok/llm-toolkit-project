@@ -51,7 +51,8 @@ Any LLM tool loading only this skill still owes all of these duty sets from
   `plugin:<plugin>:<component>` (`rules/plugin-governance.md`).
 - **Per-task model selection, independent of the session** — assign every task
   a tier and a concrete model/effort row by row from the lookup in
-  `rules/request-orchestration.md`, before anything runs; the session model is
+  `references/request-orchestration-detail.md` (core in
+  `rules/request-orchestration.md`), before anything runs; the session model is
   neither a ceiling nor a floor, so escalate a task above a cheap session
   default when its row calls for it and keep `light` work on `haiku` under an
   expensive one. Before showing the table, run the distinct-value, floor, and
@@ -181,7 +182,8 @@ Any LLM tool loading only this skill still owes all of these duty sets from
 ## Related
 
 - `rules/plugin-governance.md` — capability selection across toolkit assets and plugins
-- `rules/request-orchestration.md` — the binding orchestration and model-selection contract
+- `rules/request-orchestration.md` — the binding orchestration and model-selection contract (always-on core)
+- `references/request-orchestration-detail.md` — its full text: model contract and lookup, notification mirror, linked folders, usage limits
 - `rules/multi-agent-orchestration.md` — parallel fanout and reduction discipline
 - `skills/model-selector/SKILL.md` — per-task tier assignment and overspend audit
 - `skills/token-efficiency/SKILL.md` — reducing tokens within a chosen model

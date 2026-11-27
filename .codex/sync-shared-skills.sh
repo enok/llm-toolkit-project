@@ -11,34 +11,31 @@ readonly AGENTS_SKILLS="$REPO_ROOT/.agents/skills"
 readonly CLAUDE_SKILLS="$REPO_ROOT/.claude/skills"
 readonly CODEX_SKILLS="$SCRIPT_DIR/skills"
 readonly WINDSURF_SKILLS="$REPO_ROOT/.windsurf/skills"
-readonly CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-readonly GLOBAL_CODEX_SKILLS="$CODEX_HOME/skills"
-
-sync_global=true
+readonly GLOBAL_CODEX_SKILLS="${CODEX_HOME:-$HOME/.codex}/skills"
 
 usage() {
   cat <<'USAGE'
 Usage: ./.codex/sync-shared-skills.sh [--no-global]
 
-Repairs the shared skill catalog layout:
+Repairs the repo-local shared skill catalog links (toolkit root only):
   skills/                 canonical source of truth
   .agents/skills          -> ../skills
   .claude/skills          -> ../.agents/skills
-  .codex/skills           -> ../.agents/skills
-  .windsurf/skills        -> ../.agents/skills
 
-By default, also mirrors shared skills into ~/.codex/skills/.
+It no longer creates .codex/skills or .windsurf/skills (Codex, Cursor and
+Windsurf read .agents/skills) and no longer mirrors into ~/.codex/skills (the
+global installer links ~/.agents/skills). Existing old links are never deleted;
+one line is printed for each one found, saying it can be removed.
 Existing real directories are preserved; only symlink-style paths are replaced.
 
 Options:
-  --no-global  Skip mirroring into ~/.codex/skills/
+  --no-global  Accepted for compatibility; has no effect (nothing global is written)
 USAGE
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --no-global)
-      sync_global=false
       ;;
     -h|--help)
       usage
@@ -58,10 +55,7 @@ if [[ ! -d "$SKILLS_ROOT" ]]; then
   exit 1
 fi
 
-mkdir -p "$REPO_ROOT/.agents" "$REPO_ROOT/.claude" "$REPO_ROOT/.windsurf"
-if $sync_global; then
-  mkdir -p "$GLOBAL_CODEX_SKILLS"
-fi
+mkdir -p "$REPO_ROOT/.agents" "$REPO_ROOT/.claude"
 
 link_catalog() {
   local link_path="$1"
@@ -78,51 +72,25 @@ link_catalog() {
   ln -s "$target" "$link_path"
 }
 
-sync_global_codex_mirror() {
-  local skill_dir
-  local skill_name
-  local target
-  local resolved
-
-  for skill_dir in "$AGENTS_SKILLS"/*; do
-    [[ -f "$skill_dir/SKILL.md" ]] || continue
-    skill_name="$(basename "$skill_dir")"
-    target="$GLOBAL_CODEX_SKILLS/$skill_name"
-    if [[ -e "$target" && ! -L "$target" ]]; then
-      printf 'Preserving non-symlink global Codex skill path: %s\n' "$target" >&2
-      continue
-    fi
-    ln -sfn "$AGENTS_SKILLS/$skill_name" "$target"
-  done
-
-  for target in "$GLOBAL_CODEX_SKILLS"/*; do
-    [[ -L "$target" ]] || continue
-    skill_name="$(basename "$target")"
-    [[ "$skill_name" == .* ]] && continue
-
-    resolved="$(readlink "$target" || true)"
-    case "$resolved" in
-      "$AGENTS_SKILLS/"*|*/.agents/skills/*|"$CODEX_SKILLS/"*|*/.codex/skills/*)
-        [[ -e "$AGENTS_SKILLS/$skill_name" || -L "$AGENTS_SKILLS/$skill_name" ]] || rm -f "$target"
-        ;;
-      *)
-        continue
-        ;;
-    esac
-  done
-}
-
 link_catalog "$AGENTS_SKILLS" "../skills"
 link_catalog "$CLAUDE_SKILLS" "../.agents/skills"
-link_catalog "$CODEX_SKILLS" "../.agents/skills"
-link_catalog "$WINDSURF_SKILLS" "../.agents/skills"
 
-if $sync_global; then
-  sync_global_codex_mirror
-fi
+# Old skill roots are no longer created or mirrored; existing links are never removed here.
+note_legacy() {
+  local path="$1" entry found=0
+  if [[ -L "$path" ]]; then
+    found=1
+  elif [[ -d "$path" ]]; then
+    for entry in "$path"/*; do
+      [[ -L "$entry" ]] && { found=1; break; }
+    done
+  fi
+  if (( found )); then
+    printf 'Note: %s holds links that are no longer created; it can be removed (.agents/skills is used).\n' "$path"
+  fi
+}
+note_legacy "$CODEX_SKILLS"
+note_legacy "$WINDSURF_SKILLS"
+note_legacy "$GLOBAL_CODEX_SKILLS"
 
-if $sync_global; then
-  echo "Repaired shared skill catalog symlinks and refreshed ~/.codex/skills"
-else
-  echo "Repaired shared skill catalog symlinks"
-fi
+echo "Repaired shared skill catalog symlinks"

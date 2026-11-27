@@ -224,7 +224,7 @@ link_points_to() {
 }
 
 plan_link_surface() {
-  local tool="$1" surface_label="$2" link_path="$3" target_path="$4"
+  local tool="$1" surface_label="$2" link_path="$3" target_path="$4" backup_root="${5:-}"
   local parent
   parent="$(dirname "$link_path")"
 
@@ -244,7 +244,10 @@ plan_link_surface() {
   if [[ -e "$link_path" ]]; then
     if (( FORCE )); then
       local backup="${link_path}.bak-${BACKUP_TS}"
+      # A backup folder outside a skills root keeps the tool from loading it as a duplicate skill.
+      [[ -n "$backup_root" ]] && backup="$backup_root/$(basename "$link_path")-${BACKUP_TS}"
       if (( APPLY )); then
+        [[ -n "$backup_root" ]] && mkdir -p "$backup_root"
         mv "$link_path" "$backup"
         mkdir -p "$parent"
         ln -sfn "$target_path" "$link_path"
@@ -344,10 +347,112 @@ managed_block_apply() {
 
 CURSOR_SELECTED=0
 CURSOR_RULES_TEXT=""
+AGENTS_SKILLS_DONE=0
+
+# User-level skill roots that hold one link per skill inside a real directory
+# (~/.agents/skills, read by Codex, Cursor and Windsurf, and ~/.claude/skills):
+# never a link to the whole catalog, so anything another tool writes into the
+# root lands in the home directory and not in the toolkit checkout. Entries that
+# are not links into the toolkit's skills/ are left alone; an old directory link
+# to the whole catalog is replaced by the real directory (only the link is
+# removed, never its target's contents); links into the toolkit's skills/ whose
+# skill no longer exists are removed.
+install_skill_dir() {
+  local tool="$1" dir="$2" label_prefix="$3"
+  local skills_src="$TOOLKIT_ROOT/skills"
+  [[ -d "$skills_src" ]] || return 0
+  local migrating=0 skill_dir name entry raw
+
+  if [[ -L "$dir" ]]; then
+    if link_points_to "$dir" "$skills_src" || (( FORCE )); then
+      migrating=1
+      local previous="the whole catalog"
+      link_points_to "$dir" "$skills_src" || previous="$(readlink "$dir")"
+      if (( APPLY )); then
+        rm -f "$dir"
+        mkdir -p "$dir"
+      fi
+      add_row "$tool" "${label_prefix}skills" "updated" "$dir was a link to $previous; now a real directory with one link per skill"
+    else
+      add_row "$tool" "${label_prefix}skills" "blocked" "existing link at $dir does not point to the toolkit; rerun with --force"
+      return 0
+    fi
+  elif [[ -e "$dir" && ! -d "$dir" ]]; then
+    if (( FORCE )); then
+      local backup="${dir}.bak-${BACKUP_TS}"
+      (( APPLY )) && { mv "$dir" "$backup"; mkdir -p "$dir"; }
+      add_row "$tool" "${label_prefix}skills" "updated" "backed up to $backup, then created a directory"
+      migrating=1
+    else
+      add_row "$tool" "${label_prefix}skills" "blocked" "existing non-directory path at $dir; rerun with --force"
+      return 0
+    fi
+  fi
+
+  for skill_dir in "$skills_src"/*/; do
+    [[ -f "${skill_dir}SKILL.md" ]] || continue
+    name="$(basename "$skill_dir")"
+    if (( migrating && ! APPLY )); then
+      add_row "$tool" "${label_prefix}skills/$name" "created" "$dir/$name -> $skills_src/$name"
+      continue
+    fi
+    if [[ -L "$dir/$name" ]]; then
+      raw="$(readlink "$dir/$name")"
+      case "$raw" in
+        "$skills_src/"*) ;;
+        *)
+          add_row "$tool" "${label_prefix}skills/$name" "skipped" "$dir/$name is a link outside the toolkit; left alone"
+          continue
+          ;;
+      esac
+    fi
+    plan_link_surface "$tool" "${label_prefix}skills/$name" "$dir/$name" "$skills_src/$name" "${dir}.backup"
+  done
+
+  # Stale per-skill links: only links into the toolkit's skills/ whose skill is gone.
+  if [[ -d "$dir" && ! -L "$dir" ]]; then
+    for entry in "$dir"/*; do
+      [[ -L "$entry" ]] || continue
+      raw="$(readlink "$entry")"
+      case "$raw" in
+        "$skills_src/"*)
+          name="$(basename "$entry")"
+          if [[ ! -f "$skills_src/$name/SKILL.md" ]]; then
+            (( APPLY )) && rm -f "$entry"
+            add_row "$tool" "${label_prefix}skills/$name" "removed" "stale link; $name is no longer a toolkit skill"
+          fi
+          ;;
+      esac
+    done
+  fi
+}
+
+# Shared by Codex, Cursor and Windsurf.
+install_agents_skills() {
+  (( AGENTS_SKILLS_DONE )) && return 0
+  AGENTS_SKILLS_DONE=1
+  install_skill_dir "agents" "$HOME_DIR/.agents/skills" ""
+}
+
+# Old per-tool skill roots are no longer created. Existing links are never
+# removed here; one row says each one can be removed by hand.
+note_legacy_skill_root() {
+  local tool="$1" root="$2" entry found=0
+  if [[ -L "$root" ]]; then
+    found=1
+  elif [[ -d "$root" ]]; then
+    for entry in "$root"/*; do
+      [[ -L "$entry" ]] && { found=1; break; }
+    done
+  fi
+  if (( found )); then
+    add_row "$tool" "legacy skills" "unchanged" "$root still holds links; no longer created, can be removed (~/.agents/skills is used)"
+  fi
+}
 
 install_claude() {
   local base="$HOME_DIR/.claude"
-  plan_link_surface "claude" "skills" "$base/skills" "$TOOLKIT_ROOT/skills"
+  install_skill_dir "claude" "$base/skills" ""
   plan_link_surface "claude" "agents" "$base/agents" "$TOOLKIT_ROOT/tool-subagents"
   managed_block_apply "claude" "CLAUDE.md" "$base/CLAUDE.md"
 }
@@ -355,22 +460,33 @@ install_claude() {
 install_codex() {
   local base="$HOME_DIR/.codex"
 
-  if [[ -d "$TOOLKIT_ROOT/skills" ]]; then
-    local skill_dir name
-    for skill_dir in "$TOOLKIT_ROOT/skills"/*/; do
-      [[ -f "${skill_dir}SKILL.md" ]] || continue
-      name="$(basename "$skill_dir")"
-      plan_link_surface "codex" "skills/$name" "$base/skills/$name" "$TOOLKIT_ROOT/skills/$name"
-    done
-  fi
+  install_agents_skills
+  note_legacy_skill_root "codex" "$base/skills"
 
-  plan_link_surface "codex" "agents" "$base/agents" "$TOOLKIT_ROOT/tool-subagents"
+  # Codex reads generated TOML (rendered from tool-subagents/*.md, never committed).
+  local codex_agents="$TOOLKIT_ROOT/tool-subagents/.generated/codex"
+  if (( APPLY )); then
+    if command -v node >/dev/null 2>&1 && node "$TOOLKIT_ROOT/scripts/create-specialist-agent.js" --render-codex >/dev/null; then
+      :
+    else
+      add_row "codex" "agents" "skipped" "could not render Codex agent TOML (needs node); existing link left unchanged"
+      codex_agents=""
+    fi
+  fi
+  if [[ -n "$codex_agents" ]]; then
+    if [[ -L "$base/agents" && -d "$base/agents" && -d "$TOOLKIT_ROOT/tool-subagents" ]] \
+      && [[ "$(cd "$base/agents" && pwd -P)" == "$(cd "$TOOLKIT_ROOT/tool-subagents" && pwd -P)" ]]; then
+      echo "WARNING: $base/agents still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex (re-pointing now when applying)." >&2
+    fi
+    plan_link_surface "codex" "agents" "$base/agents" "$codex_agents"
+  fi
   managed_block_apply "codex" "AGENTS.md" "$base/AGENTS.md"
 }
 
 install_cursor() {
   local base="$HOME_DIR/.cursor"
-  plan_link_surface "cursor" "skills" "$base/skills" "$TOOLKIT_ROOT/skills"
+  install_agents_skills
+  note_legacy_skill_root "cursor" "$base/skills"
   plan_link_surface "cursor" "agents" "$base/agents" "$TOOLKIT_ROOT/tool-subagents"
   add_row "cursor" "user-rules (manual)" "skipped" "no global rules file; paste text below into Cursor Settings > Rules"
   CURSOR_SELECTED=1
@@ -379,7 +495,8 @@ install_cursor() {
 
 install_windsurf() {
   local base="$HOME_DIR/.codeium/windsurf"
-  plan_link_surface "windsurf" "skills" "$base/skills" "$TOOLKIT_ROOT/skills"
+  install_agents_skills
+  note_legacy_skill_root "windsurf" "$base/skills"
   managed_block_apply "windsurf" "memories/global_rules.md" "$base/memories/global_rules.md"
 }
 

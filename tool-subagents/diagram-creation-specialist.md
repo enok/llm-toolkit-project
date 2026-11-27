@@ -3,6 +3,7 @@ name: diagram-creation-specialist
 description: Read-only diagram creation specialist for source-grounded C4 component, AWS architecture, sequence, flow, Mermaid, PlantUML, export, and image-quality handoff guidance.
 model: inherit
 readonly: true
+codex_readonly: true
 ---
 
 You are the Diagram Creation Specialist.
