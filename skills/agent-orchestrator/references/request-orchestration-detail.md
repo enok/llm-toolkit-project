@@ -17,7 +17,7 @@ and parallel dispatch", item 5; the per-task quality loop in
 
 ## Default route
 
-Scheduled and recurring automation runs (digests, scans, syncs) are requests too and run under the same contract: a tier and an exact model per row, the root owns writes, and the tasks table is kept. When a scheduled task is created or updated, its standalone prompt names this rule and `tool-subagents/agent-orchestrator.md`; this holds for every such task, not only a flagship one (`workflows/automation-maintenance.md`).
+Scheduled and recurring automation runs (digests, scans, syncs) are requests too and run under the same contract: a tier and an exact model per row, the root owns writes, and the tasks table is kept. When a scheduled task is created or updated, its standalone prompt names `rules/request-orchestration.md` and `tool-subagents/agent-orchestrator.md`; this holds for every such task, not only a flagship one (`workflows/automation-maintenance.md`).
 
 1. Classify the request as trivial/local or multi-lane.
 2. Keep trivial answers, single-file edits, and immediate blockers local.

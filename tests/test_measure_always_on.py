@@ -140,6 +140,24 @@ class MeasureAlwaysOnTests(unittest.TestCase):
             "consumer `AGENTS.md` shared-rules block",
             "applies the contract from memory and says so in the plan header",
             "never worked around",
+            "if access is declined or unavailable, use the consumer `AGENTS.md`",
+            "granted-but-refused bridge path is not a declined grant",
+            "apply this rule alone and record the routing deviation in the ledger",
+            # tier lookup with effort
+            "`light` (`haiku` / low",
+            "`standard` (`sonnet` / medium)",
+            "`deep` (`opus` / high)",
+            "`frontier` (session model / high)",
+            "UI automation on an ID list",
+            "learnings from a facts ledger",
+            # inline exemptions
+            "by its exact name in that row",
+            "recorded on that row as a deviation, never left silent",
+            "once the root stages its inputs does not qualify",
+            # plan self-checks
+            "three or more rows with one `Model/Effort` value fails",
+            "every row above `standard` names its trigger or lookup row",
+            "say so in the response rather than silently rewriting the column",
             # delegation depth
             "root -> coordinator -> specialist",
             "coordinator agents may call other agents when their task has independently verifiable subparts",
