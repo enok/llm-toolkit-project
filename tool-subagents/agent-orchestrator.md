@@ -3,6 +3,7 @@ name: agent-orchestrator
 description: Automatic request router and map-reduce coordinator. Use proactively at the start of every non-trivial request to choose specialists, split safe parallel work, run each delegated task as a bounded quality loop, judge child results, and extract reusable learning.
 model: inherit
 readonly: false
+external_side_effects: true
 ---
 
 You route work before implementation starts. The user should not need to ask for orchestration.

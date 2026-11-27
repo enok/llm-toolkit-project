@@ -3,9 +3,11 @@
 
 const { spawnSync } = require("child_process");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
+const { REQUIRED_TOML_FIELDS, renderCodexToml, renderCodexDir } = require("./subagent-render");
 let failures = 0;
 
 function fail(message) {
@@ -99,42 +101,6 @@ function parseTomlBasicString(toml, key) {
   return match[1].replace(/\\(["\\])/g, "$1");
 }
 
-function parseTomlMultilineString(toml, key) {
-  const rest = tomlValueAfterKey(toml, key);
-  if (rest === null || !rest.startsWith('"""')) {
-    return null;
-  }
-  let body = rest.slice(3);
-  if (body.startsWith("\n")) {
-    body = body.slice(1);
-  }
-  const close = body.indexOf('"""');
-  return close === -1 ? null : body.slice(0, close);
-}
-
-function parseTomlStringArray(toml, key) {
-  const rest = tomlValueAfterKey(toml, key);
-  if (rest === null || !rest.startsWith("[")) {
-    return [];
-  }
-  const close = rest.indexOf("]");
-  if (close === -1) {
-    return [];
-  }
-  const inner = rest.slice(1, close);
-  return (inner.match(/"(?:[^"\\]|\\.)*"/g) || []).map((entry) =>
-    entry.slice(1, -1).replace(/\\(["\\])/g, "$1"),
-  );
-}
-
-function normalizeWhitespace(text) {
-  return text.replace(/\s+/g, " ").trim();
-}
-
-function stripFrontmatter(text) {
-  return text.replace(/^---\n[\s\S]*?\n---\n/, "");
-}
-
 function assertContains(file, needle, label = needle) {
   if (!exists(file)) {
     fail(`${file} missing`);
@@ -197,12 +163,23 @@ function checkRulesRedirects() {
 const VALID_SUBAGENT_MODELS = new Set(["inherit", "haiku", "sonnet", "opus"]);
 const VALID_SUBAGENT_TIERS = new Set(["light", "standard", "deep"]);
 
+function checkOrchestratorFlags(agent, meta) {
+  if (meta.readonly !== "false") {
+    fail(`tool-subagents/${agent}.md should declare readonly: false for explicit LOA mode`);
+  }
+  if (meta.external_side_effects !== "true") {
+    fail(`tool-subagents/${agent}.md should declare external_side_effects: true for the LOA side-effect capability`);
+  }
+}
+
 function checkSubagents() {
   for (const file of listFiles("tool-subagents", (name) => name.endsWith(".md") && name !== "README.md")) {
     const agent = file.replace(/\.md$/, "");
     const mdPath = `tool-subagents/${file}`;
-    const tomlPath = `tool-subagents/${agent}.toml`;
     const meta = parseFrontmatter(read(mdPath));
+    if (agent === "agent-orchestrator") {
+      checkOrchestratorFlags(agent, meta);
+    }
     if (meta.name !== agent) {
       fail(`${mdPath} frontmatter name '${meta.name || ""}' does not match file`);
     }
@@ -215,38 +192,60 @@ function checkSubagents() {
     if (meta.tier !== undefined && !VALID_SUBAGENT_TIERS.has(meta.tier)) {
       fail(`${mdPath} frontmatter tier '${meta.tier}' must be one of light|standard|deep`);
     }
-    if (!exists(tomlPath)) {
-      fail(`${tomlPath} missing`);
+    // The Codex TOML is generated from the .md (never committed): the check is
+    // that the .md renders and carries every required TOML field.
+    const rendered = renderCodexToml(read(mdPath), agent);
+    if (rendered.error) {
+      fail(`${mdPath} cannot be rendered to Codex TOML: ${rendered.error}`);
     } else {
-      const toml = read(tomlPath);
-      if (!toml.includes(`name = "${agent}"`)) {
-        fail(`${tomlPath} missing matching name`);
-      }
-      const tomlDescription = parseTomlBasicString(toml, "description");
-      if (tomlDescription === null) {
-        fail(`${tomlPath} missing description`);
-      } else if (meta.description && tomlDescription !== meta.description) {
-        fail(`${tomlPath} description differs from ${mdPath} frontmatter description`);
-      }
-      const instructions = parseTomlMultilineString(toml, "developer_instructions");
-      if (instructions !== null) {
-        const mdBody = normalizeWhitespace(stripFrontmatter(read(mdPath)));
-        if (normalizeWhitespace(instructions) !== mdBody) {
-          warn(`${tomlPath} developer_instructions diverge from ${mdPath} body`);
+      for (const field of REQUIRED_TOML_FIELDS) {
+        if (tomlValueAfterKey(rendered.toml, field) === null) {
+          fail(`${mdPath} renders without required TOML field ${field}`);
         }
       }
-      for (const target of parseTomlStringArray(toml, "can_delegate_to")) {
-        if (!exists(`tool-subagents/${target}.md`)) {
-          fail(`${tomlPath} can_delegate_to references nonexistent tool-subagents/${target}.md`);
-        }
+      const description = parseTomlBasicString(rendered.toml, "description");
+      if (description !== meta.description) {
+        fail(`${mdPath} description does not survive the TOML render`);
       }
     }
     assertContains("tool-subagents/README.md", `\`${agent}\``, `subagent catalog entry ${agent}`);
   }
 
   const canonicalReal = realpathOrNull(safeRepoPath("tool-subagents"));
+
+  // Render in a temp dir and compare with the generated folder when present
+  // (CI has none: rendering alone proves the sources are renderable).
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-agents-"));
+  try {
+    const result = renderCodexDir(safeRepoPath("tool-subagents"), tempRoot);
+    for (const error of result.errors) {
+      fail(`Codex render failed: ${error}`);
+    }
+    for (const generatedDir of ["tool-subagents/.generated/codex", ".codex/agents"]) {
+      if (!exists(generatedDir)) {
+        continue;
+      }
+      const generatedReal = realpathOrNull(safeRepoPath(generatedDir));
+      if (canonicalReal && generatedReal && generatedReal === canonicalReal) {
+        if (generatedDir === ".codex/agents") {
+          warn(`${generatedDir} still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed. Run once: ./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github (or .\\scripts\\sync-tool-configs.ps1)`);
+        }
+        continue; // legacy link onto tool-subagents/: nothing generated to compare
+      }
+      for (const file of fs.readdirSync(tempRoot)) {
+        const generatedFile = path.join(safeRepoPath(generatedDir), file);
+        if (!fs.existsSync(generatedFile)) {
+          fail(`${generatedDir}/${file} missing; run npm run subagents:render`);
+        } else if (fs.readFileSync(generatedFile, "utf8") !== fs.readFileSync(path.join(tempRoot, file), "utf8")) {
+          fail(`${generatedDir}/${file} is stale; run npm run subagents:render`);
+        }
+      }
+    }
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+
   const providerExpectations = [
-    { dir: ".codex/agents", extension: ".toml" },
     { dir: ".cursor/agents", extension: ".md" },
     { dir: ".claude/agents", extension: ".md" },
   ];
@@ -287,10 +286,7 @@ function checkSpecialist(agent) {
   const removed = removedLedgerPaths();
   const twinRemoved = !exists(`skills/${agent}`)
     && (removed.has(`skills/${agent}`) || removed.has(`skills/${agent}/SKILL.md`));
-  const required = [
-    `tool-subagents/${agent}.md`,
-    `tool-subagents/${agent}.toml`,
-  ];
+  const required = [`tool-subagents/${agent}.md`];
   if (!twinRemoved) {
     required.push(`skills/${agent}/SKILL.md`);
   }
@@ -305,11 +301,7 @@ function checkSpecialist(agent) {
       fail(`tool-subagents/${agent}.md frontmatter name mismatch`);
     }
     if (agent === "agent-orchestrator") {
-      if (meta.readonly !== "false") {
-        fail(`tool-subagents/${agent}.md should declare readonly: false for explicit LOA mode`);
-      }
-      assertContains(`tool-subagents/${agent}.toml`, "readonly = false", `writable LOA manifest for ${agent}`);
-      assertContains(`tool-subagents/${agent}.toml`, "external_side_effects = true", `LOA side-effect capability for ${agent}`);
+      checkOrchestratorFlags(agent, meta);
     } else if (meta.readonly !== "true") {
       fail(`tool-subagents/${agent}.md should declare readonly: true for validator-style specialists`);
     }

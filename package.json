@@ -6,6 +6,7 @@
   "scripts": {
     "tool-configs:sync": "node scripts/create-specialist-agent.js --sync-tool-configs .",
     "subagents:apply": "node scripts/create-specialist-agent.js --apply-subagents",
+    "subagents:render": "node scripts/create-specialist-agent.js --render-codex",
     "skills:index:check": "node scripts/validate-specialist-agent.js --skills-index-check",
     "skills:security:check": "node scripts/validate-specialist-agent.js --skillspector-check",
     "skills:security:check:all": "node scripts/validate-specialist-agent.js --skillspector-check-all",

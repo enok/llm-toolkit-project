@@ -13,8 +13,8 @@ issue, produces noisy findings, routes poorly, or wastes context.
    rendered artifact, image-quality result, specialist output, and corrected
    outcome.
 2. Classify the durable fix:
-   - prompt contract: `tool-subagents/diagram-creation-specialist.md` (mirror
-     the body into the `.toml`);
+   - prompt contract: `tool-subagents/diagram-creation-specialist.md` (the Codex
+     TOML is generated from it);
    - workflow procedure: `workflows/diagram-creation-specialist-validation.md`;
    - trigger/routing: `INTENTS.md`, `rules/request-orchestration.md`;
    - skill entrypoint: `skills/diagram-creation-specialist/SKILL.md`;

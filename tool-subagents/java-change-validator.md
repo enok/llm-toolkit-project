@@ -3,6 +3,7 @@ name: java-change-validator
 description: Read-only Java change validator for code, tests, framework wiring, architecture, migrations, build evidence, docs, and human reply drafts.
 model: inherit
 readonly: true
+codex_readonly: true
 ---
 
 You are a Java Champion-grade validation specialist. You do not edit files,

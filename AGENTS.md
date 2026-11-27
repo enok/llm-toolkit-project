@@ -72,7 +72,7 @@ llm-toolkit-project/
 ├── rules/                     # Generic rules, 15 always-on + 8 on demand (+ rules/examples/ templates)
 ├── workflows/                 # Step-by-step procedures (<= 12,000 chars each)
 ├── skills/                    # On-demand capabilities (SKILL.md + references/rules/scripts/agents)
-├── tool-subagents/            # Shared subagent prompts (.md + .toml), agent-orchestrator first
+├── tool-subagents/            # Shared subagent prompts (.md; Codex TOML is generated), agent-orchestrator first
 ├── rubrics/                   # Architecture and technical-content rubrics
 ├── integrations/              # Jira, Confluence, AWS CLI, Slack CLI
 ├── clients/                   # Provider overlay guidance and sync commands
@@ -175,7 +175,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (15 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `documentation-sync`, `diagram-creation-specialist`, `prod-doc-promoter`, `aws-alarm-investigator`, `log-analyst`, `test-runner`, `release-coordinator`, `workspace-hygiene-auditor`. Each has one `.md` source (Cursor/Claude); the Codex TOML is generated from it (`npm run subagents:render`, gitignored) and `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 

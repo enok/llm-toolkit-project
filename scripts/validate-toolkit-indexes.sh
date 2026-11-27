@@ -396,19 +396,29 @@ check_rule_example_index() {
 }
 
 check_mandatory_headings_in_toml() {
-  local md toml base name heading
+  # The Codex TOML is generated from the .md (never committed): render it into
+  # a temp dir and confirm every MANDATORY heading survives the render.
+  local md toml base name heading render_dir
+  command -v node >/dev/null 2>&1 || { echo "  SKIP mandatory-heading render check (node not found)"; return 0; }
+  render_dir="$(mktemp -d)"
+  if ! node scripts/create-specialist-agent.js --render-codex "$render_dir" >/dev/null 2>&1; then
+    fail "tool-subagents/*.md cannot be rendered to Codex TOML (run: npm run subagents:render)"
+    rm -rf -- "$render_dir"
+    return 0
+  fi
   while IFS= read -r -d '' md; do
     base="${md%.md}"
-    toml="${base}.toml"
-    [ -f "$toml" ] || continue
     name="$(basename "$base")"
+    toml="$render_dir/$name.toml"
+    [ -f "$toml" ] || { fail "$name: rendered Codex TOML missing"; continue; }
     while IFS= read -r heading; do
       [ -n "$heading" ] || continue
       if ! grep -qF "$heading" "$toml"; then
-        fail "$name: MANDATORY heading missing from tool-subagents/$name.toml: $heading"
+        fail "$name: MANDATORY heading missing from rendered Codex TOML for tool-subagents/$name.md: $heading"
       fi
     done < <(grep -E '^## .* \(MANDATORY\)[[:space:]]*$' "$md" || true)
   done < <(find tool-subagents -maxdepth 1 -type f -name '*.md' ! -name 'README.md' -print0 | LC_ALL=C sort -z)
+  rm -rf -- "$render_dir"
 }
 
 check_skill_local_references() {

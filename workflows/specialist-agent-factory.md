@@ -32,7 +32,6 @@ node scripts/create-specialist-agent.js <agent-name> --domain "<domain>" --descr
 The factory creates or updates the standard asset set:
 
 - `tool-subagents/<agent-name>.md`
-- `tool-subagents/<agent-name>.toml` (body identical to the `.md` body)
 - `workflows/<agent-name>-validation.md`
 - `workflows/<agent-name>-evolution.md`
 - `skills/<agent-name>/SKILL.md`

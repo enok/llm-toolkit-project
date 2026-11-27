@@ -47,7 +47,7 @@ When adding a specialist agent, update canonical assets first, then sync
 provider overlays:
 
 1. `tool-subagents/<agent>.md`
-2. `tool-subagents/<agent>.toml`
+2. (Codex TOML is generated from the `.md`; nothing to add)
 3. `workflows/<agent>-validation.md`
 4. `workflows/<agent>-evolution.md`
 5. `skills/<agent>/SKILL.md`

@@ -2,7 +2,9 @@
 
 This directory is the canonical source for shared subagent prompts rendered into provider compatibility surfaces such as `.cursor/agents/`, `.claude/agents/`, and optional `.codex/agents/`. Codex primarily uses `AGENTS.md` plus direct file paths; `.codex/agents/` is optional when the local setup supports it.
 
-Every agent is a pair: `<name>.md` (YAML frontmatter — `name`, `description`, `model`, and a `readonly` / `is_background` contract — plus the prompt body) and `<name>.toml` (`description`, `developer_instructions`, `name`) for tools that consume the TOML form. The `.toml` body must stay identical to the `.md` body; regenerate rather than hand-editing one side.
+Every agent is one source file, `<name>.md` (YAML frontmatter: `name`, `description`, `model`, and a `readonly` / `is_background` contract, plus the prompt body). The Codex TOML (`name`, `description`, `developer_instructions`, plus `readonly` only when the `.md` declares `codex_readonly`) is generated from that `.md` by `npm run subagents:render` into `tool-subagents/.generated/codex/` (gitignored, never committed). `.codex/agents` links there; the setup, sync, ensure-symlinks, and global-install scripts render it before linking and re-point a legacy `.codex/agents` link that still targets `tool-subagents/`. `npm run subagents:check` renders every agent in a temp dir, fails when an `.md` cannot be rendered or lacks a required TOML field, and warns while a stale `.codex/agents` link is present.
+
+**One-time step after updating the toolkit:** run the sync or installer once so the Codex agents link is re-pointed to `tool-subagents/.generated/codex/` (see the upgrade note in `README.md` for the exact commands).
 
 `agent-orchestrator` is the default coordinator for non-trivial requests. It classifies the request, chooses specialists, splits safe parallel work, scores each delegated task's complexity tier (`light`/`standard`/`deep`), runs every delegated task as a bounded produce->validate->refine quality loop (max 5 iterations, see `workflows/task-quality-loop.md`), presents the fanout as the wave-ordered tasks table defined in `agent-orchestrator.md` "Tasks table contract" (15 columns including assets, tokens, SLA, and remaining SLA; reprinted in full after every task completion; ledger checkpointed for resume), and reduces child findings. In normal mode the root then edits, validates, commits, or answers. Explicit LOA (letter-of-authorization) mode changes this only when requested: the parent reconciles final results while the coordinator dispatches separately owned authorized async execution, maintains an excluded state checkpoint, and reports auditable SLA/milestones.
 
@@ -51,8 +53,8 @@ Every agent is a pair: `<name>.md` (YAML frontmatter — `name`, `description`, 
   --apply-subagents` renders that hint per provider instead of copying it
   verbatim: `tier: light` becomes `model: haiku` in `.claude/agents` renders
   and `model: fast` in `.cursor/agents` renders, and the toolkit-only
-  `readonly`/`tier` keys are dropped from both, since Codex reads `.toml`
-  only and never sees this rewrite.
+  `readonly`/`tier` keys are dropped from both, since Codex reads the generated
+  `.toml` only and never sees this rewrite.
 
 Regenerate compatibility surfaces with:
 

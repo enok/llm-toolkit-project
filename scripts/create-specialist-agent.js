@@ -6,6 +6,8 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
+const { renderCodexDir } = require("./subagent-render");
+const GENERATED_CODEX_REL = "tool-subagents/.generated/codex";
 
 function usage() {
   console.log(`Usage:
@@ -13,10 +15,14 @@ function usage() {
   node scripts/create-specialist-agent.js --sync-tool-configs [project]
   node scripts/create-specialist-agent.js --apply-subagents <codex|cursor|claude|all> [project]
   node scripts/create-specialist-agent.js --apply-subagents <codex|cursor|claude> --target <dir>
+  node scripts/create-specialist-agent.js --render-codex [dir] [--source <tool-subagents dir>]
 
-Renders copy only the files each provider actually reads from tool-subagents/:
-codex reads *.toml only, cursor and claude read *.md only ('all' applies each
-provider's own rule to its own project-relative directory). For claude and
+The Codex agent TOML is generated from tool-subagents/<name>.md and is never
+committed: --render-codex writes it to tool-subagents/.generated/codex/ (or
+[dir]); setup and sync scripts run it before linking .codex/agents there.
+Renders produce only the files each provider actually reads: codex gets
+generated *.toml, cursor and claude get *.md ('all' applies each provider's
+own rule to its own project-relative directory). For claude and
 cursor, the rendered *.md frontmatter drops the toolkit-only 'readonly' and
 'tier' keys and, when 'tier: light' was set, writes the provider's cheap-model
 value ('model: haiku' for claude, 'model: fast' for cursor) so the cost intent
@@ -183,7 +189,7 @@ function copyChangedFile(source, destination, transform) {
 // Each provider only reads one of the two canonical file shapes.
 function providerRenderExtension(provider) {
   if (provider === "codex") {
-    return ".toml";
+    return ".toml"; // generated from the canonical .md, never copied
   }
   if (provider === "cursor" || provider === "claude") {
     return ".md";
@@ -210,7 +216,7 @@ function rewriteFrontmatterForProvider(provider, content) {
       tierValue = colon === -1 ? "" : line.slice(colon + 1).trim().replace(/^["']|["']$/g, "");
       continue;
     }
-    if (key === "readonly") {
+    if (key === "readonly" || key === "codex_readonly" || key === "external_side_effects") {
       continue;
     }
     kept.push(line);
@@ -241,7 +247,27 @@ function expandHome(target) {
   return target;
 }
 
+function renderCodexInto(sourceRoot, targetRoot, label) {
+  // A legacy link that still points at tool-subagents/ must never receive
+  // generated files; the installers re-point it to .generated/codex.
+  if (fs.existsSync(targetRoot) && sameRealPath(sourceRoot, targetRoot)) {
+    console.log(`SKIP ${label}: still linked to tool-subagents/; re-run the installer to re-point it to ${GENERATED_CODEX_REL}.`);
+    return 0;
+  }
+  const result = renderCodexDir(sourceRoot, targetRoot);
+  if (result.errors.length > 0) {
+    fail(`cannot render Codex agents:\n  ${result.errors.join("\n  ")}`);
+  }
+  if (result.changed > 0) {
+    console.log(`APPLY ${label}/ (${result.changed} of ${result.rendered} TOML file(s) rendered)`);
+  }
+  return result.changed;
+}
+
 function renderProviderInto(provider, sourceRoot, targetRoot, label) {
+  if (provider === "codex") {
+    return renderCodexInto(sourceRoot, targetRoot, label);
+  }
   const extension = providerRenderExtension(provider);
   fs.mkdirSync(targetRoot, { recursive: true });
   const transform = provider === "codex" ? null : (text) => rewriteFrontmatterForProvider(provider, text);
@@ -250,7 +276,7 @@ function renderProviderInto(provider, sourceRoot, targetRoot, label) {
     if (!entry.endsWith(extension)) {
       continue;
     }
-    if (!/^[a-z0-9-]+(?:\.md|\.toml)$/.test(entry) && entry !== "README.md") {
+    if (!/^[a-z0-9-]+\.md$/.test(entry) && entry !== "README.md") {
       fail(`unexpected subagent filename: ${entry}`);
       continue;
     }
@@ -364,18 +390,6 @@ Authority: ${readOnly ? "read-only; do not edit files, post comments, stage, com
 `,
     ],
     [
-      `tool-subagents/${name}.toml`,
-      `name = "${name}"
-description = "${description.replace(/"/g, '\\"')}"
-readonly = ${readOnly ? "true" : "false"}
-developer_instructions = """
-You are the ${title} specialist. Stay in assigned scope, cite evidence, return
-actionable findings, recommend related specialist handoffs, surface
-learning/token-efficiency improvements, and let the root agent own user
-communication, validation, commits, pushes, and PR actions."""
-`,
-    ],
-    [
       `workflows/${name}-validation.md`,
       `---
 description: Run the ${title} specialist validation workflow
@@ -477,6 +491,26 @@ if (argv.length === 0 || argv.includes("--help") || argv.includes("-h")) {
 
 if (argv[0] === "--sync-tool-configs") {
   runToolkitSync(argv[1]);
+  process.exit(0);
+}
+
+if (argv[0] === "--render-codex") {
+  const rest = argv.slice(1);
+  let sourceDir = path.join(ROOT, "tool-subagents");
+  const sourceIndex = rest.indexOf("--source");
+  if (sourceIndex !== -1) {
+    if (!rest[sourceIndex + 1] || rest[sourceIndex + 1].startsWith("--")) {
+      fail("--source requires a value");
+    }
+    sourceDir = path.resolve(expandHome(rest[sourceIndex + 1]));
+    rest.splice(sourceIndex, 2);
+  }
+  const dir = rest[0] ? path.resolve(expandHome(rest[0])) : path.join(ROOT, GENERATED_CODEX_REL);
+  const result = renderCodexDir(sourceDir, dir);
+  if (result.errors.length > 0) {
+    fail(`cannot render Codex agents:\n  ${result.errors.join("\n  ")}`);
+  }
+  console.log(`Rendered ${result.rendered} Codex agent TOML file(s) into ${dir} (${result.changed} updated).`);
   process.exit(0);
 }
 

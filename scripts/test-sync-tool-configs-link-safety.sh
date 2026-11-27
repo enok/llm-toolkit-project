@@ -91,4 +91,26 @@ if [[ -e "$TMP_DIR/.github/copilot-instructions.md" ]]; then
   exit 1
 fi
 
+# Consumer with its own tool-subagents/: hand-written *.toml stay visible to Codex.
+for kind in toml md; do
+  C="$TMP_DIR/consumer-$kind"
+  mkdir -p "$C/tool-subagents" "$C/rules"
+  echo "# Own Agent" > "$C/tool-subagents/own-agent.md"
+  [[ "$kind" == toml ]] && printf 'name = "own-agent"\n' > "$C/tool-subagents/own-agent.toml"
+  bash "$ROOT/scripts/sync-tool-configs.sh" "$C" --skip-agents-md --skip-github >/dev/null 2>&1 || true
+  if [[ "$kind" == toml ]]; then
+    if [[ ! -L "$C/.codex/agents" ]] || [[ ! -f "$C/.codex/agents/own-agent.toml" ]]; then
+      echo "FAIL: consumer .codex/agents is not linked to its own tool-subagents/ holding .toml." >&2
+      exit 1
+    fi
+  elif [[ -e "$C/.codex/agents" ]]; then
+    echo "FAIL: consumer with only .md agents got a .codex/agents link." >&2
+    exit 1
+  fi
+  if [[ -e "$C/tool-subagents/.generated" ]] || [[ "$(find "$C/tool-subagents" -type f | wc -l)" -gt 2 ]]; then
+    echo "FAIL: sync wrote into the consumer's tool-subagents/." >&2
+    exit 1
+  fi
+done
+
 echo "PASS: sync-tool-configs preserves blocking paths unless --force is supplied."

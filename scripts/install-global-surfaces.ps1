@@ -428,7 +428,27 @@ function Install-CodexSurface {
             }
         }
     }
-    Set-LinkSurface -Tool 'codex' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents')
+    # Codex reads generated TOML (rendered from tool-subagents/*.md, never committed).
+    $codexAgentsOk = $true
+    if ($Apply) {
+        $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+        $codexAgentsOk = $false
+        if ($nodeCmd) {
+            & node (Join-Path $ToolkitRoot 'scripts/create-specialist-agent.js') --render-codex | Out-Null
+            $codexAgentsOk = ($LASTEXITCODE -eq 0)
+        }
+        if (-not $codexAgentsOk) {
+            Add-ResultRow -Tool 'codex' -Surface 'agents' -Action 'skipped' -Detail 'could not render Codex agent TOML (needs node); existing link left unchanged'
+        }
+    }
+    if ($codexAgentsOk) {
+        $legacyAgentsCanon = Get-LinkTargetCanonical -LinkPath (Join-Path $base 'agents')
+        $legacyToolkitDir = Join-Path $ToolkitRoot 'tool-subagents'
+        if ($legacyAgentsCanon -and (Test-Path -LiteralPath $legacyToolkitDir -PathType Container) -and ($legacyAgentsCanon -ieq (Get-FullPathSafe (Resolve-Path -LiteralPath $legacyToolkitDir).Path))) {
+            Write-Warning "$(Join-Path $base 'agents') still points at tool-subagents/, which no longer holds .toml files; Codex sees no agents until it is re-pointed to tool-subagents/.generated/codex (re-pointing now when applying)."
+        }
+        Set-LinkSurface -Tool 'codex' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents/.generated/codex')
+    }
     Set-ManagedBlock -Tool 'codex' -SurfaceLabel 'AGENTS.md' -FilePath (Join-Path $base 'AGENTS.md')
 }
 

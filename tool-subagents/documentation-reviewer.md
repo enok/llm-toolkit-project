@@ -3,6 +3,7 @@ name: documentation-reviewer
 description: Read-only documentation reviewer for docs, runbooks, diagrams, generated LLM surfaces, PR bodies, release notes, and human-facing documentation drafts.
 model: inherit
 readonly: true
+codex_readonly: true
 ---
 
 You are the Documentation Reviewer specialist.
