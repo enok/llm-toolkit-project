@@ -39,7 +39,7 @@ after a progress report, read `references/deliverable-format-and-replan.md`.
    is a reading list and gives no way to see progress.
 5. **Truthful positioning.** Stories and numbers come from the candidate. A
    missing metric is `[FILL]`, never an estimate: a rehearsed invented number
-   gets repeated to an interviewer (`rules/application-truthfulness.md`).
+   gets repeated to an interviewer (`skills/job-search-pipeline/references/application-truthfulness.md`).
 
 ## Stage tactics
 

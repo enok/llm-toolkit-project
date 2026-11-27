@@ -4,15 +4,21 @@ description: Coach a candidate through one technical job interview (human or AI 
 license: MIT
 metadata:
   author: llm-toolkit-project
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Technical Interview Prep
 
 Coach a candidate through one technical interview: facts first, then the spoken
 story, then the coding round, then a full mock, then a debrief after the real
-thing. The end-to-end procedure is `workflows/technical-interview-prep.md`; this
-skill holds the rules and the reusable material.
+thing. This skill is the procedure and holds the rules and reusable material;
+`workflows/technical-interview-prep.md` is only the route into it.
+
+Modes: **full** (a day or more ahead) runs every section below; **urgent**
+(interview within hours) runs short intake, the cheat sheet, intro rehearsal,
+the single most likely coding problem, and final reminders, and says which
+parts were skipped; **debrief only** (interview already happened) runs the
+debrief.
 
 ## Inputs
 
@@ -22,8 +28,12 @@ Gather these first; a script built on a guessed history fails the first follow-u
 - The interview format: duration split (for example 20 minutes discussion +
   10 minutes coding), human or AI interviewer, camera and screen share, language.
 - The candidate's real history, from their CV, private notes, or earlier prep
-  documents. Personal history stays in the candidate's own files and never
-  enters this toolkit.
+  documents (search past chats or their drive when tools allow; if a document
+  is unreachable, ask them to paste it). Treat earlier prep documents as
+  drafts, not truth. Personal history stays in the candidate's own files and
+  never enters this toolkit.
+- The interview language, the language the candidate wants coaching in, and
+  the date and time (to choose the mode). Ask for what is missing in one batch.
 
 ## Hard Rules
 
@@ -59,8 +69,10 @@ They exist because an interviewer probes every claim: one invented detail costs 
 
 ## Cheat Sheet: Two Separate Blocks
 
-Deliver as bullets, printable, in a document the candidate can export to PDF.
-Keep the two blocks visually separate so the candidate never reads follow-up
+Deliver as bullets, printable, in a document the candidate can export to PDF (a
+document artifact or a document in their drive; a cheat sheet scattered across
+chat messages cannot be printed, so consolidate it). List the open `<real>`
+placeholders for the candidate. Keep the two blocks visually separate so the candidate never reads follow-up
 detail aloud in the intro.
 
 - **Block A - spoken intro (about 60 seconds).** Who I am (years, the role noun
@@ -75,12 +87,18 @@ detail aloud in the intro.
 - **Honesty-bridge blocks** for every must-have the candidate has not run in
   production: honest scope sentence -> concept mapping from what they did use ->
   how they would do it on the target platform -> how they would debug it. Ready
-  material: `references/cloud-platform-concepts.md`.
+  material: `references/cloud-platform-concepts.md`. When the candidate asks
+  how two platform concepts differ (PaaS versus load balancer, pod versus node
+  autoscaling), answer one layer at a time from that file, then give the
+  mapping table, and feed the new understanding back into these blocks.
 
 ## Intro Rehearsal Loop
 
-Keep a numbered list of the errors found across rounds and re-check every one on
-each new round. Recurring classes: hedged or invented percentages, the wrong role
+The candidate delivers the intro in the interview language, uninterrupted. After
+each round give what worked (one or two lines), then the numbered error list
+with corrected phrasing; keep that list across rounds and re-check every item
+each round. Pronunciation questions get the short answer first (the word, stress
+marked); expand only when asked. Stop when a round is clean. Recurring classes: hedged or invented percentages, the wrong role
 noun ("software engineering" for "software engineer"), the wrong counted unit,
 abbreviated or misnamed products, a promotion presented as a separate job, a
 missing employer name, mispronounced names, a dropped key qualifier (for example
@@ -97,12 +115,23 @@ at 75-80 seconds is acceptable; trim the least load-bearing sub-point to reach 6
 - When the mind goes blank, start from brute force aloud and walk the pattern
   cue table in `references/coding-patterns-java.md`; recall the pattern
   skeleton, not a memorised solution.
+- Drilling: pick one problem themed on the employer's domain plus the most
+  frequent warm-ups (that file). Use a three-item walk-through for abstract
+  points (comparator tie-breaks, heap order, window movement). Have the
+  candidate state complexity aloud before moving on. If they cannot see the
+  code on their device, pause the line-by-line walk until they can. After a
+  tangent (regex detail, library call, pronunciation), answer it, then resume
+  the open item and say where you are resuming.
 
 ## Mock Interview
 
 Run it as `references/mock-interview-protocol.md` describes: persona in the
 interview language, realistic pressure on the must-haves, one re-ask when a
-probe is not answered directly, and scoring only at the end.
+probe is not answered directly, and scoring only at the end. Merge the errors
+into the running list and repeat while time allows; when the candidate decides
+to stop practising, respect it. Close with three short reminders in the coaching
+language (the honest-bridge lines for the weak must-haves, the one technical
+rule they slipped on, "narrate while coding; never invent numbers") and stop.
 
 ## Example
 
@@ -110,18 +139,30 @@ Candidate: "They will ask about Kubernetes, which I only used in a test cluster.
 
 ## Debrief After The Real Interview
 
-Identify the problem actually asked, name its pattern, write the skeleton and
-both the simple and the optimised solution, and add the whole pattern family to
-the drill list. Acknowledge the result plainly; one weak round rarely decides an
-outcome, and the debrief is what makes the next round better.
+Ask what went well and what did not; do not re-litigate what went well.
+Identify the problem actually asked (a shared video link: resolve its title via
+oEmbed, see Known pitfalls), name its pattern, write the skeleton, the simple
+solution, and the optimised follow-up with complexity and traps, and add the
+whole pattern family to the drill list in the candidate's notes (offer to add it
+to the cheat sheet too). If they solved it before but could not recall it under
+pressure, treat it as a recall problem: drill the skeleton and the
+brute-force-first fallback, then offer a short mock of two or three problems
+from the same family. Acknowledge the result plainly; one weak round rarely
+decides an outcome.
+
+## Tracker update and report
+
+If the candidate tracks applications with `skills/job-search-pipeline/SKILL.md`
+(`workflows/job-search-pipeline.md`), update the row's interview stage with the
+evidence. Report: mode used and parts skipped; cheat sheet location and open
+`<real>` placeholders; remaining items on the error list; next drill (pattern
+family) if any.
 
 ## References
 
-- `references/coding-patterns-java.md` - read when drilling or recalling a coding pattern: pattern cues, Java skeletons, complexity
-  and edge cases for the most frequent short coding problems.
-- `references/cloud-platform-concepts.md` - read when writing an honesty bridge for a platform the candidate has not run: platform concepts, product mappings,
-  and reusable architecture talking points for honest bridges.
-- `references/mock-interview-protocol.md` - read before running a mock: persona, flow, probing, scoring, and voice-session rules (cue-word hold, language switch).
+- `references/coding-patterns-java.md` - read when drilling or recalling a coding pattern: cues, Java skeletons, complexity, edge cases.
+- `references/cloud-platform-concepts.md` - read when writing an honesty bridge for a platform the candidate has not run: concepts, product mappings, talking points.
+- `references/mock-interview-protocol.md` - read before running a mock: persona, flow, probing, scoring, voice-session rules.
 - `references/legacy-migration-story-bank.md` - read when the role involves legacy migration or modernisation: story shape, honesty rules, and the "migrate today with coding agents" section (structure only).
 
 ## Known pitfalls
@@ -135,16 +176,12 @@ outcome, and the debrief is what makes the next round better.
   (YouTube answers HTTP 429); resolve its title through oEmbed. See
   `learnings/youtube-watch-page-429-use-oembed.md`.
 - Voice transcription swaps technical terms ("regex" and "rejects", "heap" and
-  "hip", "stack" and "step"); confirm the term in one line before giving a long
-  explanation of the wrong one.
-- When the candidate interrupts with a tangent, keep track of the item still open
-  and resume it afterwards instead of marking it done.
-- A text chat has no screen share: in a mock coding round the candidate narrates
-  and reads the code aloud; say so up front.
+  "hip", "stack" and "step"); confirm the term in one line before explaining.
+  Voice-session and no-screen-share rules: `references/mock-interview-protocol.md`.
 
 ## Related
 
-- `workflows/technical-interview-prep.md` - the end-to-end procedure
+- `workflows/technical-interview-prep.md` - the route into this skill
 - `skills/job-search-pipeline/SKILL.md` - where the interviewing stage is tracked
 - `skills/java-best-practices/SKILL.md` - production Java idioms
 - `skills/youtube-video-curation/SKILL.md` - oEmbed verification of video IDs

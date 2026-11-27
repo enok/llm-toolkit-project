@@ -26,7 +26,8 @@ before the owner sees it.
 
 - Touched in the last 3 days.
 - Has a live process: running agent session, enabled scheduled task with a
-  future run, open pull request or job it drives.
+  future run, open pull request or job it drives. The one exception is the
+  merge rule for overlapping recurring tasks (see Rules per item type).
 - It is the current session, or a session running concurrently.
 - Source-of-truth chat: the place where a decision, plan, or spec is the only
   record (check whether memory or a document already holds it).
@@ -44,7 +45,7 @@ before the owner sees it.
 | Project | KEEP unless empty | Resolve contents first. |
 | Fired one-shot task (enabled=false, ended_reason set) | DELETE | Clutter by definition; still re-read before deleting. |
 | Recurring task, healthy | KEEP | Healthy means plausible run duration and no repeated failure. |
-| Recurring task, redundant or overlapping | CONSOLIDATE, then PAUSE originals | Pause, not delete, until the replacement has run well. |
+| Recurring task, redundant or overlapping | Propose CONSOLIDATE at low confidence; otherwise KEEP | Overlapping recurring tasks may be proposed for CONSOLIDATE at low confidence: create the replacement, then pause the originals (pause, not delete) until the replacement has run well. Otherwise the keep-rule applies. |
 | Recurring task, suspicious duration or repeated failure | KEEP + flag, or PAUSE | Open the run session before recommending. |
 | Artifact | DELETE only if obsolete or duplicate; KEEP otherwise | Per-item owner confirmation at execution. |
 | Ledger section (tasks table, context state) | ARCHIVE when its remaining-count row is 0 | Never trust header wording like "all waves complete"; keep the current session. |

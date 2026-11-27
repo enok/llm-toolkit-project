@@ -24,7 +24,8 @@ what would verify it.
 3. Print the tasks table (task, tier, explicit model, wave, validator,
    status). Typical lanes: conversation collection (root), header check
    (standard), one vetting lane per firm (standard, parallel), process check
-   (standard), verdict (deep). Keep `TASKS_TABLE.md` and `CONTEXT_STATE.md`.
+   (standard), verdict (deep). Keep `TASKS_TABLE.md` and `CONTEXT_STATE.md`
+   only when lanes are dispatched.
 4. The run is read-only: no replies, applications, sign-ups, form fills, link
    clicks, downloads, or installs. Lanes return evidence and drafts; the root
    owns every send.
@@ -73,8 +74,8 @@ No judgment and no draft until this phase is done on every channel.
 5. Check for lookalike domains (swapped letters, extra words, other TLDs)
    against the official domain found in Phase 4.
 6. Extract every link host without visiting it. Hosts should be the firm's own
-   or platforms it documents; shorteners and unrelated hosts are flags. Chat
-   messages have no headers: judge them by Phase 4 evidence.
+   or platforms it documents; a shortener or other host is a Phase 6 risk
+   flag, not a failed check. Chat has no headers: use Phase 4 evidence.
 
 ```bash
 # <in> = new dir holding only the saved connector output; field name varies.
@@ -149,14 +150,17 @@ Red lines (any one ask means `Fraud indicators present`):
 - buying equipment, or depositing a check and sending money on;
 - government ID, tax ID, bank, or card data before a signed contract;
 - remote-access or screen-control installs on a personal machine;
-- interview, contract, or payment links off the firm's documented domains.
+- interview, contract, or payment links on a lookalike domain, or kept off
+  documented domains after a documented-channel copy is refused.
 
 Risk flags (raise counterparty and payment risk; not fraud on their own):
 
 - pressure and urgency ("fast moving", "decide today");
 - bait and switch: an agreed rate replaced, after "the client didn't
   shortlist you", by a new role with a lower "budget";
-- payment by the least verifiable party, or pay in arrears with no contract.
+- payment by the least verifiable party, or pay in arrears with no contract;
+- a link whose destination cannot be verified (shortener, undocumented host):
+  do not open it; ask for the document via the firm's documented channel.
 
 Require before starting:
 
@@ -176,12 +180,18 @@ Require before starting:
 
 Pick one:
 
-- `Fraud indicators present` - a red-line ask, a failed authenticity check,
-  or impersonation. Advise: stop and share nothing.
+- `Fraud indicators present` - only a red-line ask or proof the sender is
+  not who it claims (failed authentication, lookalike or impersonated
+  domain, contradiction with the firm's published contacts). Advise: stop
+  and share nothing.
 - `No fraud pattern found - residual risks` - authentic messages and real
   firms, with the `unverified` items and payment risks listed.
 - `Verified` - signed contract with an identified paying entity, vendor of
   record confirmed, every entity in the chain verified.
+
+Headline: state what the evidence supports, no more. Authentic mail, real
+firm: say so, then name the real problem (payment risk, bait-and-switch,
+unverified end client). Unverified stays `unverified`.
 
 Report three axes separately: fraud risk, counterparty and payment risk, and
 fit and rate. List the Phase 6 red lines in the report whatever the verdict.
@@ -214,8 +224,8 @@ searching), or decline. The candidate decides; never decide for them.
 
    Then the verdict, the three risk axes, red lines, required documents, and
    pending `NOT POSTED` drafts.
-2. Ledger note in `CONTEXT_STATE.md`: verdict, `unverified` items, open asks,
-   drafts awaiting approval. Update `TASKS_TABLE.md`.
+2. If lanes were dispatched, note in `CONTEXT_STATE.md` the verdict,
+   `unverified` items, open asks, and pending drafts; update `TASKS_TABLE.md`.
 3. Next steps: an install request -> `workflows/third-party-installer-vetting.md`;
    follow-up polling -> `workflows/conversation-monitoring.md`; interview prep
    -> `workflows/screening-interview-quick-prep.md`; tracker updates ->

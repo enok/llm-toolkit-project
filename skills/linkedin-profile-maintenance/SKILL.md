@@ -30,7 +30,7 @@ write, and deletes cannot be undone.
   `references/profile-summary-for-scoring.md`.
 - Browser editing pitfalls specific to audits (read when an edit or save does not stick: typeaheads, rich text, saves):
   `references/browser-edit-pitfalls.md`.
-- Truthfulness and employment-status handling: `rules/application-truthfulness.md`.
+- Truthfulness and employment-status handling: `skills/job-search-pipeline/references/application-truthfulness.md`.
 - Other candidate portals and application-site profiles:
   `workflows/job-portal-profile-sync.md`.
 - Posts and reposts are a different job: `skills/linkedin-publishing/SKILL.md`.
@@ -104,7 +104,7 @@ rather than a fixed keep-list.
 3. **Employment status is the owner's call**, because the profile is checked against employer records. Do not change end dates,
    current-role flags or employment claims unless told to; remind the owner
    that background checks compare the profile with records
-   (`rules/application-truthfulness.md`).
+   (`skills/job-search-pipeline/references/application-truthfulness.md`).
 4. **Apply in a fixed order** (so the cap and links are settled before text that refers to them): skills (add, link to roles, replace, delete, pin
    the top five) -> structured fixes (dates, languages, company entity, field
    of study, certificate dates, services) -> long text (About, role

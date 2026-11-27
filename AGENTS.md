@@ -168,7 +168,6 @@ For every non-trivial request the root agent routes through `rules/request-orche
 Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 
 - `rules/api-contract-surface.md`
-- `rules/application-truthfulness.md`
 - `rules/changed-code-quality-gate-required.md`
 - `rules/ci-feedback-loop.md`
 - `rules/cli-over-mcp.md`
@@ -190,7 +189,6 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/repository-context-layers.md`
 - `rules/request-orchestration.md`
 - `rules/security-check-required.md`
-- `rules/ui-automation-lane-safety.md`
 - `rules/workflow-authoring.md`
 - `rules/workflow-self-improvement.md`
 

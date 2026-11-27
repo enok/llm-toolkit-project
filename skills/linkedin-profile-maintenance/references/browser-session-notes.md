@@ -62,5 +62,5 @@ needed, use the Chrome extension attached to the owner's own browser.
   safely): the multi-browser section of `learnings/browser-tool-operational-limits.md`
   and section 3 above.
 - When several lanes or agents could touch the same tab or page, apply
-  `rules/ui-automation-lane-safety.md`: one writer per page, read-only lanes
+  `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md`: one writer per page, read-only lanes
   elsewhere.

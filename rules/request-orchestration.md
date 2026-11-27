@@ -283,7 +283,7 @@ Applies when a cloud session reaches the user's computer only through linked fol
   isolated and approved them, or explicit LOA mode has verified they are inside
   the user's stated authority and assigned them to a bounded owner.
 - Do not use agents to bypass repo-local instructions, user constraints, auth boundaries, or required validation.
-- Lanes that drive a browser or desktop UI follow `rules/ui-automation-lane-safety.md`.
+- Lanes that drive a browser or desktop UI follow `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md`.
 - Do not use plugin capabilities to bypass these boundaries; adding, removing, or disabling a plugin is an owner-authorized action (`rules/plugin-governance.md`).
 - If the user says to avoid agents, run serially for that request.
 

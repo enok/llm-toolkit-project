@@ -130,7 +130,6 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | Rule | File | Scope |
 | --- | --- | --- |
 | **API Contract Surface** | `rules/api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
-| **Application Truthfulness** | `rules/application-truthfulness.md` | Truthful applications, profiles and screening answers (employment status, work authorization, credentials, metrics); every submission behind explicit owner approval |
 | **Changed-Code Quality Gate Required** | `rules/changed-code-quality-gate-required.md` | Blocking static-analysis gate scoped to added or modified lines |
 | **CI Feedback Loop** | `rules/ci-feedback-loop.md` | Turn CI failures into rule and workflow updates |
 | **CLI over MCP** | `rules/cli-over-mcp.md` | Prefer capable authenticated CLIs; record why MCP was chosen when it is |
@@ -152,7 +151,6 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Repository Context Layers** | `rules/repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md` and provider pointers |
 | **Request Orchestration** | `rules/request-orchestration.md` | Routing into specialists, model-selection contract, quality loops, safety boundaries |
 | **Security Check Required** | `rules/security-check-required.md` | Mandatory security gate incl. LLM-surface prompt-injection scan and skill scanners |
-| **UI Automation Lane Safety** | `rules/ui-automation-lane-safety.md` | Browser and desktop UI lanes: owned tabs only, stable-ID allow-lists, live re-read before acting, named concurrent lanes, no sign-in for the user |
 | **Workflow Authoring** | `rules/workflow-authoring.md` | 12K size limit, splits, single responsibility, composition |
 | **Workflow Self-Improvement** | `rules/workflow-self-improvement.md` | Every non-trivial workflow or agent run: preflight, capture, run record, promotion, measured trend; metrics are diagnostic only |
 

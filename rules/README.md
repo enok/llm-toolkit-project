@@ -9,7 +9,6 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | Rule | Scope |
 | --- | --- |
 | `api-contract-surface.md` | Contract changes must identify downstream consumers, gateways, and generated artifacts |
-| `application-truthfulness.md` | Truthful applications, profiles and screening answers (employment status, work authorization, credentials, metrics); every submission behind explicit owner approval |
 | `changed-code-quality-gate-required.md` | Blocking static-analysis gate scoped to added or modified lines during code validation |
 | `ci-feedback-loop.md` | Turn CI failures into rule/workflow updates instead of one-off fixes |
 | `cli-over-mcp.md` | Prefer capable authenticated CLIs over MCP servers, preserving user-selected apps and MCP-only capabilities |
@@ -31,7 +30,6 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md`, `CLAUDE.md`, and thin provider surfaces |
 | `request-orchestration.md` | Automatic request routing into specialists, model tiers, quality loops, and safe map-reduce execution |
 | `security-check-required.md` | Minimum security gate (toolkit scan, LLM-surface injection scan, skill scanners) before PR or merge |
-| `ui-automation-lane-safety.md` | Browser and desktop UI lanes: owned tabs only, stable-ID allow-lists, live re-read before acting, named concurrent lanes, no sign-in for the user |
 | `workflow-authoring.md` | 12K size limit, split conventions, single responsibility, and composition for `workflows/` |
 | `workflow-self-improvement.md` | Every non-trivial workflow or agent run does preflight, capture, run record, promotion, and measured trend; metrics are diagnostic only (Goodhart guard) |
 
