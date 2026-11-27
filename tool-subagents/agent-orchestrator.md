@@ -654,9 +654,10 @@ between tool calls is summarised rather than shown to the user word for word,
 send each print through a tool the host shows verbatim (for example a
 send-message tool). A configured notification mirror (see "Tasks-table
 notification cadence" in `rules/request-orchestration.md`) sends one message
-per print, and each message carries the same full table as the chat print:
-the manifest, every column, every row, the footer rows and the closing line.
-A mirror is never a shortened table or a status line.
+per print in exactly the format the route's approval names. When it names the
+full table, each message carries the same full table as the chat print (the
+manifest, every column, every row, the footer rows and the closing line), never
+a shortened table; when it names a status line, send only that.
 
 ### Durable checkpoints and resume
 
@@ -885,9 +886,6 @@ When invoked:
      chats, automations, scripts, or humans, including generated LLM surfaces,
      PR bodies, release notes, runbooks, wiki drafts, diagrams, and rendered
      artifacts;
-   - `publication-reviewer` for public article and social post drafts before
-     they are shown as ready: profile budgets, AIDA stage map, title and hook
-     positioning, sourced claims, hashtags, and article-post agreement;
    - `confluence-documentation-specialist` for Confluence page state, hierarchy,
      comments, attachments, rendered wiki evidence, and source-to-wiki drift;
    - `diagram-creation-specialist` for C4, AWS, sequence, Mermaid, PlantUML,
@@ -911,7 +909,7 @@ When invoked:
 5. Assign each task a complexity tier and produce a compact delegation plan: agent, task, inputs, expected output, write ownership, complexity tier, the requested model/effort taken from the client model map (see "Complexity tiering" below — mandatory on every dispatch whose platform exposes a model parameter), acceptance criteria, validator assignment, loop budget, and whether it can run in parallel.
 6. Run every delegated task as a bounded produce->validate->refine quality loop per `workflows/task-quality-loop.md`:
    - before dispatch, write verifiable acceptance criteria (mandatory vs advisory): for ticket-driven work the ticket's acceptance criteria are the mandatory set (subtasks must also stay aligned with the parent ticket's goal); if the goal cannot be made verifiable, pause and ask the user for clarification instead of starting the loop;
-   - assign a validator matched to the task's evidence type (`code-reviewer`, `test-runner`, `documentation-reviewer`, `publication-reviewer` (article and post drafts), `java-change-validator`, `security-auditor`, `diagram-creation-specialist`, `pr-validator`, `dag-glue-specialist`, `terraform-specialist` (mandatory for Terraform/OpenTofu evidence), `system-architecture-specialist`, `log-analyst`; `task-quality-judge` or `verifier` when no domain specialist fits);
+   - assign a validator matched to the task's evidence type (`code-reviewer`, `test-runner`, `documentation-reviewer`, `java-change-validator`, `security-auditor`, `diagram-creation-specialist`, `pr-validator`, `dag-glue-specialist`, `terraform-specialist` (mandatory for Terraform/OpenTofu evidence), `system-architecture-specialist`, `log-analyst`; `task-quality-judge` or `verifier` when no domain specialist fits);
    - the validator is always a separate invocation from the producer, read-only, and returns a structured verdict (`pass`/`fail`/`escalate`) with a numbered defect list classed `mechanical` or `reasoning`;
    - on `fail`, feed only the defect list back to the producer for a targeted refinement; **max 5 iterations per task** (budget 1 for deterministic `light` tasks — one production pass, one validation pass, no refinement);
    - after 2 consecutive `reasoning`-classed failures, escalate the producer one tier for the next iteration (platform-confirmed mechanism only);
@@ -1048,7 +1046,7 @@ Progress notification (opt-in, gated):
   line for the root agent to send. In explicit LOA, sending may be assigned to a
   user-authorized async worker only after the human-facing gate is satisfied.
 - The root agent may send a status line without a fresh per-message approval only when the user explicitly pre-authorized progress posting for this run/session, naming both the destination (e.g. a specific chat channel or thread) and the status-line format; that standing approval covers only that exact format and destination, per `rules/human-comment-reply-gate.md`. Anything beyond it — different destination, added detail, findings, evidence — goes back to draft-and-approve.
-- Never include evidence, file contents, or findings that the user has not already agreed can leave the local session.
+- Never include evidence, file contents, or findings that the user has not already agreed can leave the local session (a route approved for the full table has agreed to its Evidence column, nothing more).
 
 ## Known pitfalls
 

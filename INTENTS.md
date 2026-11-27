@@ -92,9 +92,9 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | find the best YouTube video per language / verify these video links | `youtube-video-curation` | skill | `multi-language-study-repo`, `medium-publishing` |
 | study a pattern and publish repo, Medium and LinkedIn / turn a study topic into a repo, an article, and a post | `study-repo-to-publication` | workflow | `multi-language-study-repo`, `diagram-authoring`, `youtube-video-curation`, `medium-publishing`, `linkedin-publishing` |
 | publish a finished study repo on Medium and LinkedIn / write the article and post in AIDA order / retitle a published study article or post | `study-publication-medium-linkedin` | workflow | `medium-publishing`, `linkedin-publishing`, `diagram-authoring`, `rules/external-write-authorization.md` |
-| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `medium-publishing`, `linkedin-publishing`, `publication-reviewer` |
-| review this article or post before I approve it / check a draft against my publication profile | `publication-reviewer` | subagent | `rules/publication-positioning.md`, `skills/medium-publishing/scripts/check_publication.py`, `documentation-reviewer` |
-| write a technical article / LinkedIn post or carousel about my project (draft only) | `technical-content-publishing` | workflow + skill | `publication-reviewer`, `rules/publication-positioning.md`, `diagram-authoring`, `medium-publishing`, `linkedin-publishing` |
+| write or replace a publication (article or post) for my target role / short system-design article with a teaser post / replace the published story and post with a new one | `study-publication-medium-linkedin` | workflow | `rules/publication-positioning.md`, `medium-publishing`, `linkedin-publishing`, `rubrics/technical-content.md` (if present) |
+| review this article or post before I approve it / check a draft against my publication profile | `medium-publishing` | skill | `rules/publication-positioning.md`, `skills/medium-publishing/scripts/check_publication.py`, `documentation-reviewer` |
+| write a technical article / LinkedIn post or carousel about my project (draft only) | `technical-content-publishing` | workflow + skill | `rules/publication-positioning.md`, `diagram-authoring`, `medium-publishing`, `linkedin-publishing` |
 | what is the analysis of last night's debate / hearing / ruling / what do the polls and fact-checkers say | `current-events-briefing` | skill | - |
 
 ## Security
@@ -135,9 +135,9 @@ Plain-English prompts map to the shared rules, workflows, skills, and subagents 
 | run a retrospective / learn from this run's mistakes / what keeps going wrong in `<workflow>` / show the quality trend of a workflow | `run-retrospective` | workflow + skill | `rules/workflow-self-improvement.md`, `self-improvement`, `capture-learning`, `task-quality-loop` |
 | make every workflow learn from its mistakes / measure workflow accuracy over time | `rules/workflow-self-improvement.md` | rule | `run-retrospective`, `error-driven-learning`, `rules/request-orchestration.md` |
 | import or adapt external LLM skills | `external-skill-intake` | skill | `self-improvement`, `security` |
-| add or install a plugin / find a plugin in the marketplace | `plugin-intake` | workflow | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
-| remove unnecessary plugins / prune plugins | `plugin-intake` | workflow | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
-| audit installed plugins / are my plugins safe | `plugin-intake` | workflow | `llm-toolchain-provisioning`, `scripts/plugins.py`, `docs/plugins.md` |
+| add or install a plugin / find a plugin in the marketplace | `docs/plugins.md` | script | `rules/plugin-governance.md`, `external-skill-intake`, `scripts/plugins.py` |
+| remove unnecessary plugins / prune plugins | `docs/plugins.md` | script | `rules/plugin-governance.md`, `llm-toolchain-provisioning`, `scripts/plugins.py` |
+| audit installed plugins / are my plugins safe | `docs/plugins.md` | script | `llm-toolchain-provisioning`, `scripts/plugins.py` |
 | which plugin, skill or agent is best for this task | `rules/plugin-governance.md` | rule | `agent-orchestrator`, `knowledge-base`, `scripts/plugins.py` |
 | LLM app, RAG, agents, memory | `llm-application-architecture` | skill | `llm-context-engineering` |
 | understand this project / onboard me | `project-discovery` | workflow + skill | `onboarding`, `parallel-explorer` |

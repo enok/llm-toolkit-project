@@ -52,7 +52,7 @@ Every task gets its own slim context. The root checks this before each wave; a f
 ## Specialist selection
 
 - Prefer the most specific available specialist in `tool-subagents/` before generic exploration.
-- Use `parallel-explorer` for broad repo maps, `cross-repo-analyst` for multi-repo context, `code-reviewer` for implementation risk, `java-change-validator` for Java diffs and Java-related reviewer drafts, `pr-validator` for live PR/ticket readiness and approve/block calls, `dag-glue-specialist` for Airflow DAG, MWAA, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation, `prod-doc-promoter` for deployed-ticket documentation promotion from temporary wiki intake folders to canonical wiki homes, `test-runner` for validation mapping, `documentation-sync` for docs drift, `documentation-reviewer` for documentation created or changed by agents, chats, automations, scripts, or humans, `publication-reviewer` for public article and social post drafts before they are shown as ready, `confluence-documentation-specialist` for wiki page state and hierarchy, `diagram-creation-specialist` for source-grounded diagrams and export/image QA, `system-architecture-specialist` for application architecture, service boundaries, data flows, integrations, and quality attributes, `log-analyst` for operational log evidence reduction, `aws-alarm-investigator` for CloudWatch alarm root-cause investigation, `ci-triage` for CI failure logs, `contract-analyzer` for API/schema/event and downstream-consumer impact, `release-coordinator` for release order and rollback, `model-selector` for per-task tier/model/effort assignment at split time and completed-table overspend audits, `task-quality-judge` and `verifier` for quality-loop verdicts and skeptical completion checks, and security agents for security-sensitive changes. The canonical specialist list is the `tool-subagents/` catalog; when this enumeration and the catalog disagree, the catalog wins.
+- Use `parallel-explorer` for broad repo maps, `cross-repo-analyst` for multi-repo context, `code-reviewer` for implementation risk, `java-change-validator` for Java diffs and Java-related reviewer drafts, `pr-validator` for live PR/ticket readiness and approve/block calls, `dag-glue-specialist` for Airflow DAG, MWAA, AWS Glue job, crawler, Data Catalog, and ETL pipeline validation, `prod-doc-promoter` for deployed-ticket documentation promotion from temporary wiki intake folders to canonical wiki homes, `test-runner` for validation mapping, `documentation-sync` for docs drift, `documentation-reviewer` for documentation created or changed by agents, chats, automations, scripts, or humans, `confluence-documentation-specialist` for wiki page state and hierarchy, `diagram-creation-specialist` for source-grounded diagrams and export/image QA, `system-architecture-specialist` for application architecture, service boundaries, data flows, integrations, and quality attributes, `log-analyst` for operational log evidence reduction, `aws-alarm-investigator` for CloudWatch alarm root-cause investigation, `ci-triage` for CI failure logs, `contract-analyzer` for API/schema/event and downstream-consumer impact, `release-coordinator` for release order and rollback, `model-selector` for per-task tier/model/effort assignment at split time and completed-table overspend audits, `task-quality-judge` and `verifier` for quality-loop verdicts and skeptical completion checks, and security agents for security-sensitive changes. The canonical specialist list is the `tool-subagents/` catalog; when this enumeration and the catalog disagree, the catalog wins.
 - If no specialist fits, keep the task in the parent agent and note the missing reusable capability only when it would be useful to add later.
 
 ## Hierarchical delegation
@@ -108,9 +108,12 @@ column (including `Vector DB used`, `Complexity` and the exact
 - **A skipped send is reported, never assumed delivered.** Treat the mirror as
   part of the table's completion: if the table was printed and the send did not
   happen, that is an open item, not a detail.
-- **The pre-approved content is the table.** Each mirrored message carries the
-  requester header and the full table, never a shortened version or a status
-  line. Anything beyond the table returns to the draft-and-approve flow in
+- **The pre-approved content is exactly what the route's approval names.**
+  When the owner approved the full table for that destination, each mirrored
+  message carries the requester header and the full table (its Evidence column
+  included), never a shortened version; when the approval names a status line,
+  send only that. Anything beyond the approved content (another destination,
+  file contents, findings) returns to the draft-and-approve flow in
   `rules/human-comment-reply-gate.md`.
 
 ## Per-task quality loop

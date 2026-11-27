@@ -8,9 +8,9 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 
 | Area | Path | Purpose |
 | --- | --- | --- |
-| Rules | `rules/` | 24 short always-on constraints: code, git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
-| Workflows | `workflows/` | 101 sequenced procedures: review and fix loops, knowledge-base sync, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
-| Skills | `skills/` | 101 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
+| Rules | `rules/` | 24 short constraints (23 always-on, `plugin-governance` on demand): code, git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
+| Workflows | `workflows/` | 100 sequenced procedures: review and fix loops, knowledge-base sync, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
+| Skills | `skills/` | 112 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
 | Tool subagents | `tool-subagents/` | 26 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture, security, and holistic code-review checklists with the `review-report.json` contract |
 | Integrations | `integrations/` | Jira, Confluence, GitHub, Jenkins, AWS CLI, Slack CLI, AWS Agent Toolkit setup guides |
@@ -60,7 +60,7 @@ A thin root routes each non-trivial request and assigns every task a tier (light
 
 1. **Rules** travel with every request (`rules/request-orchestration.md` routes non-trivial work; `rules/security-check-required.md`, `rules/human-comment-reply-gate.md`, and `rules/external-write-authorization.md` gate side effects).
 2. **`agent-orchestrator`** (`tool-subagents/agent-orchestrator.md`) splits multi-lane work into a wave-ordered task table, assigns each task a complexity tier and concrete model through `model-selector`, runs every delegated task as a bounded produce-validate-refine loop (`workflows/task-quality-loop.md`, max 5 iterations), keeps a durable state ledger (`CONTEXT_STATE.md` + `TASKS_TABLE.md`), and enforces a 30-minute SLA per task.
-3. **Read-only specialists** (`pr-validator`, `java-change-validator`, `documentation-reviewer`, `publication-reviewer`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `system-architecture-specialist`, `diagram-creation-specialist`, `confluence-documentation-specialist`, `prod-doc-promoter`, `task-quality-judge`, `verifier`, ...) return evidence, findings, and draft replies; the root agent owns edits, commits, pushes, and human-facing replies.
+3. **Read-only specialists** (`pr-validator`, `java-change-validator`, `documentation-reviewer`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `system-architecture-specialist`, `diagram-creation-specialist`, `confluence-documentation-specialist`, `prod-doc-promoter`, `task-quality-judge`, `verifier`, ...) return evidence, findings, and draft replies; the root agent owns edits, commits, pushes, and human-facing replies.
 4. Each specialist ships as a **skill** entrypoint plus a **validation** workflow and an **evolution** workflow; `workflows/specialist-agent-factory.md` creates new ones.
 
 ## Quick Start
@@ -145,8 +145,8 @@ Then refresh generated exports from the consumer repo with `scripts/sync-llm-con
 | **Log Analysis Safety** | `rules/log-analysis-safety.md` | Read-only, bounded, redacted log analysis |
 | **Multi-Agent Orchestration** | `rules/multi-agent-orchestration.md` | Parallel fanout, tier and validator handoff, when to serialize |
 | **Operational Doc Required** | `rules/operational-doc-required.md` | Recurring operations become runbooks; metric catalogs and wiki backup gates |
-| **Publication Positioning** | `rules/publication-positioning.md` | Read the consumer's publication profile first; AIDA order, budgets, sourced claims, `NOT POSTED` drafts, and a `publication-reviewer` pass before any draft is shown as ready |
-| **Plugin Governance** | `rules/plugin-governance.md` | Capability selection across toolkit assets and plugins; trust tiers, scanner verdicts, owner-gated adds and removals, protective plugins |
+| **Publication Positioning** | `rules/publication-positioning.md` | Read the consumer's publication profile first; AIDA order, budgets, sourced claims, `NOT POSTED` drafts, a profile check before any draft is shown as ready, and owner approval before posting |
+| **Plugin Governance** | `rules/plugin-governance.md` | On demand: capability selection across toolkit assets and plugins; trust tiers, scanner verdicts, owner-gated adds and removals, protective plugins |
 | **Release Safety** | `rules/release-safety.md` | Deploy order, verification, rollback, completion evidence |
 | **Repository Context Layers** | `rules/repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md` and provider pointers |
 | **Request Orchestration** | `rules/request-orchestration.md` | Routing into specialists, model-selection contract, quality loops, safety boundaries |
@@ -158,7 +158,7 @@ Templates for consumer-specific rules live in `rules/examples/`.
 
 ## Workflows
 
-See `workflows/README.md` for the categorized catalog of all 112 workflows. Highlights:
+See `workflows/README.md` for the categorized catalog of all 111 workflows. Highlights:
 
 | Workflow | Use when |
 | --- | --- |
@@ -171,15 +171,14 @@ See `workflows/README.md` for the categorized catalog of all 112 workflows. High
 | `workflows/document-creation.md`, `workflows/diagram-creation-specialist-validation.md`, `workflows/confluence-documentation.md`, `workflows/markdown-pdf-export.md` | Docs, diagrams, wiki, and PDF export |
 | `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/toolkit-maintenance.md`, `workflows/chat-knowledge-curation.md`, `workflows/context-compaction.md` | Growing and maintaining the toolkit itself |
 | `workflows/thesis-writing-main.md`, `workflows/notebook-analysis.md`, `workflows/data-pipeline-change.md`, `workflows/ml-experiment.md` | Data-science and thesis work |
-| `workflows/study-repo-to-publication.md` | Study topic to a protected repo (one or more languages), a short profile-positioned Medium article, and a LinkedIn teaser post, validated by `check_publication.py` and `publication-reviewer`, with bidirectional links, a drafts-only mode, and approval gates |
+| `workflows/study-repo-to-publication.md` | Study topic to a protected repo (one or more languages), a short profile-positioned Medium article, and a LinkedIn teaser post, validated by `check_publication.py` and a profile check, with bidirectional links, a drafts-only mode, and approval gates |
 | `workflows/study-publication-medium-linkedin.md` | Phases 7-10 of the study flow: short system-design-first Medium article and LinkedIn teaser in AIDA order, a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replace-published-story path behind separate approval gates |
 | `workflows/run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes, append the run record, promote recurring mistakes, report trend metrics |
 | `workflows/knowledge-base-sync.md` | Scheduled sync: intake-gate new knowledge, promote it on one rolling pull request, archive inbox items after the merge |
-| `workflows/plugin-intake.md` | Add, audit, or prune plugins: inventory, marketplace discovery, quarantine fetch, scan and review, overlap check, decision, owner-run install or removal plans |
 
 All workflows by area:
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
@@ -357,7 +356,7 @@ Full catalog with conventions: `skills/README.md`. Invoke by intent (`INTENTS.md
 
 ## Tool Subagents
 
-`tool-subagents/README.md` lists all 28 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, CV/profile truthfulness, and workspace hygiene.
+`tool-subagents/README.md` lists all 27 shared subagents and the delegation contract (objective, scope, constraints, allowed tools, write ownership, acceptance criteria, validator, loop budget, complexity tier). `agent-orchestrator` is the default coordinator; `model-selector` assigns tiers; `task-quality-judge` and `verifier` judge results; the read-only specialists cover PRs, Java, docs, wiki, diagrams, architecture, Terraform, DAG/Glue, alarms, logs, contracts, security, CI, tests, releases, cross-repo impact, CV/profile truthfulness, and workspace hygiene.
 
 ## Integrations
 

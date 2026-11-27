@@ -2,7 +2,7 @@
 title: Study articles are short system design stories with the pattern inside, and the post is a short teaser
 category: toolchain
 created: 2026-10-12
-tags: [medium, linkedin, system-design, positioning, positioning-profile, article-length, teaser, hashtags, aida, guard-script, publication-reviewer, approval-gate]
+tags: [medium, linkedin, system-design, positioning, positioning-profile, article-length, teaser, hashtags, aida, guard-script, profile-check, approval-gate]
 ---
 
 # Problem
@@ -45,7 +45,7 @@ defaults; a consumer's profile overrides them.
    most 200, the article link as the single call to action (repo link optional), at most 5
    hashtags each backed by text in the post, the hero diagram as the image. Medium topics stay
    five and system-design-led.
-5. Validate every draft before it is shown: `tool-subagents/publication-reviewer.md` and
+5. Validate every draft before it is shown: check it against the consumer's publication profile (and `rubrics/technical-content.md` if that file exists) and run
    `skills/medium-publishing/scripts/check_publication.py`, results shown with the AIDA stage
    map (`workflows/study-publication-medium-linkedin.md`). Honour the profile's approval mode
    (`gated` or `drafts-only`): `drafts-only` pre-approves creating the two drafts only; publish,

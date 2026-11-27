@@ -66,9 +66,12 @@ a fact sheet (`skills/technical-content-publishing/SKILL.md`).
    The hook names the highest-level concept the body supports.
    `skills/medium-publishing/references/aida-narrative.md`.
 8. **Measured before shown.** Run `skills/medium-publishing/scripts/check_publication.py post`
-   (with `--profile`, `--forbid <study topic name>`, `--require-link <article url>`) and the
-   `tool-subagents/publication-reviewer.md` agent; a non-zero exit or a failed verdict means the
-   draft is not ready. Show the profile used, the output and the verdict with the draft.
+   (with `--profile`, `--forbid <study topic name>`, `--require-link <article url>`) and a
+   profile check (the drafting assistant, or a read-only validator lane the orchestrator dispatches,
+   checks the draft against the consumer's publication profile and `rubrics/technical-content.md`
+   if that file exists); a non-zero exit or an open defect means the draft is not ready. Show the
+   profile used, the output and the check result with the draft; it stays `NOT POSTED` until the
+   owner approves.
 
 ## Preconditions
 
@@ -203,8 +206,8 @@ a fact sheet (`skills/technical-content-publishing/SKILL.md`).
 - `skills/medium-publishing/SKILL.md` for the article side of the bidirectional links.
 - `skills/medium-publishing/references/content-angle.md` for what the post leads with, and
   `skills/medium-publishing/references/aida-narrative.md` for how it moves.
-- `rules/publication-positioning.md` and `tool-subagents/publication-reviewer.md` for the always-on
-  positioning rule and the read-only validator of the draft.
+- `rules/publication-positioning.md` for the always-on positioning rule and the profile check of
+  the draft.
 - `workflows/study-repo-to-publication.md` and `workflows/study-publication-medium-linkedin.md`
   for where this step sits in the full repo, article, post sequence.
 - `skills/technical-content-publishing/SKILL.md` — draft here, publish there: drafts the post and carousel from a fact sheet; this skill only pastes and publishes approved text

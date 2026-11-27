@@ -133,7 +133,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Export Markdown to PDF" / "PowerPoint deck" | **markdown-pdf-export** workflow + skill; **pptx-generator** / **powerpoint-slides** skills |
 | "Publish this on Medium" / "share on LinkedIn with a diagram" / "best YouTube video per language" | **medium-publishing**, **linkedin-publishing**, **youtube-video-curation** skills |
 | "Study a topic and publish repo, Medium and LinkedIn" / "study repo in one or more languages" / "reduce a study repo to one language" | **study-repo-to-publication** workflow + **multi-language-study-repo** skill |
-| "Write / replace / review a publication (article or post)" / "position this article for my target role" / "replace the published story and post" | **study-publication-medium-linkedin** workflow; **publication-reviewer** agent; **publication-positioning** rule |
+| "Write / replace / review a publication (article or post)" / "position this article for my target role" / "replace the published story and post" | **study-publication-medium-linkedin** workflow; **publication-positioning** rule |
 | "Security review" / "OWASP audit" / "threat model" | **security-report** workflow, **security**, **owasp-security-review**, **security-threat-model** skills |
 | "Cut a release" / "Maven release" / "E2E for release" | **release-manager**, **maven-release**, **e2e-release-verification** skills; **ticket-release** workflow |
 | "Load test" / "JMeter" | **jmeter-performance-testing** skill |
@@ -149,7 +149,7 @@ For every non-trivial request the root agent routes through `rules/request-orche
 | "Save this as a learning" / "improve the toolkit" | **capture-learning**, **self-improvement**, **toolkit-maintenance** workflows; **llm-context-engineering** skill |
 | "Run a retrospective" / "learn from this run's mistakes" / "what keeps going wrong in a workflow" | **run-retrospective** workflow + skill, under the always-on `rules/workflow-self-improvement.md` |
 | "Import external skills" | **external-skill-intake** skill |
-| "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | **plugin-intake** workflow, `scripts/plugins.py`, under `rules/plugin-governance.md` |
+| "Add / install a plugin" / "remove unnecessary plugins" / "audit installed plugins" / "which plugin, skill or agent fits this task" | `docs/plugins.md` and `scripts/plugins.py`, under `rules/plugin-governance.md` (loaded on demand) |
 | "Java / Python / JavaScript / shell patterns" | **java-best-practices**, **python-best-practices**, **js-ts-best-practices**, **shell-scripting** skills |
 | "RAG" / "agent memory" / "LLM app architecture" | **llm-application-architecture** skill |
 | "Notebook analysis" / "ML experiment" / "data pipeline" | **notebook-analysis**, **ml-experiment**, **data-pipeline-change** workflows + skills |
@@ -183,13 +183,16 @@ Always-loaded constraints (`rules/README.md` has the one-line scope of each):
 - `rules/multi-agent-orchestration.md`
 - `rules/operational-doc-required.md`
 - `rules/publication-positioning.md`
-- `rules/plugin-governance.md`
 - `rules/release-safety.md`
 - `rules/repository-context-layers.md`
 - `rules/request-orchestration.md`
 - `rules/security-check-required.md`
 - `rules/workflow-authoring.md`
 - `rules/workflow-self-improvement.md`
+
+Loaded on demand (`trigger: model_decision`):
+
+- `rules/plugin-governance.md`: when adding, removing, auditing or choosing a plugin, skill, MCP server or connector, or when a plugin's text conflicts with toolkit rules.
 
 Consumer-specific rule templates live in `rules/examples/`.
 
@@ -199,7 +202,7 @@ Consumer-specific rule templates live in `rules/examples/`.
 
 `workflows/README.md` describes every workflow. Specialists ship as a `*-validation` (run it) plus `*-evolution` (improve it) pair.
 
-- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/plugin-intake.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`
+- **Orchestration and toolkit evolution:** `workflows/task-quality-loop.md`, `workflows/agent-orchestrator-validation.md`, `workflows/agent-orchestrator-evolution.md`, `workflows/model-selector-validation.md`, `workflows/model-selector-evolution.md`, `workflows/specialist-agent-factory.md`, `workflows/specialist-agent-evolution.md`, `workflows/context-compaction.md`, `workflows/chat-knowledge-curation.md`, `workflows/automation-maintenance.md`, `workflows/capture-learning.md`, `workflows/self-improvement.md`, `workflows/run-retrospective.md`, `workflows/toolkit-maintenance.md`, `workflows/knowledge-base-sync.md`, `workflows/assistant-workspace-cleanup.md`, `workflows/conversation-monitoring.md`, `workflows/workspace-hygiene-auditor-validation.md`, `workflows/workspace-hygiene-auditor-evolution.md`
 - **Core engineering:** `workflows/project-discovery.md`, `workflows/review.md`, `workflows/review-and-fix.md`, `workflows/ticket-review.md`, `workflows/ticket-review-and-fix.md`, `workflows/pre-pr-check.md`, `workflows/changed-code-quality-gate.md`, `workflows/run-tests.md`, `workflows/update-docs.md`, `workflows/commit-and-push.md`, `workflows/cross-repo-impact.md`, `workflows/new-backend-feature.md`, `workflows/environment-diagnose.md`, `workflows/dependency-upgrade.md`
 - **Tickets, PRs, CI, releases:** `workflows/ticket-research.md`, `workflows/ticket-implementation.md`, `workflows/ticket-research-and-implementation.md`, `workflows/ticket-research-and-implementation-and-validation.md`, `workflows/ticket-pr-validation-loop.md`, `workflows/pr-validator-validation.md`, `workflows/pr-validator-evolution.md`, `workflows/java-change-validation.md`, `workflows/java-validator-evolution.md`, `workflows/gh-address-comments.md`, `workflows/gh-fix-ci.md`, `workflows/pr-automation-review.md`, `workflows/ticket-release.md`, `workflows/security-check-required.md`, `workflows/security-report.md`
 - **Infrastructure, operations, logs:** `workflows/terraform-specialist-validation.md`, `workflows/terraform-specialist-evolution.md`, `workflows/terraform-manual-infrastructure-handoff.md`, `workflows/dag-glue-specialist-validation.md`, `workflows/dag-glue-specialist-evolution.md`, `workflows/aws-alarm-investigator-validation.md`, `workflows/aws-alarm-investigator-evolution.md`, `workflows/log-investigation.md`, `workflows/aws-airflow-terraform-change.md`, `workflows/aws-airflow-terraform-project.md`, `workflows/aws-data-pipeline-ops.md`, `workflows/aws-data-platform-ops.md`, `workflows/folder-reorganization.md`, `workflows/third-party-installer-vetting.md`
@@ -381,7 +384,7 @@ Skills marked toolkit-local in `skills/README.md` (documentation governance, sec
 
 ## Tool Subagents
 
-`tool-subagents/README.md` is the canonical catalog (28 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `cv-truthfulness-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`, `workspace-hygiene-auditor`, `publication-reviewer`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
+`tool-subagents/README.md` is the canonical catalog (27 agents) and delegation contract. Coordinator and judges: `agent-orchestrator`, `model-selector`, `task-quality-judge`, `verifier`. Read-only specialists: `pr-validator`, `java-change-validator`, `documentation-reviewer`, `cv-truthfulness-reviewer`, `documentation-sync`, `confluence-documentation-specialist`, `diagram-creation-specialist`, `system-architecture-specialist`, `prod-doc-promoter`, `terraform-specialist`, `dag-glue-specialist`, `aws-alarm-investigator`, `log-analyst`, `code-reviewer`, `contract-analyzer`, `cross-repo-analyst`, `parallel-explorer`, `test-runner`, `ci-triage`, `security-auditor`, `owasp-security-auditor`, `release-coordinator`, `workspace-hygiene-auditor`. Each has a `.md` (Cursor/Claude) and a `.toml` (Codex) with identical bodies; `npm run subagents:apply -- all .` renders the provider mirrors.
 
 ## Integrations
 
