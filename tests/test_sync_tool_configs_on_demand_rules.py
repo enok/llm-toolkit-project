@@ -9,6 +9,7 @@ Runs the real script against a throwaway consumer repo and checks:
 """
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -24,6 +25,7 @@ RULES = {
     "glob-rule.md": "---\ntrigger: glob\nglobs: \"*.py\"\ndescription: Glob rule\n---\n\n# Glob Rule\n\nGLOB_BODY_MARKER\n",
     "demand-rule.md": "---\ntrigger: model_decision\ndescription: Load when the demand topic comes up\n---\n\n# Demand Rule\n\nDEMAND_BODY_MARKER\n",
     "odd-rule.md": "---\ntrigger: something_else\ndescription: Unknown trigger rule\n---\n\n# Odd Rule\n\nODD_BODY_MARKER\n",
+    "manual-rule.md": "---\ntrigger: manual\ndescription: Manual rule\n---\n\n# Manual Rule\n\nMANUAL_BODY_MARKER\n",
     "plain-rule.md": "# Plain Rule\n\nPLAIN_BODY_MARKER\n",
 }
 
@@ -65,21 +67,39 @@ class OnDemandRulesSyncTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         return tmp
 
-    def convert(self, name: str) -> str:
+    def convert(self, name: str, text: str | None = None) -> str:
         """Run cursor_convert_rule (extracted from the script) on one fixture rule."""
         script = SCRIPT.read_text(encoding="utf-8")
         functions = "\n".join(shell_function(script, n) for n in CONVERTER_FUNCTIONS)
         tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, tmp, True)
         src = tmp / name
-        src.write_text(RULES[name], encoding="utf-8")
+        src.write_bytes((RULES[name] if text is None else text).encode("utf-8"))
         dest = tmp / "out.mdc"
         result = subprocess.run(
             ["bash", "-c", functions + '\ncursor_convert_rule "$1" "$2"', "bash", str(src), str(dest)],
             capture_output=True, text=True, timeout=60,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        return dest.read_text(encoding="utf-8")
+        return dest.read_bytes().decode("utf-8")
+
+    def test_cursor_body_dashes_do_not_reenter_frontmatter(self):
+        out = self.convert("body.md", "---\ntrigger: always_on\ndescription: D\n---\n\nintro\n\n---\ntrigger: manual\ndescription: not front\n---\ntail\n")
+        self.assertEqual(alwaysapply(out), ["alwaysApply: true"])
+        self.assertIn("\n---\ntrigger: manual\ndescription: not front\n---\ntail\n", out)
+
+    def test_cursor_crlf_source_is_converted_and_body_kept(self):
+        out = self.convert("crlf.md", "---\r\ntrigger: glob\r\nglobs: \"*.py\"\r\ndescription: D\r\n---\r\n\r\nBODY_CRLF\r\n")
+        self.assertEqual(alwaysapply(out), ["alwaysApply: false"])
+        self.assertIn("globs: *.py\n", out)
+        self.assertNotIn("trigger:", out)
+        self.assertTrue(out.endswith("\n---\r\n\r\nBODY_CRLF\r\n") or out.endswith("---\n\r\nBODY_CRLF\r\n"), repr(out))
+
+    def test_cursor_manual_emits_no_description(self):
+        out = self.convert("manual-rule.md")
+        self.assertNotIn("description:", out)
+        out = self.convert("manual2.md", "---\ndescription: D\ntrigger: manual\n---\nB\n")
+        self.assertNotIn("description:", out)
 
     def test_cursor_always_on_is_always_apply_true(self):
         self.assertEqual(alwaysapply(self.convert("always-rule.md")), ["alwaysApply: true"])
@@ -87,7 +107,8 @@ class OnDemandRulesSyncTest(unittest.TestCase):
     def test_cursor_glob_is_always_apply_false(self):
         out = self.convert("glob-rule.md")
         self.assertEqual(alwaysapply(out), ["alwaysApply: false"])
-        self.assertIn('globs: "*.py"', out)
+        self.assertIn("globs: *.py", out)
+        self.assertNotIn('"*.py"', out)
 
     def test_cursor_model_decision_is_always_apply_false_and_keeps_description(self):
         out = self.convert("demand-rule.md")
@@ -95,6 +116,12 @@ class OnDemandRulesSyncTest(unittest.TestCase):
         self.assertIn("description: Load when the demand topic comes up", out)
         self.assertNotIn("trigger:", out)
         self.assertIn("DEMAND_BODY_MARKER", out)
+
+    def test_cursor_manual_sets_neither_always_apply_nor_trigger(self):
+        out = self.convert("manual-rule.md")
+        self.assertEqual(alwaysapply(out), [])
+        self.assertNotIn("trigger:", out)
+        self.assertIn("MANUAL_BODY_MARKER", out)
 
     def test_cursor_unknown_trigger_keeps_always_apply_true(self):
         self.assertEqual(alwaysapply(self.convert("odd-rule.md")), ["alwaysApply: true"])
@@ -129,3 +156,153 @@ class OnDemandRulesSyncTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(shutil.which("bash"), "bash is not available on PATH")
+class CursorRulesGenerationTest(unittest.TestCase):
+    def consumer(self) -> Path:
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        (tmp / "rules").mkdir()
+        (tmp / "workflows").mkdir()
+        (tmp / "workflows" / "example-workflow.md").write_text("# Example Workflow\n", encoding="utf-8")
+        (tmp / "rules" / "README.md").write_text("# Rules\n", encoding="utf-8")
+        for name, text in RULES.items():
+            (tmp / "rules" / name).write_text(text, encoding="utf-8")
+        return tmp
+
+    def run_sync(self, tmp: Path, *extra: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["bash", str(SCRIPT), str(tmp), "--skip-agents-md", "--skip-github", *extra],
+            capture_output=True, text=True, timeout=120,
+        )
+
+    def test_generates_mdc_per_rule_with_marker_and_flags(self):
+        tmp = self.consumer()
+        result = self.run_sync(tmp)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        out = tmp / ".cursor" / "rules"
+        self.assertFalse(out.is_symlink())
+        names = sorted(p.name for p in out.glob("*.mdc"))
+        self.assertEqual(names, sorted(n[:-3] + ".mdc" for n in RULES))
+        self.assertFalse((out / "README.mdc").exists())
+        self.assertEqual(alwaysapply((out / "always-rule.mdc").read_text(encoding="utf-8")), ["alwaysApply: true"])
+        self.assertEqual(alwaysapply((out / "demand-rule.mdc").read_text(encoding="utf-8")), ["alwaysApply: false"])
+        self.assertEqual(alwaysapply((out / "manual-rule.mdc").read_text(encoding="utf-8")), [])
+        for p in out.glob("*.mdc"):
+            text = p.read_text(encoding="utf-8")
+            self.assertTrue(text.startswith("---\n"), p.name)
+            self.assertIn("generated-by: sync-tool-configs", text)
+
+    def test_stale_generated_removed_and_hand_made_kept(self):
+        tmp = self.consumer()
+        self.assertEqual(self.run_sync(tmp).returncode, 0)
+        out = tmp / ".cursor" / "rules"
+        (out / "mine.mdc").write_text("---\nalwaysApply: true\n---\nmine\n", encoding="utf-8")
+        (out / "notes.md").write_text("notes\n", encoding="utf-8")
+        (tmp / "rules" / "plain-rule.md").unlink()
+        result = self.run_sync(tmp)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((out / "plain-rule.mdc").exists())
+        self.assertTrue((out / "always-rule.mdc").exists())
+        self.assertEqual((out / "mine.mdc").read_text(encoding="utf-8"), "---\nalwaysApply: true\n---\nmine\n")
+        self.assertTrue((out / "notes.md").exists())
+
+    def test_hand_made_file_with_rule_name_is_not_overwritten(self):
+        tmp = self.consumer()
+        out = tmp / ".cursor" / "rules"
+        out.mkdir(parents=True)
+        (out / "always-rule.mdc").write_text("hand made\n", encoding="utf-8")
+        result = self.run_sync(tmp)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((out / "always-rule.mdc").read_text(encoding="utf-8"), "hand made\n")
+        self.assertIn("hand-made", result.stderr)
+
+    def test_dir_link_needs_force_to_be_replaced(self):
+        tmp = self.consumer()
+        (tmp / ".cursor").mkdir()
+        (tmp / ".cursor" / "rules").symlink_to("../rules")
+        result = self.run_sync(tmp)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((tmp / ".cursor" / "rules").is_symlink())
+        self.assertIn("--force", result.stderr)
+        self.assertEqual(list((tmp / "rules").glob("*.mdc")), [])
+        result = self.run_sync(tmp, "--force")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((tmp / ".cursor" / "rules").is_symlink())
+        self.assertTrue((tmp / ".cursor" / "rules" / "always-rule.mdc").is_file())
+        self.assertTrue((tmp / "rules" / "always-rule.md").is_file(), "link target content must survive")
+
+    def test_workflows_link_is_not_created_and_existing_one_is_kept(self):
+        tmp = self.consumer()
+        self.assertEqual(self.run_sync(tmp).returncode, 0)
+        self.assertFalse(os.path.lexists(tmp / ".cursor" / "workflows"))
+        (tmp / ".cursor" / "workflows").symlink_to("../workflows")
+        result = self.run_sync(tmp)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((tmp / ".cursor" / "workflows").is_symlink())
+        self.assertIn("can be removed", result.stdout)
+
+    def test_skip_cursor_rules_generates_nothing(self):
+        tmp = self.consumer()
+        self.assertEqual(self.run_sync(tmp, "--skip-cursor-rules").returncode, 0)
+        self.assertFalse((tmp / ".cursor" / "rules").exists())
+
+    def git_init(self, tmp: Path) -> None:
+        subprocess.run(["git", "init", "-q", str(tmp)], check=True, capture_output=True)
+
+    def check_ignore(self, tmp: Path, rel: str) -> int:
+        return subprocess.run(["git", "-C", str(tmp), "check-ignore", "-q", rel], capture_output=True).returncode
+
+    @unittest.skipUnless(shutil.which("git"), "git is not available on PATH")
+    def test_generated_files_are_git_ignored_but_hand_made_are_not(self):
+        tmp = self.consumer()
+        self.git_init(tmp)
+        out = tmp / ".cursor" / "rules"
+        out.mkdir(parents=True)
+        (out / "mine.mdc").write_text("---\nalwaysApply: true\n---\nmine\n", encoding="utf-8")
+        self.assertEqual(self.run_sync(tmp).returncode, 0)
+        self.assertEqual(self.check_ignore(tmp, ".cursor/rules/always-rule.mdc"), 0)
+        self.assertNotEqual(self.check_ignore(tmp, ".cursor/rules/mine.mdc"), 0)
+        gi = (out / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn("generated-by: sync-tool-configs", gi)
+        self.assertNotIn("mine.mdc", gi)
+
+    def test_hand_made_file_quoting_marker_in_body_survives(self):
+        tmp = self.consumer()
+        out = tmp / ".cursor" / "rules"
+        out.mkdir(parents=True)
+        text = "---\nalwaysApply: true\n---\nMention generated-by: sync-tool-configs here.\n"
+        (out / "mine.mdc").write_text(text, encoding="utf-8")
+        (tmp / "rules" / "plain-rule.md").unlink()
+        (out / "plain-rule.mdc").write_text(text, encoding="utf-8")
+        result = self.run_sync(tmp)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((out / "mine.mdc").read_text(encoding="utf-8"), text)
+        self.assertEqual((out / "plain-rule.mdc").read_text(encoding="utf-8"), text)
+
+    def test_unchanged_generated_file_is_not_rewritten(self):
+        tmp = self.consumer()
+        self.assertEqual(self.run_sync(tmp).returncode, 0)
+        out = tmp / ".cursor" / "rules"
+        old = {p.name: p.stat().st_mtime_ns for p in out.iterdir()}
+        for p in out.iterdir():
+            os.utime(p, ns=(1_000_000_000, 1_000_000_000))
+        self.assertEqual(self.run_sync(tmp).returncode, 0)
+        self.assertEqual({p.name for p in out.iterdir()}, set(old))
+        for p in out.iterdir():
+            self.assertEqual(p.stat().st_mtime_ns, 1_000_000_000, p.name)
+
+    def test_force_leaves_link_to_foreign_directory(self):
+        tmp = self.consumer()
+        foreign = tmp / "foreign-dir"
+        foreign.mkdir()
+        (foreign / "keep.txt").write_text("keep\n", encoding="utf-8")
+        (tmp / ".cursor").mkdir()
+        (tmp / ".cursor" / "rules").symlink_to("../foreign-dir")
+        result = self.run_sync(tmp, "--force")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((tmp / ".cursor" / "rules").is_symlink())
+        self.assertEqual(sorted(p.name for p in foreign.iterdir()), ["keep.txt"])
+        self.assertIn("is a link", result.stderr)
+        self.assertNotIn("older sync", result.stderr)

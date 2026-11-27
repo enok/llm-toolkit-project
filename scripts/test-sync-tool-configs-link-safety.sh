@@ -76,6 +76,16 @@ if [[ ! -f "$TMP_DIR/.cursor/agents/example-agent.md" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$TMP_DIR/.cursor/rules/example-rule.mdc" ]] || [[ -L "$TMP_DIR/.cursor/rules" ]]; then
+  echo "FAIL: .cursor/rules is not a generated directory of .mdc files." >&2
+  exit 1
+fi
+
+if [[ -e "$TMP_DIR/.cursor/workflows" ]]; then
+  echo "FAIL: .cursor/workflows was created although it is no longer a Cursor surface." >&2
+  exit 1
+fi
+
 if [[ -e "$TMP_DIR/.github/copilot-instructions.md" ]]; then
   echo "FAIL: --skip-github generated .github/copilot-instructions.md." >&2
   exit 1

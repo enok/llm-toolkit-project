@@ -95,7 +95,7 @@ Jira and Confluence are not used for this project. Their guides may still exist 
 
 ## Workflow Customization
 
-All workflows are now in the shared toolkit under `workflows/` and accessible via `.windsurf/workflows/` and `.cursor/workflows/` links.
+All workflows are now in the shared toolkit under `workflows/` and accessible via the `.windsurf/workflows/` link.
 
 ## Recommended Skills (via Shared Toolkit)
 

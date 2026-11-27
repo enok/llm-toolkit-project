@@ -185,7 +185,7 @@ function checkRulesRedirects() {
       }
     }
   }
-  for (const dir of [".windsurf/rules", ".windsurf/workflows", ".cursor/rules", ".cursor/workflows"]) {
+  for (const dir of [".windsurf/rules", ".windsurf/workflows", ".cursor/rules"]) {
     if (!exists(dir)) {
       // Provider overlays are generated links (gitignored); a fresh clone has none until sync runs.
       warn(`provider rules/workflows overlay missing: ${dir} (run ./scripts/sync-tool-configs.sh . --skip-agents-md --skip-github)`);

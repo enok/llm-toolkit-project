@@ -33,8 +33,7 @@ All agent-specific directories are **Windows junctions** (or symlinks on Linux/m
 .codex/skills     -> skills/       (junction)
 .windsurf/rules     -> rules/      (junction)
 .windsurf/workflows -> workflows/  (junction)
-.cursor/rules       -> rules/      (junction)
-.cursor/workflows   -> workflows/  (junction)
+.cursor/rules/*.mdc generated from rules/ (not a junction; listed in .cursor/rules/.gitignore)
 ```
 
 **No duplicate content.** Edit a file in `skills/xxx/` and all agents immediately see the change.
@@ -100,6 +99,6 @@ find rules/ -maxdepth 1 -name "*.md" | wc -l                 # rules plus README
 npm run skills:index:check                                   # every skill indexed in skills/README.md and README.md
 
 # Agent dirs must be junctions
-ls -la .agents/skills .claude/skills .codex/skills .windsurf/rules .windsurf/workflows .cursor/rules .cursor/workflows
+ls -la .agents/skills .claude/skills .codex/skills .windsurf/rules .windsurf/workflows
 # Should all show "->" indicating link/junction
 ```
