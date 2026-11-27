@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Keep job applications, profiles and screening answers truthful - employment status, work authorization, credentials and metrics - and keep every submission behind the owner's explicit approval
+trigger: model_decision
+description: Load when preparing, editing or submitting a job application, candidate profile or screening answer, or repeating profile facts to an interviewer: keep employment status, work authorization, credentials and metrics truthful and every submission behind the owner's explicit approval
 ---
 
 # Application truthfulness

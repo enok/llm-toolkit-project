@@ -47,7 +47,7 @@ Fit keywords: <only what the profile states>
   [skills-reconciliation.md](skills-reconciliation.md); change nothing.
 - **Fit keywords: only what the profile states.** Never add a skill because a
   posting asks for it; that is how a score turns into an untrue claim
-  (`rules/application-truthfulness.md`).
+  (`skills/job-search-pipeline/references/application-truthfulness.md`).
 
 ## How the scoring lanes use it
 

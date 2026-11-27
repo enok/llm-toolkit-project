@@ -119,7 +119,7 @@ click.
   earlier run closed a pre-existing empty tab it had not opened.
 - Reject non-essential cookie prompts. Do not click anything that is not on
   the lane's list of controls.
-- See `rules/ui-automation-lane-safety.md` for the binding rules.
+- See `skills/assistant-workspace-cleanup/references/ui-automation-lane-safety.md` for the binding rules.
 
 ## Shells and repositories
 
