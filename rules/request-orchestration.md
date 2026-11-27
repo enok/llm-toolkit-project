@@ -94,9 +94,12 @@ column (including `Vector DB used`, `Complexity` and the exact
 - **A skipped send is reported, never assumed delivered.** Treat the mirror as
   part of the table's completion: if the table was printed and the send did not
   happen, that is an open item, not a detail.
-- **The pre-approved content is the table.** Each mirrored message carries the
-  requester header and the full table, never a shortened version or a status
-  line. Anything beyond the table returns to the draft-and-approve flow in
+- **The pre-approved content is exactly what the route's approval names.**
+  When the owner approved the full table for that destination, each mirrored
+  message carries the requester header and the full table (its Evidence column
+  included), never a shortened version; when the approval names a status line,
+  send only that. Anything beyond the approved content (another destination,
+  file contents, findings) returns to the draft-and-approve flow in
   `rules/human-comment-reply-gate.md`.
 
 ## Per-task quality loop
