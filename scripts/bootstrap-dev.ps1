@@ -237,7 +237,7 @@ if ($Rtk) {
     Write-Host '== RTK (reviewed version only) =='
     $rtkVersionOk = $false
     if (Test-Command 'rtk') {
-        $rtkOut = (& rtk --version 2>&1 | Out-String)
+        $rtkOut = try { (& rtk --version 2>&1 | Out-String) } catch { "$_" }
         if ($rtkOut -match [regex]::Escape($rtkReviewedVersion)) {
             $rtkVersionOk = $true
             $skipped.Add("rtk $rtkReviewedVersion (already installed)")

@@ -279,15 +279,26 @@ if [[ -n "$RTK_INSTALL" ]]; then
     run winget.exe pin add --id rtk-ai.rtk --version "$RTK_REVIEWED_VERSION"
     [[ -n "$DRY_RUN" ]] || MISSING_SUMMARY+=("rtk: open a new shell, verify the installer SHA-256 against the release checksums.txt, then run the smoke test in skills/token-efficiency/references/rtk-reviewed-deployment.md")
   elif [[ "$PKG" == "brew" ]]; then
-    # macOS: the Homebrew build of the reviewed version passed the smoke test. Refuse any other version.
-    run brew install rtk
-    if [[ -z "$DRY_RUN" ]] && ! rtk_version_ok; then
-      echo "rtk --version does not report the reviewed $RTK_REVIEWED_VERSION; uninstall it (brew uninstall rtk) and install the reviewed version manually. Stopping." >&2
-      exit 3
+    # macOS: the Homebrew build of the reviewed version passed the smoke test. Refuse any other version:
+    # check the formula version BEFORE installing, then pin it so `brew upgrade` cannot replace it.
+    brew_rtk_version=""
+    if [[ -z "$DRY_RUN" ]]; then
+      brew_rtk_version="$(brew info --json=v2 rtk 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["formulae"][0]["versions"]["stable"])' 2>/dev/null || true)"
     fi
-    [[ -n "$DRY_RUN" ]] || INSTALLED_SUMMARY+=("rtk $RTK_REVIEWED_VERSION (run the smoke test in skills/token-efficiency/references/rtk-reviewed-deployment.md)")
+    if [[ -z "$DRY_RUN" && "$brew_rtk_version" != "$RTK_REVIEWED_VERSION" ]]; then
+      MISSING_SUMMARY+=("rtk $RTK_REVIEWED_VERSION: Homebrew offers '${brew_rtk_version:-unknown}', not the reviewed version; nothing installed (a new version needs a new review)")
+    else
+      run brew install rtk
+      if [[ -z "$DRY_RUN" ]] && ! rtk_version_ok; then
+        echo "rtk --version does not report the reviewed $RTK_REVIEWED_VERSION; removing it again. Stopping." >&2
+        brew uninstall rtk >/dev/null 2>&1 || true
+        exit 3
+      fi
+      run brew pin rtk
+      [[ -n "$DRY_RUN" ]] || INSTALLED_SUMMARY+=("rtk $RTK_REVIEWED_VERSION, pinned (run the smoke test in skills/token-efficiency/references/rtk-reviewed-deployment.md)")
+    fi
   else
-    MISSING_SUMMARY+=("rtk $RTK_REVIEWED_VERSION — reviewed on Windows only; no supported install route on this platform without a new review")
+    MISSING_SUMMARY+=("rtk $RTK_REVIEWED_VERSION — reviewed for Windows (winget) and macOS (Homebrew) only; no supported install route on this platform without a new review")
   fi
 fi
 
@@ -302,7 +313,7 @@ if command -v rtk >/dev/null 2>&1 && [[ -z "$DRY_RUN" ]]; then
       echo "# RTK privacy controls (LLM toolkit bootstrap): no DB, no telemetry, no tee"
       if [[ "$OS" == "macos" ]]; then
         # A plain file as the parent: the DB paths below can never be created.
-        : > "$HOME/.rtk-off"
+        [[ -e "$HOME/.rtk-off" ]] || : > "$HOME/.rtk-off"
         echo "export RTK_DB_PATH=\"\$HOME/.rtk-off/history.db\""
         echo "export RTK_RECALL_DB=\"\$HOME/.rtk-off/recall.db\""
       else
