@@ -6,7 +6,7 @@
 #   2. rules/*.md and workflows/*.md at project root (toolkit canonical layout)
 #
 # Repairs shared compatibility surfaces:
-#   .cursor/rules/*.mdc -> generated from the canonical shared rules (gitignored; never an old directory link)
+#   .cursor/rules/*.mdc -> generated from the canonical shared rules (listed in .cursor/rules/.gitignore; never an old directory link)
 #   .cursor/workflows -> no longer created (not a Cursor surface); an existing link is left alone
 #   .cursor/agents -> canonical shared tool-subagents
 #   .claude/agents -> canonical shared tool-subagents
@@ -333,6 +333,7 @@ file_has_frontmatter() {
   awk '
     NR == 1 {
       sub(/^\xef\xbb\xbf/, "")
+      sub(/\r$/, "")
       if ($0 == "---") { print "1" }
       exit
     }
@@ -388,40 +389,40 @@ cursor_convert_rule() {
   local dest="$2"
   if [[ "$(file_has_frontmatter "$src")" == "1" ]]; then
     awk '
-      BEGIN { in_front=0; printed_apply=0 }
+      function emit_front(   i, l, manual, printed_apply, v) {
+        manual = 0
+        printed_apply = 0
+        for (i = 1; i <= n; i++) if (buf[i] ~ /^trigger:[ \t]*manual/) manual = 1
+        for (i = 1; i <= n; i++) {
+          l = buf[i]
+          if (l ~ /^trigger:[ \t]*always_on/) { print "alwaysApply: true"; printed_apply = 1; continue }
+          if (l ~ /^trigger:[ \t]*glob/) { print "alwaysApply: false"; printed_apply = 1; continue }
+          if (l ~ /^trigger:[ \t]*model_decision/) { print "alwaysApply: false"; printed_apply = 1; continue }
+          if (l ~ /^trigger:[ \t]*manual/) { printed_apply = 1; continue }
+          if (l ~ /^trigger:/) { print "alwaysApply: true"; printed_apply = 1; continue }
+          if (manual && l ~ /^description:/) continue
+          if (l ~ /^globs:/) {
+            v = l
+            sub(/^globs:[ \t]*/, "", v)
+            gsub(/^["\047]|["\047]$/, "", v)
+            l = "globs: " v
+          }
+          print l
+        }
+        if (!printed_apply) print "alwaysApply: true"
+      }
+      BEGIN { state = 0; n = 0 }
       NR == 1 { sub(/^\xef\xbb\xbf/, "") }
-      /^---$/ {
-        if (in_front == 0) { in_front=1; print; next }
-        if (!printed_apply) { print "alwaysApply: true"; printed_apply=1 }
-        in_front=0
-        print
-        next
-      }
-      in_front && /^trigger:[ \t]*always_on/ {
-        print "alwaysApply: true"
-        printed_apply=1
-        next
-      }
-      in_front && /^trigger:[ \t]*glob/ {
-        print "alwaysApply: false"
-        printed_apply=1
-        next
-      }
-      in_front && /^trigger:[ \t]*model_decision/ {
-        print "alwaysApply: false"
-        printed_apply=1
-        next
-      }
-      in_front && /^trigger:[ \t]*manual/ {
-        printed_apply=1
-        next
-      }
-      in_front && /^trigger:/ {
-        print "alwaysApply: true"
-        printed_apply=1
+      state == 0 { state = 1; print "---"; next }
+      state == 1 {
+        line = $0
+        sub(/\r$/, "", line)
+        if (line == "---") { emit_front(); print "---"; state = 2; next }
+        buf[++n] = line
         next
       }
       { print }
+      END { if (state == 1) for (i = 1; i <= n; i++) print buf[i] }
     ' "$src" > "$dest"
   else
     local desc
@@ -440,7 +441,14 @@ cursor_convert_rule() {
 CURSOR_GENERATED_MARKER="generated-by: sync-tool-configs"
 
 cursor_is_generated() {
-  [[ -f "$1" ]] && grep -q -- "$CURSOR_GENERATED_MARKER" "$1" 2>/dev/null
+  [[ -f "$1" ]] || return 1
+  awk -v marker="<!-- $CURSOR_GENERATED_MARKER " '
+    { sub(/\r$/, "") }
+    NR == 1 { if ($0 != "---") exit 1; next }
+    after { exit (index($0, marker) == 1 && $0 ~ / -->$/) ? 0 : 1 }
+    $0 == "---" { after = 1 }
+    END { if (!after) exit 1 }
+  ' "$1" 2>/dev/null
 }
 
 # Writes dest as a Cursor .mdc rule from a shared rule and tags it as generated
@@ -453,7 +461,12 @@ cursor_generate_rule() {
   awk -v marker="<!-- $CURSOR_GENERATED_MARKER from rules/$(basename "$src"); do not edit, rerun the sync -->" '
     /^---[ \t\r]*$/ { seen++; print; if (seen == 2) { print marker } next }
     { print }
-  ' "$tmp" > "$dest"
+  ' "$tmp" > "$tmp.new"
+  if [[ -f "$dest" ]] && cmp -s "$tmp.new" "$dest"; then
+    rm -f "$tmp.new"
+  else
+    mv -f "$tmp.new" "$dest"
+  fi
   rm -f "$tmp"
 }
 
@@ -465,6 +478,17 @@ cursor_path_is_link() {
   parent_resolved="$(cd "$(dirname "$path")" 2>/dev/null && pwd -P)" || return 1
   path_resolved="$(cd "$path" 2>/dev/null && pwd -P)" || return 1
   [[ "$path_resolved" != "$parent_resolved/$(basename "$path")" ]]
+}
+
+# True when the link resolves to the toolkit rules directory (the only link --force may replace).
+cursor_link_is_toolkit_rules() {
+  local target cand
+  target="$(cd "$1" 2>/dev/null && pwd -P)" || return 1
+  for cand in "$PROJECT/rules" "$PROJECT/.windsurf/rules" "${WINDSURF_RULES:-}"; do
+    [[ -n "$cand" && -d "$cand" ]] || continue
+    [[ "$target" == "$(cd "$cand" && pwd -P)" ]] && return 0
+  done
+  return 1
 }
 
 get_description() {
@@ -848,11 +872,14 @@ if [[ -n "$CURSOR_RULES_SOURCE" ]]; then
   else
     CURSOR_RULES_OK=1
     if cursor_path_is_link "$CURSOR_RULES"; then
-      if [[ "$ALLOW_REPAIR" -eq 1 ]]; then
+      if [[ "$ALLOW_REPAIR" -eq 1 ]] && cursor_link_is_toolkit_rules "$CURSOR_RULES"; then
         reset_path "$CURSOR_RULES"
+      elif [[ "$ALLOW_REPAIR" -eq 1 ]]; then
+        echo "Warning: $CURSOR_RULES is a link to a directory that is not the toolkit rules; leaving it and not generating .mdc rules." >&2
+        CURSOR_RULES_OK=0
       else
-        echo "Warning: $CURSOR_RULES is a directory link from an older sync; leaving it and not generating .mdc rules." >&2
-        echo "  Re-run with --force to replace the link with generated .mdc rules." >&2
+        echo "Warning: $CURSOR_RULES is a link; leaving it and not generating .mdc rules." >&2
+        echo "  Re-run with --force to replace it with generated .mdc rules (only a link to the toolkit rules is replaced)." >&2
         CURSOR_RULES_OK=0
       fi
     elif [[ -e "$CURSOR_RULES" && ! -d "$CURSOR_RULES" ]]; then
@@ -882,6 +909,22 @@ if [[ -n "$CURSOR_RULES_SOURCE" ]]; then
           echo "  Removed stale generated Cursor rule: $(basename "$existing")"
         fi
       done
+      # Ignore exactly the generated files (hand-made rules stay visible to git).
+      CURSOR_GI="$CURSOR_RULES/.gitignore"
+      if [[ -e "$CURSOR_GI" ]] && ! grep -q -- "^# $CURSOR_GENERATED_MARKER" "$CURSOR_GI" 2>/dev/null; then
+        echo "Warning: $CURSOR_GI is hand-made; not overwritten, generated rules may show up in git." >&2
+      else
+        {
+          echo "# $CURSOR_GENERATED_MARKER: lists the generated rule files only; rewritten on every sync"
+          echo "/.gitignore"
+          for existing in "${CURSOR_RULES_NAMES[@]}"; do echo "/$existing"; done
+        } > "$CURSOR_GI.tmp-gen-$$"
+        if [[ -f "$CURSOR_GI" ]] && cmp -s "$CURSOR_GI.tmp-gen-$$" "$CURSOR_GI"; then
+          rm -f "$CURSOR_GI.tmp-gen-$$"
+        else
+          mv -f "$CURSOR_GI.tmp-gen-$$" "$CURSOR_GI"
+        fi
+      fi
       CURSOR_RULES_GENERATED=1
       echo "  OK Cursor rules generated (${#CURSOR_RULES_NAMES[@]} .mdc files)"
     fi
@@ -1075,7 +1118,7 @@ Canonical shared content lives in toolkit \`skills/\`, \`rules/\`, \`workflows/\
 |------|----------|--------|
 | Antigravity | \`.agent/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | Codex / generic | \`AGENTS.md\`, \`.agents/skills/\`, optional \`.codex/skills\`, optional \`.codex/agents/\` | \`AGENTS.md\` is primary; provider skill paths stay thin links to the shared skill catalog |
-| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills and agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated (gitignored) from \`rules/\`; project filtering happens via local ignore files |
+| Cursor | \`.cursor/skills/\`, \`.cursor/rules/\`, \`.cursor/agents/\` | Skills and agents are links to canonical shared files; \`.cursor/rules/*.mdc\` are generated from \`rules/\` (git-ignored through \`.cursor/rules/.gitignore\`; hand-made rules there stay visible to git); project filtering happens via local ignore files |
 | Claude Code | \`CLAUDE.md\`, \`.claude/skills/\`, \`.claude/agents/\` | \`CLAUDE.md\` imports \`AGENTS.md\` (\`@AGENTS.md\`); shared skills and agents are links |
 | Gemini CLI | \`.gemini/skills/\` | Thin skill compatibility link to \`.agents/skills/\` |
 | GitHub Copilot | \`.github/copilot-instructions.md\` | Concatenated repo-local export from shared selection plus resolved LLM config docs |
@@ -1154,21 +1197,6 @@ fi
 
 echo ""
 echo "Done. All tool configs synced for $DOC_TITLE."
-# Guard: remove cloud-sync conflict-resolution duplicates (e.g., "file (1).md")
-if [[ "$SKIP_CURSOR_RULES" -eq 0 ]] && [[ -L "${CURSOR_RULES:-}" ]]; then
-  dupes=()
-  while IFS= read -r -d '' f; do
-    dupes+=("$f")
-  done < <(find "$CURSOR_RULES" -name "* (*).md" -print0 2>/dev/null)
-  if [ "${#dupes[@]}" -gt 0 ]; then
-    echo "Warning: removing ${#dupes[@]} cloud-sync conflict duplicate(s) in $CURSOR_RULES:" >&2
-    for f in "${dupes[@]}"; do
-      echo "  rm $(basename "$f")" >&2
-      rm -f "$f"
-    done
-  fi
-fi
-
 echo ""
 echo "Source of truth:  ${DISPLAY_RULES_PREFIX} and ${DISPLAY_WORKFLOWS_PREFIX}"
 if [[ -d "$PROJECT/tool-subagents" ]]; then

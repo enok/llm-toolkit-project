@@ -352,13 +352,17 @@ else
     echo ".windsurf/workflows/"
     [[ $USE_WINDSURF -eq 1 ]] && append_shared_skill_ignores ".windsurf"
     [[ $USE_ANTIGRAVITY -eq 1 ]] && append_shared_skill_ignores ".agent" && echo ".agent/skills/AGENTS.md"
-    [[ $USE_CURSOR -eq 1 ]]   && append_shared_skill_ignores ".cursor" && echo ".cursor/skills/AGENTS.md" && echo ".cursor/rules/" && echo ".cursor/workflows/" && echo ".cursor/agents/"
+    [[ $USE_CURSOR -eq 1 ]]   && append_shared_skill_ignores ".cursor" && echo ".cursor/skills/AGENTS.md" && echo ".cursor/workflows/" && echo ".cursor/agents/"
     [[ $USE_CLAUDE -eq 1 ]]   && append_shared_skill_ignores ".claude" && echo ".claude/skills/AGENTS.md"
     [[ $USE_CODEX -eq 1 ]]    && append_shared_skill_ignores ".codex" && echo ".codex/skills/AGENTS.md" && echo ".codex/agents/"
     [[ $USE_GEMINI -eq 1 ]]   && append_shared_skill_ignores ".gemini" && echo ".gemini/skills/AGENTS.md"
     [[ $USE_OPENCODE -eq 1 ]] && append_shared_skill_ignores ".opencode" && echo ".opencode/skills/AGENTS.md"
   } >> "$CONSUMER_GITIGNORE"
   echo ".gitignore: appended LLM tool entries."
+fi
+
+if [[ $USE_CURSOR -eq 1 ]] && grep -Eqx '\.cursor/rules/?' "$CONSUMER_GITIGNORE" 2>/dev/null; then
+  echo "Note: .gitignore ignores .cursor/rules/ as a whole; hand-made Cursor rules there would be ignored. The sync now writes .cursor/rules/.gitignore for the generated files, so that line can be removed."
 fi
 
 if [[ $USE_CURSOR -eq 1 ]] && ! grep -qx '!\.cursorignore' "$CONSUMER_GITIGNORE" 2>/dev/null; then

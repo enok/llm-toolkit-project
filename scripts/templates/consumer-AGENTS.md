@@ -9,7 +9,7 @@ This repo uses symlinked skills, rules, and workflows for LLM-assisted developme
 - **Claude Code**: `.claude/skills/<name>` and `.claude/agents/` -> shared toolkit content
 - **Codex (optional)**: `.codex/skills/<name>` and optional `.codex/agents/`; `AGENTS.md` stays primary
 - **Windsurf**: `.windsurf/rules/`, `.windsurf/workflows/`, and optional `.windsurf/skills/<name>` -> shared toolkit content
-- **Cursor**: `.cursor/skills/` and `.cursor/agents/` stay symlinked to canonical shared files; `.cursor/rules/*.mdc` is generated from the shared rules (gitignored)
+- **Cursor**: `.cursor/skills/` and `.cursor/agents/` stay symlinked to canonical shared files; `.cursor/rules/*.mdc` is generated from the shared rules (git-ignored per file through a generated `.cursor/rules/.gitignore`)
 
 ## Repo-local LLM files
 

@@ -325,7 +325,6 @@ if ($USE_ANTIGRAVITY) {
 if ($USE_CURSOR) {
     $gitignoreLines += Get-SharedSkillIgnoreLines -Prefix '.cursor'
     $gitignoreLines += '.cursor/skills/AGENTS.md'
-    $gitignoreLines += '.cursor/rules/'
     $gitignoreLines += '.cursor/workflows/'
     $gitignoreLines += '.cursor/agents/'
 }
@@ -363,6 +362,10 @@ else {
     $encoding = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText($consumerGitignore, $gitignoreBlock + [Environment]::NewLine, $encoding)
     Write-Host '.gitignore: created.'
+}
+
+if ($USE_CURSOR -and (Test-Path -LiteralPath $consumerGitignore -PathType Leaf) -and ((Get-Content -LiteralPath $consumerGitignore -Raw) -match '(?m)^\.cursor/rules/?\r?$')) {
+    Write-Host 'Note: .gitignore ignores .cursor/rules/ as a whole; hand-made Cursor rules there would be ignored. The sync now writes .cursor/rules/.gitignore for the generated files, so that line can be removed.'
 }
 
 if ($USE_CURSOR) {
