@@ -5,8 +5,7 @@ tags: [job-search, apply, ats, browser-automation, authorization]
 
 # Apply playbook
 
-How an owner-approved tracker row becomes a confirmed submit. The run order is
-in `workflows/job-search-apply.md`. Related: lane F prompt in
+How an owner-approved tracker row becomes a confirmed submit. Related: lane F prompt in
 [lane-prompts.md](lane-prompts.md), kit files in
 [cv-tailoring.md](cv-tailoring.md) section 6, profile keys in
 [profile-template.md](profile-template.md), approval marks in
@@ -162,7 +161,7 @@ run state, then move the row to `Applied`. Many rows go through
 `skills/job-search-pipeline/scripts/tracker_batch.py` (one JSON ops list, one
 mtime chain, a log you can resume). Afterwards run `approvals` and
 `repair --dry-run` (expect no orphans or link fixes), then clear the journal.
-Commands and the resume rule are in `workflows/job-search-apply.md`.
+Commands and the resume rule are in `skills/job-search-pipeline/scripts/tracker_batch.py`.
 
 ## 8. Owner-only steps
 

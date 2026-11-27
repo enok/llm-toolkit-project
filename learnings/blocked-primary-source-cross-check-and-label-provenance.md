@@ -23,8 +23,7 @@ several times to "check this again".
 - On each re-check request, repeat the comparison and restate the provenance and the fetch
   status; say plainly if nothing changed.
 - Report the block once, with the hosts tried, and do not loop.
-- Related: `cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md`,
-  `rules/evidence-before-verdict.md`.
+- Related: `cloud-sandbox-egress-blocks-registries-verify-on-user-machine.md`.
 
 # Why
 A reader of the deliverable cannot see the fetch history, so the document must carry the

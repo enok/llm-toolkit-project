@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: rank-three-postings
-expected_outcome: |
-  Dispatches the read-only analyst, normalizes pay to monthly USD with stated assumptions, flags unknown work authorization on posting 1, treats hourly marketplace pay with 60-80% realization (bridge tier), skips posting 3 as onsite, and returns tier per row.

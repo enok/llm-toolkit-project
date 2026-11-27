@@ -14,7 +14,7 @@ Reusable engine for a candidate's recurring job search. Everything personal
 notification channel) lives in the candidate's **profile**, never in this skill.
 
 - Run procedure: `workflows/job-search-pipeline.md` (one scan run).
-- Apply step (approvals, the per-form chat OK, submits): `workflows/job-search-apply.md`.
+- Apply step (approvals, the per-form chat OK, submits): `skills/job-search-pipeline/references/apply-playbook.md`.
 - Completing a candidate-portal profile in a session the owner signed in to:
   `workflows/job-portal-profile-sync.md`.
 - First-time setup for a new candidate: `workflows/job-search-setup.md`.
@@ -64,7 +64,7 @@ notification channel) lives in the candidate's **profile**, never in this skill.
      typed; the owner's reply approves only the forms it names, and a changed
      answer needs a new OK. Answers come only from the profile or that reply.
      With no owner in the chat (an unattended run), fill nothing; list the forms
-     for the owner. Steps: `workflows/job-search-apply.md`.
+     for the owner. Steps: `skills/job-search-pipeline/references/apply-playbook.md`.
    - **Consent boxes are the owner's.** Consent, privacy, and terms checkboxes
      are always ticked by the owner, even on a form with a chat OK. Fill the
      rest, leave the tab open, and hand over: the owner ticks and submits.

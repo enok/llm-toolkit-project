@@ -169,7 +169,6 @@ Skills are on-demand capabilities. Each skill lives in `skills/<skill-name>/SKIL
 | **linkedin-profile-maintenance** | Safe, owner-approved bulk maintenance of a LinkedIn profile through browser automation: inventory, backup, owner keep-list, per-item verified edits and deletes, re-read; details-page mechanics and browser-session notes in references. |
 | **contract-platform-vetting** | Vet AI-training and expert-contractor marketplaces as bridge income: legitimacy check, rate selection inside the posted band, ranking by band and task fit, effective-hourly math, weekly-hour caps |
 | **interview-prep-planner** | Build an interview-preparation plan: classify interview types, gap analysis against the profile, prioritized study plan with resources and drills, week-one triage, STAR prompts, and a resumable deliverable |
-| **job-posting-analyst** | Route job-posting reading and fit analysis through the read-only analyst: normalize pay, stack, seniority, contract form and work authorization, score fit, flag duplicates, and tier apply-now / apply-next / bridge / skip |
 | **technical-interview-prep** | Coach a candidate through one technical interview: truthful cheat sheet, intro rehearsal, Java coding-pattern drills, full mock with end-of-session scoring, and a debrief that turns the asked problem into the next drill |
 
 ### Thesis And Academic Formatting

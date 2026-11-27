@@ -9,7 +9,7 @@ pipeline", "check my applications and find new jobs"). Capability:
 `skills/job-search-pipeline/SKILL.md`. First-time setup for a new candidate:
 `workflows/job-search-setup.md`. Online-sheet tracker: `references/sheet-tracker-mode.md`.
 
-On demand: approved rows are `workflows/job-search-apply.md`; one posting's
+On demand: approved rows: the apply playbook; one posting's
 apply kit is Phase 5 steps 4-7; best-fit roles, ATS keywords, or an XYZ-format
 CV rewrite is `workflows/job-search-setup.md` Phase 2 step 5.
 
@@ -26,7 +26,7 @@ passes `--expect-mtime <m> --backup-dir <paths.backup_dir>`; after each write se
 step 7) use `tracker_batch --tracker <t> --ops <ops.json> --expect-mtime <m>
 --backup-dir <dir> --log <file> [--resume]`: it chains the ops, logs each, stops
 at the first failure, prints `{"ok","failed","mtime"}`, and exits like
-`tracker_ops`; op shapes: `workflows/job-search-apply.md` Phase 8. Run child
+`tracker_ops`; op shapes: `tracker_batch.py`. Run child
 processes with `encoding='utf-8', errors='replace'` and
 `PYTHONIOENCODING=utf-8` (a non-ASCII dash in a title once crashed a run after
 `append` succeeded).
@@ -90,7 +90,7 @@ While they run, the root starts Phase 3.
 
 ## Phase 3 - Approvals (root)
 
-Run the **job-search-apply** workflow (workflows/job-search-apply.md) in full.
+Follow the apply playbook (`references/apply-playbook.md`) in full.
 It runs while the Wave 1 lanes run and submits nothing before their L1 and L3
 evidence feeds its duplicate check. A submit needs the owner's per-form chat
 OK; the tracker mark alone is not enough.

@@ -8,7 +8,6 @@
 # Always-on rules
 rules/api-contract-surface.md
 rules/application-truthfulness.md
-rules/capability-check-before-limitation.md
 rules/changed-code-quality-gate-required.md
 rules/ci-feedback-loop.md
 rules/cli-over-mcp.md
@@ -17,7 +16,6 @@ rules/command-safety.md
 rules/cross-platform-scripts.md
 rules/documentation-review-required.md
 rules/error-driven-learning.md
-rules/evidence-before-verdict.md
 rules/external-write-authorization.md
 rules/git-conventions.md
 rules/human-comment-reply-gate.md
