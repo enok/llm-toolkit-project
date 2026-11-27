@@ -11,7 +11,7 @@ The toolkit is the single source of truth. Consumer projects link to it (symlink
 | Rules | `rules/` | 23 short constraints (15 always-on, 8 loaded on demand): git, security gates, knowledge base first, request orchestration, model selection, human-reply gate, external-write authorization, CLI-over-MCP, cross-platform scripts, workflow authoring, workflow self-improvement |
 | Workflows | `workflows/` | 71 sequenced procedures: review, knowledge-base sync, PR/ticket validation, releases, specialist validation/evolution pairs, docs and diagrams, study-to-publication and run retrospectives, infrastructure and log investigation, data-science and thesis work |
 | Skills | `skills/` | 64 on-demand capabilities with progressive disclosure (`SKILL.md` + `references/`, `rules/`, `scripts/`, `agents/`) |
-| Tool subagents | `tool-subagents/` | 15 shared subagent prompts (`.md` + `.toml`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents`, led by `agent-orchestrator` |
+| Tool subagents | `tool-subagents/` | 15 shared subagent prompts (`.md`) rendered into `.cursor/agents`, `.claude/agents`, and `.codex/agents` (generated TOML), led by `agent-orchestrator` |
 | Rubrics | `rubrics/` | Architecture severity calls and the technical-content scoring rubric |
 | Integrations | `integrations/` | Jira, Confluence, AWS CLI, Slack CLI setup guides |
 | Clients | `clients/` | Provider overlay guidance and client sync commands |
@@ -29,7 +29,7 @@ Canonical content lives in one place; provider directories are thin compatibilit
 rules/             broad always-relevant guidance (always loaded)
 workflows/         manually invoked procedures (<= 12,000 characters each)
 skills/            on-demand capabilities
-tool-subagents/    reusable subagent prompts (.md + .toml)
+tool-subagents/    reusable subagent prompts (.md; Codex TOML generated, not committed)
 rubrics/           review scoring and checklists
 learnings/         indexed gotchas (read learnings/INDEX.md first)
 
@@ -333,7 +333,7 @@ PowerShell:
 npm run validate
 ```
 
-The gate checks skill frontmatter, referenced paths, the 12,000-character workflow limit, subagent `.md`/`.toml` parity, cloud-sync duplicates, project-specific leak patterns (`FORBIDDEN_PROJECT_PATTERNS`), prompt-injection patterns in LLM surfaces (`scripts/scan-llm-surface-security.py`), and runs every installed scanner (gitleaks, semgrep, shellcheck, PSScriptAnalyzer, yamllint, actionlint, hadolint, syft/grype/trivy, SkillSpector). Missing scanners are skipped with a reason; set `SECURITY_ALLOW_ALL_SKIPPED=1` only for local runs without any scanner. `.github/workflows/validate.yml` runs the same gate in CI, and `changed-code-quality-gate.yml` runs the changed-code static analysis on pull requests.
+The gate checks skill frontmatter, referenced paths, the 12,000-character workflow limit, subagent `.md` renderability to the Codex TOML (`name`, `description`, `developer_instructions`), cloud-sync duplicates, project-specific leak patterns (`FORBIDDEN_PROJECT_PATTERNS`), prompt-injection patterns in LLM surfaces (`scripts/scan-llm-surface-security.py`), and runs every installed scanner (gitleaks, semgrep, shellcheck, PSScriptAnalyzer, yamllint, actionlint, hadolint, syft/grype/trivy, SkillSpector). Missing scanners are skipped with a reason; set `SECURITY_ALLOW_ALL_SKIPPED=1` only for local runs without any scanner. `.github/workflows/validate.yml` runs the same gate in CI, and `changed-code-quality-gate.yml` runs the changed-code static analysis on pull requests.
 
 ## Safety
 

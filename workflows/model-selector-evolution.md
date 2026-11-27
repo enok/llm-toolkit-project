@@ -16,7 +16,7 @@ Use this workflow when the Model Selector specialist needs a durable improvement
    was worse, not better. A task that completed easily on an expensive model
    means the lookup row is too high or was never consulted.
 3. Classify the fix across the lookup table, the escalation triggers, the prompt
-   (`tool-subagents/model-selector.md` and its `.toml` twin), the skill
+   (`tool-subagents/model-selector.md`; its Codex TOML is generated), the skill
    (`skills/model-selector/SKILL.md`), the model selection contract in
    `rules/request-orchestration.md`, the client model map in
    `tool-subagents/agent-orchestrator.md`, or the companion workflows.

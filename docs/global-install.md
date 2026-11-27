@@ -69,7 +69,7 @@ inspection at any time (for example in a script or CI step).
 | Tool | Skills | Agents | Global instruction file |
 | --- | --- | --- | --- |
 | Claude Code | `~/.claude/skills` -> `skills/` | `~/.claude/agents` -> `tool-subagents/` | `~/.claude/CLAUDE.md` (managed block) |
-| Codex | `~/.codex/skills/<name>` -- one link per skill directory | `~/.codex/agents` -> `tool-subagents/` | `~/.codex/AGENTS.md` (managed block; created if missing or empty) |
+| Codex | `~/.codex/skills/<name>` -- one link per skill directory | `~/.codex/agents` -> `tool-subagents/.generated/codex/` (rendered from the `.md` by the installer; a legacy link to `tool-subagents/` is re-pointed) | `~/.codex/AGENTS.md` (managed block; created if missing or empty) |
 | Cursor | `~/.cursor/skills` -> `skills/` | `~/.cursor/agents` -> `tool-subagents/` | None -- Cursor has no global rules file. The script prints the directive text to paste into **Cursor Settings > Rules > User Rules**. |
 | Windsurf | `~/.codeium/windsurf/skills` -> `skills/` | -- | `~/.codeium/windsurf/memories/global_rules.md` (managed block; directories created if missing) |
 | Gemini CLI | `~/.gemini/skills` -> `skills/` | -- | `~/.gemini/GEMINI.md` (managed block) |

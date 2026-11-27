@@ -51,7 +51,7 @@ Most tools also support installing skills globally, outside any one repo.
 `scripts/install-global-surfaces.sh` / `.ps1` (see `docs/global-install.md`)
 materializes every path below as a link back to this toolkit's `skills/`,
 links the agent path for Claude Code (`~/.claude/agents`), Codex
-(`~/.codex/agents`), and Cursor (`~/.cursor/agents`) to `tool-subagents/`, and
+(`~/.codex/agents`, linked to the generated `tool-subagents/.generated/codex/`), and Cursor (`~/.cursor/agents`) to `tool-subagents/`, and
 writes a managed instruction block into the global instruction files of
 Claude Code (`~/.claude/CLAUDE.md`), Codex (`~/.codex/AGENTS.md`), Windsurf
 (`~/.codeium/windsurf/memories/global_rules.md`), and Gemini CLI
@@ -90,7 +90,7 @@ is untested.
 | `.cursor/workflows/` | No longer created (not a Cursor surface); an existing link keeps working and can be removed | `workflows/` |
 | `.cursor/agents/` | Cursor specialist agents | `tool-subagents/` |
 | `.claude/agents/` | Claude Code specialist agents | `tool-subagents/` |
-| `.codex/agents/` | Optional Codex specialist agents | `tool-subagents/` |
+| `.codex/agents/` | Optional Codex specialist agents | `tool-subagents/.generated/codex/` (TOML rendered from `tool-subagents/*.md`; gitignored) |
 
 Generated exports such as `CLAUDE.md`, the Copilot instructions file, and
 the managed `AGENTS.md` sync block should stay thin summaries or pointers.

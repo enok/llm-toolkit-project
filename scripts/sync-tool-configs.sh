@@ -937,7 +937,22 @@ fi
 if [[ -d "$PROJECT/tool-subagents" ]]; then
   ensure_symlink "$PROJECT/.cursor/agents" "../tool-subagents"
   ensure_symlink "$PROJECT/.claude/agents" "../tool-subagents"
-  if ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents"; then
+  # Codex reads generated TOML (rendered from the .md sources, never committed).
+  # A legacy link onto tool-subagents/ is re-pointed; nothing else is removed.
+  CODEX_LINK_OK=0
+  if command -v node >/dev/null 2>&1 \
+    && node "$(dirname "${BASH_SOURCE[0]}")/create-specialist-agent.js" --render-codex \
+      --source "$PROJECT/tool-subagents" "$PROJECT/tool-subagents/.generated/codex" >/dev/null 2>&1; then
+    if [[ -L "$PROJECT/.codex/agents" ]] \
+      && [[ "$(cd "$PROJECT/.codex/agents" 2>/dev/null && pwd -P)" == "$(cd "$PROJECT/tool-subagents" && pwd -P)" ]]; then
+      echo "  Re-pointing legacy .codex/agents -> tool-subagents/.generated/codex"
+      rm -f -- "$PROJECT/.codex/agents"
+    fi
+    ensure_symlink "$PROJECT/.codex/agents" "../tool-subagents/.generated/codex" && CODEX_LINK_OK=1
+  else
+    echo "Warning: could not render Codex agent TOML (needs node and valid tool-subagents/*.md)." >&2
+  fi
+  if [[ "$CODEX_LINK_OK" -eq 1 ]]; then
     CODEX_AGENTS_SYNCED=1
     echo "  OK shared subagent symlinks repaired"
   else

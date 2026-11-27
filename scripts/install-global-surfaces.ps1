@@ -428,7 +428,22 @@ function Install-CodexSurface {
             }
         }
     }
-    Set-LinkSurface -Tool 'codex' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents')
+    # Codex reads generated TOML (rendered from tool-subagents/*.md, never committed).
+    $codexAgentsOk = $true
+    if ($Apply) {
+        $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+        $codexAgentsOk = $false
+        if ($nodeCmd) {
+            & node (Join-Path $ToolkitRoot 'scripts/create-specialist-agent.js') --render-codex | Out-Null
+            $codexAgentsOk = ($LASTEXITCODE -eq 0)
+        }
+        if (-not $codexAgentsOk) {
+            Add-ResultRow -Tool 'codex' -Surface 'agents' -Action 'skipped' -Detail 'could not render Codex agent TOML (needs node); existing link left unchanged'
+        }
+    }
+    if ($codexAgentsOk) {
+        Set-LinkSurface -Tool 'codex' -SurfaceLabel 'agents' -LinkPath (Join-Path $base 'agents') -TargetPath (Join-Path $ToolkitRoot 'tool-subagents/.generated/codex')
+    }
     Set-ManagedBlock -Tool 'codex' -SurfaceLabel 'AGENTS.md' -FilePath (Join-Path $base 'AGENTS.md')
 }
 

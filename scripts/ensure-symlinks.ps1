@@ -124,8 +124,9 @@ else {
     $consumerCodexRoot = Join-Path $Consumer '.codex'
     Ensure-ConsumerDirectory -Path $consumerCodexRoot
     Ensure-SharedSkillCatalogLinks -SkillsRoot (Join-Path $consumerCodexRoot 'skills') -Label 'Codex: .codex/skills/<name> -> toolkit/skills/<name>'
-    if (Test-Path -LiteralPath $toolkitAgents -PathType Container) {
-        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath $toolkitAgents -AllowRepair:$Force
+    if ((Test-Path -LiteralPath $toolkitAgents -PathType Container) -and (Invoke-CodexAgentRender -ToolkitRoot $ToolkitRoot)) {
+        Remove-LegacyAgentsLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -ToolkitRoot $ToolkitRoot
+        $null = Ensure-ToolkitDirectoryLink -LinkPath (Join-Path $consumerCodexRoot 'agents') -TargetPath (Join-Path $toolkitAgents '.generated/codex') -AllowRepair:$Force
     }
 
     $consumerWindsurfRoot = Join-Path $Consumer '.windsurf'

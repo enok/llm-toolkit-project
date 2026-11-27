@@ -364,7 +364,19 @@ install_codex() {
     done
   fi
 
-  plan_link_surface "codex" "agents" "$base/agents" "$TOOLKIT_ROOT/tool-subagents"
+  # Codex reads generated TOML (rendered from tool-subagents/*.md, never committed).
+  local codex_agents="$TOOLKIT_ROOT/tool-subagents/.generated/codex"
+  if (( APPLY )); then
+    if command -v node >/dev/null 2>&1 && node "$TOOLKIT_ROOT/scripts/create-specialist-agent.js" --render-codex >/dev/null; then
+      :
+    else
+      add_row "codex" "agents" "skipped" "could not render Codex agent TOML (needs node); existing link left unchanged"
+      codex_agents=""
+    fi
+  fi
+  if [[ -n "$codex_agents" ]]; then
+    plan_link_surface "codex" "agents" "$base/agents" "$codex_agents"
+  fi
   managed_block_apply "codex" "AGENTS.md" "$base/AGENTS.md"
 }
 

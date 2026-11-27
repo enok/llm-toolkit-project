@@ -72,7 +72,7 @@ llm-toolkit-project/
 ├── rules/                     # Generic rules, 15 always-on + 8 on demand (+ rules/examples/ templates)
 ├── workflows/                 # Step-by-step procedures (<= 12,000 chars each)
 ├── skills/                    # On-demand capabilities (SKILL.md + references/rules/scripts/agents)
-├── tool-subagents/            # Shared subagent prompts (.md + .toml), agent-orchestrator first
+├── tool-subagents/            # Shared subagent prompts (.md; Codex TOML is generated), agent-orchestrator first
 ├── rubrics/                   # Architecture and technical-content rubrics
 ├── integrations/              # Jira, Confluence, AWS CLI, Slack CLI
 ├── clients/                   # Provider overlay guidance and sync commands

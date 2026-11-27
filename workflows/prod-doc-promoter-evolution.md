@@ -15,8 +15,8 @@ loads too much context.
    specialist output, executed promotion, validation result, and corrected
    outcome.
 2. Classify the durable fix:
-   - prompt contract: `tool-subagents/prod-doc-promoter.md` (mirror the body
-     into the `.toml`);
+   - prompt contract: `tool-subagents/prod-doc-promoter.md` (the Codex TOML
+     is generated from it);
    - workflow procedure: `workflows/prod-doc-promoter-validation.md`;
    - trigger/routing: `INTENTS.md`, `rules/request-orchestration.md`;
    - skill entrypoint: `skills/prod-doc-promoter/SKILL.md`;

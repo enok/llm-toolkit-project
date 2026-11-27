@@ -11,7 +11,8 @@ SCRIPT = REPO_ROOT / "scripts" / "create-specialist-agent.js"
 SUBAGENTS_DIR = REPO_ROOT / "tool-subagents"
 
 SOURCE_MD_COUNT = len(list(SUBAGENTS_DIR.glob("*.md")))
-SOURCE_TOML_COUNT = len(list(SUBAGENTS_DIR.glob("*.toml")))
+# The Codex TOML is generated from each agent .md (README.md is not an agent).
+SOURCE_TOML_COUNT = len([p for p in SUBAGENTS_DIR.glob("*.md") if p.name != "README.md"])
 
 
 def node_path() -> str | None:
@@ -48,7 +49,7 @@ class CreateSpecialistAgentRenderTests(unittest.TestCase):
         self.addCleanup(self._tmp.cleanup)
         self.project = Path(self._tmp.name)
 
-    def test_codex_render_copies_toml_only(self) -> None:
+    def test_codex_render_generates_toml_only(self) -> None:
         result = run_apply("codex", str(self.project))
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -171,6 +172,53 @@ class CreateSpecialistAgentTargetOptionTests(unittest.TestCase):
         result = run_apply("all", "--target", str(self.target_dir))
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("--target requires a single provider", result.stderr)
+
+
+@unittest.skipUnless(node_path(), "node is required to render subagent surfaces")
+class CodexTomlGenerationTests(unittest.TestCase):
+    """The Codex TOML is generated from the .md source and never committed."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+
+    def render(self, source: Path, out: Path) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["node", str(SCRIPT), "--render-codex", "--source", str(source), str(out)],
+            cwd=REPO_ROOT, capture_output=True, text=True, timeout=60,
+        )
+
+    def test_no_toml_is_committed_in_tool_subagents(self) -> None:
+        self.assertEqual(list(SUBAGENTS_DIR.glob("*.toml")), [])
+
+    def test_render_codex_writes_one_toml_per_agent_with_required_fields(self) -> None:
+        out = self.root / "codex"
+        result = self.render(SUBAGENTS_DIR, out)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        files = sorted(out.glob("*.toml"))
+        self.assertEqual(len(files), SOURCE_TOML_COUNT)
+        text = (out / "verifier.toml").read_text(encoding="utf-8")
+        for field in ("name = ", "description = ", "developer_instructions = "):
+            self.assertIn(field, text)
+        orchestrator = (out / "agent-orchestrator.toml").read_text(encoding="utf-8")
+        self.assertIn("readonly = false", orchestrator)
+        self.assertIn("external_side_effects = true", orchestrator)
+
+    def test_render_codex_rejects_agent_missing_description(self) -> None:
+        src = self.root / "src"
+        src.mkdir()
+        (src / "broken.md").write_text("---\nname: broken\nmodel: inherit\n---\n\nBody\n", encoding="utf-8")
+        result = self.render(src, self.root / "out")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing description", result.stderr)
+
+    def test_subagents_check_passes_without_a_generated_folder(self) -> None:
+        result = subprocess.run(
+            ["node", str(REPO_ROOT / "scripts" / "validate-specialist-agent.js"), "--subagents-check"],
+            cwd=REPO_ROOT, capture_output=True, text=True, timeout=60,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 class CreateSpecialistAgentSyntaxTests(unittest.TestCase):

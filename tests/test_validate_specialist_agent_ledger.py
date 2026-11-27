@@ -30,10 +30,10 @@ class CompanionLedgerTests(unittest.TestCase):
             root = Path(tmp)
             (root / "scripts").mkdir()
             shutil.copy(SCRIPT, root / "scripts" / SCRIPT.name)
+            shutil.copy(SCRIPT.with_name("subagent-render.js"), root / "scripts" / "subagent-render.js")
             prompt = (f"---\nname: {agent}\nreadonly: true\n---\n\n## Related Specialists\n\n"
                       "Learning/token efficiency\n")
             write(root, f"tool-subagents/{agent}.md", prompt)
-            write(root, f"tool-subagents/{agent}.toml", f'name = "{agent}"\n')
             write(root, "tool-subagents/README.md", f"`{agent}`\n")
             write(root, f"skills/{agent}/SKILL.md", f"---\nname: {agent}\n---\n")
             write(root, f"workflows/{agent}-validation.md", "validation\n")

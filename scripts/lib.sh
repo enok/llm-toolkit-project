@@ -125,6 +125,36 @@ ensure_dir_link() {
   return 0
 }
 
+# Codex agent TOML is generated from tool-subagents/*.md (never committed).
+# Renders into <root>/tool-subagents/.generated/codex; returns non-zero (and
+# warns) when node is missing or an agent cannot be rendered.
+render_codex_agents() {
+  local root="$1"
+  if ! command -v node >/dev/null 2>&1; then
+    echo "Warning: node not found; cannot render Codex agent TOML (skipping .codex/agents)." >&2
+    return 1
+  fi
+  node "$root/scripts/create-specialist-agent.js" --render-codex >/dev/null || {
+    echo "Warning: Codex agent TOML render failed (skipping .codex/agents)." >&2
+    return 1
+  }
+  [[ -d "$root/tool-subagents/.generated/codex" ]]
+}
+
+# One-release compatibility: a link that still points at tool-subagents/ keeps
+# working until the installer runs; then only the link itself is re-pointed
+# (never the directory it points at, never a plain directory).
+repoint_legacy_agents_link() {
+  local link_path="$1" root="$2" resolved legacy
+  [[ -L "$link_path" ]] || return 0
+  resolved="$(cd "$link_path" 2>/dev/null && pwd -P)" || return 0
+  legacy="$(cd "$root/tool-subagents" 2>/dev/null && pwd -P)" || return 0
+  if [[ "$resolved" == "$legacy" ]]; then
+    echo "Re-pointing legacy $link_path (tool-subagents/ -> tool-subagents/.generated/codex)" >&2
+    rm -f -- "$link_path"
+  fi
+}
+
 ensure_toolkit_windsurf_layout() {
   local root="$1"
   local allow_repair="${2:-}"

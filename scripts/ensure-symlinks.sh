@@ -114,8 +114,9 @@ else
 
   ensure_plain_dir "$CONSUMER/.codex" "$FORCE" || exit 1
   link_shared_skill_catalog "$CONSUMER/.codex/skills" "Codex: .codex/skills/<name> -> toolkit/skills/<name>" || exit 1
-  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]]; then
-    ensure_dir_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT/tool-subagents" "$FORCE" || exit 1
+  if [[ -d "$TOOLKIT_ROOT/tool-subagents" ]] && render_codex_agents "$TOOLKIT_ROOT"; then
+    repoint_legacy_agents_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT"
+    ensure_dir_link "$CONSUMER/.codex/agents" "$TOOLKIT_ROOT/tool-subagents/.generated/codex" "$FORCE" || exit 1
   fi
 
   ensure_plain_dir "$CONSUMER/.windsurf" "$FORCE" || exit 1

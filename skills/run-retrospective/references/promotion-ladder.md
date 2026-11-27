@@ -53,7 +53,7 @@ run's `promotions` at its actual level (for example `learning` for a
 
 Checklist promotions live in a section named exactly `## Known pitfalls`,
 placed near the end of the owning workflow, `SKILL.md`, or agent definition
-(`tool-subagents/<name>.md`, mirrored in its `.toml`), before any "Final Step"
+(`tool-subagents/<name>.md`; its Codex TOML is generated from it), before any "Final Step"
 or "Related" section. One bullet per signature:
 
 ```markdown
