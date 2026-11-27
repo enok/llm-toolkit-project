@@ -102,6 +102,15 @@ class ValueCheckTests(unittest.TestCase):
         code, data = self.js(s)
         self.assertEqual((code, len(data["failed"])), (1, 2))
 
+    def test_on_demand_passes_only_when_the_file_loads_on_demand(self) -> None:
+        s = self.scenario(["rules/b.md"], [row("rules/b.md", "on-demand")])
+        write(s.repo, "rules/b.md", "---\ntrigger: model_decision\ndescription: Load when x\n---\n# B\n")
+        self.assertEqual(self.js(s)[0], 0)
+        write(s.repo, "rules/b.md", "---\ntrigger: always_on\n---\n# B\n")
+        code, data = self.js(s)
+        self.assertEqual(code, 1)
+        self.assertIn("model_decision", data["failed"][0]["reason"])
+
     def test_exempt_without_note_fails(self) -> None:
         s = self.scenario(["rules/r.md"], [row("rules/r.md", "exempt", note="", winner="exempt")])
         code, data = self.js(s)

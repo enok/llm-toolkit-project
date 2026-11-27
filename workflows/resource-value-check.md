@@ -102,7 +102,8 @@ resource,kind,date,model,winner,margin,with_passed,plain_passed,of,decision,evid
 - `kind`: `skill`, `workflow`, `agent` or `rule`. `date`: `YYYY-MM-DD`.
 - `winner`: `with`, `plain` or `tie`; `margin`: `clear`, `slight` or `none`.
 - `decision`: one of `keep`, `keep-slim`, `on-demand`, `slim`, `remove`,
-  `retest`, `exempt`.
+  `retest`, `exempt`. The check passes `keep`, `keep-slim` and `exempt`, and
+  passes `on-demand` only once the file's frontmatter says `trigger: model_decision`.
 - `evidence`: where the case, outputs and verdict live (a run id or a path in
   the scratch workspace; never a machine-specific absolute path). `note`: short.
 

@@ -116,7 +116,26 @@ def load_ledger(path: Path) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
     return rows, errors
 
 
-def judge(resource: str, rows: Dict[str, Dict[str, str]]) -> Optional[str]:
+def loads_on_demand(repo: Optional[Path], resource: str) -> bool:
+    """True when the resource's own frontmatter says it is loaded on demand."""
+    if repo is None:
+        return False
+    path = repo / (resource + "/SKILL.md" if resource.startswith("skills/") and not resource.endswith(".md") else resource)
+    try:
+        head = path.read_text(encoding="utf-8", errors="replace").split("\n", 40)[:40]
+    except OSError:
+        return False
+    if not head or head[0].strip() != "---":
+        return False
+    for line in head[1:]:
+        if line.strip() == "---":
+            break
+        if line.strip().replace(" ", "") == "trigger:model_decision":
+            return True
+    return False
+
+
+def judge(resource: str, rows: Dict[str, Dict[str, str]], repo: Optional[Path] = None) -> Optional[str]:
     row = rows.get(resource)
     if row is None and resource.startswith("skills/"):
         row = rows.get(resource + "/SKILL.md")
@@ -125,6 +144,10 @@ def judge(resource: str, rows: Dict[str, Dict[str, str]]) -> Optional[str]:
     decision = row["decision"]
     if decision not in DECISIONS:
         return f"unknown decision '{decision}'"
+    if decision == "on-demand":
+        if loads_on_demand(repo, resource):
+            return None
+        return "decision is 'on-demand' but the file does not say trigger: model_decision"
     if decision not in PASSING:
         return f"decision is '{decision}', not keep, keep-slim or exempt"
     if decision == "exempt" and not row["note"].strip():
@@ -168,7 +191,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     failed: List[Dict[str, str]] = []
     passed: List[str] = []
     for res in resources:
-        reason = judge(res, rows)
+        reason = judge(res, rows, repo)
         if reason:
             failed.append({"resource": res, "reason": reason})
         else:
