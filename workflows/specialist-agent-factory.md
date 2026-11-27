@@ -45,7 +45,7 @@ Update:
 - `README.md`
 - `skills/README.md`
 - `docs/catalog/workflows.md`
-- `clients/README.md` if client overlay behavior changes
+- `docs/tool-compatibility-paths.md` (client overlay section) if client overlay behavior changes
 
 Keep indexes short. Put detailed operating instructions in the prompt, workflow,
 or skill body rather than root guidance.

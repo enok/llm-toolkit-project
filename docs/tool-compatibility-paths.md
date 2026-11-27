@@ -121,3 +121,109 @@ Regenerate every compatibility surface after changing `rules/`,
 ```powershell
 .\scripts\sync-tool-configs.ps1 . -SkipAgentsMd
 ```
+
+`--skip-agents-md` preserves the curated root `AGENTS.md` while repairing the
+provider links and refreshing the other repo-local exports. On a fresh clone
+where links are missing, run the same command from the toolkit root (add
+`--skip-github` / `-SkipGithub` to leave `.github/` alone), or for a consumer
+repo run `../llm-toolkit/scripts/setup-repo.cmd .`. `.agent`, `.agents`,
+`.claude`, `.cursor` and `.windsurf` surfaces are links (junctions on
+Windows); `.cursor/rules/*.mdc` is generated and gitignored. If the
+filesystem has no symlinks, mirror by copy with
+`./.codex/sync-shared-skills.sh --copy --no-global`. Check the links with
+`ls -la .agents/skills .claude/skills .windsurf/rules .windsurf/workflows .cursor/rules`
+(each should show `->`, except the generated `.cursor/rules` files).
+
+## Provider Notes
+
+Each provider folder (`.agents`, `.claude`, `.codex`, `.cursor`, `.windsurf`)
+holds a one-line `README.md` pointing here. Keep these folders thin: do not
+hand-edit anything reached through them; edit `skills/`, `rules/`,
+`workflows/` or `tool-subagents/` and regenerate.
+
+- `.agents/skills/`: the provider-agnostic skill root, one per-skill link into
+  `skills/<name>`. Edit `skills/<name>/SKILL.md` (and its `references/`,
+  `rules/`, `scripts/`), never the link.
+- `.claude/agents`: link to `tool-subagents/`; add or edit files there, not
+  through `.claude/agents`.
+- `.codex/`: `AGENTS.md` stays the primary Codex instruction surface.
+  `.codex/agents/` links to the generated `tool-subagents/.generated/codex/`
+  (not committed, gitignored except the README; do not hand-edit). Re-render
+  the TOML with `npm run subagents:render`; `npm run subagents:apply -- all .`
+  also refreshes the `.cursor/agents/` and `.claude/agents/` renders (sync,
+  setup and global-install run the render before linking). Codex-only
+  additions belong in `.codex/` only when they cannot live in the
+  tool-agnostic source tree. `.codex/sync-shared-skills.sh` mirrors the skill
+  catalog into a global `~/.codex/skills/` (`--no-global` repairs local links
+  only); it is separate from the installer, which no longer creates
+  `~/.codex/skills` (Codex reads `~/.agents/skills`; an existing one can be
+  removed), and it refuses to replace non-symlink provider directories.
+- `.cursor/`: rule conversion is described in the skill-paths table above;
+  `manual` emits no `description` (Cursor would treat it as agent-requested)
+  and `globs` is written unquoted. Generated files carry the marker
+  `generated-by: sync-tool-configs`; the sync writes `.cursor/rules/.gitignore`
+  listing exactly those files, so hand-made rules there stay visible to git and
+  are never touched or deleted (in this repo the root `.gitignore` covers the
+  whole directory). An older `.cursor/rules` directory link is replaced only
+  with `--force`, and only when it points at the toolkit `rules/` (any other
+  link is left alone); stale generated `.mdc` files are removed on the next sync. `.cursor/workflows` is
+  not a Cursor surface and is no longer created. Cursor skills load from
+  `.agents/skills/` (see `skills/README.md` for the catalog). The catalog of
+  shared subagents is `tool-subagents/README.md`; `.cursor/agents/` links to
+  the same files. Invoke a subagent with `/name` or natural language.
+- `.windsurf/`: `rules` and `workflows` are links to `rules/` and
+  `workflows/`; Windsurf reads skills from `.agents/skills/`.
+  `.windsurf/skills/<name>` links are legacy and can be removed.
+
+### Cursor Max Throughput (Multiple Agents)
+
+1. Turn on Max Mode (or the plan's highest-quality agent setting) so the root
+   agent runs at full capability and per-task tier requests can be honored;
+   subagents still follow their assigned complexity tier
+   (`light`/`standard`/`deep`), not automatic full depth.
+2. In one message, ask for parallel work (for example "run CI triage,
+   contract analysis, and doc drift in parallel") so the agent issues
+   several subagent tasks at once.
+3. Use `model: fast` subagents for log parsing, repo mapping and wide search;
+   use `model: inherit` for security, release planning and deep review (see
+   [Subagents](https://cursor.com/docs/subagents)).
+4. Use `is_background: true` on long read-only slices so the parent keeps
+   driving the critical path.
+5. Team-wide defaults also live in `rules/multi-agent-orchestration.md`.
+6. `rules/request-orchestration.md` makes `agent-orchestrator` the default
+   router for non-trivial requests, so users do not need to ask for agents
+   explicitly; it assigns each delegated task a complexity tier and shows a
+   wave-ordered task table before fanout.
+
+## Client Overlays And Sync Commands
+
+Client overlays are generated or linked surfaces that let IDEs and LLM tools
+consume the canonical toolkit content without duplicating source files.
+Provider-facing overlays are `.codex/`, `.cursor/`, `.claude/`, `.windsurf/`,
+`.agents/`, `.agent/`, `.gemini/`, `.opencode/`, and generated files such as
+`.github/copilot-instructions.md`.
+
+- Refresh generated tool configs with `npm run tool-configs:sync`: the npm
+  wrapper for the same `scripts/sync-tool-configs.sh` /
+  `scripts/sync-tool-configs.ps1` documented at the repository root; both
+  repair the same overlays.
+- Apply shared subagents to one provider overlay with
+  `npm run subagents:apply -- codex .` (other names: `cursor`, `claude`,
+  `all`). When a new specialist must be available across every local
+  provider surface, run `npm run subagents:apply -- all .` after the canonical
+  prompt files are complete; use a provider-specific apply only when the task
+  targets a single client.
+- Adding a specialist agent: update canonical assets first, then sync:
+  1. `tool-subagents/<agent>.md` (Codex TOML is generated from the `.md`)
+  2. `workflows/<agent>-validation.md`
+  3. `workflows/<agent>-evolution.md`
+  4. `skills/<agent>/SKILL.md`
+  5. `INTENTS.md`, `AGENTS.md`, `README.md`, and `docs/catalog/workflows.md`
+  6. `npm run tool-configs:sync`, then `npm run subagents:apply -- codex .`
+- Documentation created or changed by provider sync, agent output, chat
+  output, or generated client files must pass `documentation-reviewer`
+  before final reporting.
+- Commit generated client files only when the repository should work out of
+  the box for those clients.
+- For a new workstation or LLM client, use [`../clients/infra.md`](../clients/infra.md)
+  and the repository-root `INFRA.sh` / `INFRA.ps1` plan-first bootstrap.
