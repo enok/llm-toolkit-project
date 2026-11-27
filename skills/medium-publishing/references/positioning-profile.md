@@ -9,8 +9,8 @@ AIDA ([aida-narrative.md](aida-narrative.md)) fixes the ORDER of a piece. It doe
 the piece is about, how long it runs, or how many hashtags it carries, so a complete, correct,
 cited draft can still miss its purpose (`learnings/study-posts-system-design-first-short-teaser.md`).
 A positioning profile records those decisions once, as numbers and rules a script and a reviewer
-can check. The always-on rule is `rules/publication-positioning.md`; the read-only validator is
-`tool-subagents/publication-reviewer.md`; the measuring script is
+can check. The always-on rule is `rules/publication-positioning.md`; the draft is checked against the profile as that
+rule's rule 6 says; the measuring script is
 `skills/medium-publishing/scripts/check_publication.py` (subcommands `post` and `article`, option `--profile`).
 
 ## 1. What the profile fixes
@@ -84,7 +84,7 @@ Copy to the consumer project and replace every `<...>`.
 ````markdown
 # Publication profile: <series or project name>
 
-Read by the toolkit's publishing skills, the publication-reviewer agent and
+Read by the toolkit's publishing skills, the profile check and
 `check_publication.py --profile`. Stated by <owner> on <date>; it overrides older publishing
 rules where they conflict.
 
@@ -165,10 +165,11 @@ python skills/medium-publishing/scripts/check_publication.py post post.txt \
 2. Draft to the budgets, not to the source's size: the repo is the complete material and the
    article links to it ([system-design-article.md](system-design-article.md)).
 3. Run `check_publication.py` on the article and on the post; a non-zero exit is a defect list.
-4. Run the `publication-reviewer` agent for what a script cannot measure (title level, hook,
-   whether the pattern stays internal, claim support).
+4. Check the draft against the profile (and `rubrics/technical-content.md` if that file exists) for
+   what a script cannot measure (title level, hook, whether the pattern stays internal, claim
+   support): the drafting assistant, or a read-only validator lane the orchestrator dispatches.
 5. Show the profile used, the stage map ([aida-narrative.md](aida-narrative.md)), the script output and
-   the reviewer verdict with the `NOT POSTED` drafts.
+   the profile-check result with the `NOT POSTED` drafts.
 6. In `drafts-only` mode create the two drafts (pre-approved) and stop; every other external write
    still waits for explicit approval of that action; replacing an already published piece follows
    [replace-published-story.md](replace-published-story.md).

@@ -25,7 +25,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `toolkit-maintenance.md` | Maintain the shared LLM toolkit — mine feedback, de-duplicate guidance, add generic skills/workflows, validate indexes, and sync clients |
 | `run-retrospective.md` | End-of-run retrospective: capture signals, classify mistakes by signature, append the run record, promote recurring mistakes up the ladder, verify, and report trend metrics |
 | `knowledge-base-sync.md` | Scheduled knowledge-base sync: gather new knowledge, run the intake gate, promote it on one rolling pull request, archive inbox items after the merge |
-| `plugin-intake.md` | Add, audit, or prune plugins: inventory, marketplace discovery, quarantine fetch, scan and review, overlap check, decision, owner-run install or removal plans (`scripts/plugins.py`) |
+
 | `resource-value-check.md` | Mandatory gate before adding a skill, workflow, agent or rule: blind race against the plain model, CSV record, `scripts/check_value_checks.py` |
 | `assistant-workspace-cleanup.md` | Inventory, classify, approve, execute, and verify a cleanup of an AI-assistant workspace (chats, agent sessions, projects, scheduled tasks, artifacts, orchestration ledgers) with a reversibility-grouped approval gate, ID allow-listed lanes, and live-state verification |
 | `conversation-monitoring.md` | Watch named conversations (inbox, chat, messaging threads) on a fixed interval until a stop time, alert the user only on new external messages, never reply, and pause or stop safely |
@@ -112,7 +112,7 @@ Specialist agents ship as a **validation** workflow (run the specialist) plus an
 | `bilingual-doc-sync.md` | Keep English and localized documentation or notebooks aligned during code and analysis changes |
 | `paired-doc-sync.md` | Keep paired docs, notebooks, and deliverables synchronized across languages or presentation variants |
 | `translation-sync.md` | Keep English and translated docs, labels, and examples synchronized after changes |
-| `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a short profile-positioned Medium article and a LinkedIn teaser post validated by `check_publication.py` and `publication-reviewer`, all linked both ways behind separate approval gates |
+| `study-repo-to-publication.md` | Study topic to a protected repo (one or more languages) with diagrams and curated videos, then a short profile-positioned Medium article and a LinkedIn teaser post validated by `check_publication.py` and a profile check, all linked both ways behind separate approval gates |
 | `study-publication-medium-linkedin.md` | Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post in AIDA order per the consumer's positioning profile, with a validation gate before every draft, drafts-only mode, README link PRs, back-links, and a replacement path for live pieces, behind separate approval gates (Phases 7-10 of `study-repo-to-publication.md`) |
 | `technical-content-publishing.md` | Turn a software project into an evidence-grounded article, social post, carousel, and visuals - drafted and validated, never posted |
 

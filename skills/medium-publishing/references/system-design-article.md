@@ -85,8 +85,8 @@ budget; code blocks, image captions and the title do not count in the script's m
 - The one-sentence principles line is present and matches the repo's principles page; the full
   "Principles behind it" section belongs to a full-tutorial profile only.
 - Stage map shown with the `NOT POSTED` draft: one line per stage naming the section that carries it.
-- Title level, internal placement of the topic and claim support checked by the
-  `publication-reviewer` agent (`tool-subagents/publication-reviewer.md`).
+- Title level, internal placement of the topic and claim support checked against the
+  profile (`rules/publication-positioning.md` rule 6).
 - Each design decision has its trade-off; each number or result traces to the repo or fact table.
 - The "Your next step" section exists, and the post (a teaser, [content-angle.md](content-angle.md)
   post order) links this article as its one primary call to action.

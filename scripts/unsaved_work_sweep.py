@@ -28,7 +28,7 @@ Usage (Python 3, standard library only):
         [--stale-days N] [--json] [--fail-on-findings]
 
 Default root is the current directory. Exit codes: 0 always (findings are information),
-1 only with --fail-on-findings when there are findings, 2 on a usage error.
+1 only with --fail-on-findings when there are findings or a root could not be read, 2 on a usage error.
 """
 
 from __future__ import annotations
@@ -67,6 +67,26 @@ remaining_values = _load_remaining_values()
 
 class GitError(Exception):
     pass
+
+
+def porcelain_entries(raw: str) -> list[str]:
+    """Split `git status --porcelain -z` output into "XY path" entries.
+
+    -z keeps paths with spaces or non-ASCII characters unquoted; a rename or copy
+    entry is followed by its source path, which is dropped here.
+    """
+    parts = raw.split("\0")
+    out: list[str] = []
+    i = 0
+    while i < len(parts):
+        entry = parts[i]
+        i += 1
+        if len(entry) < 4:
+            continue
+        out.append(entry)
+        if entry[0] in "RC":
+            i += 1
+    return out
 
 
 def git(cwd: Path, *args: str, check: bool = True) -> str:
@@ -127,7 +147,7 @@ def sweep_worktree(repo: str, wt: dict, today: dt.date, stale_days: int) -> list
     if wt["prunable"] or not path.is_dir():
         out.append(finding("dirty-worktree", repo, str(path), "worktree directory is missing (prunable); its branch state is reported separately"))
         return out
-    status = git(path, "status", "--porcelain", "--untracked-files=all").splitlines()
+    status = porcelain_entries(git(path, "status", "--porcelain", "-z", "--untracked-files=all"))
     tracked = [line for line in status if not line.startswith("??")]
     if tracked:
         out.append(finding("dirty-worktree", repo, str(path), f"{len(tracked)} changed tracked file(s)", files=[line[3:] for line in tracked][:50]))
@@ -285,7 +305,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-dir", action="append", type=Path, default=[], help="Folder to scan for leftover *.bundle/*.patch/*.diff files (repeatable)")
     parser.add_argument("--stale-days", type=int, default=7, help="Report open ledger sections at least this many days old (default 7)")
     parser.add_argument("--json", action="store_true", help="Print the report as JSON")
-    parser.add_argument("--fail-on-findings", action="store_true", help="Exit 1 when there is any finding (default: always exit 0)")
+    parser.add_argument("--fail-on-findings", action="store_true", help="Exit 1 when there is any finding or a root could not be read (default: always exit 0)")
     args = parser.parse_args(argv)
     if args.stale_days < 0:
         parser.error("--stale-days must be >= 0")
@@ -297,7 +317,9 @@ def main(argv: list[str] | None = None) -> int:
     roots = args.root or [Path.cwd()]
     report = run_sweep(roots, args.output_dir, args.stale_days)
     print(json.dumps(report, indent=2) if args.json else render_human(report))
-    return 1 if args.fail_on_findings and report["total"] else 0
+    if args.fail_on_findings and (report["total"] or report["errors"]):
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

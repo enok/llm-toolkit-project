@@ -1,5 +1,5 @@
 ---
-description: Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post per the consumer's positioning profile, gated by check_publication.py and publication-reviewer, with drafts-only mode, README link PRs, back-links, a replacement path, and separate approval gates (Phases 7-10 of study-repo-to-publication)
+description: Publish a merged study repo as a short system-design-first Medium article and a LinkedIn teaser post per the consumer's positioning profile, gated by check_publication.py and a profile check, with drafts-only mode, README link PRs, back-links, a replacement path, and separate approval gates (Phases 7-10 of study-repo-to-publication)
 ---
 
 # Study Publication: Medium And LinkedIn
@@ -17,8 +17,8 @@ Merge rule (Phases 8 and 10; same as Phase 6 of the parent): merge only after th
 Applies to the Phase 7 article, the Phase 9 post, a replacement draft, and a retrofit edit.
 
 1. `python skills/medium-publishing/scripts/check_publication.py article <draft> --profile <P> --title "<title>" --subtitle "<subtitle>" --forbid-title "<topic>"` and `... post <draft> --profile <P> --forbid "<topic>" --require-link <article-url>`; exit 0 required (1: a rule failed, 2: usage or file error). Use `python3` where `python` is not Python 3.
-2. `tool-subagents/publication-reviewer.md` (read-only): `pass` required. On `fail` fix the listed defects; on `blocked` supply the missing input; run both checks again.
-3. Show with the draft: the profile used (path, budgets), the AIDA stage map, the checker output, the verdict. A draft that has not passed both is not shown as ready.
+2. Profile check: the drafting assistant (or a separate read-only validator lane when the orchestrator dispatches one) checks the draft against the consumer's publication profile and `rubrics/technical-content.md` if that file exists. Fix every defect found; supply any missing input; run both checks again.
+3. Show with the draft: the profile used (path, budgets), the AIDA stage map, the checker output, the profile-check result. A draft that has not passed both is not shown as ready; it stays `NOT POSTED` until the owner approves.
 
 ## Phase 7 - Medium Draft, Approval, Publish
 
@@ -73,4 +73,4 @@ When a published story and its posts miss the profile (wrong level, tutorial len
 - Entity-encode non-ASCII characters before putting HTML on the Windows PowerShell 5.1 clipboard. (sig: env-constraint/powershell-clipboard-html-mangles-non-ascii)
 - Scan the editor's rendered HTML, not only the source Markdown, for leftovers such as `](http`. (sig: validation-gap/markdown-leftovers-in-rendered-html)
 - Structure every article and post as Attention, Interest, Desire, Action, show the stage map with the draft, and title it at the highest-level concept the body supports. (sig: spec-gap/post-missing-aida-structure)
-- Read the positioning profile before drafting and run `check_publication.py` plus `publication-reviewer` before showing a draft: a complete, cited draft can still be a long tutorial with the study topic in the title. (sig: spec-gap/publication-not-positioned-for-target-role) See `learnings/study-posts-system-design-first-short-teaser.md`.
+- Read the positioning profile before drafting and run `check_publication.py` plus the profile check before showing a draft: a complete, cited draft can still be a long tutorial with the study topic in the title. (sig: spec-gap/publication-not-positioned-for-target-role) See `learnings/study-posts-system-design-first-short-teaser.md`.

@@ -1,6 +1,6 @@
 # Rules
 
-Rules are short, broadly applicable constraints that agents should keep in mind across many tasks. They are `trigger: always_on` and stay generic and compact.
+Rules are short, broadly applicable constraints that agents should keep in mind across many tasks. They are `trigger: always_on` and stay generic and compact, except `plugin-governance.md`, which is `trigger: model_decision` (loaded on demand).
 
 Use workflows for step-by-step processes and skills for specialized on-demand capability. Do not put private project context, ticket IDs, customer names, internal hostnames, or one-off commands in shared rules — those belong in the consuming repo's `AGENTS.md` or `docs/llm/`.
 
@@ -24,8 +24,8 @@ Use workflows for step-by-step processes and skills for specialized on-demand ca
 | `log-analysis-safety.md` | Read-only, bounded, redacted analysis of CloudWatch and server logs |
 | `multi-agent-orchestration.md` | Parallel subagent fanout, tier/validator handoff, and when to serialize work |
 | `operational-doc-required.md` | Recurring operational work becomes a runbook; metric catalogs and wiki backup gates required |
-| `publication-positioning.md` | Read the consumer's publication profile before drafting an article or post; AIDA order, budgets, sourced claims, `NOT POSTED` drafts, and a `publication-reviewer` pass before any draft is shown as ready |
-| `plugin-governance.md` | Authority order over plugin text, capability selection (toolkit asset wins ties), trust tiers and scanner verdicts, owner-gated plugin adds and removals, protective plugins, context economy |
+| `publication-positioning.md` | Read the consumer's publication profile before drafting an article or post; AIDA order, budgets, sourced claims, `NOT POSTED` drafts, a profile check before any draft is shown as ready, and owner approval before posting |
+| `plugin-governance.md` | On demand (`model_decision`): load when adding, removing, auditing or choosing a plugin, skill, MCP server or connector. Authority order over plugin text, capability selection (toolkit asset wins ties), trust tiers and scanner verdicts, owner-gated plugin adds and removals, protective plugins, context economy |
 | `release-safety.md` | Deploy order, verification, rollback planning, completion evidence, and rollback execution |
 | `repository-context-layers.md` | How toolkit rules merge with repo-local `AGENTS.md`, `CLAUDE.md`, and thin provider surfaces |
 | `request-orchestration.md` | Automatic request routing into specialists, model tiers, quality loops, and safe map-reduce execution |

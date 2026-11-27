@@ -2,7 +2,7 @@
 
 The only RTK deployment approved for explicit use. Any other version or platform needs its own review (`skills/external-skill-intake/SKILL.md`). Constraint set: `rules/command-safety.md`.
 
-- Reviewed: RTK **1.2.1**, native Windows, explicit `rtk <cmd>` wrapper only. Static source review plus a runtime smoke test on a Windows PC (2026-11-26).
+- Reviewed: RTK **1.2.1**, native Windows (and the macOS Homebrew build, smoke-tested separately below), explicit `rtk <cmd>` wrapper only. Static source review plus a runtime smoke test on a Windows PC (2026-11-26).
 - Installer SHA-256 `08671cb746e779c50dc530eec0114a7cd6cbbd1ea4f66c98dd9f0572f5f96c43` matched the release `checksums.txt`.
 
 ## Install and pin (PowerShell)
