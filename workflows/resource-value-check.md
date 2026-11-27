@@ -116,8 +116,9 @@ them; the CSV row is the durable record.
 python3 scripts/check_value_checks.py --base <ref>
 ```
 
-Exit 0 when every resource added since `<ref>` has a row whose decision is
-`keep`, `keep-slim` or `exempt`; exit 1 otherwise. Run it in **pre-pr-check**
+Exit 0 when every resource added since `<ref>` (renames into a resource folder
+count as added) has a row whose decision passes as described under Record; exit 1
+otherwise. Run it in **pre-pr-check**
 with the PR base (`origin/main` unless the PR targets another branch). On
 Windows use `py -3` or `python` in place of `python3`.
 

@@ -167,6 +167,22 @@ class ValueCheckTests(unittest.TestCase):
         code, out, _ = s.run("--json", base="mid")
         self.assertEqual((code, json.loads(out)["checked"]), (0, 0))
 
+    def test_resource_promoted_by_rename_is_checked(self) -> None:
+        # A learning moved into rules/ is a new resource even though git sees a rename.
+        s = self.scenario([])
+        write(s.repo, "learnings/lesson.md", "same body\n" * 20)
+        git(s.repo, "add", "-A")
+        git(s.repo, "commit", "-q", "-m", "x")
+        git(s.repo, "tag", "mid")
+        (s.repo / "rules").mkdir(exist_ok=True)
+        git(s.repo, "mv", "learnings/lesson.md", "rules/lesson.md")
+        git(s.repo, "commit", "-q", "-m", "promote")
+        code, out, _ = s.run("--json", base="mid")
+        data = json.loads(out)
+        self.assertEqual(code, 1)
+        self.assertEqual(data["checked"], 1)
+        self.assertEqual(data["failed"][0]["resource"], "rules/lesson.md")
+
     def test_bad_ref_exits_2(self) -> None:
         code, _, err = self.scenario([]).run(base="no-such-ref")
         self.assertEqual(code, 2)

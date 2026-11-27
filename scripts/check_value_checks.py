@@ -42,7 +42,7 @@ class GitError(Exception):
 def added_files(repo: Path, base: str) -> List[str]:
     try:
         proc = subprocess.run(
-            ["git", "-C", str(repo), "diff", "--name-status", "--diff-filter=A",
+            ["git", "-C", str(repo), "diff", "--name-status", "--no-renames", "--diff-filter=A",
              "-z", f"{base}...HEAD"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
         )
