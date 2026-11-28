@@ -73,7 +73,7 @@ class FreshCloneSyncTest(unittest.TestCase):
             env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.invalid",
                        GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.invalid")
             for args in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "snapshot"]):
-                subprocess.run(["git", "-C", str(repo), *args], check=True, env=env,
+                subprocess.run(["git", "-c", "commit.gpgsign=false", "-C", str(repo), *args], check=True, env=env,
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             result = subprocess.run(
                 ["bash", str(repo / "scripts" / "sync-tool-configs.sh"), str(repo),
