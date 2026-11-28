@@ -85,6 +85,8 @@ echo SCRIPT-COMPLETE                            # sentinel as the last line
 
 - Inside a script that arrives on standard input, redirect every command that may read it from the null device (`</dev/null`), or use the client's own no-input flag; or write the script to a file and run the file.
 - End the script with a sentinel line and treat a missing sentinel as a failed run, because the exit status does not show the loss.
+- For a command whose program comes from a nested here-document, make that here-document its only standard-input redirection, and keep `</dev/null` on commands that take no here-document. A redirection after the here-document operator (`python3 - "$file" <<'PY' </dev/null`) replaces it, so the interpreter reads an empty program: no error, no output, exit status 0, and later steps run on unmodified files (observed once; the fix ran and the script reached its sentinel, also observed once).
+- Observed once, the missing confirmation line of each inner program showed the loss. Print a confirmation line as the last statement of each inner program and check for it. Not tested: other interpreters or shells, the redirect placed before the here-document operator, passing the program as an argument.
 
 ## Git over SSH from an automation-started process on macOS
 

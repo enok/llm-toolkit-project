@@ -36,7 +36,7 @@ else.
 1. `python3 scripts/kb.py sync-status --json`: service health, pending inbox
    items, run-log records newer than the watermark, corpus git state, and the
    session-digest count when enabled. Note the `now` timestamp it prints.
-   Print the first tasks table right after this call, before the state and contract reads; if those reads change it, correct it in the next print and say so (observed twice printed late, untested as a written step; sig: quality-defect/first-tasks-table-printed-after-work-had-run).
+   Print the first tasks table right after this call, before the state and contract reads: persist it, run `scripts/check_tasks_table.py`, then print (sig: quality-defect/first-tasks-table-printed-after-work-had-run). Evidence and detail: `skills/knowledge-base/references/sync-run-state.md`.
 2. When the service is not healthy: `python3 scripts/kb.py doctor`, then
    `python3 scripts/kb.py up`. If it is still unreachable, report the blocker
    and stop: the intake gate needs `check`.
