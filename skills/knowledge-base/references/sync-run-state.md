@@ -1,6 +1,6 @@
 # Sync run state: what a later scheduled run must see
 
-Detail for the Known pitfalls in `workflows/knowledge-base-sync.md`. The sync is a scheduled routine, so every run starts without memory of the last one. State that exists only on the machine, or only in a side document, is invisible to the next run's preflight unless the preflight is told to look for it. Evidence labels are kept exactly: "observed", "observed once", "predicted, not observed", "untested", "candidate".
+Detail for the Known pitfalls in `workflows/knowledge-base-sync.md`. The sync is a scheduled routine, so every run starts without memory of the last one. State that exists only on the machine, or only in a side document, is invisible to the next run's preflight unless the preflight is told to look for it. Evidence labels are kept exactly: "observed", "observed once", "tested once", "predicted, not observed", "untested", "candidate".
 
 ## An unposted local sync commit
 
@@ -53,3 +53,12 @@ git merge-base --is-ancestor <rolling-branch-tip> <other-pull-request-head>
 If it exits 0, record that pull request as the carrier and treat the inbox items named in the rolling branch's commits as in flight; add no commit and open no pull request; re-evaluate when the carrier merges or closes.
 
 Untested: a carrier merged by squash (there the same test run on the rolling branch against the default branch would fail); a carrier closed without merging, where opening the usual pull request is expected.
+
+## The first tasks table prints late or incomplete
+
+Problem: the stored prompt tells a run to read the contract files and then print; the Phase 0 step and the state file both say print first, but were read in that same batch, too late (observed once). The first print was late in 3 runs, including the first run after the step was added. Signatures: `quality-defect/first-tasks-table-printed-after-work-had-run` (late in 3 runs) and `quality-defect/uniform-model-column-in-first-tasks-table` (2 runs: one tier on every row; a role word as Model/Effort, no manifest, no footer rows, SLA not in HH:MM).
+
+- Observed once: the first print was complete; its shape came from the state file's list of print parts and the previous run's persisted table, and it passed `scripts/check_tasks_table.py` (0 fail, 0 warn) before printing.
+- Tested once: a two-row table with the second signature's defects fails the checker with exit status 1.
+- Observed once, the run that printed a complete first table persisted it, ran the checker, then printed. Untested as a written step: that sequence, and correcting the table in the next print, with a note, if later reads change it.
+- Candidate, not tested: carry the print order in the stored prompt, since it must hold before the first reads. Changing a stored prompt is the owner's decision; a run does not change it.
