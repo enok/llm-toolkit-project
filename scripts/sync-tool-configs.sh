@@ -1029,6 +1029,13 @@ done
 
 if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
   build_ignore_block() {
+    # Decide the prefixes here, after the .windsurf links were created above, so the
+    # first run in a fresh clone writes the same block as every later run.
+    local ignore_rules_prefix="rules/" ignore_workflows_prefix="workflows/"
+    if [[ -d "$PROJECT/.windsurf/rules" ]]; then
+      ignore_rules_prefix=".windsurf/rules/"
+      ignore_workflows_prefix=".windsurf/workflows/"
+    fi
     {
       echo "# BEGIN TOOLKIT SELECTION FILTERS"
       echo "# Auto-generated from $SELECTION_FILE_LABEL by sync-tool-configs.sh."
@@ -1038,7 +1045,7 @@ if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
       for f in "${ALL_RULE_FILES[@]}"; do
         basename_f="$(basename "$f")"
         if ! array_contains "$basename_f" "${SELECTED_RULE_NAMES[@]}"; then
-          echo "${DISPLAY_RULES_PREFIX}${basename_f}"
+          echo "${ignore_rules_prefix}${basename_f}"
           echo ".cursor/rules/${basename_f%.md}.mdc"
           ignored_any=1
         fi
@@ -1047,7 +1054,7 @@ if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
       for f in "${ALL_WORKFLOW_FILES[@]}"; do
         basename_f="$(basename "$f")"
         if ! array_contains "$basename_f" "${SELECTED_WORKFLOW_NAMES[@]}"; then
-          echo "${DISPLAY_WORKFLOWS_PREFIX}${basename_f}"
+          echo "${ignore_workflows_prefix}${basename_f}"
           ignored_any=1
         fi
       done

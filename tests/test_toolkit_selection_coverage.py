@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import os
 import re
+import shutil
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -46,6 +50,42 @@ class ToolkitSelectionCoverageTest(unittest.TestCase):
         indexing = selection_block(".cursorindexingignore")
         self.assertEqual(cursorignore, indexing)
         self.assertNotIn(".cursor/workflows/", cursorignore)
+
+
+@unittest.skipUnless(shutil.which("git") and shutil.which("bash"), "needs git and bash")
+class FreshCloneSyncTest(unittest.TestCase):
+    """The first sync in a fresh copy of the repository changes no tracked file."""
+
+    def test_first_sync_leaves_tracked_files_unchanged(self) -> None:
+        listed = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+            stdout=subprocess.PIPE, check=True,
+        ).stdout.decode("utf-8").split("\0")
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "toolkit"
+            for rel in filter(None, listed):
+                src = ROOT / rel
+                if src.is_symlink() or not src.is_file():
+                    continue
+                dst = repo / rel
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dst)
+            env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.invalid",
+                       GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.invalid")
+            for args in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "snapshot"]):
+                subprocess.run(["git", "-C", str(repo), *args], check=True, env=env,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            result = subprocess.run(
+                ["bash", str(repo / "scripts" / "sync-tool-configs.sh"), str(repo),
+                 "--skip-agents-md", "--skip-github"],
+                stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout.decode("utf-8", "replace")[-2000:])
+            status = subprocess.run(
+                ["git", "-C", str(repo), "status", "--porcelain", "--untracked-files=no"],
+                stdout=subprocess.PIPE, check=True,
+            ).stdout.decode("utf-8")
+            self.assertEqual(status, "", "the first sync changed tracked files:\n" + status)
 
 
 if __name__ == "__main__":
