@@ -1048,7 +1048,6 @@ if [[ "$SELECTION_IN_EFFECT" -eq 1 ]]; then
         basename_f="$(basename "$f")"
         if ! array_contains "$basename_f" "${SELECTED_WORKFLOW_NAMES[@]}"; then
           echo "${DISPLAY_WORKFLOWS_PREFIX}${basename_f}"
-          echo ".cursor/workflows/${basename_f}"
           ignored_any=1
         fi
       done
