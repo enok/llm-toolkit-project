@@ -44,6 +44,9 @@ workflows/workspace-hygiene-auditor-validation.md
 workflows/workspace-hygiene-auditor-evolution.md
 workflows/automation-maintenance.md
 workflows/capture-learning.md
+workflows/run-retrospective.md
+workflows/knowledge-base-sync.md
+workflows/folder-reorganization.md
 
 # Core engineering
 workflows/project-discovery.md
@@ -54,6 +57,8 @@ workflows/run-tests.md
 workflows/update-docs.md
 workflows/commit-and-push.md
 workflows/environment-diagnose.md
+workflows/third-party-installer-vetting.md
+workflows/resource-value-check.md
 
 # Tickets, PRs, CI, releases
 workflows/ticket-implementation.md
@@ -83,6 +88,8 @@ workflows/confluence-documentation.md
 workflows/prod-doc-promoter-validation.md
 workflows/prod-doc-promoter-evolution.md
 workflows/markdown-pdf-export.md
+workflows/technical-content-publishing.md
+workflows/study-publication-medium-linkedin.md
 
 # Data science, thesis, notebooks, pipelines (toolkit-local context)
 workflows/project-execution-main.md
@@ -98,3 +105,12 @@ workflows/data-source-storage-backend.md
 workflows/dataset-onboarding.md
 workflows/data-pipeline-change.md
 workflows/aws-airflow-terraform-project.md
+
+# Career, job search, interview preparation
+workflows/career-profile-sync.md
+workflows/job-portal-profile-sync.md
+workflows/job-search-attack-plan.md
+workflows/job-search-pipeline.md
+workflows/recruiter-legitimacy-check.md
+workflows/screening-interview-quick-prep.md
+workflows/technical-interview-prep.md
